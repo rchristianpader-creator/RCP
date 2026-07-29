@@ -1,1987 +1,229 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="UTF-8">
-<meta name="color-scheme" content="light">
-<link rel="manifest" href="/manifest.webmanifest">
-<meta name="theme-color" content="#fafafa">
-<link rel="apple-touch-icon" href="/icon-180.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Aktien-Liste">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Aktien-Liste · Ralph Christian Pader</title>
+/* Prueft die Einkaufszonen und schickt Push, wenn ein Kurs neu in seine Zone eintritt.
+   Laeuft von selbst alle 30 Minuten.
 
-<meta name="description" content="Live-Charts und technische Analyse – Ralph Christian Pader">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://rcp-aktien.netlify.app/">
-<meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
-<meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:locale" content="de_DE">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
-<meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png">
+   Automatisch, ohne Konfiguration:
+   - Zonen und Symbole liest die Function direkt aus der veroeffentlichten index.html
+   - Verglichen wird in der Waehrung des Charts (USD), ohne Umrechnung
+   - Empfaenger kommen aus Netlify Blobs (dort landen sie beim Tippen auf "Benachrichtigungen")
+   - VAPID-Schluessel werden beim ersten Aufruf erzeugt und gespeichert
 
-<style>
-  :root {
-    color-scheme: light;
-    --bg: #fafafa;
-    --fg: #111111;
-    --muted: #737373;
-    --line: #e5e5e5;
-    --soft: #f5f5f5;
-    --card: #ffffff;
-    --hair: #ebebeb;
-    --ease: cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html {
-    scroll-behavior: smooth;
-    scroll-padding-top: 88px;
-  }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif;
-    background: var(--bg);
-    color: var(--fg);
-    line-height: 1.45;
-    -webkit-font-smoothing: antialiased;
-    padding-bottom: 40px;
+   Optional per Environment-Variable: SITE_PASSWORD (falls die Seite geschuetzt ist),
+   VAPID_PUBLIC / VAPID_PRIVATE, VAPID_SUBJECT. */
+
+import webpush from "web-push";
+import { getStore } from "@netlify/blobs";
+import { keys } from "./vapid.js";
+
+const QUIET_FROM = 23;
+const QUIET_TO = 7;
+
+export default async () => {
+  const hour = Number(
+    new Intl.DateTimeFormat("de-DE", {
+      timeZone: "Europe/Berlin",
+      hour: "2-digit",
+      hour12: false
+    }).format(new Date())
+  );
+  if (hour >= QUIET_FROM || hour < QUIET_TO) {
+    return json({ ok: true, uebersprungen: "Nachtruhe", stunde: hour });
   }
 
-  /* LOCK */
-  #lock {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    background: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 32px 24px;
-    transition: opacity 0.35s ease, visibility 0.35s;
-  }
-  #lock.hidden {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-  }
-  #lock .lock-label,
-  #lock h1,
-  #lock .lock-sub,
-  #lock .pin-wrap,
-  #lock .keypad {
-    animation: riseIn 0.55s var(--ease) both;
-  }
-  #lock .lock-label { animation-delay: 0.02s; }
-  #lock h1 {
-    font-size: 24px;
-    font-weight: 700;
-    letter-spacing: -0.3px;
-    margin-bottom: 8px;
-    animation-delay: 0.06s;
-  }
-  #lock .lock-label {
-    font-size: 10px;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--muted);
-    font-weight: 600;
-    margin-bottom: 12px;
-  }
-  #lock .lock-sub {
-    font-size: 13px;
-    color: var(--muted);
-    margin-bottom: 28px;
-    animation-delay: 0.1s;
-  }
-  #lock .pin-wrap {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 22px;
-    animation-delay: 0.14s;
-  }
-  #lock .pin-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    border: 1.5px solid var(--fg);
-    background: transparent;
-    transform: translateZ(0);
-    transition: background 0.15s ease, transform 0.2s var(--ease);
-  }
-  #lock .pin-dot.filled {
-    background: var(--fg);
-    transform: scale(1.12);
-  }
-  #lock .keypad {
-    display: grid;
-    grid-template-columns: repeat(3, 72px);
-    gap: 12px;
-    margin-top: 8px;
-    animation-delay: 0.18s;
-  }
-  #lock .key {
-    width: 72px;
-    height: 72px;
-    border: 1px solid var(--line);
-    border-radius: 50%;
-    background: var(--card);
-    font-size: 22px;
-    font-weight: 600;
-    color: var(--fg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    user-select: none;
-    -webkit-user-select: none;
-    -webkit-tap-highlight-color: transparent;
-    transform: translateZ(0);
-    transition: background 0.15s ease, transform 0.12s var(--ease);
-  }
-  #lock .key:active {
-    background: var(--soft);
-    transform: scale(0.92);
-  }
-  #lock .key.empty {
-    border: none;
-    background: transparent;
-    pointer-events: none;
-  }
-  #lock .error {
-    margin-top: 18px;
-    font-size: 13px;
-    color: #b91c1c;
-    min-height: 20px;
-    opacity: 0;
-    transform: translate3d(0, 4px, 0);
-    transition: opacity 0.2s ease, transform 0.2s ease;
-  }
-  #lock .error.show {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-  #lock .shake {
-    animation: shakeX 0.4s ease;
+  const store = getStore("aktien-push");
+
+  const subs = await empfaenger(store);
+  if (!subs.length) {
+    return json({ ok: true, hinweis: "noch kein Geraet angemeldet" });
   }
 
-  #app { display: none; }
-  #app.visible {
-    display: block;
+  const watch = await zonen();
+  if (!watch.length) {
+    return json({ ok: false, fehler: "keine Zonen in index.html gefunden" }, 500);
   }
 
-  header {
-    padding: 40px 24px 28px;
-    text-align: center;
-    background: var(--card);
-    border-bottom: 1px solid var(--hair);
-  }
-  header .label {
-    font-size: 10px;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--muted);
-    font-weight: 600;
-    margin-bottom: 14px;
-  }
-  header h1 {
-    font-size: 26px;
-    font-weight: 700;
-    letter-spacing: -0.3px;
-    line-height: 1.15;
-  }
-  header .sub {
-    margin-top: 8px;
-    font-size: 13px;
-    color: var(--muted);
-  }
-  header .rule {
-    width: 28px;
-    height: 1px;
-    background: var(--fg);
-    margin: 18px auto 0;
-    opacity: 0.3;
-  }
-  header .author {
-    margin-top: 14px;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-  }
+  const k = await keys();
+  webpush.setVapidDetails(
+    process.env.VAPID_SUBJECT || "mailto:push@rcp-aktien.netlify.app",
+    k.publicKey,
+    k.privateKey
+  );
 
-  nav {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    padding: 14px 16px;
-    justify-content: center;
-    position: sticky;
-    top: 0;
-    background: #fafafa;
-    z-index: 20;
-    border-bottom: 1px solid var(--hair);
-  }
-  nav a {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    padding: 6px 12px;
-    border: 1px solid var(--line);
-    border-radius: 2px;
-    text-decoration: none;
-    color: var(--fg);
-    background: transparent;
-    -webkit-tap-highlight-color: transparent;
-    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.15s var(--ease);
-  }
-  nav a:active {
-    background: var(--fg);
-    color: #fff;
-    border-color: var(--fg);
-    transform: scale(0.95);
-  }
+  const report = [];
 
-  .card {
-    margin: 16px 14px 56px;
-    border: 1px solid var(--hair);
-    border-radius: 2px;
-    overflow: hidden;
-    background: var(--card);
-    scroll-margin-top: 80px;
-  }
-
-  .card-head { padding: 18px 18px 12px; }
-  .card-head .row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 12px;
-  }
-  .card-head h2 {
-    font-size: 17px;
-    font-weight: 700;
-    letter-spacing: -0.2px;
-  }
-  .badge {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    color: var(--muted);
-    border: 1px solid var(--line);
-    padding: 3px 8px;
-    border-radius: 2px;
-    white-space: nowrap;
-  }
-  .badge.neu {
-    border-color: #111;
-    background: #111;
-    color: #fff;
-  }
-  .card-head .badges {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    flex-shrink: 0;
-  }
-  nav a.nav-new {
-    position: relative;
-    padding-top: 10px;
-    padding-bottom: 6px;
-    min-width: 52px;
-    text-align: center;
-  }
-  nav a.nav-new .nav-neu {
-    position: absolute;
-    top: -7px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 7px;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    background: #111;
-    color: #fff;
-    padding: 2px 5px;
-    border-radius: 2px;
-    line-height: 1.15;
-  }
-  /* Banner */
-  .news-banner {
-    overflow: hidden;
-    border-bottom: 1px solid var(--hair);
-    background: var(--soft);
-    color: var(--fg);
-  }
-  .news-banner-track {
-    display: flex;
-    width: max-content;
-    animation: marquee 28s linear infinite;
-    padding: 10px 0;
-  }
-  .news-banner-track:hover {
-    animation-play-state: paused;
-  }
-  .news-banner span {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    white-space: nowrap;
-    padding: 0 40px;
-    color: var(--fg);
-  }
-  .news-banner a {
-    color: var(--fg);
-    text-decoration: none;
-    border-bottom: 1px solid rgba(17,17,17,0.35);
-    font-weight: 700;
-  }
-  @keyframes marquee {
-    from { transform: translate3d(0, 0, 0); }
-    to { transform: translate3d(-50%, 0, 0); }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .news-banner-track { animation: none; }
-  }
-  .card-head .info {
-    margin-top: 10px;
-    font-size: 13px;
-    color: #555;
-    font-weight: 600;
-  }
-  .card-head .info .zone {
-    font-weight: 800;
-    font-size: 14px;
-    letter-spacing: -0.15px;
-    color: #333;
-  }
-
-  .ziel-bar {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    padding: 12px 18px;
-    border-top: 1px solid var(--hair);
-    background: var(--soft);
-  }
-  .ziel-bar .k {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--muted);
-    font-weight: 600;
-  }
-  .ziel-bar .v {
-    font-size: 16px;
-    font-weight: 800;
-    letter-spacing: -0.3px;
-    color: #333;
-  }
-  .ziel-bar .k {
-    color: #666;
-  }
-
-  .chart {
-    width: 100%;
-    height: 400px;
-    background: #f3f3f3;
-    border-top: 1px solid var(--hair);
-  }
-  .chart iframe {
-    width: 100%;
-    height: 100%;
-    border: 0;
-    display: block;
-  }
-
-  .actions {
-    padding: 14px 18px 32px;
-  }
-  .btn {
-    display: block;
-    width: 100%;
-    text-align: center;
-    padding: 13px 16px;
-    border-radius: 2px;
-    font-size: 13px;
-    font-weight: 650;
-    text-decoration: none;
-    background: var(--fg);
-    color: #fff;
-    -webkit-tap-highlight-color: transparent;
-    transition: transform 0.15s var(--ease), opacity 0.15s ease;
-  }
-  .btn:active {
-    transform: scale(0.98);
-    opacity: 0.9;
-  }
-
-  /* Installation */
-  [hidden] { display: none !important; }
-  .header-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: center;
-    margin-top: 18px;
-  }
-  .install-btn {
-    display: inline-block;
-    font: inherit;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--fg);
-    background: none;
-    border: 1px solid var(--fg);
-    border-radius: 2px;
-    padding: 9px 16px;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    transition: transform 0.15s var(--ease), background 0.15s ease, color 0.15s ease;
-  }
-  .install-btn:active {
-    transform: scale(0.98);
-    background: var(--fg);
-    color: #fff;
-  }
-  .sheet {
-    position: fixed;
-    inset: 0;
-    z-index: 200;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    background: rgba(17, 17, 17, 0.32);
-    -webkit-backdrop-filter: saturate(120%) blur(2px);
-    backdrop-filter: saturate(120%) blur(2px);
-  }
-  .sheet-card {
-    width: 100%;
-    max-width: 520px;
-    background: var(--card);
-    border-top: 1px solid var(--fg);
-    border-radius: 2px 2px 0 0;
-    padding: 22px 22px 28px;
-    max-height: 88vh;
-    overflow-y: auto;
-    animation: sheet-up 0.28s var(--ease) both;
-  }
-  @keyframes sheet-up {
-    from { transform: translate3d(0, 14px, 0); opacity: 0; }
-    to { transform: translate3d(0, 0, 0); opacity: 1; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .sheet-card { animation: none; }
-  }
-  .sheet-top {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 12px;
-    border-bottom: 1px solid var(--hair);
-    padding-bottom: 12px;
-  }
-  .sheet-label {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-  .sheet-close {
-    font: inherit;
-    font-size: 12px;
-    font-weight: 650;
-    color: var(--muted);
-    background: none;
-    border: 0;
-    padding: 0;
-    cursor: pointer;
-  }
-  .sheet-card h3 {
-    margin-top: 16px;
-    font-size: 19px;
-    font-weight: 700;
-    letter-spacing: -0.2px;
-    line-height: 1.25;
-  }
-  .sheet-card .sheet-sub {
-    margin-top: 6px;
-    font-size: 13px;
-    color: var(--muted);
-  }
-  .steps {
-    list-style: none;
-    margin-top: 20px;
-  }
-  .steps li {
-    display: flex;
-    gap: 14px;
-    padding: 14px 0;
-    border-top: 1px solid var(--hair);
-    font-size: 14px;
-    line-height: 1.5;
-  }
-  .steps li:first-child { border-top: 0; padding-top: 4px; }
-  .steps .n {
-    flex: 0 0 auto;
-    width: 20px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    color: var(--muted);
-    padding-top: 3px;
-  }
-  .steps b { font-weight: 700; }
-  .share-glyph {
-    display: inline-block;
-    vertical-align: -3px;
-    margin: 0 2px;
-  }
-  .sheet-note {
-    margin-top: 18px;
-    padding: 12px 14px;
-    background: var(--soft);
-    border-left: 2px solid var(--fg);
-    font-size: 12.5px;
-    line-height: 1.5;
-  }
-
-  /* Schritte mit Abbildungen */
-  .steps li { align-items: flex-start; }
-  .step-body { flex: 1 1 auto; min-width: 0; }
-  .step-text { font-size: 14px; line-height: 1.45; }
-  .mock {
-    display: block;
-    width: 100%;
-    height: auto;
-    margin-top: 10px;
-    border: 1px solid var(--line);
-    border-radius: 3px;
-    background: var(--soft);
-    color: var(--fg);
-  }
-  .mock text { font-family: inherit; }
-  .mock .ring { animation: ring-pulse 1.9s var(--ease) infinite; transform-origin: center; }
-  @keyframes ring-pulse {
-    0%, 70%, 100% { opacity: 0.9; }
-    35% { opacity: 0.25; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .mock .ring { animation: none; }
-  }
-
-  /* Einladung am unteren Rand */
-  .install-bar {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 150;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
-    background: var(--card);
-    border-top: 1px solid var(--fg);
-  }
-  body.has-install-bar { padding-bottom: 104px; }
-  .install-mark {
-    flex: 0 0 auto;
-    width: 38px;
-    height: 38px;
-    border-radius: 5px;
-    background: var(--fg);
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.06em;
-  }
-  .install-copy { flex: 1 1 auto; min-width: 0; }
-  .install-copy b {
-    display: block;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: -0.1px;
-  }
-  .install-copy span {
-    display: block;
-    margin-top: 2px;
-    font-size: 11.5px;
-    color: var(--muted);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .install-go {
-    flex: 0 0 auto;
-    font: inherit;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: #fff;
-    background: var(--fg);
-    border: 0;
-    border-radius: 2px;
-    padding: 10px 13px;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .install-go:active { transform: scale(0.98); opacity: 0.9; }
-  .sub-json {
-    width: 100%;
-    margin-top: 16px;
-    padding: 10px 12px;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 10.5px;
-    line-height: 1.45;
-    color: var(--fg);
-    background: var(--soft);
-    border: 1px solid var(--line);
-    border-radius: 2px;
-    resize: vertical;
-    -webkit-user-select: all;
-    user-select: all;
-  }
-  .sheet-card .btn { margin-top: 10px; }
-  .install-x {
-    flex: 0 0 auto;
-    font: inherit;
-    font-size: 20px;
-    line-height: 1;
-    color: var(--muted);
-    background: none;
-    border: 0;
-    padding: 6px;
-    cursor: pointer;
-  }
-
-  footer {
-    text-align: center;
-    padding: 36px 24px 12px;
-    font-size: 11px;
-    color: var(--muted);
-    line-height: 1.7;
-  }
-  footer .line {
-    width: 24px;
-    height: 1px;
-    background: var(--line);
-    margin: 0 auto 16px;
-  }
-
-  @keyframes riseIn {
-    from { opacity: 0; transform: translate3d(0, 12px, 0); }
-    to { opacity: 1; transform: translate3d(0, 0, 0); }
-  }
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translate3d(0, 10px, 0); }
-    to { opacity: 1; transform: translate3d(0, 0, 0); }
-  }
-  @keyframes cardIn {
-    from { opacity: 0; transform: translate3d(0, 16px, 0); }
-    to { opacity: 1; transform: translate3d(0, 0, 0); }
-  }
-  @keyframes lineIn {
-    from { transform: scaleX(0); opacity: 0; }
-    to { transform: scaleX(1); opacity: 0.3; }
-  }
-  @keyframes shakeX {
-    0%, 100% { transform: translate3d(0, 0, 0); }
-    20% { transform: translate3d(-8px, 0, 0); }
-    40% { transform: translate3d(8px, 0, 0); }
-    60% { transform: translate3d(-5px, 0, 0); }
-    80% { transform: translate3d(5px, 0, 0); }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      animation-duration: 0.01ms !important;
-      animation-delay: 0ms !important;
-      transition-duration: 0.01ms !important;
+  for (const item of watch) {
+    const q = await quote(item.yahoo);
+    if (!q || !q.price) {
+      report.push({ badge: item.badge, status: "kein Kurs" });
+      continue;
     }
-  }
 
-  @media (min-width: 720px) {
-    .card {
-      max-width: 780px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .chart { height: 440px; }
-    header h1 { font-size: 30px; }
-  }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  .news-block {
-    border-top: 1px solid var(--hair);
-    background: #f3f3f3;
-    padding: 12px 16px 14px;
-    min-height: 72px;
-  }
-  .news-block .news-label {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: #666;
-    margin-bottom: 8px;
-  }
-  .news-rotator {
-    position: relative;
-    height: 44px;
-    overflow: hidden;
-  }
-  .news-rotator .news-item {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: opacity 0.5s ease, transform 0.5s ease;
-    pointer-events: none;
-  }
-  .news-rotator .news-item.active {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
-  }
-  .news-rotator .news-item a {
-    font-size: 14px;
-    line-height: 1.35;
-    color: #111;
-    text-decoration: none;
-    font-weight: 700;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  .news-dots {
-    display: flex;
-    gap: 5px;
-    margin-top: 8px;
-  }
-  .news-dots span {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #ccc;
-  }
-  .news-dots span.on {
-    background: #111;
-  }
-
-
-  .news-block .news-label {
-    display: inline-flex; margin-bottom: 8px;
-    align-items: center;
-    gap: 7px;
-  }
-  .news-block .news-label .live-dot {
-    display: inline-block;
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #e11d48;
-    flex-shrink: 0;
-    position: relative;
-    top: 0;
-    animation: liveBlink 1.2s ease-in-out infinite;
-  }
-  @keyframes liveBlink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
-
-
-  .fg-box {
-    margin: 14px 14px 0;
-    border: 1px solid var(--hair);
-    border-radius: 2px;
-    background: var(--card);
-    padding: 14px 16px 16px;
-  }
-  .fg-box .fg-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 12px;
-    margin-bottom: 10px;
-  }
-  .fg-box .fg-title {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: #666;
-  }
-  .fg-box .fg-link {
-    font-size: 11px;
-    color: #666;
-    text-decoration: none;
-    border-bottom: 1px solid #ddd;
-  }
-  .fg-box .fg-row {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-  .fg-box .fg-score {
-    font-size: 32px;
-    font-weight: 800;
-    letter-spacing: -1px;
-    min-width: 52px;
-    line-height: 1;
-    color: #111;
-    transition: color 0.4s ease;
-  }
-  .fg-box .fg-meta {
-    flex: 1;
-    min-width: 0;
-  }
-  .fg-box .fg-label {
-    font-size: 15px;
-    font-weight: 700;
-    color: #111;
-    margin-bottom: 6px;
-    transition: color 0.4s ease;
-  }
-  .fg-bar {
-    height: 6px;
-    background: #eee;
-    border-radius: 99px;
-    overflow: hidden;
-  }
-  .fg-bar > i {
-    display: block;
-    height: 100%;
-    width: 0%;
-    border-radius: 99px;
-    background: #111;
-    transition: width 0.6s ease, background 0.4s ease;
-  }
-  .fg-box .fg-sub {
-    margin-top: 8px;
-    font-size: 11px;
-    color: #888;
-  }
-  @media (min-width: 720px) {
-    .fg-box { max-width: 780px; margin-left: auto; margin-right: auto; }
-  }
-
-</style>
-</head>
-<body>
-
-<div id="lock">
-  <div class="lock-label">Geschützt</div>
-  <h1>Aktien-Liste</h1>
-  <p class="lock-sub">PIN eingeben</p>
-  <div class="pin-wrap" id="pinDots">
-    <div class="pin-dot"></div>
-    <div class="pin-dot"></div>
-    <div class="pin-dot"></div>
-    <div class="pin-dot"></div>
-  </div>
-  <div class="keypad" id="keypad">
-    <div class="key" data-k="1">1</div>
-    <div class="key" data-k="2">2</div>
-    <div class="key" data-k="3">3</div>
-    <div class="key" data-k="4">4</div>
-    <div class="key" data-k="5">5</div>
-    <div class="key" data-k="6">6</div>
-    <div class="key" data-k="7">7</div>
-    <div class="key" data-k="8">8</div>
-    <div class="key" data-k="9">9</div>
-    <div class="key empty"></div>
-    <div class="key" data-k="0">0</div>
-    <div class="key" data-k="del">⌫</div>
-  </div>
-  <div class="error" id="pinError">Falscher PIN</div>
-</div>
-
-<div id="app">
-<header>
-  <div class="label">Watchlist</div>
-  <h1>Aktien-Liste</h1>
-  <p class="sub">Live-Charts · Technische Analyse</p>
-  <div class="rule"></div>
-  <div class="author">Ralph Christian Pader · Juli 2026</div>
-  <div class="header-actions">
-    <button class="install-btn" id="installBtn" type="button" hidden>App installieren</button>
-    <button class="install-btn" id="pushBtn" type="button" hidden>Benachrichtigungen</button>
-  </div>
-</header>
-
-<nav>
-  <a href="#uaa">UAA</a>
-  <a href="#dow">DOW</a>
-  <a href="#nvo">NVO</a>
-  <a href="#tsla">TSLA</a>
-  <a href="#btc">BTC</a>
-  <a href="#hut">HUT</a>
-  <a href="#gold">Gold</a>
-  <a href="#silber">Silber</a>
-  <a href="#intc" class="nav-new">INTC<span class="nav-neu">NEU</span></a>
-  <a href="#uuuu" class="nav-new">UUUU<span class="nav-neu">NEU</span></a>
-</nav>
-
-<div class="news-banner" aria-label="Neuigkeit">
-  <div class="news-banner-track">
-    <span>Neu — Energie-These: KI ist kein Chip-Problem · <a href="energie-these.pdf" download>PDF herunterladen</a></span>
-    <span>Neu — Energie-These: KI ist kein Chip-Problem · <a href="energie-these.pdf" download>PDF herunterladen</a></span>
-    <span>Neu — Energie-These: KI ist kein Chip-Problem · <a href="energie-these.pdf" download>PDF herunterladen</a></span>
-    <span>Neu — Energie-These: KI ist kein Chip-Problem · <a href="energie-these.pdf" download>PDF herunterladen</a></span>
-  </div>
-</div>
-
-
-<div class="fg-box" id="feargreed">
-  <div class="fg-top">
-    <div class="fg-title">Fear &amp; Greed Index · Live</div>
-    <a class="fg-link" href="https://edition.cnn.com/markets/fear-and-greed" target="_blank" rel="noopener">CNN</a>
-  </div>
-  <div class="fg-row">
-    <div class="fg-score" id="fg-score">–</div>
-    <div class="fg-meta">
-      <div class="fg-label" id="fg-label">Lädt…</div>
-      <div class="fg-bar"><i id="fg-fill"></i></div>
-    </div>
-  </div>
-  <div class="fg-sub" id="fg-sub">Marktstimmung 0–100</div>
-</div>
-
-<section class="card" id="uaa">
-  <div class="card-head">
-    <div class="row">
-      <h2>Under Armour, Inc.</h2>
-      <span class="badge">UAA</span>
-    </div>
-    <div class="info">Performance Apparel · <span class="zone">Einkaufszone 5,53 – 5,24 EUR</span></div>
-  </div>
-  <div class="ziel-bar">
-    <span class="k">Ziel</span>
-    <span class="v">13,28 EUR</span>
-  </div>
-  <div class="chart">
-    <iframe src="https://s.tradingview.com/widgetembed/?symbol=NYSE%3AUAA&interval=D&hidesidetoolbar=0&theme=light&style=1&locale=de&toolbarbg=ffffff&timezone=Europe%2FBerlin&withdateranges=1" allowfullscreen loading="lazy"></iframe>
-  </div>
-      <div class="news-block" data-news-query="Under Armour Aktie" data-news-id="uaa" data-yahoo="UAA" data-fn-page="https://www.finanzen.net/nachrichten/alle/under_armour" data-news-keys="Under Armour|UAA">
-    <div class="news-label">News · Live<span class="live-dot" aria-hidden="true"></span></div>
-    <div class="news-rotator">
-      <div class="news-item active"><a href="#" style="opacity:0.5;pointer-events:none">Aktuelle Meldungen werden geladen…</a></div>
-    </div>
-    <div class="news-dots"><span class="on"></span></div>
-  </div>
-<div class="actions">
-    <a class="btn" href="https://de.tradingview.com/chart/IsFAfevG/" target="_blank" rel="noopener">Analyse-Chart (Fibos) öffnen</a>
-  </div>
-</section>
-
-<section class="card" id="dow">
-  <div class="card-head">
-    <div class="row">
-      <h2>Dow, Inc.</h2>
-      <span class="badge">DOW</span>
-    </div>
-    <div class="info">Chemie & Materialien · <span class="zone">Einkaufszone 27,15 – 24,88 EUR</span></div>
-  </div>
-  <div class="ziel-bar">
-    <span class="k">Ziel</span>
-    <span class="v">81,76 EUR</span>
-  </div>
-  <div class="chart">
-    <iframe src="https://s.tradingview.com/widgetembed/?symbol=NYSE%3ADOW&interval=D&hidesidetoolbar=0&theme=light&style=1&locale=de&toolbarbg=ffffff&timezone=Europe%2FBerlin&withdateranges=1" allowfullscreen loading="lazy"></iframe>
-  </div>
-      <div class="news-block" data-news-query="Dow Aktie" data-news-id="dow" data-yahoo="DOW" data-fn-page="https://www.finanzen.net/nachrichten/alle/dow" data-news-keys="Dow Inc|Dow Chemical|DOW">
-    <div class="news-label">News · Live<span class="live-dot" aria-hidden="true"></span></div>
-    <div class="news-rotator">
-      <div class="news-item active"><a href="#" style="opacity:0.5;pointer-events:none">Aktuelle Meldungen werden geladen…</a></div>
-    </div>
-    <div class="news-dots"><span class="on"></span></div>
-  </div>
-<div class="actions">
-    <a class="btn" href="https://de.tradingview.com/chart/anWHZ0Ot/" target="_blank" rel="noopener">Analyse-Chart (Fibos) öffnen</a>
-  </div>
-</section>
-
-<section class="card" id="nvo">
-  <div class="card-head">
-    <div class="row">
-      <h2>Novo Nordisk A/S</h2>
-      <span class="badge">NVO</span>
-    </div>
-    <div class="info">Pharma · <span class="zone">Einkaufszone 39,24 – 37,48 EUR</span></div>
-  </div>
-  <div class="ziel-bar">
-    <span class="k">Ziel</span>
-    <span class="v">70,11 EUR</span>
-  </div>
-  <div class="chart">
-    <iframe src="https://s.tradingview.com/widgetembed/?symbol=NYSE%3ANVO&interval=D&hidesidetoolbar=0&theme=light&style=1&locale=de&toolbarbg=ffffff&timezone=Europe%2FBerlin&withdateranges=1" allowfullscreen loading="lazy"></iframe>
-  </div>
-      <div class="news-block" data-news-query="Novo Nordisk Aktie" data-news-id="nvo" data-yahoo="NVO" data-fn-page="https://www.finanzen.net/nachrichten/alle/novo_nordisk" data-news-keys="Novo Nordisk|NVO">
-    <div class="news-label">News · Live<span class="live-dot" aria-hidden="true"></span></div>
-    <div class="news-rotator">
-      <div class="news-item active"><a href="#" style="opacity:0.5;pointer-events:none">Aktuelle Meldungen werden geladen…</a></div>
-    </div>
-    <div class="news-dots"><span class="on"></span></div>
-  </div>
-<div class="actions">
-    <a class="btn" href="https://de.tradingview.com/chart/01o3MapY/" target="_blank" rel="noopener">Analyse-Chart (Fibos) öffnen</a>
-  </div>
-</section>
-
-<section class="card" id="tsla">
-  <div class="card-head">
-    <div class="row">
-      <h2>Tesla, Inc.</h2>
-      <span class="badge">TSLA</span>
-    </div>
-    <div class="info">Elektrofahrzeuge & AI · <span class="zone">Einkaufszone 242 – 208 EUR</span></div>
-  </div>
-  <div class="ziel-bar">
-    <span class="k">Ziel</span>
-    <span class="v">729 EUR</span>
-  </div>
-  <div class="chart">
-    <iframe src="https://s.tradingview.com/widgetembed/?symbol=NASDAQ%3ATSLA&interval=D&hidesidetoolbar=0&theme=light&style=1&locale=de&toolbarbg=ffffff&timezone=Europe%2FBerlin&withdateranges=1" allowfullscreen loading="lazy"></iframe>
-  </div>
-      <div class="news-block" data-news-query="Tesla Aktie" data-news-id="tsla" data-yahoo="TSLA" data-fn-page="https://www.finanzen.net/nachrichten/alle/tesla" data-news-keys="Tesla|TSLA">
-    <div class="news-label">News · Live<span class="live-dot" aria-hidden="true"></span></div>
-    <div class="news-rotator">
-      <div class="news-item active"><a href="#" style="opacity:0.5;pointer-events:none">Aktuelle Meldungen werden geladen…</a></div>
-    </div>
-    <div class="news-dots"><span class="on"></span></div>
-  </div>
-<div class="actions">
-    <a class="btn" href="https://de.tradingview.com/chart/nJwqfuat/" target="_blank" rel="noopener">Analyse-Chart (Fibos) öffnen</a>
-  </div>
-</section>
-
-<section class="card" id="btc">
-  <div class="card-head">
-    <div class="row">
-      <h2>Bitcoin</h2>
-      <span class="badge">BTCUSD</span>
-    </div>
-    <div class="info">Kryptowährung · <span class="zone">Einkaufszone 40.557 – 31.726 EUR</span></div>
-  </div>
-  <div class="ziel-bar">
-    <span class="k">Ziel</span>
-    <span class="v">87.400 EUR</span>
-  </div>
-  <div class="chart">
-    <iframe src="https://s.tradingview.com/widgetembed/?symbol=BINANCE%3ABTCUSDT&interval=D&hidesidetoolbar=0&theme=light&style=1&locale=de&toolbarbg=ffffff&timezone=Europe%2FBerlin&withdateranges=1" allowfullscreen loading="lazy"></iframe>
-  </div>
-      <div class="news-block" data-news-query="Bitcoin Kurs" data-news-id="btc" data-yahoo="BTC-USD" data-fn-page="https://www.finanzen.net/nachrichten/alle/bitcoin" data-news-keys="Bitcoin|BTC|Krypto">
-    <div class="news-label">News · Live<span class="live-dot" aria-hidden="true"></span></div>
-    <div class="news-rotator">
-      <div class="news-item active"><a href="#" style="opacity:0.5;pointer-events:none">Aktuelle Meldungen werden geladen…</a></div>
-    </div>
-    <div class="news-dots"><span class="on"></span></div>
-  </div>
-<div class="actions">
-    <a class="btn" href="https://de.tradingview.com/chart/GL9h1XoG/" target="_blank" rel="noopener">Analyse-Chart (Fibos) öffnen</a>
-  </div>
-</section>
-
-<section class="card" id="hut">
-  <div class="card-head">
-    <div class="row">
-      <h2>Hut 8 Corp.</h2>
-      <span class="badge">HUT</span>
-    </div>
-    <div class="info">Bitcoin Mining / HPC · <span class="zone">Einkaufszone 26,62 – 18,37 EUR</span></div>
-  </div>
-  <div class="ziel-bar">
-    <span class="k">Ziel</span>
-    <span class="v">128,80 EUR</span>
-  </div>
-  <div class="chart">
-    <iframe src="https://s.tradingview.com/widgetembed/?symbol=NASDAQ%3AHUT&interval=D&hidesidetoolbar=0&theme=light&style=1&locale=de&toolbarbg=ffffff&timezone=Europe%2FBerlin&withdateranges=1" allowfullscreen loading="lazy"></iframe>
-  </div>
-      <div class="news-block" data-news-query="Hut 8 Aktie" data-news-id="hut" data-yahoo="HUT" data-fn-page="https://www.finanzen.net/nachrichten/alle/hut_8" data-news-keys="Hut 8|Hut8|HUT">
-    <div class="news-label">News · Live<span class="live-dot" aria-hidden="true"></span></div>
-    <div class="news-rotator">
-      <div class="news-item active"><a href="#" style="opacity:0.5;pointer-events:none">Aktuelle Meldungen werden geladen…</a></div>
-    </div>
-    <div class="news-dots"><span class="on"></span></div>
-  </div>
-<div class="actions">
-    <a class="btn" href="https://de.tradingview.com/chart/Z0bGwKnE/" target="_blank" rel="noopener">Analyse-Chart (Fibos) öffnen</a>
-  </div>
-</section>
-
-<section class="card" id="gold">
-  <div class="card-head">
-    <div class="row">
-      <h2>Gold Spot</h2>
-      <span class="badge">XAUUSD</span>
-    </div>
-    <div class="info">Edelmetall · <span class="zone">Einkaufszone 3.461 – 3.063 EUR</span></div>
-  </div>
-  <div class="ziel-bar">
-    <span class="k">Ziel</span>
-    <span class="v">4.691 – 5.756 EUR</span>
-  </div>
-  <div class="chart">
-    <iframe src="https://s.tradingview.com/widgetembed/?symbol=OANDA%3AXAUUSD&interval=D&hidesidetoolbar=0&theme=light&style=1&locale=de&toolbarbg=ffffff&timezone=Europe%2FBerlin&withdateranges=1" allowfullscreen loading="lazy"></iframe>
-  </div>
-      <div class="news-block" data-news-query="Goldpreis" data-news-id="gold" data-yahoo="GC=F" data-fn-page="https://www.finanzen.net/rohstoffe/goldpreis" data-news-keys="Goldpreis|Gold">
-    <div class="news-label">News · Live<span class="live-dot" aria-hidden="true"></span></div>
-    <div class="news-rotator">
-      <div class="news-item active"><a href="#" style="opacity:0.5;pointer-events:none">Aktuelle Meldungen werden geladen…</a></div>
-    </div>
-    <div class="news-dots"><span class="on"></span></div>
-  </div>
-<div class="actions">
-    <a class="btn" href="https://de.tradingview.com/chart/KAott5wx/" target="_blank" rel="noopener">Analyse-Chart (Fibos) öffnen</a>
-  </div>
-</section>
-
-<section class="card" id="silber">
-  <div class="card-head">
-    <div class="row">
-      <h2>Silber</h2>
-      <span class="badge">XAGUSD</span>
-    </div>
-    <div class="info">Edelmetall · <span class="zone">Einkaufszone 41,78 – 36,33 EUR</span></div>
-  </div>
-  <div class="ziel-bar">
-    <span class="k">Ziel</span>
-    <span class="v">158 – 820 EUR</span>
-  </div>
-  <div class="chart">
-    <iframe src="https://s.tradingview.com/widgetembed/?symbol=OANDA%3AXAGUSD&interval=D&hidesidetoolbar=0&theme=light&style=1&locale=de&toolbarbg=ffffff&timezone=Europe%2FBerlin&withdateranges=1" allowfullscreen loading="lazy"></iframe>
-  </div>
-      <div class="news-block" data-news-query="Silberpreis" data-news-id="silber" data-yahoo="SI=F" data-fn-page="https://www.finanzen.net/rohstoffe/silberpreis" data-news-keys="Silberpreis|Silber">
-    <div class="news-label">News · Live<span class="live-dot" aria-hidden="true"></span></div>
-    <div class="news-rotator">
-      <div class="news-item active"><a href="#" style="opacity:0.5;pointer-events:none">Aktuelle Meldungen werden geladen…</a></div>
-    </div>
-    <div class="news-dots"><span class="on"></span></div>
-  </div>
-<div class="actions">
-    <a class="btn" href="https://de.tradingview.com/chart/XXF0Fgrb/" target="_blank" rel="noopener">Analyse-Chart (Fibos) öffnen</a>
-  </div>
-</section>
-
-<section class="card" id="intc">
-  <div class="card-head">
-    <div class="row">
-      <h2>Intel Corporation</h2>
-      <div class="badges">
-        <span class="badge neu">NEU</span>
-        <span class="badge">INTC</span>
-      </div>
-    </div>
-    <div class="info">Halbleiter · <span class="zone">Einkaufszone 46,10 – 36,04 EUR</span></div>
-  </div>
-  <div class="ziel-bar">
-    <span class="k">Ziel</span>
-    <span class="v">272 EUR</span>
-  </div>
-  <div class="chart">
-    <iframe src="https://s.tradingview.com/widgetembed/?symbol=NASDAQ%3AINTC&interval=D&hidesidetoolbar=0&theme=light&style=1&locale=de&toolbarbg=ffffff&timezone=Europe%2FBerlin&withdateranges=1" allowfullscreen loading="lazy"></iframe>
-  </div>
-      <div class="news-block" data-news-query="Intel Aktie" data-news-id="intc" data-yahoo="INTC" data-fn-page="https://www.finanzen.net/nachrichten/alle/intel" data-news-keys="Intel|INTC">
-    <div class="news-label">News · Live<span class="live-dot" aria-hidden="true"></span></div>
-    <div class="news-rotator">
-      <div class="news-item active"><a href="#" style="opacity:0.5;pointer-events:none">Aktuelle Meldungen werden geladen…</a></div>
-    </div>
-    <div class="news-dots"><span class="on"></span></div>
-  </div>
-<div class="actions">
-    <a class="btn" href="https://de.tradingview.com/chart/EzouZ6ts/" target="_blank" rel="noopener">Analyse-Chart (Fibos) öffnen</a>
-  </div>
-</section>
-
-<section class="card" id="uuuu">
-  <div class="card-head">
-    <div class="row">
-      <h2>Energy Fuels Inc.</h2>
-      <div class="badges">
-        <span class="badge neu">NEU</span>
-        <span class="badge">UUUU</span>
-      </div>
-    </div>
-    <div class="info">Uran &amp; Seltene Erden · <span class="zone">Einkaufszone 8,68 – 6,72 EUR</span></div>
-  </div>
-  <div class="ziel-bar">
-    <span class="k">Ziel</span>
-    <span class="v">224 EUR</span>
-  </div>
-  <div class="chart">
-    <iframe src="https://s.tradingview.com/widgetembed/?symbol=AMEX%3AUUUU&interval=D&hidesidetoolbar=0&theme=light&style=1&locale=de&toolbarbg=ffffff&timezone=Europe%2FBerlin&withdateranges=1" allowfullscreen loading="lazy"></iframe>
-  </div>
-      <div class="news-block" data-news-query="Energy Fuels UUUU Aktie" data-news-id="uuuu" data-yahoo="UUUU" data-fn-page="https://www.finanzen.net/nachrichten/alle/energy_fuels" data-news-keys="Energy Fuels|UUUU|Uran">
-    <div class="news-label">News · Live<span class="live-dot" aria-hidden="true"></span></div>
-    <div class="news-rotator">
-      <div class="news-item active"><a href="#" style="opacity:0.5;pointer-events:none">Aktuelle Meldungen werden geladen…</a></div>
-    </div>
-    <div class="news-dots"><span class="on"></span></div>
-  </div>
-<div class="actions">
-    <a class="btn" href="https://de.tradingview.com/chart/tx3UAbNF/" target="_blank" rel="noopener">Analyse-Chart (Fibos) öffnen</a>
-  </div>
-</section>
-
-
-
-
-<div class="sheet" id="installSheet" role="dialog" aria-modal="true" aria-labelledby="installTitle" hidden>
-  <div class="sheet-card">
-    <div class="sheet-top">
-      <div class="sheet-label">Installation</div>
-      <button class="sheet-close" id="installClose" type="button">Schließen</button>
-    </div>
-    <h3 id="installTitle">Aktien-Liste auf den Home-Bildschirm</h3>
-    <p class="sheet-sub">Danach startet die Liste wie eine App: ohne Adressleiste, mit eigenem Icon.</p>
-
-    <ol class="steps" id="stepsIos">
-      <li>
-        <span class="n">1</span>
-        <div class="step-body">
-          <div class="step-text">Unten in Safari auf <b>Teilen</b> tippen</div>
-          <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <line x1="0" y1="14" x2="300" y2="14" stroke="var(--line)"/>
-            <path d="M34 46l-8-8 8-8" opacity=".3"/>
-            <path d="M70 30l8 8-8 8" opacity=".3"/>
-            <path d="M150 42V22"/>
-            <path d="M144 28l6-6 6 6"/>
-            <path d="M138 38v12h24V38"/>
-            <circle class="ring" cx="150" cy="36" r="19"/>
-            <path d="M226 30h15v18l-7.5-5.5L226 48z" opacity=".3"/>
-            <rect x="262" y="31" width="16" height="16" rx="2" opacity=".3"/>
-          </svg>
-        </div>
-      </li>
-      <li>
-        <span class="n">2</span>
-        <div class="step-body">
-          <div class="step-text">In der Liste nach unten wischen bis <b>Zum Home-Bildschirm</b></div>
-          <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
-            <rect x="10" y="8" width="280" height="20" rx="4" opacity=".25"/>
-            <rect x="10" y="34" width="280" height="24" rx="4"/>
-            <rect x="24" y="39" width="14" height="14" rx="3" stroke-width="1.2"/>
-            <path d="M31 42v8M27 46h8" stroke-width="1.2" stroke-linecap="round"/>
-            <text x="50" y="51" font-size="11" font-weight="600" fill="currentColor" stroke="none">Zum Home-Bildschirm</text>
-          </svg>
-        </div>
-      </li>
-      <li>
-        <span class="n">3</span>
-        <div class="step-body">
-          <div class="step-text">Oben rechts <b>Hinzufügen</b> bestätigen</div>
-          <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
-            <text x="14" y="25" font-size="10" fill="currentColor" stroke="none" opacity=".4">Abbrechen</text>
-            <rect x="212" y="10" width="76" height="20" rx="3" fill="currentColor" stroke="none"/>
-            <text x="250" y="24" font-size="10" font-weight="700" fill="#fff" stroke="none" text-anchor="middle">Hinzufügen</text>
-            <line x1="0" y1="40" x2="300" y2="40" stroke="var(--line)"/>
-            <rect x="14" y="48" width="90" height="7" rx="2" fill="currentColor" stroke="none" opacity=".16"/>
-          </svg>
-        </div>
-      </li>
-      <li>
-        <span class="n">4</span>
-        <div class="step-body">
-          <div class="step-text">Fertig — App über das neue Icon starten</div>
-          <svg class="mock" viewBox="0 0 300 66" fill="none" aria-hidden="true">
-            <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
-            <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
-            <rect x="152" y="16" width="34" height="34" rx="8" fill="currentColor"/>
-            <text x="169" y="37" font-size="9" font-weight="700" fill="#fff" text-anchor="middle">RCP</text>
-            <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
-          </svg>
-        </div>
-      </li>
-    </ol>
-
-    <ol class="steps" id="stepsOther" hidden>
-      <li><span class="n">1</span><span>Im Browsermenü <b>App installieren</b> oder <b>Zum Startbildschirm hinzufügen</b> wählen</span></li>
-      <li><span class="n">2</span><span>Bestätigen</span></li>
-      <li><span class="n">3</span><span>App über das neue Icon <b>RCP</b> starten</span></li>
-    </ol>
-
-    <div class="sheet-note" id="installNote" hidden></div>
-  </div>
-</div>
-
-<div class="sheet" id="pushSheet" role="dialog" aria-modal="true" aria-labelledby="pushTitle" hidden>
-  <div class="sheet-card">
-    <div class="sheet-top">
-      <div class="sheet-label">Benachrichtigungen</div>
-      <button class="sheet-close" id="pushClose" type="button">Schließen</button>
-    </div>
-    <h3 id="pushTitle">Benachrichtigungen sind aktiv</h3>
-    <p class="sheet-sub">Dieses Gerät meldet sich, wenn ein Kurs neu in seine Einkaufszone eintritt. Geprüft wird alle 30 Minuten, nachts ist Ruhe.</p>
-
-    <div id="pushOk">
-      <ol class="steps">
-        <li><span class="n">✓</span><div class="step-body"><div class="step-text">Gerät angemeldet</div></div></li>
-        <li><span class="n">✓</span><div class="step-body"><div class="step-text">Alle Einkaufszonen aus dieser Liste werden überwacht</div></div></li>
-      </ol>
-      <button class="btn" id="pushTest" type="button">Testmeldung senden</button>
-    </div>
-    <div class="sheet-note" id="pushNote" hidden></div>
-  </div>
-</div>
-
-<div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true">RCP</div>
-  <div class="install-copy">
-    <b>Aktien-Liste als App</b>
-    <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
-  </div>
-  <button class="install-go" id="installBarGo" type="button">So geht's</button>
-  <button class="install-x" id="installBarX" type="button" aria-label="Hinweis ausblenden">&times;</button>
-</div>
-
-<footer>
-  <div class="line"></div>
-  Live-Charts · TradingView · Fibos über den Button<br>
-  Ralph Christian Pader · Juli 2026
-</footer>
-</div>
-
-<script>
-(function () {
-  var PIN = "2310";
-  var entered = "";
-  var dots = document.querySelectorAll("#pinDots .pin-dot");
-  var err = document.getElementById("pinError");
-  var lock = document.getElementById("lock");
-  var app = document.getElementById("app");
-  var pinWrap = document.getElementById("pinDots");
-
-  // Kein Merken: der PIN wird bei jedem Start verlangt
-
-  function updateDots() {
-    for (var i = 0; i < 4; i++) {
-      if (i < entered.length) dots[i].classList.add("filled");
-      else dots[i].classList.remove("filled");
-    }
-  }
-
-  function unlock(instant) {
-    if (instant) {
-      lock.classList.add("hidden");
-      app.classList.add("visible");
-      document.dispatchEvent(new Event("rcp:unlocked"));
-      return;
-    }
-    lock.classList.add("hidden");
-    setTimeout(function () {
-      app.classList.add("visible");
-      document.dispatchEvent(new Event("rcp:unlocked"));
-    }, 200);
-  }
-
-  function wrong() {
-    err.classList.add("show");
-    pinWrap.classList.add("shake");
-    entered = "";
-    updateDots();
-    setTimeout(function () {
-      err.classList.remove("show");
-      pinWrap.classList.remove("shake");
-    }, 650);
-  }
-
-  function press(k) {
-    if (k === "del") {
-      entered = entered.slice(0, -1);
-      updateDots();
-      return;
-    }
-    if (entered.length >= 4) return;
-    entered += k;
-    updateDots();
-    if (entered.length === 4) {
-      if (entered === PIN) setTimeout(function () { unlock(false); }, 180);
-      else setTimeout(wrong, 140);
-    }
-  }
-
-  document.getElementById("keypad").addEventListener("click", function (e) {
-    var t = e.target.closest(".key");
-    if (!t || !t.dataset.k) return;
-    press(t.dataset.k);
-  });
-
-  // Precise nav scroll under sticky bar
-  function stickyOffset() {
-    var nav = document.querySelector("nav");
-    return nav ? nav.getBoundingClientRect().height + 8 : 70;
-  }
-  document.querySelectorAll("nav a[href^='#']").forEach(function (a) {
-    a.addEventListener("click", function (e) {
-      var id = a.getAttribute("href");
-      if (!id || id === "#") return;
-      var el = document.querySelector(id);
-      if (!el) return;
-      e.preventDefault();
-      var top = el.getBoundingClientRect().top + window.pageYOffset - stickyOffset();
-      window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-      // brief highlight of target card
-      el.style.transition = "box-shadow 0.35s ease";
-      el.style.boxShadow = "0 0 0 1px #111";
-      setTimeout(function () { el.style.boxShadow = "none"; }, 700);
-    });
-  });
-
-})();
-</script>
-
-
-
-
-
-
-<script>
-(function () {
-  function setSlide(box, idx) {
-    var items = box.querySelectorAll(".news-item");
-    var dots = box.querySelectorAll(".news-dots span");
-    if (!items.length) return;
-    idx = ((idx % items.length) + items.length) % items.length;
-    items.forEach(function (el, i) { el.classList.toggle("active", i === idx); });
-    dots.forEach(function (el, i) { el.classList.toggle("on", i === idx); });
-    box.setAttribute("data-idx", String(idx));
-  }
-
-  function startRotate(box) {
-    if (box.getAttribute("data-rotating")) return;
-    box.setAttribute("data-rotating", "1");
-    setInterval(function () {
-      if (box.querySelectorAll(".news-item").length < 2) return;
-      var idx = parseInt(box.getAttribute("data-idx") || "0", 10);
-      setSlide(box, idx + 1);
-    }, 4000);
-  }
-
-  function applyItems(box, items) {
-    var rotator = box.querySelector(".news-rotator");
-    var dotsWrap = box.querySelector(".news-dots");
-    if (!rotator || !items || !items.length) return false;
-    var html = "";
-    var dots = "";
-    var n = 0;
-    items.forEach(function (it) {
-      if (n >= 3) return;
-      var t = String(it.title || "").replace(/</g, "&lt;").trim();
-      var href = String(it.link || "").trim();
-      if (!t || !href) return;
-      if (/\/search\?/i.test(href)) return;
-      html += '<div class="news-item' + (n === 0 ? " active" : "") + '">' +
-        '<a href="' + href + '" target="_blank" rel="noopener">' + t + "</a></div>";
-      dots += '<span class="' + (n === 0 ? "on" : "") + '"></span>';
-      n++;
-    });
-    if (!html) return false;
-    rotator.innerHTML = html;
-    if (dotsWrap) dotsWrap.innerHTML = dots;
-    box.setAttribute("data-idx", "0");
-    box.setAttribute("data-live", "1");
-    startRotate(box);
-    return true;
-  }
-
-  function apiUrl(box) {
-    var sym = box.getAttribute("data-yahoo") || "TSLA";
-    var q = box.getAttribute("data-news-query") || sym;
-    // works on Netlify; local fallback path same
-    return "/.netlify/functions/news?symbol=" + encodeURIComponent(sym) +
-      "&q=" + encodeURIComponent(q);
-  }
-
-  function loadBox(box, force) {
-    if (box.getAttribute("data-loading")) return;
-    box.setAttribute("data-loading", "1");
-    startRotate(box);
-    var url = apiUrl(box);
-    var ctrl = new AbortController();
-    var timer = setTimeout(function () { ctrl.abort(); }, 8000);
-    fetch(url, { signal: ctrl.signal, cache: "no-store" })
-      .then(function (r) {
-        clearTimeout(timer);
-        if (!r.ok) throw new Error("http");
-        return r.json();
-      })
-      .then(function (data) {
-        if (data && data.items && data.items.length) {
-          applyItems(box, data.items);
-        } else if (!box.getAttribute("data-live")) {
-          var page = box.getAttribute("data-fn-page") || "https://www.finanzen.net/nachricht/aktien";
-          applyItems(box, [{ title: "Aktuelle Nachrichten öffnen", link: page }]);
-        }
-      })
-      .catch(function () {
-        if (!box.getAttribute("data-live")) {
-          var page = box.getAttribute("data-fn-page") || "https://www.finanzen.net/nachricht/aktien";
-          applyItems(box, [{ title: "Aktuelle Nachrichten öffnen", link: page }]);
-        }
-      })
-      .finally(function () {
-        clearTimeout(timer);
-        box.removeAttribute("data-loading");
+    // Verglichen wird in der Waehrung des Charts, ohne Umrechnung:
+    // die Zonen stammen aus derselben Quelle wie der Kurs.
+    const price = q.price;
+    const cur = q.currency || "";
+    const inZone = price <= item.high && price >= item.low;
+    const key = "zone-" + item.badge;
+    const was = await store.get(key).catch(() => null);
+
+    if (inZone && was !== "in") {
+      await senden(store, subs, {
+        title: item.label + " in der Zone",
+        body: fmt(price) + " " + cur + " — Zone " + fmt(item.high) + " bis " + fmt(item.low) + " " + cur,
+        url: "/#" + item.anchor,
+        tag: item.badge
       });
-  }
-
-  function init() {
-    var boxes = Array.prototype.slice.call(document.querySelectorAll("[data-news-query]"));
-    boxes.forEach(function (b) {
-      b.setAttribute("data-idx", "0");
-      startRotate(b);
-    });
-    boxes.forEach(function (b, i) {
-      setTimeout(function () { loadBox(b, true); }, i * 150);
-    });
-    // alle 2 Minuten echte Headlines neu holen
-    setInterval(function () {
-      boxes.forEach(function (b, i) {
-        setTimeout(function () { loadBox(b, true); }, i * 200);
+      report.push({ badge: item.badge, kurs: fmt(price), waehrung: cur, status: "Push gesendet" });
+    } else {
+      report.push({
+        badge: item.badge,
+        kurs: fmt(price),
+        waehrung: cur,
+        zone: fmt(item.high) + " - " + fmt(item.low),
+        status: inZone ? "weiter in Zone" : "ausserhalb"
       });
-    }, 2 * 60 * 1000);
+    }
+
+    await store.set(key, inZone ? "in" : "out").catch(() => {});
   }
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
-  else init();
+  return json({ ok: true, geraete: subs.length, ergebnis: report });
+};
 
-  
-  // Fear & Greed live
-  (function () {
-    function labelDE(en, v) {
-      var map = {
-        "Extreme Fear": "Extreme Angst",
-        "Fear": "Angst",
-        "Neutral": "Neutral",
-        "Greed": "Gier",
-        "Extreme Greed": "Extreme Gier"
-      };
-      if (en && map[en]) return map[en];
-      if (v <= 24) return "Extreme Angst";
-      if (v <= 44) return "Angst";
-      if (v <= 55) return "Neutral";
-      if (v <= 74) return "Gier";
-      return "Extreme Gier";
+export const config = { schedule: "*/30 * * * *" };
+
+/* --- Empfaenger --- */
+
+async function empfaenger(store) {
+  const out = [];
+  try {
+    const list = await store.list({ prefix: "sub-" });
+    for (const blob of list.blobs || []) {
+      const sub = await store.get(blob.key, { type: "json" });
+      if (sub && sub.endpoint) out.push({ key: blob.key, sub: sub });
     }
-    function fgColor(v) {
-      v = Math.max(0, Math.min(100, Number(v) || 0));
-      // smooth: red (0) -> orange (30) -> yellow (50) -> lime (70) -> green (100)
-      var stops = [
-        { p: 0,  c: [220, 38, 38] },
-        { p: 25, c: [234, 88, 12] },
-        { p: 45, c: [202, 138, 4] },
-        { p: 55, c: [132, 204, 22] },
-        { p: 75, c: [34, 197, 94] },
-        { p: 100,c: [22, 163, 74] }
-      ];
-      var a = stops[0], b = stops[stops.length - 1];
-      for (var i = 0; i < stops.length - 1; i++) {
-        if (v >= stops[i].p && v <= stops[i + 1].p) {
-          a = stops[i]; b = stops[i + 1];
-          break;
-        }
+  } catch (e) {
+    // Blobs nicht verfuegbar
+  }
+  if (!out.length && process.env.PUSH_SUB) {
+    try {
+      out.push({ key: null, sub: JSON.parse(process.env.PUSH_SUB) });
+    } catch (e) {}
+  }
+  return out;
+}
+
+async function senden(store, subs, payload) {
+  for (const entry of subs) {
+    try {
+      await webpush.sendNotification(entry.sub, JSON.stringify(payload));
+    } catch (err) {
+      const code = err && err.statusCode;
+      // Geraet abgemeldet oder Subscription abgelaufen: Eintrag entfernen
+      if ((code === 404 || code === 410) && entry.key) {
+        await store.delete(entry.key).catch(() => {});
+      } else {
+        console.error("Push fehlgeschlagen", code, err && err.body);
       }
-      var t = (b.p === a.p) ? 0 : (v - a.p) / (b.p - a.p);
-      var r = Math.round(a.c[0] + (b.c[0] - a.c[0]) * t);
-      var g = Math.round(a.c[1] + (b.c[1] - a.c[1]) * t);
-      var bl = Math.round(a.c[2] + (b.c[2] - a.c[2]) * t);
-      return "rgb(" + r + "," + g + "," + bl + ")";
     }
-    function paint(v, label) {
-      var score = document.getElementById("fg-score");
-      var lab = document.getElementById("fg-label");
-      var fill = document.getElementById("fg-fill");
-      var sub = document.getElementById("fg-sub");
-      if (!score) return;
-      var col = fgColor(v);
-      score.textContent = String(v);
-      score.style.color = col;
-      lab.textContent = labelDE(label, v);
-      lab.style.color = col;
-      if (fill) {
-        fill.style.width = Math.max(0, Math.min(100, v)) + "%";
-        fill.style.background = col;
+  }
+}
+
+/* --- Zonen aus der eigenen Seite lesen --- */
+
+async function zonen() {
+  const base = process.env.URL || process.env.DEPLOY_URL;
+  if (!base) return [];
+
+  const headers = { "User-Agent": "AktienListe-Alerts/1.0" };
+  if (process.env.SITE_PASSWORD) {
+    headers.Authorization = "Basic " + btoa("alerts:" + process.env.SITE_PASSWORD);
+  }
+
+  let html = "";
+  try {
+    const res = await fetch(base + "/index.html", { headers });
+    if (!res.ok) return [];
+    html = await res.text();
+  } catch (e) {
+    return [];
+  }
+
+  const out = [];
+  const blocks = html.split('<section class="card"');
+  for (let i = 1; i < blocks.length; i++) {
+    const block = blocks[i];
+
+    const anchor = firstMatch(block, /^\s+id="([^"]+)"/);
+    const yahoo = firstMatch(block, /data-yahoo="([^"]+)"/);
+    const label = firstMatch(block, /<h2>([^<]+)<\/h2>/);
+    const badge = firstMatch(block, /<span class="badge">([^<]+)<\/span>/);
+    const zone = firstMatch(block, /class="zone">Einkaufszone\s*([^<]+)</);
+    if (!yahoo || !zone) continue;
+
+    const parts = zone.split(/[–-]/);
+    if (parts.length < 2) continue;
+    const a = num(parts[0]);
+    const b = num(parts[1]);
+    if (!isFinite(a) || !isFinite(b)) continue;
+
+    out.push({
+      label: (label || badge || yahoo).trim(),
+      badge: (badge || yahoo).trim(),
+      yahoo: yahoo,
+      anchor: anchor || "",
+      high: Math.max(a, b),
+      low: Math.min(a, b)
+    });
+  }
+  return out;
+}
+
+function firstMatch(text, re) {
+  const m = text.match(re);
+  return m ? m[1] : null;
+}
+
+// "40.557" -> 40557 ; "8,68" -> 8.68
+function num(s) {
+  return parseFloat(
+    String(s || "")
+      .replace(/[^\d.,]/g, "")
+      .replace(/\./g, "")
+      .replace(",", ".")
+  );
+}
+
+/* --- Kurse --- */
+
+async function quote(symbol) {
+  try {
+    const url =
+      "https://query1.finance.yahoo.com/v8/finance/chart/" +
+      encodeURIComponent(symbol) +
+      "?range=1d&interval=15m";
+    const res = await fetch(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; AktienListe/1.0)",
+        Accept: "application/json"
       }
-      if (sub) sub.textContent = "0 Extreme Angst  ·  100 Extreme Gier  ·  Live";
-    }
-    function load() {
-      fetch("/.netlify/functions/feargreed", { cache: "no-store" })
-        .then(function (r) { return r.json(); })
-        .then(function (d) {
-          var src = (d && (d.stock || d.crypto)) || null;
-          if (src && typeof src.value === "number") {
-            paint(src.value, src.label || "");
-          } else {
-            var lab = document.getElementById("fg-label");
-            if (lab) lab.textContent = "Nicht verfügbar";
-          }
-        })
-        .catch(function () {
-          var lab = document.getElementById("fg-label");
-          if (lab) lab.textContent = "Nicht verfügbar";
-        });
-    }
-    load();
-    setInterval(load, 5 * 60 * 1000);
-  })();
-
-  document.addEventListener("visibilitychange", function () {
-    if (document.visibilityState === "visible") {
-      document.querySelectorAll("[data-news-query]").forEach(function (b, i) {
-        setTimeout(function () { loadBox(b, true); }, i * 150);
-      });
-    }
-  });
-})();
-
-// Installation: Button im Header oeffnet die Schritt-fuer-Schritt-Anleitung
-(function () {
-  var btn = document.getElementById("installBtn");
-  var sheet = document.getElementById("installSheet");
-  var closeBtn = document.getElementById("installClose");
-  var note = document.getElementById("installNote");
-  var stepsIos = document.getElementById("stepsIos");
-  var stepsOther = document.getElementById("stepsOther");
-  var bar = document.getElementById("installBar");
-  var barGo = document.getElementById("installBarGo");
-  var barX = document.getElementById("installBarX");
-  var appEl = document.getElementById("app");
-  var SEEN = "rcp_install_seen";
-  var BAR_OFF = "rcp_install_bar_off";
-  if (!btn || !sheet) return;
-
-  var ua = navigator.userAgent;
-  var isIOS = /iPad|iPhone|iPod/.test(ua) ||
-              (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-  var inAppBrowser = /CriOS|FxiOS|EdgiOS|OPiOS|GSA|FBAN|FBAV|Instagram|LinkedInApp|Twitter/.test(ua);
-  var installed = window.matchMedia("(display-mode: standalone)").matches ||
-                  navigator.standalone === true;
-
-  // Schon installiert: Button bleibt aus
-  if (installed) return;
-  btn.hidden = false;
-
-  // Android/Chrome liefert einen echten Installations-Dialog
-  var prompt = null;
-  window.addEventListener("beforeinstallprompt", function (e) {
-    e.preventDefault();
-    prompt = e;
-  });
-  window.addEventListener("appinstalled", function () {
-    btn.hidden = true;
-    hideBar(true);
-    closeSheet();
-  });
-
-  stepsIos.hidden = !isIOS;
-  stepsOther.hidden = isIOS;
-
-  if (isIOS && inAppBrowser) {
-    note.hidden = false;
-    note.innerHTML = "Du bist gerade in einem In-App-Browser. Zum Home-Bildschirm hinzufügen geht nur in <b>Safari</b> \u2014 Adresse dort öffnen: rcp-aktien.netlify.app";
-  }
-
-  var lastFocus = null;
-
-  function openSheet() {
-    try { localStorage.setItem(SEEN, "1"); } catch (e) {}
-    lastFocus = document.activeElement;
-    sheet.hidden = false;
-    document.body.style.overflow = "hidden";
-    closeBtn.focus();
-  }
-
-  function closeSheet() {
-    sheet.hidden = true;
-    document.body.style.overflow = "";
-    if (lastFocus && lastFocus.focus) lastFocus.focus();
-  }
-
-  btn.addEventListener("click", function () {
-    if (prompt) {
-      prompt.prompt();
-      prompt = null;
-      return;
-    }
-    openSheet();
-  });
-
-  function hideBar(remember) {
-    if (!bar) return;
-    bar.hidden = true;
-    document.body.classList.remove("has-install-bar");
-    if (remember) { try { localStorage.setItem(BAR_OFF, "1"); } catch (e) {} }
-  }
-
-  function showBar() {
-    if (!bar) return;
-    var off = false;
-    try { off = localStorage.getItem(BAR_OFF) === "1"; } catch (e) {}
-    if (off) return;
-    bar.hidden = false;
-    document.body.classList.add("has-install-bar");
-  }
-
-  // Erster Besuch: Anleitung von selbst zeigen, danach nur noch auf Tap
-  var started = false;
-  function start() {
-    if (started) return;
-    started = true;
-    showBar();
-    var seen = true;
-    try { seen = localStorage.getItem(SEEN) === "1"; } catch (e) {}
-    if (!seen && !prompt) setTimeout(openSheet, 900);
-  }
-
-  if (appEl && appEl.classList.contains("visible")) start();
-  else document.addEventListener("rcp:unlocked", start);
-
-  if (barGo) barGo.addEventListener("click", function () { openSheet(); });
-  if (barX) barX.addEventListener("click", function () { hideBar(true); });
-
-  closeBtn.addEventListener("click", closeSheet);
-  sheet.addEventListener("click", function (e) {
-    if (e.target === sheet) closeSheet();
-  });
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && !sheet.hidden) closeSheet();
-  });
-})();
-
-// Benachrichtigungen: Geraet anmelden und den Schluessel fuer Netlify zeigen
-(function () {
-  var btn = document.getElementById("pushBtn");
-  var sheet = document.getElementById("pushSheet");
-  var closeBtn = document.getElementById("pushClose");
-  var testBtn = document.getElementById("pushTest");
-  var note = document.getElementById("pushNote");
-  var okBlock = document.getElementById("pushOk");
-  var title = document.getElementById("pushTitle");
-  var sub1 = sheet.querySelector(".sheet-sub");
-  if (!btn || !sheet) return;
-
-  var supported = "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
-  if (!supported) return;
-
-  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-              (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-  var standalone = window.matchMedia("(display-mode: standalone)").matches ||
-                   navigator.standalone === true;
-
-  btn.hidden = false;
-  markState();
-
-  function markState() {
-    if (Notification.permission !== "granted") return;
-    navigator.serviceWorker.getRegistration().then(function (reg) {
-      if (!reg) return;
-      reg.pushManager.getSubscription().then(function (sub) {
-        if (sub) btn.textContent = "Benachrichtigungen aktiv";
-      });
     });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const meta = data?.chart?.result?.[0]?.meta;
+    if (!meta) return null;
+    return { price: meta.regularMarketPrice, currency: meta.currency };
+  } catch (e) {
+    return null;
   }
+}
 
-  function showNote(text) {
-    note.hidden = false;
-    note.innerHTML = text;
-    if (okBlock) okBlock.hidden = true;
-    if (title) title.textContent = "Noch nicht angemeldet";
-    if (sub1) sub1.hidden = true;
-  }
+function fmt(n) {
+  return Number(n).toLocaleString("de-DE", { maximumFractionDigits: 2 });
+}
 
-  function showKey() {
-    note.hidden = true;
-    if (okBlock) okBlock.hidden = false;
-    if (title) title.textContent = "Dieses Gerät ist angemeldet";
-    if (sub1) sub1.hidden = false;
-  }
-
-  function openSheet() {
-    sheet.hidden = false;
-    document.body.style.overflow = "hidden";
-    closeBtn.focus();
-  }
-
-  function closeSheet() {
-    sheet.hidden = true;
-    document.body.style.overflow = "";
-  }
-
-  btn.addEventListener("click", function () {
-    // Auf iOS liefert Apple Push nur an die vom Home-Bildschirm gestartete App
-    if (isIOS && !standalone) {
-      var installBtn = document.getElementById("installBtn");
-      if (installBtn) installBtn.click();
-      return;
-    }
-    subscribe();
-  });
-
-  function withTimeout(promise, ms, message) {
-    return new Promise(function (resolve, reject) {
-      var timer = setTimeout(function () { reject(new Error(message)); }, ms);
-      promise.then(
-        function (value) { clearTimeout(timer); resolve(value); },
-        function (err) { clearTimeout(timer); reject(err); }
-      );
-    });
-  }
-
-  function subscribe() {
-    var label = btn.textContent;
-    btn.textContent = "Wird angemeldet…";
-    Notification.requestPermission().then(function (perm) {
-      btn.textContent = label;
-      if (perm !== "granted") {
-        openSheet();
-        showNote("Benachrichtigungen sind für diese Seite abgelehnt. Am iPhone unter <b>Einstellungen → Mitteilungen → Aktien-Liste</b> wieder erlauben.");
-        return;
-      }
-
-      // Server erzeugt und verwaltet den Schluessel selbst
-      return fetch("/.netlify/functions/vapid")
-        .then(function (r) {
-          return r.text().then(function (text) {
-            if (!r.ok) {
-              throw new Error("Schritt 1 — Server antwortet mit " + r.status + ": " + text.slice(0, 140));
-            }
-            try {
-              return JSON.parse(text);
-            } catch (e) {
-              throw new Error("Schritt 1 — /vapid liefert kein JSON: " + text.slice(0, 140));
-            }
-          });
-        })
-        .then(function (data) {
-          if (!data || !data.publicKey) {
-            throw new Error("Schritt 2 — kein Schlüssel vom Server" + (data && data.fehler ? ": " + data.fehler : ""));
-          }
-          var key = String(data.publicKey).trim();
-          if (!/^[A-Za-z0-9_-]+$/.test(key)) {
-            throw new Error("Schritt 2 — Schlüssel enthält unerlaubte Zeichen");
-          }
-          var appKey;
-          try {
-            appKey = toUint8(key);
-          } catch (e) {
-            throw new Error("Schritt 2 — Schlüssel nicht dekodierbar (" + key.length + " Zeichen)");
-          }
-          if (appKey.length !== 65) {
-            throw new Error("Schritt 2 — Schlüssel hat " + appKey.length + " Bytes statt 65");
-          }
-
-          return withTimeout(
-            navigator.serviceWorker.ready.then(function (reg) {
-              return reg.pushManager.getSubscription().then(function (existing) {
-                if (existing) return existing;
-                return reg.pushManager.subscribe({
-                  userVisibleOnly: true,
-                  applicationServerKey: appKey
-                }).catch(function (e) {
-                  throw new Error("Schritt 3 — iOS lehnt die Anmeldung ab: " + (e && e.message ? e.message : e));
-                });
-              });
-            }),
-            20000,
-            "Schritt 3 — Anmeldung beim Push-Dienst hat zu lange gebraucht"
-          );
-        })
-        .then(function (sub) {
-          return fetch("/.netlify/functions/subscribe", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(sub)
-          }).then(function (r) {
-            if (!r.ok) throw new Error("Schritt 4 — Server hat die Anmeldung nicht angenommen (" + r.status + ")");
-            btn.textContent = "Benachrichtigungen aktiv";
-            showKey();
-            openSheet();
-          });
-        });
-    }).catch(function (e) {
-      btn.textContent = label;
-      openSheet();
-      var hint = standalone
-        ? ""
-        : "<br>Die Liste läuft nicht vom Home-Bildschirm — im Safari-Tab liefert iOS keine Benachrichtigungen.";
-      showNote("Anmeldung fehlgeschlagen.<br>" + (e && e.message ? e.message : e) + hint);
-    });
-  }
-
-  if (testBtn) {
-    testBtn.addEventListener("click", function () {
-      testBtn.textContent = "Wird gesendet…";
-      fetch("/.netlify/functions/push-test")
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-          testBtn.textContent = data && data.ok ? "Gesendet" : "Fehlgeschlagen";
-          if (!data || !data.ok) showNote("Der Server konnte nicht senden: " + JSON.stringify(data));
-          setTimeout(function () { testBtn.textContent = "Testmeldung senden"; }, 2500);
-        })
-        .catch(function (e) {
-          testBtn.textContent = "Testmeldung senden";
-          showNote("Test fehlgeschlagen: " + (e && e.message ? e.message : e));
-        });
-    });
-  }
-
-  closeBtn.addEventListener("click", closeSheet);
-  sheet.addEventListener("click", function (e) { if (e.target === sheet) closeSheet(); });
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && !sheet.hidden) closeSheet();
-  });
-
-  function toUint8(base64) {
-    var pad = "=".repeat((4 - (base64.length % 4)) % 4);
-    var raw = atob((base64 + pad).replace(/-/g, "+").replace(/_/g, "/"));
-    var out = new Uint8Array(raw.length);
-    for (var i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
-    return out;
-  }
-})();
-
-// Service Worker: macht die Seite installierbar und offline-faehig
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", function () {
-    navigator.serviceWorker.register("/sw.js").catch(function (e) {
-      console.warn("SW registration failed", e);
-    });
+function json(obj, status) {
+  return new Response(JSON.stringify(obj, null, 2), {
+    status: status || 200,
+    headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" }
   });
 }
-</script>
-
-
-
-
-
-</body>
-</html>
