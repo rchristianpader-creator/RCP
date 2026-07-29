@@ -1,3 +1,79 @@
+function withTimeout(promise, ms, message) {
+    return new Promise(function (resolve, reject) {
+      var timer = setTimeout(function () { reject(new Error(message)); }, ms);
+      promise.then(
+        function (value) { clearTimeout(timer); resolve(value); },
+        function (err) { clearTimeout(timer); reject(err); }
+      );
+    });
+  }
+
+  function subscribe() {
+    var label = btn.textContent;
+    btn.textContent = "Wird angemeldet…";
+    Notification.requestPermission().then(function (perm) {
+      btn.textContent = label;
+      if (perm !== "granted") {
+        openSheet();
+        showNote("Benachrichtigungen sind für diese Seite abgelehnt. Am iPhone unter <b>Einstellungen → Mitteilungen → Aktien-Liste</b> wieder erlauben.");
+        return;
+      }
+
+      // Server erzeugt und verwaltet den Schluessel selbst
+      return fetch("/.netlify/functions/vapid")
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (!data || !data.publicKey) throw new Error("Kein Schlüssel vom Server");
+          return withTimeout(
+            navigator.serviceWorker.ready.then(function (reg) {
+              return reg.pushManager.getSubscription().then(function (existing) {
+                if (existing) return existing;
+                return reg.pushManager.subscribe({
+                  userVisibleOnly: true,
+                  applicationServerKey: toUint8(data.publicKey)
+                });
+              });
+            }),
+            20000,
+            "Anmeldung beim Push-Dienst hat zu lange gebraucht"
+          );
+        })
+        .then(function (sub) {
+          return fetch("/.netlify/functions/subscribe", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(sub)
+          }).then(function (r) {
+            if (!r.ok) throw new Error("Server hat die Anmeldung nicht angenommen");
+            btn.textContent = "Benachrichtigungen aktiv";
+            showKey();
+            openSheet();
+          });
+        });
+    }).catch(function (e) {
+      btn.textContent = label;
+      openSheet();
+      showNote("Anmeldung fehlgeschlagen: " + (e && e.message ? e.message : e) + "<br>Läuft die Liste vom Home-Bildschirm? Im Safari-Tab liefert iOS keine Benachrichtigungen.");
+    });
+  }
+
+  if (testBtn) {
+    testBtn.addEventListener("click", function () {
+      testBtn.textContent = "Wird gesendet…";
+      fetch("/.netlify/functions/push-test")
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          testBtn.textContent = data && data.ok ? "Gesendet" : "Fehlgeschlagen";
+          if (!data || !data.ok) showNote("Der Server konnte nicht senden: " + JSON.stringify(data));
+          setTimeout(function () { testBtn.textContent = "Testmeldung senden"; }, 2500);
+        })
+        .catch(function (e) {
+          testBtn.textContent = "Testmeldung senden";
+          showNote("Test fehlgeschlagen: " + (e && e.message ? e.message : e));
+        });
+    });
+  }
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -423,8 +499,14 @@
 
   /* Installation */
   [hidden] { display: none !important; }
+  .header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 18px;
+  }
   .install-btn {
-    margin: 18px auto 0;
     display: inline-block;
     font: inherit;
     font-size: 10px;
@@ -633,6 +715,22 @@
     -webkit-tap-highlight-color: transparent;
   }
   .install-go:active { transform: scale(0.98); opacity: 0.9; }
+  .sub-json {
+    width: 100%;
+    margin-top: 16px;
+    padding: 10px 12px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 10.5px;
+    line-height: 1.45;
+    color: var(--fg);
+    background: var(--soft);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    resize: vertical;
+    -webkit-user-select: all;
+    user-select: all;
+  }
+  .sheet-card .btn { margin-top: 10px; }
   .install-x {
     flex: 0 0 auto;
     font: inherit;
@@ -910,7 +1008,10 @@
   <p class="sub">Live-Charts · Technische Analyse</p>
   <div class="rule"></div>
   <div class="author">Ralph Christian Pader · Juli 2026</div>
-  <button class="install-btn" id="installBtn" type="button" hidden>App installieren</button>
+  <div class="header-actions">
+    <button class="install-btn" id="installBtn" type="button" hidden>App installieren</button>
+    <button class="install-btn" id="pushBtn" type="button" hidden>Benachrichtigungen</button>
+  </div>
 </header>
 
 <nav>
@@ -1305,6 +1406,26 @@
     </ol>
 
     <div class="sheet-note" id="installNote" hidden></div>
+  </div>
+</div>
+
+<div class="sheet" id="pushSheet" role="dialog" aria-modal="true" aria-labelledby="pushTitle" hidden>
+  <div class="sheet-card">
+    <div class="sheet-top">
+      <div class="sheet-label">Benachrichtigungen</div>
+      <button class="sheet-close" id="pushClose" type="button">Schließen</button>
+    </div>
+    <h3 id="pushTitle">Benachrichtigungen sind aktiv</h3>
+    <p class="sheet-sub">Dieses Gerät meldet sich, wenn ein Kurs neu in seine Einkaufszone eintritt. Geprüft wird alle 30 Minuten, nachts ist Ruhe.</p>
+
+    <div id="pushOk">
+      <ol class="steps">
+        <li><span class="n">✓</span><div class="step-body"><div class="step-text">Gerät angemeldet</div></div></li>
+        <li><span class="n">✓</span><div class="step-body"><div class="step-text">Alle Einkaufszonen aus dieser Liste werden überwacht</div></div></li>
+      </ol>
+      <button class="btn" id="pushTest" type="button">Testmeldung senden</button>
+    </div>
+    <div class="sheet-note" id="pushNote" hidden></div>
   </div>
 </div>
 
@@ -1730,6 +1851,138 @@
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape" && !sheet.hidden) closeSheet();
   });
+})();
+
+// Benachrichtigungen: Geraet anmelden und den Schluessel fuer Netlify zeigen
+(function () {
+  var btn = document.getElementById("pushBtn");
+  var sheet = document.getElementById("pushSheet");
+  var closeBtn = document.getElementById("pushClose");
+  var testBtn = document.getElementById("pushTest");
+  var note = document.getElementById("pushNote");
+  var okBlock = document.getElementById("pushOk");
+  var title = document.getElementById("pushTitle");
+  var sub1 = sheet.querySelector(".sheet-sub");
+  if (!btn || !sheet) return;
+
+  var supported = "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+  if (!supported) return;
+
+  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+              (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  var standalone = window.matchMedia("(display-mode: standalone)").matches ||
+                   navigator.standalone === true;
+
+  btn.hidden = false;
+  markState();
+
+  function markState() {
+    if (Notification.permission !== "granted") return;
+    navigator.serviceWorker.getRegistration().then(function (reg) {
+      if (!reg) return;
+      reg.pushManager.getSubscription().then(function (sub) {
+        if (sub) btn.textContent = "Benachrichtigungen aktiv";
+      });
+    });
+  }
+
+  function showNote(text) {
+    note.hidden = false;
+    note.innerHTML = text;
+    if (okBlock) okBlock.hidden = true;
+    if (title) title.textContent = "Noch nicht angemeldet";
+    if (sub1) sub1.hidden = true;
+  }
+
+  function showKey() {
+    note.hidden = true;
+    if (okBlock) okBlock.hidden = false;
+    if (title) title.textContent = "Dieses Gerät ist angemeldet";
+    if (sub1) sub1.hidden = false;
+  }
+
+  function openSheet() {
+    sheet.hidden = false;
+    document.body.style.overflow = "hidden";
+    closeBtn.focus();
+  }
+
+  function closeSheet() {
+    sheet.hidden = true;
+    document.body.style.overflow = "";
+  }
+
+  btn.addEventListener("click", function () {
+    // Auf iOS liefert Apple Push nur an die vom Home-Bildschirm gestartete App
+    if (isIOS && !standalone) {
+      var installBtn = document.getElementById("installBtn");
+      if (installBtn) installBtn.click();
+      return;
+    }
+    subscribe();
+  });
+
+  function subscribe() {
+    Notification.requestPermission().then(function (perm) {
+      if (perm !== "granted") {
+        openSheet();
+        showNote("Benachrichtigungen sind für diese Seite abgelehnt. Am iPhone unter <b>Einstellungen → Mitteilungen → Aktien-Liste</b> wieder erlauben.");
+        return;
+      }
+      return navigator.serviceWorker.ready.then(function (reg) {
+        return reg.pushManager.getSubscription().then(function (existing) {
+          if (existing) return existing;
+          return reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: toUint8(VAPID_PUBLIC)
+          });
+        });
+      }).then(function (sub) {
+        jsonBox.value = JSON.stringify(sub);
+        btn.textContent = "Benachrichtigungen aktiv";
+        showKey();
+        openSheet();
+      });
+    }).catch(function (e) {
+      openSheet();
+      showNote("Anmeldung fehlgeschlagen: " + (e && e.message ? e.message : e));
+    });
+  }
+
+  copyBtn.addEventListener("click", function () {
+    var text = jsonBox.value;
+    if (!text) return;
+    function done() {
+      copyBtn.textContent = "Kopiert";
+      setTimeout(function () { copyBtn.textContent = "Kopieren"; }, 1800);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, fallback);
+    } else {
+      fallback();
+    }
+    function fallback() {
+      jsonBox.focus();
+      jsonBox.setSelectionRange(0, text.length);
+      try { document.execCommand("copy"); done(); } catch (e) {
+        showNote("Kopieren hat nicht geklappt — Text im Feld markieren und manuell kopieren.");
+      }
+    }
+  });
+
+  closeBtn.addEventListener("click", closeSheet);
+  sheet.addEventListener("click", function (e) { if (e.target === sheet) closeSheet(); });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !sheet.hidden) closeSheet();
+  });
+
+  function toUint8(base64) {
+    var pad = "=".repeat((4 - (base64.length % 4)) % 4);
+    var raw = atob((base64 + pad).replace(/-/g, "+").replace(/_/g, "/"));
+    var out = new Uint8Array(raw.length);
+    for (var i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+    return out;
+  }
 })();
 
 // Service Worker: macht die Seite installierbar und offline-faehig
