@@ -548,6 +548,103 @@
     line-height: 1.5;
   }
 
+  /* Schritte mit Abbildungen */
+  .steps li { align-items: flex-start; }
+  .step-body { flex: 1 1 auto; min-width: 0; }
+  .step-text { font-size: 14px; line-height: 1.45; }
+  .mock {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin-top: 10px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--soft);
+    color: var(--fg);
+  }
+  .mock text { font-family: inherit; }
+  .mock .ring { animation: ring-pulse 1.9s var(--ease) infinite; transform-origin: center; }
+  @keyframes ring-pulse {
+    0%, 70%, 100% { opacity: 0.9; }
+    35% { opacity: 0.25; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .mock .ring { animation: none; }
+  }
+
+  /* Einladung am unteren Rand */
+  .install-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 150;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+    background: var(--card);
+    border-top: 1px solid var(--fg);
+  }
+  body.has-install-bar { padding-bottom: 104px; }
+  .install-mark {
+    flex: 0 0 auto;
+    width: 38px;
+    height: 38px;
+    border-radius: 5px;
+    background: var(--fg);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+  }
+  .install-copy { flex: 1 1 auto; min-width: 0; }
+  .install-copy b {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: -0.1px;
+  }
+  .install-copy span {
+    display: block;
+    margin-top: 2px;
+    font-size: 11.5px;
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .install-go {
+    flex: 0 0 auto;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #fff;
+    background: var(--fg);
+    border: 0;
+    border-radius: 2px;
+    padding: 10px 13px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .install-go:active { transform: scale(0.98); opacity: 0.9; }
+  .install-x {
+    flex: 0 0 auto;
+    font: inherit;
+    font-size: 20px;
+    line-height: 1;
+    color: var(--muted);
+    background: none;
+    border: 0;
+    padding: 6px;
+    cursor: pointer;
+  }
+
   footer {
     text-align: center;
     padding: 36px 24px 12px;
@@ -1143,10 +1240,62 @@
     <p class="sheet-sub">Danach startet die Liste wie eine App: ohne Adressleiste, mit eigenem Icon.</p>
 
     <ol class="steps" id="stepsIos">
-      <li><span class="n">1</span><span>Unten in der Safari-Leiste auf das Teilen-Symbol tippen<svg class="share-glyph" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 13v7h14v-7"/></svg></span></li>
-      <li><span class="n">2</span><span>In der Liste nach unten wischen bis <b>Zum Home-Bildschirm</b></span></li>
-      <li><span class="n">3</span><span>Oben rechts <b>Hinzufügen</b> bestätigen</span></li>
-      <li><span class="n">4</span><span>App über das neue Icon <b>RCP</b> starten</span></li>
+      <li>
+        <span class="n">1</span>
+        <div class="step-body">
+          <div class="step-text">Unten in Safari auf <b>Teilen</b> tippen</div>
+          <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="0" y1="14" x2="300" y2="14" stroke="var(--line)"/>
+            <path d="M34 46l-8-8 8-8" opacity=".3"/>
+            <path d="M70 30l8 8-8 8" opacity=".3"/>
+            <path d="M150 42V22"/>
+            <path d="M144 28l6-6 6 6"/>
+            <path d="M138 38v12h24V38"/>
+            <circle class="ring" cx="150" cy="36" r="19"/>
+            <path d="M226 30h15v18l-7.5-5.5L226 48z" opacity=".3"/>
+            <rect x="262" y="31" width="16" height="16" rx="2" opacity=".3"/>
+          </svg>
+        </div>
+      </li>
+      <li>
+        <span class="n">2</span>
+        <div class="step-body">
+          <div class="step-text">In der Liste nach unten wischen bis <b>Zum Home-Bildschirm</b></div>
+          <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+            <rect x="10" y="8" width="280" height="20" rx="4" opacity=".25"/>
+            <rect x="10" y="34" width="280" height="24" rx="4"/>
+            <rect x="24" y="39" width="14" height="14" rx="3" stroke-width="1.2"/>
+            <path d="M31 42v8M27 46h8" stroke-width="1.2" stroke-linecap="round"/>
+            <text x="50" y="51" font-size="11" font-weight="600" fill="currentColor" stroke="none">Zum Home-Bildschirm</text>
+          </svg>
+        </div>
+      </li>
+      <li>
+        <span class="n">3</span>
+        <div class="step-body">
+          <div class="step-text">Oben rechts <b>Hinzufügen</b> bestätigen</div>
+          <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+            <text x="14" y="25" font-size="10" fill="currentColor" stroke="none" opacity=".4">Abbrechen</text>
+            <rect x="212" y="10" width="76" height="20" rx="3" fill="currentColor" stroke="none"/>
+            <text x="250" y="24" font-size="10" font-weight="700" fill="#fff" stroke="none" text-anchor="middle">Hinzufügen</text>
+            <line x1="0" y1="40" x2="300" y2="40" stroke="var(--line)"/>
+            <rect x="14" y="48" width="90" height="7" rx="2" fill="currentColor" stroke="none" opacity=".16"/>
+          </svg>
+        </div>
+      </li>
+      <li>
+        <span class="n">4</span>
+        <div class="step-body">
+          <div class="step-text">Fertig — App über das neue Icon starten</div>
+          <svg class="mock" viewBox="0 0 300 66" fill="none" aria-hidden="true">
+            <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
+            <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
+            <rect x="152" y="16" width="34" height="34" rx="8" fill="currentColor"/>
+            <text x="169" y="37" font-size="9" font-weight="700" fill="#fff" text-anchor="middle">RCP</text>
+            <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
+          </svg>
+        </div>
+      </li>
     </ol>
 
     <ol class="steps" id="stepsOther" hidden>
@@ -1157,6 +1306,16 @@
 
     <div class="sheet-note" id="installNote" hidden></div>
   </div>
+</div>
+
+<div class="install-bar" id="installBar" hidden>
+  <div class="install-mark" aria-hidden="true">RCP</div>
+  <div class="install-copy">
+    <b>Aktien-Liste als App</b>
+    <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
+  </div>
+  <button class="install-go" id="installBarGo" type="button">So geht's</button>
+  <button class="install-x" id="installBarX" type="button" aria-label="Hinweis ausblenden">&times;</button>
 </div>
 
 <footer>
@@ -1192,11 +1351,13 @@
     if (instant) {
       lock.classList.add("hidden");
       app.classList.add("visible");
+      document.dispatchEvent(new Event("rcp:unlocked"));
       return;
     }
     lock.classList.add("hidden");
     setTimeout(function () {
       app.classList.add("visible");
+      document.dispatchEvent(new Event("rcp:unlocked"));
     }, 200);
   }
 
@@ -1468,6 +1629,12 @@
   var note = document.getElementById("installNote");
   var stepsIos = document.getElementById("stepsIos");
   var stepsOther = document.getElementById("stepsOther");
+  var bar = document.getElementById("installBar");
+  var barGo = document.getElementById("installBarGo");
+  var barX = document.getElementById("installBarX");
+  var appEl = document.getElementById("app");
+  var SEEN = "rcp_install_seen";
+  var BAR_OFF = "rcp_install_bar_off";
   if (!btn || !sheet) return;
 
   var ua = navigator.userAgent;
@@ -1489,6 +1656,7 @@
   });
   window.addEventListener("appinstalled", function () {
     btn.hidden = true;
+    hideBar(true);
     closeSheet();
   });
 
@@ -1503,6 +1671,7 @@
   var lastFocus = null;
 
   function openSheet() {
+    try { localStorage.setItem(SEEN, "1"); } catch (e) {}
     lastFocus = document.activeElement;
     sheet.hidden = false;
     document.body.style.overflow = "hidden";
@@ -1523,6 +1692,39 @@
     }
     openSheet();
   });
+
+  function hideBar(remember) {
+    if (!bar) return;
+    bar.hidden = true;
+    document.body.classList.remove("has-install-bar");
+    if (remember) { try { localStorage.setItem(BAR_OFF, "1"); } catch (e) {} }
+  }
+
+  function showBar() {
+    if (!bar) return;
+    var off = false;
+    try { off = localStorage.getItem(BAR_OFF) === "1"; } catch (e) {}
+    if (off) return;
+    bar.hidden = false;
+    document.body.classList.add("has-install-bar");
+  }
+
+  // Erster Besuch: Anleitung von selbst zeigen, danach nur noch auf Tap
+  var started = false;
+  function start() {
+    if (started) return;
+    started = true;
+    showBar();
+    var seen = true;
+    try { seen = localStorage.getItem(SEEN) === "1"; } catch (e) {}
+    if (!seen && !prompt) setTimeout(openSheet, 900);
+  }
+
+  if (appEl && appEl.classList.contains("visible")) start();
+  else document.addEventListener("rcp:unlocked", start);
+
+  if (barGo) barGo.addEventListener("click", function () { openSheet(); });
+  if (barX) barX.addEventListener("click", function () { hideBar(true); });
 
   closeBtn.addEventListener("click", closeSheet);
   sheet.addEventListener("click", function (e) {
