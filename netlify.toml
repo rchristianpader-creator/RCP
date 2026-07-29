@@ -4,3 +4,27 @@
 
 [functions]
   node_bundler = "esbuild"
+
+# Der Repo-Inhalt liegt im Publish-Verzeichnis. Diese Pfade sollen
+# niemand als Datei abrufen koennen — die Functions laufen weiter
+# unter /.netlify/functions/... (mit Punkt), das ist ein anderer Pfad.
+
+[[redirects]]
+  from = "/netlify/*"
+  to = "/404.html"
+  status = 404
+
+[[redirects]]
+  from = "/package.json"
+  to = "/404.html"
+  status = 404
+
+[[redirects]]
+  from = "/package-lock.json"
+  to = "/404.html"
+  status = 404
+
+[[redirects]]
+  from = "/netlify.toml"
+  to = "/404.html"
+  status = 404
