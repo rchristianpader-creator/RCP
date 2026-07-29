@@ -3,6 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="color-scheme" content="light">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#fafafa">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Aktien-Liste">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Aktien-Liste · Ralph Christian Pader</title>
 
@@ -414,6 +421,133 @@
     opacity: 0.9;
   }
 
+  /* Installation */
+  [hidden] { display: none !important; }
+  .install-btn {
+    margin: 18px auto 0;
+    display: inline-block;
+    font: inherit;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg);
+    background: none;
+    border: 1px solid var(--fg);
+    border-radius: 2px;
+    padding: 9px 16px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s var(--ease), background 0.15s ease, color 0.15s ease;
+  }
+  .install-btn:active {
+    transform: scale(0.98);
+    background: var(--fg);
+    color: #fff;
+  }
+  .sheet {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    background: rgba(17, 17, 17, 0.32);
+    -webkit-backdrop-filter: saturate(120%) blur(2px);
+    backdrop-filter: saturate(120%) blur(2px);
+  }
+  .sheet-card {
+    width: 100%;
+    max-width: 520px;
+    background: var(--card);
+    border-top: 1px solid var(--fg);
+    border-radius: 2px 2px 0 0;
+    padding: 22px 22px 28px;
+    max-height: 88vh;
+    overflow-y: auto;
+    animation: sheet-up 0.28s var(--ease) both;
+  }
+  @keyframes sheet-up {
+    from { transform: translate3d(0, 14px, 0); opacity: 0; }
+    to { transform: translate3d(0, 0, 0); opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sheet-card { animation: none; }
+  }
+  .sheet-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid var(--hair);
+    padding-bottom: 12px;
+  }
+  .sheet-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .sheet-close {
+    font: inherit;
+    font-size: 12px;
+    font-weight: 650;
+    color: var(--muted);
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+  }
+  .sheet-card h3 {
+    margin-top: 16px;
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+    line-height: 1.25;
+  }
+  .sheet-card .sheet-sub {
+    margin-top: 6px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .steps {
+    list-style: none;
+    margin-top: 20px;
+  }
+  .steps li {
+    display: flex;
+    gap: 14px;
+    padding: 14px 0;
+    border-top: 1px solid var(--hair);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .steps li:first-child { border-top: 0; padding-top: 4px; }
+  .steps .n {
+    flex: 0 0 auto;
+    width: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    padding-top: 3px;
+  }
+  .steps b { font-weight: 700; }
+  .share-glyph {
+    display: inline-block;
+    vertical-align: -3px;
+    margin: 0 2px;
+  }
+  .sheet-note {
+    margin-top: 18px;
+    padding: 12px 14px;
+    background: var(--soft);
+    border-left: 2px solid var(--fg);
+    font-size: 12.5px;
+    line-height: 1.5;
+  }
+
   footer {
     text-align: center;
     padding: 36px 24px 12px;
@@ -679,6 +813,7 @@
   <p class="sub">Live-Charts · Technische Analyse</p>
   <div class="rule"></div>
   <div class="author">Ralph Christian Pader · Juli 2026</div>
+  <button class="install-btn" id="installBtn" type="button" hidden>App installieren</button>
 </header>
 
 <nav>
@@ -998,6 +1133,32 @@
 
 
 
+<div class="sheet" id="installSheet" role="dialog" aria-modal="true" aria-labelledby="installTitle" hidden>
+  <div class="sheet-card">
+    <div class="sheet-top">
+      <div class="sheet-label">Installation</div>
+      <button class="sheet-close" id="installClose" type="button">Schließen</button>
+    </div>
+    <h3 id="installTitle">Aktien-Liste auf den Home-Bildschirm</h3>
+    <p class="sheet-sub">Danach startet die Liste wie eine App: ohne Adressleiste, mit eigenem Icon.</p>
+
+    <ol class="steps" id="stepsIos">
+      <li><span class="n">1</span><span>Unten in der Safari-Leiste auf das Teilen-Symbol tippen<svg class="share-glyph" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 13v7h14v-7"/></svg></span></li>
+      <li><span class="n">2</span><span>In der Liste nach unten wischen bis <b>Zum Home-Bildschirm</b></span></li>
+      <li><span class="n">3</span><span>Oben rechts <b>Hinzufügen</b> bestätigen</span></li>
+      <li><span class="n">4</span><span>App über das neue Icon <b>RCP</b> starten</span></li>
+    </ol>
+
+    <ol class="steps" id="stepsOther" hidden>
+      <li><span class="n">1</span><span>Im Browsermenü <b>App installieren</b> oder <b>Zum Startbildschirm hinzufügen</b> wählen</span></li>
+      <li><span class="n">2</span><span>Bestätigen</span></li>
+      <li><span class="n">3</span><span>App über das neue Icon <b>RCP</b> starten</span></li>
+    </ol>
+
+    <div class="sheet-note" id="installNote" hidden></div>
+  </div>
+</div>
+
 <footer>
   <div class="line"></div>
   Live-Charts · TradingView · Fibos über den Button<br>
@@ -1015,7 +1176,7 @@
   var app = document.getElementById("app");
   var pinWrap = document.getElementById("pinDots");
 
-  if (sessionStorage.getItem("aktien_unlocked") === "1") {
+  if (localStorage.getItem("aktien_unlocked") === "1") {
     unlock(true);
   }
 
@@ -1027,7 +1188,7 @@
   }
 
   function unlock(instant) {
-    sessionStorage.setItem("aktien_unlocked", "1");
+    localStorage.setItem("aktien_unlocked", "1");
     if (instant) {
       lock.classList.add("hidden");
       app.classList.add("visible");
@@ -1298,6 +1459,88 @@
     }
   });
 })();
+
+// Installation: Button im Header oeffnet die Schritt-fuer-Schritt-Anleitung
+(function () {
+  var btn = document.getElementById("installBtn");
+  var sheet = document.getElementById("installSheet");
+  var closeBtn = document.getElementById("installClose");
+  var note = document.getElementById("installNote");
+  var stepsIos = document.getElementById("stepsIos");
+  var stepsOther = document.getElementById("stepsOther");
+  if (!btn || !sheet) return;
+
+  var ua = navigator.userAgent;
+  var isIOS = /iPad|iPhone|iPod/.test(ua) ||
+              (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  var inAppBrowser = /CriOS|FxiOS|EdgiOS|OPiOS|GSA|FBAN|FBAV|Instagram|LinkedInApp|Twitter/.test(ua);
+  var installed = window.matchMedia("(display-mode: standalone)").matches ||
+                  navigator.standalone === true;
+
+  // Schon installiert: Button bleibt aus
+  if (installed) return;
+  btn.hidden = false;
+
+  // Android/Chrome liefert einen echten Installations-Dialog
+  var prompt = null;
+  window.addEventListener("beforeinstallprompt", function (e) {
+    e.preventDefault();
+    prompt = e;
+  });
+  window.addEventListener("appinstalled", function () {
+    btn.hidden = true;
+    closeSheet();
+  });
+
+  stepsIos.hidden = !isIOS;
+  stepsOther.hidden = isIOS;
+
+  if (isIOS && inAppBrowser) {
+    note.hidden = false;
+    note.innerHTML = "Du bist gerade in einem In-App-Browser. Zum Home-Bildschirm hinzufügen geht nur in <b>Safari</b> \u2014 Adresse dort öffnen: rcp-aktien.netlify.app";
+  }
+
+  var lastFocus = null;
+
+  function openSheet() {
+    lastFocus = document.activeElement;
+    sheet.hidden = false;
+    document.body.style.overflow = "hidden";
+    closeBtn.focus();
+  }
+
+  function closeSheet() {
+    sheet.hidden = true;
+    document.body.style.overflow = "";
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+
+  btn.addEventListener("click", function () {
+    if (prompt) {
+      prompt.prompt();
+      prompt = null;
+      return;
+    }
+    openSheet();
+  });
+
+  closeBtn.addEventListener("click", closeSheet);
+  sheet.addEventListener("click", function (e) {
+    if (e.target === sheet) closeSheet();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !sheet.hidden) closeSheet();
+  });
+})();
+
+// Service Worker: macht die Seite installierbar und offline-faehig
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("/sw.js").catch(function (e) {
+      console.warn("SW registration failed", e);
+    });
+  });
+}
 </script>
 
 
