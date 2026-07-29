@@ -3,6 +3,7 @@
 
    Automatisch, ohne Konfiguration:
    - Zonen und Symbole liest die Function direkt aus der veroeffentlichten index.html
+   - Verglichen wird in der Waehrung des Charts (USD), ohne Umrechnung
    - Empfaenger kommen aus Netlify Blobs (dort landen sie beim Tippen auf "Benachrichtigungen")
    - VAPID-Schluessel werden beim ersten Aufruf erzeugt und gespeichert
 
@@ -47,7 +48,6 @@ export default async () => {
     k.privateKey
   );
 
-  const usdPerEur = (await quote("EURUSD=X").then((q) => q && q.price)) || null;
   const report = [];
 
   for (const item of watch) {
@@ -57,34 +57,28 @@ export default async () => {
       continue;
     }
 
-    let eur = q.price;
-    if (q.currency === "USD") {
-      if (!usdPerEur) {
-        report.push({ badge: item.badge, status: "kein Wechselkurs" });
-        continue;
-      }
-      eur = q.price / usdPerEur;
-    } else if (q.currency && q.currency !== "EUR") {
-      report.push({ badge: item.badge, status: "Waehrung " + q.currency });
-      continue;
-    }
-
-    const inZone = eur <= item.high && eur >= item.low;
+    // Verglichen wird in der Waehrung des Charts, ohne Umrechnung:
+    // die Zonen stammen aus derselben Quelle wie der Kurs.
+    const price = q.price;
+    const cur = q.currency || "";
+    const inZone = price <= item.high && price >= item.low;
     const key = "zone-" + item.badge;
     const was = await store.get(key).catch(() => null);
 
     if (inZone && was !== "in") {
       await senden(store, subs, {
         title: item.label + " in der Zone",
-        body: fmt(eur) + " EUR — Zone " + fmt(item.high) + " bis " + fmt(item.low) + " EUR",
+        body: fmt(price) + " " + cur + " — Zone " + fmt(item.high) + " bis " + fmt(item.low) + " " + cur,
         url: "/#" + item.anchor,
         tag: item.badge
       });
-      report.push({ badge: item.badge, kurs: fmt(eur), status: "Push gesendet" });
+      report.push({ badge: item.badge, kurs: fmt(price), waehrung: cur, status: "Push gesendet" });
     } else {
       report.push({
         badge: item.badge,
-        kurs: fmt(eur),
+        kurs: fmt(price),
+        waehrung: cur,
+        zone: fmt(item.high) + " - " + fmt(item.low),
         status: inZone ? "weiter in Zone" : "ausserhalb"
       });
     }
