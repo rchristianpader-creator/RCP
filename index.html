@@ -577,6 +577,16 @@
   .wirtschaft-block .w-werte .leise { color: var(--muted); font-weight: 600; }
   .wirtschaft-block .news-dots { margin-top: 10px; }
 
+  /* Beim Wischen wandern zwei Eintraege gemeinsam durchs Bild. Beide sind
+     dabei voll sichtbar und stehen nebeneinander; der Rahmen schneidet ab.
+     Wuerden sie stattdessen ineinander ueberblenden, laege der alte als
+     Geist hinter dem neuen - und man liest beide gleichzeitig. */
+  .wirtschaft-block .news-rotator .news-item.geht,
+  .wirtschaft-block .news-rotator .news-item.kommt {
+    opacity: 1;
+    transition: transform 0.34s var(--ease);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .wirtschaft-block .news-item { transition: none; }
   }
@@ -2808,19 +2818,34 @@ if ("serviceWorker" in navigator) {
 
   function gleiten(richtung) {
     var raus = aktives();
+    if (!raus) return;
+    raus.classList.add("geht");     // vor dem Wechsel, sonst blitzt er weg
+
     zeigen(idx + richtung);
     var rein = aktives();
-    if (!raus || !rein || raus === rein) return;
+    if (!rein || rein === raus) { raus.classList.remove("geht"); return; }
+    rein.classList.add("kommt");
 
-    var weg = richtung > 0 ? -70 : 70;
-    raus.style.transform = "translateX(" + weg + "px)";
+    // Startpunkte ohne Uebergang setzen, dann beide in einem Zug fahren
+    var weg = richtung > 0 ? -100 : 100;
     rein.style.transition = "none";
-    rein.style.transform = "translateX(" + (-weg) + "px)";
-    requestAnimationFrame(function () {
-      rein.style.transition = "";
-      rein.style.transform = "";
-    });
-    window.setTimeout(function () { raus.style.transform = ""; }, 520);
+    rein.style.transform = "translateX(" + (-weg) + "%)";
+    raus.style.transition = "none";
+    void rotator.offsetWidth;
+
+    rein.style.transition = "";
+    raus.style.transition = "";
+    rein.style.transform = "translateX(0)";
+    raus.style.transform = "translateX(" + weg + "%)";
+
+    window.setTimeout(function () {
+      [raus, rein].forEach(function (el) {
+        el.classList.remove("geht");
+        el.classList.remove("kommt");
+        el.style.transition = "";
+        el.style.transform = "";
+      });
+    }, 380);
   }
 
   block.addEventListener("touchstart", function (e) {
@@ -2855,12 +2880,12 @@ if ("serviceWorker" in navigator) {
     var dx = zieh.dx, quer = zieh.quer;
     zieh = null;
 
-    var el = aktives();
-    if (el) { el.style.transition = ""; el.style.transform = ""; }
-
     if (quer && Math.abs(dx) > 45) {
       gewischt = Date.now();
       gleiten(dx < 0 ? 1 : -1);           // nach links gewischt: naechster
+    } else {
+      var el = aktives();                 // zu kurz: zurueckfedern
+      if (el) { el.style.transition = ""; el.style.transform = ""; }
     }
     laufen();
   }
