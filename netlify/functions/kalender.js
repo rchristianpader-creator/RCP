@@ -12,9 +12,10 @@
      ergebnis  tatsaechlicher Wert (null, solange nicht veroeffentlicht)
      ueber     true/false/null - liegt das Ergebnis ueber der Prognose
 
-   Der Schluessel kommt aus der Umgebungsvariablen KALENDER_KEY und steht
-   nie im Code. Ohne Schluessel liefert die Funktion 503 und die Seite
-   blendet das Band einfach aus, statt etwas Kaputtes zu zeigen.
+   Quelle ist der woechentliche Kalender von ForexFactory. Er braucht keinen
+   Schluessel und kein Kontingent. Der Wirtschaftskalender von Financial
+   Modeling Prep waere die Alternative, ist dort aber ein Bezahl-Endpunkt:
+   der kostenlose Tarif bekommt darauf HTTP 402.
 
    Aufruf mit ?roh=1 gibt den ersten unveraenderten Datensatz zurueck -
    hilfreich, falls die Quelle ihre Feldnamen aendert. */
@@ -23,74 +24,60 @@ const TAGE_ZURUECK = 3;   // schon veroeffentlichte Termine noch zeigen
 const TAGE_VORAUS = 10;   // so weit nach vorne schauen
 const MAX = 12;           // mehr passt in kein Laufband
 
-// Nur diese Termine. Reihenfolge egal, geprueft wird auf Teilzeichenketten.
-const WICHTIG = [
-  "CPI", "Consumer Price Index", "Core PCE", "PCE Price", "Inflation Rate",
-  "FOMC", "Fed Interest Rate", "Interest Rate Decision", "Fed Chair",
-  "Non Farm", "Nonfarm", "Unemployment Rate", "Initial Jobless",
-  "PPI", "Producer Price", "Retail Sales", "GDP", "ISM"
+// Die Quelle fuehrt zwei Wochen getrennt; beide holen und zusammenlegen
+const QUELLEN = [
+  "https://nfs.faireconomy.media/ff_calendar_thisweek.json",
+  "https://nfs.faireconomy.media/ff_calendar_nextweek.json"
 ];
 
-// Kurze Namen fuers Band - "Consumer Price Index (YoY)" ist zu lang
+// Kurze Namen fuers Band - "Core PCE Price Index m/m" ist zu lang
 const KURZ = [
   [/core pce/i, "Core PCE"],
-  [/pce price/i, "PCE"],
-  [/consumer price index|^cpi/i, "CPI"],
-  [/inflation rate/i, "Inflation"],
-  [/fomc.*minutes|minutes.*fomc/i, "FOMC-Protokoll"],
-  [/fomc|fed interest rate|interest rate decision/i, "FOMC-Zinsentscheid"],
+  [/core cpi/i, "Core CPI"],
+  [/\bcpi\b/i, "CPI"],
+  [/fomc.*minutes/i, "FOMC-Protokoll"],
+  [/fomc.*projections/i, "FOMC-Prognosen"],
+  [/fomc.*press/i, "FOMC-Pressekonferenz"],
+  [/fomc|federal funds rate/i, "FOMC-Zinsentscheid"],
   [/fed chair|powell/i, "Fed-Chef"],
-  [/non ?farm/i, "Arbeitsmarkt (NFP)"],
+  [/non-?farm/i, "Arbeitsmarkt (NFP)"],
   [/unemployment rate/i, "Arbeitslosenquote"],
-  [/initial jobless/i, "Erstantraege"],
-  [/producer price|^ppi/i, "PPI"],
+  [/average hourly/i, "Stundenloehne"],
+  [/unemployment claims|jobless/i, "Erstantraege"],
+  [/core ppi/i, "Core PPI"],
+  [/\bppi\b/i, "PPI"],
+  [/core retail/i, "Einzelhandel (Kern)"],
   [/retail sales/i, "Einzelhandel"],
   [/\bgdp\b/i, "BIP"],
   [/ism.*manufacturing/i, "ISM Industrie"],
-  [/ism.*services|ism.*non-?manufacturing/i, "ISM Dienstleistung"]
+  [/ism.*services/i, "ISM Dienstleistung"]
 ];
 
 export default async (request) => {
-  const schluessel = process.env.KALENDER_KEY;
-  if (!schluessel) {
-    return json({ ok: false, fehler: "kein KALENDER_KEY gesetzt" }, 503, "no-store");
-  }
+  const jetzt = Date.now();
+  const von = jetzt - TAGE_ZURUECK * 86400000;
+  const bis = jetzt + TAGE_VORAUS * 86400000;
 
-  const heute = new Date();
-  const von = datum(heute, -TAGE_ZURUECK);
-  const bis = datum(heute, TAGE_VORAUS);
-
-  // Die Quelle hat ihre Pfade umgestellt; der alte v3-Pfad ist seit
-  // August 2025 abgeschaltet. Kandidaten der Reihe nach, der erste
-  // brauchbare gewinnt - steht der richtige vorn, bleibt es bei einem
-  // Abruf je Aufruf.
-  const versuche = [
-    ["stable", `https://financialmodelingprep.com/stable/economic-calendar?from=${von}&to=${bis}&apikey=${schluessel}`],
-    ["stable-s", `https://financialmodelingprep.com/stable/economics-calendar?from=${von}&to=${bis}&apikey=${schluessel}`],
-    ["v3", `https://financialmodelingprep.com/api/v3/economic_calendar?from=${von}&to=${bis}&apikey=${schluessel}`]
-  ];
-
-  let roh = null;
+  let roh = [];
   const fehler = [];   // jeden Versuch festhalten, nicht nur den letzten
-  for (const [pfad, url] of versuche) {
+  for (const url of QUELLEN) {
+    const name = url.includes("nextweek") ? "naechste Woche" : "diese Woche";
     try {
-      const res = await fetch(url, { headers: { Accept: "application/json" } });
+      const res = await fetch(url, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (compatible; AktienListe/1.0)",
+          Accept: "application/json"
+        }
+      });
       const daten = await res.json().catch(() => null);
-
-      if (Array.isArray(daten) && daten.length) { roh = daten; break; }
-
-      // Die Quelle meldet Fehler mal ueber den Status, mal im Koerper mit
-      // Status 200. Beides durchreichen, sonst steht man beim Suchen im Dunkeln.
-      const meldung = daten && !Array.isArray(daten)
-        ? (daten["Error Message"] || daten.message || daten.error || JSON.stringify(daten).slice(0, 200))
-        : null;
-      fehler.push(pfad + ": " + (meldung || (res.ok ? "leere Liste" : "Antwort " + res.status)));
+      if (Array.isArray(daten)) { roh = roh.concat(daten); continue; }
+      fehler.push(name + ": " + (res.ok ? "keine Liste" : "Antwort " + res.status));
     } catch (e) {
-      fehler.push(pfad + ": " + (e && e.message ? e.message : String(e)));
+      fehler.push(name + ": " + (e && e.message ? e.message : String(e)));
     }
   }
 
-  if (!roh) {
+  if (!roh.length) {
     return json({ ok: false, fehler: fehler.length ? fehler : ["keine Daten"] }, 502, "no-store");
   }
 
@@ -101,14 +88,23 @@ export default async (request) => {
   const termine = roh
     .filter(istUSA)
     .filter(istHoch)
-    .filter(istWichtig)
     .map(umbauen)
     .filter((t) => t.zeit)
+    .filter((t) => {
+      const z = new Date(t.zeit).getTime();
+      return z >= von && z <= bis;
+    })
     .sort((a, b) => new Date(a.zeit) - new Date(b.zeit))
     .slice(0, MAX);
 
   return json(
-    { ok: true, stand: new Date().toISOString(), termine: termine },
+    {
+      ok: true,
+      stand: new Date().toISOString(),
+      quelle: "ForexFactory",
+      termine: termine,
+      hinweis: fehler.length ? fehler : undefined
+    },
     200,
     "public, max-age=900"
   );
@@ -116,39 +112,39 @@ export default async (request) => {
 
 /* ---------- Filter ---------- */
 
+// Die Quelle fuehrt das Land als Waehrung: USD sind die US-Termine
 function istUSA(e) {
-  const land = String(feld(e, ["country", "countryCode", "Country"]) || "").toUpperCase();
-  return land === "US" || land === "USA" || land === "UNITED STATES";
+  const land = String(feld(e, ["country", "Country"]) || "").toUpperCase();
+  return land === "USD" || land === "US" || land === "USA";
 }
 
-// Die Quelle schreibt die Wirkung mal als Wort, mal als Zahl
+// Nur die Termine, die den Markt wirklich bewegen. Bei dieser Quelle ist
+// "High" fuer USD genau die Liste, die wir wollen - eine eigene Auswahl
+// von Namen wuerde nur riskieren, dass etwas faelschlich rausfaellt.
 function istHoch(e) {
-  const w = feld(e, ["impact", "importance", "Impact"]);
+  const w = feld(e, ["impact", "Impact"]);
   if (typeof w === "number") return w >= 3;
-  const t = String(w || "").toLowerCase();
-  return t === "high" || t === "3";
-}
-
-function istWichtig(e) {
-  const name = String(feld(e, ["event", "name", "title", "Event"]) || "");
-  return WICHTIG.some((w) => name.toLowerCase().includes(w.toLowerCase()));
+  return String(w || "").toLowerCase() === "high";
 }
 
 /* ---------- Umbau ---------- */
 
 function umbauen(e) {
-  const name = String(feld(e, ["event", "name", "title", "Event"]) || "").trim();
-  const prognose = zahl(feld(e, ["estimate", "forecast", "consensus", "Estimate"]));
-  const vorwert = zahl(feld(e, ["previous", "prev", "Previous"]));
-  const ergebnis = zahl(feld(e, ["actual", "Actual"]));
+  const name = String(feld(e, ["title", "event", "name", "Title"]) || "").trim();
+  const rohProg = feld(e, ["forecast", "Forecast", "estimate"]);
+  const rohVor = feld(e, ["previous", "Previous"]);
+  const rohErg = feld(e, ["actual", "Actual"]);
+
+  const prognose = zahl(rohProg);
+  const ergebnis = zahl(rohErg);
 
   return {
-    zeit: zeitpunkt(feld(e, ["date", "datetime", "time", "Date"])),
+    zeit: zeitpunkt(feld(e, ["date", "Date", "datetime"])),
     titel: kurz(name),
     voll: name,
-    einheit: einheit(name, feld(e, ["unit"])),
+    einheit: einheit(rohErg, rohProg, rohVor),
     prognose: prognose,
-    vorwert: vorwert,
+    vorwert: zahl(rohVor),
     ergebnis: ergebnis,
     ueber: ergebnis === null || prognose === null ? null : ergebnis > prognose
   };
@@ -157,19 +153,25 @@ function umbauen(e) {
 function kurz(name) {
   for (const [muster, ersatz] of KURZ) {
     if (muster.test(name)) {
-      // Zusatz in Klammern behalten, wenn er den Zeitraum nennt
-      const zusatz = name.match(/\((YoY|MoM|QoQ)\)/i);
-      return zusatz ? ersatz + " " + zusatz[1].toUpperCase() : ersatz;
+      // Zeitraum behalten, wenn er im Namen steht: "CPI m/m" -> "CPI MOM"
+      const zusatz = name.match(/\b(m\/m|y\/y|q\/q)\b/i);
+      if (!zusatz) return ersatz;
+      return ersatz + " " + zusatz[1].replace("/", "").toUpperCase();
     }
   }
-  return name.length > 28 ? name.slice(0, 27) + "…" : name;
+  return name.length > 28 ? name.slice(0, 27) + "\u2026" : name;
 }
 
-// Prozent oder nicht: die Quelle liefert die Einheit nicht zuverlaessig mit
-function einheit(name, angegeben) {
-  if (angegeben) return String(angegeben);
-  if (/rate|cpi|pce|ppi|inflation|gdp|sales|price index/i.test(name)) return "%";
-  if (/non ?farm|payroll|claims/i.test(name)) return "K";
+// Die Einheit steht im Rohwert selbst ("2.9%", "236K") - das ist
+// zuverlaessiger, als sie aus dem Namen zu erraten
+function einheit() {
+  for (const wert of arguments) {
+    const t = String(wert === null || wert === undefined ? "" : wert).trim();
+    if (!t) continue;
+    if (t.indexOf("%") !== -1) return "%";
+    const m = t.match(/([KMB])\s*$/i);
+    if (m) return m[1].toUpperCase();
+  }
   return "";
 }
 
