@@ -2644,7 +2644,7 @@ if ("serviceWorker" in navigator) {
   function zahl(n, einheit) {
     if (n === null || n === undefined) return "–";
     var text = Number(n).toLocaleString("de-DE", {
-      minimumFractionDigits: Math.abs(n) < 10 && !Number.isInteger(n) ? 1 : 0,
+      minimumFractionDigits: Math.abs(n) < 10 ? 1 : 0,
       maximumFractionDigits: 2
     });
     return einheit ? text + " " + einheit : text;

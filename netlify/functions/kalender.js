@@ -25,9 +25,11 @@ const TAGE_VORAUS = 10;   // so weit nach vorne schauen
 const MAX = 12;           // mehr passt in kein Laufband
 
 // Die Quelle fuehrt zwei Wochen getrennt; beide holen und zusammenlegen
+// Nur die laufende Woche: den Feed fuer die naechste Woche gibt es unter
+// diesem Namen nicht, er antwortet mit 404. Die laufende Woche reicht auch -
+// mit dem Fenster unten stehen die Ergebnisse der letzten Tage weiter im Band.
 const QUELLEN = [
-  "https://nfs.faireconomy.media/ff_calendar_thisweek.json",
-  "https://nfs.faireconomy.media/ff_calendar_nextweek.json"
+  "https://nfs.faireconomy.media/ff_calendar_thisweek.json"
 ];
 
 // Kurze Namen fuers Band - "Core PCE Price Index m/m" ist zu lang
@@ -38,7 +40,9 @@ const KURZ = [
   [/fomc.*minutes/i, "FOMC-Protokoll"],
   [/fomc.*projections/i, "FOMC-Prognosen"],
   [/fomc.*press/i, "FOMC-Pressekonferenz"],
-  [/fomc|federal funds rate/i, "FOMC-Zinsentscheid"],
+  [/fomc statement/i, "FOMC-Statement"],
+  [/federal funds rate/i, "FOMC-Zinsentscheid"],
+  [/fomc/i, "FOMC"],
   [/fed chair|powell/i, "Fed-Chef"],
   [/non-?farm/i, "Arbeitsmarkt (NFP)"],
   [/unemployment rate/i, "Arbeitslosenquote"],
@@ -48,6 +52,9 @@ const KURZ = [
   [/\bppi\b/i, "PPI"],
   [/core retail/i, "Einzelhandel (Kern)"],
   [/retail sales/i, "Einzelhandel"],
+  [/advance gdp/i, "BIP Schnellschätzung"],
+  [/prelim gdp/i, "BIP 2. Schätzung"],
+  [/final gdp/i, "BIP final"],
   [/\bgdp\b/i, "BIP"],
   [/ism.*manufacturing/i, "ISM Industrie"],
   [/ism.*services/i, "ISM Dienstleistung"]
@@ -156,7 +163,9 @@ function kurz(name) {
       // Zeitraum behalten, wenn er im Namen steht: "CPI m/m" -> "CPI MOM"
       const zusatz = name.match(/\b(m\/m|y\/y|q\/q)\b/i);
       if (!zusatz) return ersatz;
-      return ersatz + " " + zusatz[1].replace("/", "").toUpperCase();
+      const form = { "m/m": "MoM", "y/y": "YoY", "q/q": "QoQ" }[zusatz[1].toLowerCase()];
+      // Bei ohnehin langen Namen den Zusatz weglassen, sonst reisst das Band
+      return ersatz.length > 14 ? ersatz : ersatz + " " + form;
     }
   }
   return name.length > 28 ? name.slice(0, 27) + "\u2026" : name;
