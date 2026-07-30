@@ -207,7 +207,15 @@ function num(s) {
 
 /* --- Kurse --- */
 
+/* Kurse: erst Yahoo, dann Stooq. Yahoo blockt Anfragen aus Rechenzentren
+   gelegentlich, Stooq liefert CSV ohne Schluessel. */
 async function quote(symbol) {
+  const y = await quoteYahoo(symbol);
+  if (y && y.price) return y;
+  return await quoteStooq(symbol);
+}
+
+async function quoteYahoo(symbol) {
   try {
     const url =
       "https://query1.finance.yahoo.com/v8/finance/chart/" +
@@ -222,8 +230,39 @@ async function quote(symbol) {
     if (!res.ok) return null;
     const data = await res.json();
     const meta = data?.chart?.result?.[0]?.meta;
-    if (!meta) return null;
-    return { price: meta.regularMarketPrice, currency: meta.currency };
+    if (!meta || !meta.regularMarketPrice) return null;
+    return { price: meta.regularMarketPrice, currency: meta.currency, quelle: "Yahoo" };
+  } catch (e) {
+    return null;
+  }
+}
+
+// Yahoo-Symbol -> Stooq-Symbol
+function stooqSymbol(symbol) {
+  const fest = { "GC=F": "xauusd", "SI=F": "xagusd" };
+  if (fest[symbol]) return fest[symbol];
+  if (symbol.endsWith("=X")) return symbol.slice(0, -2).toLowerCase();
+  if (symbol.endsWith("-USD")) return symbol.replace("-", "").toLowerCase();
+  return symbol.toLowerCase() + ".us";
+}
+
+async function quoteStooq(symbol) {
+  try {
+    const url =
+      "https://stooq.com/q/l/?s=" + encodeURIComponent(stooqSymbol(symbol)) + "&f=sd2t2ohlc&h&e=csv";
+    const res = await fetch(url, { headers: { "User-Agent": "AktienListe/1.0" } });
+    if (!res.ok) return null;
+    const text = await res.text();
+    const zeilen = text.trim().split(/\r?\n/);
+    if (zeilen.length < 2) return null;
+    const spalten = zeilen[0].toLowerCase().split(",");
+    const werte = zeilen[1].split(",");
+    const i = spalten.indexOf("close");
+    if (i < 0) return null;
+    const price = parseFloat(werte[i]);
+    if (!isFinite(price) || price <= 0) return null;
+    const cur = /xau|xag|usd$/.test(stooqSymbol(symbol)) || stooqSymbol(symbol).endsWith(".us") ? "USD" : "USD";
+    return { price: price, currency: cur, quelle: "Stooq" };
   } catch (e) {
     return null;
   }
