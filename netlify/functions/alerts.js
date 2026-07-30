@@ -3,8 +3,8 @@
 
    Automatisch, ohne Konfiguration:
    - Zonen und Symbole liest die Function direkt aus der veroeffentlichten index.html
-   - Verglichen wird in der Waehrung des Charts (USD); die Meldung zeigt Euro,
-     live umgerechnet ueber EURUSD=X
+   - Zonen stehen in USD (Fib 0,5-0,618 aus den Charts); verglichen wird in USD,
+     die Meldung zeigt zusaetzlich den live umgerechneten Euro-Wert
    - Empfaenger kommen aus Netlify Blobs (dort landen sie beim Tippen auf "Benachrichtigungen")
    - VAPID-Schluessel werden beim ersten Aufruf erzeugt und gespeichert
 
@@ -49,8 +49,7 @@ export default async () => {
     k.privateKey
   );
 
-  // Wechselkurs fuer die Anzeige in Euro. Verglichen wird weiter in USD,
-  // das ist dieselbe Bedingung und unabhaengig vom Wechselkurs.
+  // Wechselkurs nur fuer die Anzeige in Euro; verglichen wird in USD.
   const rate = await eurUsd();
   const report = [];
 
@@ -61,10 +60,10 @@ export default async () => {
       continue;
     }
 
-    // Verglichen wird in der Waehrung des Charts, ohne Umrechnung:
-    // die Zonen stammen aus derselben Quelle wie der Kurs.
-    const price = q.price;
+    // Zonen und Kurs stehen beide in USD: verglichen wird ohne Umrechnung,
+    // damit der Ausloeser nicht am Wechselkurs haengt.
     const cur = q.currency || "";
+    const price = q.price;
     const inZone = price <= item.high && price >= item.low;
     const key = "zone-" + item.badge;
     const was = await store.get(key).catch(() => null);
@@ -73,8 +72,8 @@ export default async () => {
       let text;
       if (rate && cur === "USD") {
         text =
-          eur(price / rate) + " EUR (" + fmt(price) + " USD) — Zone " +
-          eur(item.high / rate) + " bis " + eur(item.low / rate) + " EUR";
+          eur(price / rate) + " EUR — Zone " + eur(item.high / rate) + " bis " +
+          eur(item.low / rate) + " EUR · " + fmt(price) + " USD";
       } else {
         text = fmt(price) + " " + cur + " — Zone " + fmt(item.high) + " bis " + fmt(item.low) + " " + cur;
       }
@@ -85,13 +84,13 @@ export default async () => {
         url: "/#" + item.anchor,
         tag: item.badge
       });
-      report.push({ badge: item.badge, kurs: fmt(price), waehrung: cur, status: "Push gesendet" });
+      report.push({ badge: item.badge, kurs_usd: fmt(price), status: "Push gesendet" });
     } else {
       report.push({
         badge: item.badge,
-        kurs: fmt(price),
-        waehrung: cur,
-        zone: fmt(item.high) + " - " + fmt(item.low),
+        kurs_usd: fmt(price),
+        kurs_eur: rate ? eur(price / rate) : null,
+        zone_usd: fmt(item.high) + " - " + fmt(item.low),
         status: inZone ? "weiter in Zone" : "ausserhalb"
       });
     }
