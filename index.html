@@ -2639,6 +2639,8 @@ if ("serviceWorker" in navigator) {
 
   var TEMPO = 60;                  // Pixel je Sekunde, unabhaengig von der Menge
   var TAKT = 10 * 60 * 1000;       // alle zehn Minuten nachsehen
+  var SPEICHER = "rcp:kalender";   // letzte gute Termine
+  var MAX_ALTER = 12 * 3600 * 1000;
   var stand = "";                  // Fingerabdruck, damit unveraendert nicht neu gebaut wird
 
   function zahl(n, einheit) {
@@ -2706,6 +2708,30 @@ if ("serviceWorker" in navigator) {
     if (breite > 0) track.style.animationDuration = Math.round(breite / TEMPO) + "s";
   }
 
+  function merken(termine) {
+    try {
+      localStorage.setItem(SPEICHER, JSON.stringify({
+        zeit: new Date().toISOString(), termine: termine
+      }));
+    } catch (e) { /* privates Fenster - dann eben nur fuer diesen Besuch */ }
+  }
+
+  function gemerkt() {
+    try {
+      var d = JSON.parse(localStorage.getItem(SPEICHER) || "null");
+      if (!d || !d.termine || !d.termine.length) return null;
+      var alter = Date.now() - new Date(d.zeit).getTime();
+      if (!isFinite(alter) || alter > MAX_ALTER) return null;
+      // Abgelaufene Termine aus dem Speicher nicht mehr zeigen
+      var frisch = d.termine.filter(function (t) {
+        return new Date(t.zeit).getTime() > Date.now() - 3 * 86400000;
+      });
+      return frisch.length ? frisch : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
   function laden() {
     fetch("/.netlify/functions/kalender", { cache: "no-store" })
       .then(function (r) {
@@ -2714,15 +2740,23 @@ if ("serviceWorker" in navigator) {
       })
       .then(function (d) {
         if (!d || !d.ok || !d.termine || !d.termine.length) throw new Error("keine Termine");
+        merken(d.termine);
         bauen(d.termine);
       })
       .catch(function () {
-        // Ohne Termine bleibt das Band aus - lieber nichts als eine leere Leiste
-        if (!stand) band.hidden = true;
+        // Ein Fehlschlag darf das Band nicht leeren: die zuletzt geholten
+        // Termine stehen lassen, sonst verschwindet es bei jedem Schluckauf
+        // der Quelle. Erst wenn auch nichts Gemerktes da ist, bleibt es aus.
+        if (stand) return;
+        var alt = gemerkt();
+        if (alt) bauen(alt);
+        else band.hidden = true;
       });
   }
 
   function start() {
+    var alt = gemerkt();
+    if (alt) bauen(alt);          // sofort etwas zeigen, auch offline
     laden();
     setInterval(laden, TAKT);
     document.addEventListener("visibilitychange", function () {
