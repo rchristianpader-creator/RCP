@@ -577,6 +577,20 @@
   .wirtschaft-block .w-werte .leise { color: var(--muted); font-weight: 600; }
   .wirtschaft-block .news-dots { margin-top: 10px; }
 
+  /* Der Wechsel laeuft nacheinander, nicht gleichzeitig: erst blendet der
+     alte Eintrag aus, dann kommt der neue. Ueberlappen sie sich, liest man
+     eine halbe Sekunde lang beide uebereinander - bei einer Zeile
+     Nachrichtentext faellt das nicht auf, bei Ueberschrift plus Werte-Zeile
+     schon. Diese Regeln stehen bewusst vor .geht/.kommt: gleiche
+     Spezifitaet, die spaetere gewinnt, also behaelt das Wischen sein
+     Weiterschieben. */
+  .wirtschaft-block .news-rotator .news-item {
+    transition: opacity 0.16s ease, transform 0.16s ease;
+  }
+  .wirtschaft-block .news-rotator .news-item.active {
+    transition: opacity 0.24s ease 0.16s, transform 0.24s ease 0.16s;
+  }
+
   /* Beim Wischen wandern zwei Eintraege gemeinsam durchs Bild. Beide sind
      dabei voll sichtbar und stehen nebeneinander; der Rahmen schneidet ab.
      Wuerden sie stattdessen ineinander ueberblenden, laege der alte als
