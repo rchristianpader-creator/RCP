@@ -27,7 +27,7 @@ icon-maskable-512.png                 Android, beschnittfest
 netlify/functions/news.js             Schlagzeilen je Position
 netlify/functions/fx.js               Wechselkurs EUR/USD für die Euro-Anzeige
 netlify/functions/vapid.js            Erzeugt und verwaltet das VAPID-Schlüsselpaar
-netlify/functions/subscribe.js        Speichert angemeldete Geräte
+netlify/functions/subscribe.js        Speichert angemeldete Geräte samt Besitzer
 netlify/functions/alerts.js           Zonen-Prüfung, läuft alle 30 Minuten
 netlify/functions/push-test.js        Testmeldung an alle Geräte
 netlify/functions/on-publish.js       Meldet nach jedem Deploy, was neu ist
@@ -115,9 +115,19 @@ sehen. Der frühere PIN stand im Quelltext und war nur ein Vorhang; er ist weg.
 **Weitere Leute**
 
 Sie fragen selbst unter `/anmelden.html` an und landen auf *Wartet auf
-Freigabe*. Erst nach dem Tippen auf **Freigeben** in `/verwaltung.html` kommen
-sie rein. Sperren und Löschen gehen an derselben Stelle; wer gesperrt wird,
-fliegt beim nächsten Aufruf raus.
+Freigabe*. Du bekommst im selben Moment eine Push-Meldung — Antippen führt
+direkt in die Verwaltung. Dort steht **Freigeben** oder **Ablehnen**; erst
+danach kommt jemand rein. Solange etwas offen ist, trägt der Link
+*Verwaltung* in der Fußleiste eine Zahl.
+
+Die Meldung geht nur an Geräte, an denen die Verwaltung angemeldet ist —
+`subscribe.js` merkt sich zu jedem Gerät, wer daran hängt. Kursalarme gehen
+weiter an alle. Bereits angemeldete Geräte tragen das beim nächsten Start von
+selbst nach.
+
+Wer freigegeben wird, erfährt es nicht von allein — vorher hat er kein Gerät
+angemeldet, also gibt es nichts, wohin die Meldung gehen könnte. Ein kurzes
+"Du kannst rein" muss von Hand kommen.
 
 **Wie es zusammenhängt**
 

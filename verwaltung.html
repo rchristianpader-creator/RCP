@@ -272,7 +272,8 @@
       }));
     }
     if (k.status !== "gesperrt") {
-      kn.appendChild(knopf("Sperren", "", function () {
+      // Wer noch wartet, wird abgelehnt; wer schon drin war, wird gesperrt
+      kn.appendChild(knopf(k.status === "wartet" ? "Ablehnen" : "Sperren", "", function () {
         return tat("entscheiden", { mail: k.mail, status: "gesperrt" });
       }));
     }

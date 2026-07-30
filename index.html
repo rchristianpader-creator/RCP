@@ -844,6 +844,24 @@
     -webkit-tap-highlight-color: transparent;
   }
   footer .konto-zeile .trenner { margin: 0 6px; color: var(--line); }
+  footer .konto-zeile .wartend {
+    display: inline-block;
+    margin-left: 6px;
+    min-width: 16px;
+    padding: 0 4px;
+    font-size: 10px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 16px;
+    text-align: center;
+    color: #fff;
+    background: var(--fg);
+    border-radius: 8px;
+    animation: beat-badge 2s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    footer .konto-zeile .wartend { animation: none; }
+  }
 
   @keyframes riseIn {
     from { opacity: 0; transform: translate3d(0, 12px, 0); }
@@ -1897,7 +1915,16 @@
     navigator.serviceWorker.getRegistration().then(function (reg) {
       if (!reg) return;
       reg.pushManager.getSubscription().then(function (sub) {
-        if (sub) btn.textContent = "Benachrichtigungen aktiv";
+        if (!sub) return;
+        btn.textContent = "Benachrichtigungen aktiv";
+        // Noch einmal melden, damit am Geraet steht, wer gerade angemeldet ist.
+        // Nur so weiss der Server, welche Geraete zur Verwaltung gehoeren.
+        fetch("/.netlify/functions/subscribe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify(sub)
+        }).catch(function () {});
       });
     });
   }
@@ -2011,6 +2038,7 @@
           return fetch("/.netlify/functions/subscribe", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
+            credentials: "same-origin",
             body: JSON.stringify(sub)
           }).then(function (r) {
             if (!r.ok) throw new Error("Schritt 4 — Server hat die Anmeldung nicht angenommen (" + r.status + ")");
@@ -2810,6 +2838,13 @@ if ("serviceWorker" in navigator) {
         v.href = "/verwaltung.html";
         v.textContent = "Verwaltung";
         zeile.appendChild(v);
+        if (a.wartend > 0) {
+          var w = document.createElement("span");
+          w.className = "wartend";
+          w.textContent = a.wartend;
+          w.title = a.wartend === 1 ? "1 offene Anfrage" : a.wartend + " offene Anfragen";
+          v.appendChild(w);
+        }
       }
       zeile.appendChild(trenner());
       zeile.appendChild(link("Abmelden", abmelden));

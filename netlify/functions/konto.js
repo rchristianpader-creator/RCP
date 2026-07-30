@@ -21,7 +21,9 @@
    Konten liegen in Netlify Blobs, Store "aktien-konten". Passwoerter als
    scrypt-Hash mit eigenem Salz — im Klartext steht nichts. */
 
+import webpush from "web-push";
 import { getStore } from "@netlify/blobs";
+import { keys } from "./vapid.js";
 import {
   LADEN,
   DAUER_KURZ,
@@ -108,8 +110,24 @@ async function wer(request, store) {
     mail: konto.mail,
     name: konto.name || "",
     rolle: konto.rolle || "gast",
-    chef: konto.rolle === "chef"
+    chef: konto.rolle === "chef",
+    // Die Verwaltung sieht sofort, ob etwas offen ist
+    wartend: konto.rolle === "chef" ? await zaehleWartende(store) : 0
   });
+}
+
+async function zaehleWartende(store) {
+  try {
+    const l = await store.list({ prefix: "nutzer/" });
+    let n = 0;
+    for (const blob of l.blobs || []) {
+      const k = await store.get(blob.key, { type: "json" }).catch(() => null);
+      if (k && k.status === "wartet") n++;
+    }
+    return n;
+  } catch (e) {
+    return 0;
+  }
 }
 
 /* ---------- Registrierung ---------- */
@@ -150,6 +168,8 @@ async function registrieren(request, store) {
   };
   await store.setJSON(key, konto);
 
+  if (!chef) await meldeAnfrage(konto);
+
   return json({
     ok: true,
     status: konto.status,
@@ -157,6 +177,50 @@ async function registrieren(request, store) {
       ? "Konto angelegt und freigegeben."
       : "Anfrage ist eingegangen. Sie wird freigegeben, dann kannst du dich anmelden."
   });
+}
+
+/* Push an die Geraete der Verwaltung, sobald jemand Zugang anfragt.
+   Schlaegt das fehl, ist die Anfrage trotzdem gespeichert — sie steht dann
+   eben nur in der Verwaltung und meldet sich nicht von selbst. */
+async function meldeAnfrage(konto) {
+  try {
+    const push = getStore("aktien-push");
+    const l = await push.list({ prefix: "sub-" });
+
+    const ziele = [];
+    for (const blob of l.blobs || []) {
+      const s = await push.get(blob.key, { type: "json" }).catch(() => null);
+      if (s && s.endpoint && s.rolle === "chef") ziele.push({ key: blob.key, sub: s });
+    }
+    if (!ziele.length) return;
+
+    const k = await keys();
+    webpush.setVapidDetails(
+      process.env.VAPID_SUBJECT || "mailto:push@rcp-aktien.netlify.app",
+      k.publicKey,
+      k.privateKey
+    );
+
+    const nutzlast = JSON.stringify({
+      title: "Neue Zugangsanfrage",
+      body: (konto.name ? konto.name + " · " : "") + konto.mail,
+      tag: "zugang",
+      url: "/verwaltung.html"
+    });
+
+    for (const z of ziele) {
+      try {
+        await webpush.sendNotification(z.sub, nutzlast);
+      } catch (e) {
+        // Abgemeldetes Geraet: Eintrag aufraeumen
+        if (e && (e.statusCode === 404 || e.statusCode === 410)) {
+          await push.delete(z.key).catch(() => {});
+        }
+      }
+    }
+  } catch (e) {
+    // stiller Fehlschlag, die Anfrage steht
+  }
 }
 
 async function esGibtKonten(store) {
