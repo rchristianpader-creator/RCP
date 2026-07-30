@@ -3,8 +3,11 @@
 Watchlist als installierbare Web-App: TradingView-Live-Charts, Live-News,
 Fear & Greed Index und Push-Benachrichtigungen bei Eintritt in eine Einkaufszone.
 
-Alle Kurse, Einkaufszonen und Ziele sind in **USD**, in derselben Währung wie
-die Charts, aus denen die Niveaus abgeleitet sind.
+Einkaufszonen und Ziele stehen in **USD**, in derselben Währung wie die Charts,
+aus denen die Niveaus abgeleitet sind. Darunter zeigt die Seite denselben Wert
+live in **Euro**, umgerechnet über den aktuellen EUR/USD-Kurs. Verglichen wird
+im Alarm weiter in USD — das ist dieselbe Bedingung und hängt nicht am
+Wechselkurs.
 
 ## Struktur
 
@@ -22,6 +25,7 @@ icon-192.png / icon-512.png           App-Icons
 icon-maskable-512.png                 Android, beschnittfest
 
 netlify/functions/news.js             Schlagzeilen je Position
+netlify/functions/fx.js               Wechselkurs EUR/USD für die Euro-Anzeige
 netlify/functions/vapid.js            Erzeugt und verwaltet das VAPID-Schlüsselpaar
 netlify/functions/subscribe.js        Speichert angemeldete Geräte
 netlify/functions/alerts.js           Zonen-Prüfung, läuft alle 30 Minuten

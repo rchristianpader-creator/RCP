@@ -386,6 +386,35 @@
     color: #666;
   }
 
+  /* Live umgerechnete Euro-Werte */
+  .info-eur {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.01em;
+  }
+  .info-eur b {
+    font-weight: 700;
+    color: #444;
+  }
+  .ziel-bar .v-eur {
+    display: block;
+    margin-top: 2px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-align: right;
+    letter-spacing: 0;
+  }
+  .fx-note {
+    padding: 0 18px 14px;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
+  }
+
   .chart {
     width: 100%;
     height: 400px;
@@ -1362,6 +1391,8 @@
   <button class="install-x" id="installBarX" type="button" aria-label="Hinweis ausblenden">&times;</button>
 </div>
 
+<div class="fx-note" id="fxNote" hidden></div>
+
 <footer>
   <div class="line"></div>
   Live-Charts · TradingView · Fibos über den Button<br>
@@ -1949,6 +1980,79 @@
     for (var i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
     return out;
   }
+})();
+
+// Euro-Werte: USD-Niveaus live in Euro umrechnen
+(function () {
+  var note = document.getElementById("fxNote");
+
+  function zahl(text) {
+    // "40.557" -> 40557 ; "8,68" -> 8.68
+    return parseFloat(String(text).replace(/[^\d.,]/g, "").replace(/\./g, "").replace(",", "."));
+  }
+
+  function eur(wert) {
+    var stellen = wert >= 1000 ? 0 : 2;
+    return wert.toLocaleString("de-DE", {
+      minimumFractionDigits: stellen,
+      maximumFractionDigits: stellen
+    });
+  }
+
+  function rechnen(rate) {
+    // Einkaufszonen
+    document.querySelectorAll(".card-head .info").forEach(function (info) {
+      var zone = info.querySelector(".zone");
+      if (!zone || info.parentNode.querySelector(".info-eur")) return;
+      var treffer = zone.textContent.match(/([\d.,]+)\s*[–-]\s*([\d.,]+)/);
+      if (!treffer) return;
+      var oben = zahl(treffer[1]) / rate;
+      var unten = zahl(treffer[2]) / rate;
+      if (!isFinite(oben) || !isFinite(unten)) return;
+      var zeile = document.createElement("div");
+      zeile.className = "info-eur";
+      zeile.innerHTML = "in Euro: <b>" + eur(oben) + " – " + eur(unten) + " EUR</b>";
+      info.parentNode.insertBefore(zeile, info.nextSibling);
+    });
+
+    // Kursziele
+    document.querySelectorAll(".ziel-bar").forEach(function (bar) {
+      var v = bar.querySelector(".v");
+      if (!v || bar.querySelector(".v-eur")) return;
+      var wert = zahl(v.textContent);
+      if (!isFinite(wert)) return;
+      var span = document.createElement("span");
+      span.className = "v-eur";
+      span.textContent = eur(wert / rate) + " EUR";
+      v.parentNode.insertBefore(span, v.nextSibling);
+    });
+  }
+
+  function start() {
+    fetch("/.netlify/functions/fx")
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!data || !data.rate) throw new Error("kein Kurs");
+        rechnen(data.rate);
+        if (note) {
+          note.hidden = false;
+          note.textContent =
+            "Euro-Werte umgerechnet mit 1 EUR = " +
+            data.rate.toLocaleString("de-DE", { minimumFractionDigits: 4, maximumFractionDigits: 4 }) +
+            " USD · " + data.quelle;
+        }
+      })
+      .catch(function () {
+        if (note) {
+          note.hidden = false;
+          note.textContent = "Euro-Umrechnung gerade nicht verfügbar";
+        }
+      });
+  }
+
+  var appEl = document.getElementById("app");
+  if (appEl && appEl.classList.contains("visible")) start();
+  else document.addEventListener("rcp:unlocked", start);
 })();
 
 // Service Worker: macht die Seite installierbar und offline-faehig
