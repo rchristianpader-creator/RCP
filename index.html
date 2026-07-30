@@ -2,9 +2,18 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="light dark">
 <link rel="manifest" href="/manifest.webmanifest">
-<meta name="theme-color" content="#fafafa">
+<script>
+  /* Vor dem ersten Malen: ein selbst gewaehltes Schema sofort setzen,
+     damit die Seite nicht kurz im Systemschema aufblitzt. */
+  try {
+    var rcpTheme = localStorage.getItem("rcp:theme");
+    if (rcpTheme) document.documentElement.setAttribute("data-theme", rcpTheme);
+  } catch (e) {}
+</script>
+<meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1012" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="/icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -29,16 +38,81 @@
 
 <style>
   :root {
-    color-scheme: light;
+    color-scheme: light dark;
+
+    /* Hell — unveraendert, nur um die Werte erweitert,
+       die vorher als Literal im Regelwerk standen */
     --bg: #fafafa;
     --fg: #111111;
+    --fg-rgb: 17, 17, 17;   /* Grundfarbe der Puls-Ringe */
+    --fg-inv: #ffffff;      /* Text auf gefuellten Flaechen */
+    --fg-2: #333333;        /* Zonen, Kursziele */
+    --fg-3: #555555;        /* Fliesstext in Karten */
+    --fg-4: #666666;        /* Labels */
     --muted: #737373;
+    --muted-2: #888888;   /* etwas leiser als --muted */
     --line: #e5e5e5;
+    --line-2: #dddddd;
+    --line-3: #cccccc;
     --soft: #f5f5f5;
+    --soft-2: #eeeeee;
     --card: #ffffff;
     --hair: #ebebeb;
+    --chart-bg: #f3f3f3;
+    --live: #e11d48;
+    --danger: #b91c1c;
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
   }
+
+  /* Dunkel. Kein Umkehren der Helligkeiten, sondern eigene Werte:
+     der Grund bleibt ruhig, die Karten heben sich leicht ab, und die
+     Haarlinien bleiben Haarlinien statt zu Kanten zu werden. */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1012;
+      --fg: #ececf0;
+      --fg-rgb: 236, 236, 240;
+      --fg-inv: #0f1012;
+      --fg-2: #d2d3d9;
+      --fg-3: #a9aab1;
+      --fg-4: #9a9ba2;
+      --muted: #8a8b92;
+      --muted-2: #7b7c83;
+      --line: #2a2c31;
+      --line-2: #33353b;
+      --line-3: #3d3f46;
+      --soft: #17181b;
+      --soft-2: #1d1e22;
+      --card: #16171a;
+      --hair: #24262a;
+      --chart-bg: #17181b;
+      --live: #fb7185;
+      --danger: #f87171;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1012;
+    --fg: #ececf0;
+    --fg-rgb: 236, 236, 240;
+    --fg-inv: #0f1012;
+    --fg-2: #d2d3d9;
+    --fg-3: #a9aab1;
+    --fg-4: #9a9ba2;
+    --muted: #8a8b92;
+    --muted-2: #7b7c83;
+    --line: #2a2c31;
+    --line-2: #33353b;
+    --line-3: #3d3f46;
+    --soft: #17181b;
+    --soft-2: #1d1e22;
+    --card: #16171a;
+    --hair: #24262a;
+    --chart-bg: #17181b;
+    --live: #fb7185;
+    --danger: #f87171;
+  }
+  :root[data-theme="dark"] { color-scheme: dark; }
+  :root[data-theme="light"] { color-scheme: light; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html {
     scroll-behavior: smooth;
@@ -58,7 +132,7 @@
     position: fixed;
     inset: 0;
     z-index: 9999;
-    background: #fff;
+    background: var(--card);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -157,7 +231,7 @@
   #lock .error {
     margin-top: 18px;
     font-size: 13px;
-    color: #b91c1c;
+    color: var(--danger);
     min-height: 20px;
     opacity: 0;
     transform: translate3d(0, 4px, 0);
@@ -223,7 +297,7 @@
     justify-content: center;
     position: sticky;
     top: 0;
-    background: #fafafa;
+    background: var(--bg);
     z-index: 20;
     border-bottom: 1px solid var(--hair);
   }
@@ -242,7 +316,7 @@
   }
   nav a:active {
     background: var(--fg);
-    color: #fff;
+    color: var(--fg-inv);
     border-color: var(--fg);
     transform: scale(0.95);
   }
@@ -265,7 +339,7 @@
     text-align: center;
   }
   .setup-strip a {
-    color: #fff;
+    color: var(--fg-inv);
     background: var(--fg);
     border-radius: 2px;
     padding: 5px 9px;
@@ -282,9 +356,9 @@
     animation: beat-nav 2s ease-in-out infinite;
   }
   @keyframes beat-nav {
-    0%   { box-shadow: 0 0 0 0 rgba(17, 17, 17, 0.30); }
-    50%  { box-shadow: 0 0 0 6px rgba(17, 17, 17, 0.06); }
-    100% { box-shadow: 0 0 0 0 rgba(17, 17, 17, 0.30); }
+    0%   { box-shadow: 0 0 0 0 rgba(var(--fg-rgb), 0.30); }
+    50%  { box-shadow: 0 0 0 6px rgba(var(--fg-rgb), 0.06); }
+    100% { box-shadow: 0 0 0 0 rgba(var(--fg-rgb), 0.30); }
   }
 
   .card.card-live {
@@ -293,21 +367,21 @@
     animation: beat-card 2s ease-in-out infinite;
   }
   @keyframes beat-card {
-    0%   { box-shadow: 0 0 0 0 rgba(17, 17, 17, 0.30); }
-    50%  { box-shadow: 0 0 0 8px rgba(17, 17, 17, 0.06); }
-    100% { box-shadow: 0 0 0 0 rgba(17, 17, 17, 0.30); }
+    0%   { box-shadow: 0 0 0 0 rgba(var(--fg-rgb), 0.30); }
+    50%  { box-shadow: 0 0 0 8px rgba(var(--fg-rgb), 0.06); }
+    100% { box-shadow: 0 0 0 0 rgba(var(--fg-rgb), 0.30); }
   }
 
   @media (prefers-reduced-motion: reduce) {
     nav a.nav-live,
     .card.card-live { animation: none; }
-    nav a.nav-live { box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.12); }
+    nav a.nav-live { box-shadow: 0 0 0 3px rgba(var(--fg-rgb), 0.12); }
   }
 
   .entry-note {
     padding: 10px 18px;
     background: var(--fg);
-    color: #fff;
+    color: var(--fg-inv);
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.14em;
@@ -316,7 +390,45 @@
   .badge.aktiv {
     border-color: var(--fg);
     background: var(--fg);
-    color: #fff;
+    color: var(--fg-inv);
+  }
+
+
+  /* Die Karten liegen in einem Flex-Stapel. Sortiert wird ueber order,
+     damit keine Karte im DOM verschoben werden muss — jedes Verschieben
+     wuerde ihren TradingView-iFrame neu laden. Die Aussenabstaende sind
+     so gesetzt, dass der Stapel aussieht wie vorher im Blockfluss, wo
+     die 56 und die 16 zusammenfielen. */
+  .karten {
+    display: flex;
+    flex-direction: column;
+    margin-top: 16px;
+  }
+  .karten > .card { margin: 0 14px 56px; }
+
+  /* Sortier-Knopf: sitzt in der Nav, ist aber ein Schalter und kein
+     Sprungziel — deshalb gestrichelt, bis er greift. */
+  nav .sort-chip {
+    order: 99;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 6px 12px;
+    border: 1px dashed var(--line-3);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--fg);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.15s var(--ease);
+  }
+  nav .sort-chip:active { transform: scale(0.95); }
+  nav .sort-chip[aria-pressed="true"] {
+    background: var(--fg);
+    color: var(--fg-inv);
+    border-style: solid;
+    border-color: var(--fg);
   }
 
   .card {
@@ -351,9 +463,9 @@
     white-space: nowrap;
   }
   .badge.neu {
-    border-color: #111;
-    background: #111;
-    color: #fff;
+    border-color: var(--fg);
+    background: var(--fg);
+    color: var(--fg-inv);
   }
   .card-head .badges {
     display: flex;
@@ -376,8 +488,8 @@
     font-size: 7px;
     font-weight: 800;
     letter-spacing: 0.08em;
-    background: #111;
-    color: #fff;
+    background: var(--fg);
+    color: var(--fg-inv);
     padding: 2px 5px;
     border-radius: 2px;
     line-height: 1.15;
@@ -410,7 +522,7 @@
   .news-banner a {
     color: var(--fg);
     text-decoration: none;
-    border-bottom: 1px solid rgba(17,17,17,0.35);
+    border-bottom: 1px solid rgba(var(--fg-rgb), 0.35);
     font-weight: 700;
   }
   @keyframes marquee {
@@ -423,14 +535,14 @@
   .card-head .info {
     margin-top: 10px;
     font-size: 13px;
-    color: #555;
+    color: var(--fg-3);
     font-weight: 600;
   }
   .card-head .info .zone {
     font-weight: 800;
     font-size: 14px;
     letter-spacing: -0.15px;
-    color: #333;
+    color: var(--fg-2);
   }
 
   .ziel-bar {
@@ -452,10 +564,10 @@
     font-size: 16px;
     font-weight: 800;
     letter-spacing: -0.3px;
-    color: #333;
+    color: var(--fg-2);
   }
   .ziel-bar .k {
-    color: #666;
+    color: var(--fg-4);
   }
 
   /* Live in Euro umgerechnete Chart-Werte */
@@ -467,7 +579,7 @@
   }
   .info-fx b {
     font-weight: 700;
-    color: #444;
+    color: var(--fg-2);
   }
   .ziel-bar .v-fx {
     display: block;
@@ -490,7 +602,7 @@
   .chart {
     width: 100%;
     height: 400px;
-    background: #f3f3f3;
+    background: var(--chart-bg);
     border-top: 1px solid var(--hair);
   }
   .chart iframe {
@@ -513,7 +625,7 @@
     font-weight: 650;
     text-decoration: none;
     background: var(--fg);
-    color: #fff;
+    color: var(--fg-inv);
     -webkit-tap-highlight-color: transparent;
     transition: transform 0.15s var(--ease), opacity 0.15s ease;
   }
@@ -550,7 +662,7 @@
   .install-btn:active {
     transform: scale(0.98);
     background: var(--fg);
-    color: #fff;
+    color: var(--fg-inv);
   }
   .sheet {
     position: fixed;
@@ -559,7 +671,7 @@
     display: flex;
     align-items: flex-end;
     justify-content: center;
-    background: rgba(17, 17, 17, 0.32);
+    background: rgba(var(--fg-rgb), 0.32);
     -webkit-backdrop-filter: saturate(120%) blur(2px);
     backdrop-filter: saturate(120%) blur(2px);
   }
@@ -700,7 +812,7 @@
     height: 38px;
     border-radius: 5px;
     background: var(--fg);
-    color: #fff;
+    color: var(--fg-inv);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -731,7 +843,7 @@
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: #fff;
+    color: var(--fg-inv);
     background: var(--fg);
     border: 0;
     border-radius: 2px;
@@ -839,7 +951,7 @@
 
   .news-block {
     border-top: 1px solid var(--hair);
-    background: #f3f3f3;
+    background: var(--chart-bg);
     padding: 12px 16px 14px;
     min-height: 72px;
   }
@@ -848,7 +960,7 @@
     font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: #666;
+    color: var(--fg-4);
     margin-bottom: 8px;
   }
   .news-rotator {
@@ -874,7 +986,7 @@
   .news-rotator .news-item a {
     font-size: 14px;
     line-height: 1.35;
-    color: #111;
+    color: var(--fg);
     text-decoration: none;
     font-weight: 700;
     display: -webkit-box;
@@ -891,10 +1003,10 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: #ccc;
+    background: var(--line-3);
   }
   .news-dots span.on {
-    background: #111;
+    background: var(--fg);
   }
 
 
@@ -908,7 +1020,7 @@
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: #e11d48;
+    background: var(--live);
     flex-shrink: 0;
     position: relative;
     top: 0;
@@ -939,13 +1051,13 @@
     font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: #666;
+    color: var(--fg-4);
   }
   .fg-box .fg-link {
     font-size: 11px;
-    color: #666;
+    color: var(--fg-4);
     text-decoration: none;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid var(--line-2);
   }
   .fg-box .fg-row {
     display: flex;
@@ -958,7 +1070,7 @@
     letter-spacing: -1px;
     min-width: 52px;
     line-height: 1;
-    color: #111;
+    color: var(--fg);
     transition: color 0.4s ease;
   }
   .fg-box .fg-meta {
@@ -968,13 +1080,13 @@
   .fg-box .fg-label {
     font-size: 15px;
     font-weight: 700;
-    color: #111;
+    color: var(--fg);
     margin-bottom: 6px;
     transition: color 0.4s ease;
   }
   .fg-bar {
     height: 6px;
-    background: #eee;
+    background: var(--soft-2);
     border-radius: 99px;
     overflow: hidden;
   }
@@ -983,13 +1095,13 @@
     height: 100%;
     width: 0%;
     border-radius: 99px;
-    background: #111;
+    background: var(--fg);
     transition: width 0.6s ease, background 0.4s ease;
   }
   .fg-box .fg-sub {
     margin-top: 8px;
     font-size: 11px;
-    color: #888;
+    color: var(--muted-2);
   }
   @media (min-width: 720px) {
     .fg-box { max-width: 780px; margin-left: auto; margin-right: auto; }
@@ -1034,6 +1146,7 @@
   <div class="rule"></div>
   <div class="author">Ralph Christian Pader · Juli 2026</div>
   <div class="header-actions">
+    <button class="install-btn" id="themeBtn" type="button">Dunkel</button>
     <button class="install-btn" id="installBtn" type="button" hidden>App installieren</button>
     <button class="install-btn" id="pushBtn" type="button" hidden>Benachrichtigungen</button>
   </div>
@@ -1050,6 +1163,7 @@
   <a href="#silber">Silber</a>
   <a href="#intc" class="nav-new">INTC<span class="nav-neu">NEU</span></a>
   <a href="#uuuu" class="nav-new">UUUU<span class="nav-neu">NEU</span></a>
+  <button class="sort-chip" id="sortBtn" type="button" aria-pressed="false">Nach Zone sortieren</button>
 </nav>
 
 <div class="news-banner" aria-label="Neuigkeit">
@@ -1078,6 +1192,8 @@
   </div>
   <div class="fg-sub" id="fg-sub">Marktstimmung 0–100</div>
 </div>
+
+<div class="karten" id="karten">
 
 <section class="card" id="uaa">
   <div class="card-head">
@@ -1354,6 +1470,9 @@
     <a class="btn" href="https://de.tradingview.com/chart/tx3UAbNF/" target="_blank" rel="noopener">Analyse-Chart (Fibos) öffnen</a>
   </div>
 </section>
+
+</div>
+
 
 
 
@@ -2313,6 +2432,8 @@
           throw new Error((daten && daten.fehler) || "keine Daten");
         }
         markieren(daten);
+        // Einmal geholt, zweifach genutzt: der Sortierer haengt sich hier an
+        document.dispatchEvent(new CustomEvent("rcp:status", { detail: daten }));
 
         var mitKurs = daten.positionen.filter(function (p) { return p.kurs; });
         var aktive = daten.positionen.filter(function (p) { return p.aktiv; });
@@ -2362,6 +2483,158 @@ if ("serviceWorker" in navigator) {
     });
   });
 }
+
+// Dunkelmodus: folgt dem System, bis der Knopf im Kopf gedrueckt wird.
+// Danach gilt die Wahl und bleibt gespeichert.
+(function () {
+  var KEY = "rcp:theme";
+  var HELL = "#fafafa";
+  var DUNKEL = "#0f1012";
+  var btn = document.getElementById("themeBtn");
+  var wurzel = document.documentElement;
+  var system = window.matchMedia("(prefers-color-scheme: dark)");
+
+  function gewaehlt() {
+    try { return localStorage.getItem(KEY); } catch (e) { return null; }
+  }
+  function merken(wert) {
+    try {
+      if (wert) localStorage.setItem(KEY, wert);
+      else localStorage.removeItem(KEY);
+    } catch (e) { /* privates Fenster — dann gilt es nur fuer diesen Besuch */ }
+  }
+  function istDunkel() {
+    var w = gewaehlt();
+    return w ? w === "dark" : system.matches;
+  }
+
+  // Bei eigener Wahl eine Statusleisten-Farbe ohne media davorstellen:
+  // der Browser nimmt die erste passende Angabe, und die gewinnt dann.
+  function statusleiste(dunkel) {
+    var eigen = document.getElementById("themeColorEigen");
+    if (!gewaehlt()) {
+      if (eigen) eigen.parentNode.removeChild(eigen);
+      return;
+    }
+    if (!eigen) {
+      eigen = document.createElement("meta");
+      eigen.name = "theme-color";
+      eigen.id = "themeColorEigen";
+      document.head.insertBefore(eigen, document.head.firstChild);
+    }
+    eigen.setAttribute("content", dunkel ? DUNKEL : HELL);
+  }
+
+  // Die Charts kommen von TradingView und kennen unser Schema nicht:
+  // das Thema steckt in der Adresse und muss mitgezogen werden.
+  function charts(dunkel) {
+    document.querySelectorAll('.chart iframe').forEach(function (f) {
+      var alt = f.getAttribute("src") || "";
+      if (alt.indexOf("tradingview") === -1) return;
+      var neu = alt
+        .replace(/theme=(?:light|dark)/, "theme=" + (dunkel ? "dark" : "light"))
+        .replace(/toolbarbg=[0-9a-fA-F]{3,6}/, "toolbarbg=" + (dunkel ? "0f1012" : "ffffff"));
+      if (neu !== alt) f.setAttribute("src", neu);   // laedt neu, nur wenn sich etwas aendert
+    });
+  }
+
+  function anwenden() {
+    var w = gewaehlt();
+    if (w) wurzel.setAttribute("data-theme", w);
+    else wurzel.removeAttribute("data-theme");
+    var dunkel = istDunkel();
+    if (btn) {
+      btn.textContent = dunkel ? "Hell" : "Dunkel";
+      btn.setAttribute("aria-label", dunkel ? "Zur hellen Ansicht wechseln" : "Zur dunklen Ansicht wechseln");
+    }
+    statusleiste(dunkel);
+    charts(dunkel);
+  }
+
+  if (btn) {
+    btn.addEventListener("click", function () {
+      merken(istDunkel() ? "light" : "dark");
+      anwenden();
+    });
+  }
+
+  // Solange nichts gewaehlt ist, dem System folgen — auch wenn es mittendrin umschaltet
+  var beiWechsel = function () { if (!gewaehlt()) anwenden(); };
+  if (system.addEventListener) system.addEventListener("change", beiWechsel);
+  else if (system.addListener) system.addListener(beiWechsel);
+
+  anwenden();
+})();
+
+// Sortieren nach Naehe zur Einkaufszone.
+// Die Daten kommen aus dem Status-Abruf, der ohnehin laeuft; sortiert wird
+// ueber die CSS-Eigenschaft order, damit keine Karte den Platz im DOM
+// wechselt und ihren Chart neu laedt.
+(function () {
+  var KEY = "rcp:sort";
+  var btn = document.getElementById("sortBtn");
+  var stapel = document.getElementById("karten");
+  if (!btn || !stapel) return;
+
+  var aktiv = false;
+  try { aktiv = localStorage.getItem(KEY) === "zone"; } catch (e) {}
+  var positionen = null;
+
+  function karten() {
+    return [].slice.call(stapel.children).filter(function (el) {
+      return el.classList && el.classList.contains("card");
+    });
+  }
+  function navLinks() {
+    return [].slice.call(document.querySelectorAll("nav a[href^='#']"));
+  }
+  function weit(p) {
+    return Math.abs(p.abstand === null || p.abstand === undefined ? 9999 : p.abstand);
+  }
+
+  function anwenden() {
+    var k = karten(), l = navLinks();
+    if (!aktiv || !positionen) {
+      k.forEach(function (el) { el.style.order = ""; });
+      l.forEach(function (el) { el.style.order = ""; });
+      return;
+    }
+    var rang = {};
+    positionen.slice().sort(function (a, b) { return weit(a) - weit(b); })
+      .forEach(function (p, i) { if (p.id) rang[p.id] = i + 1; });
+
+    k.forEach(function (el) { el.style.order = rang[el.id] || 90; });
+    l.forEach(function (el) { el.style.order = rang[el.getAttribute("href").slice(1)] || 90; });
+  }
+
+  function knopf() {
+    btn.setAttribute("aria-pressed", aktiv ? "true" : "false");
+    btn.textContent = aktiv
+      ? (positionen ? "Nächste Zone oben" : "Sortiert, sobald Kurse da sind")
+      : "Nach Zone sortieren";
+  }
+
+  btn.addEventListener("click", function () {
+    aktiv = !aktiv;
+    try {
+      if (aktiv) localStorage.setItem(KEY, "zone");
+      else localStorage.removeItem(KEY);
+    } catch (e) {}
+    anwenden();
+    knopf();
+  });
+
+  document.addEventListener("rcp:status", function (e) {
+    var daten = e.detail;
+    if (!daten || !daten.positionen) return;
+    positionen = daten.positionen;
+    anwenden();
+    knopf();
+  });
+
+  knopf();
+})();
+
 </script>
 
 
