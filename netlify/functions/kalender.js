@@ -45,6 +45,9 @@ const QUELLEN = [
 // egal wie viele Leute die Seite oeffnen. Faellt die Quelle aus, wird der
 // gespeicherte Stand weitergereicht, auch wenn er aelter ist.
 const FRISCH = 15 * 60 * 1000;
+// Die Ergebnisse haben ihren eigenen Takt: sie treffen ueber den Tag
+// verteilt ein, unabhaengig davon, ob der Terminplan neu geholt wurde.
+const FRISCH_FRED = 3 * 60 * 1000;
 const NOTNAGEL = 24 * 3600 * 1000;   // so alt darf der Speicher hoechstens werden
 
 // Zuordnung der Termine zu den Datenreihen in FRED. Nur Reihen, bei denen
@@ -166,11 +169,23 @@ export default async (request) => {
     .sort((a, b) => new Date(a.zeit) - new Date(b.zeit))
     .slice(0, MAX);
 
-  // Ergebnisse: entweder aus dem Speicher oder frisch bei FRED holen.
-  // Nur fuer Termine, die schon vorbei sind - vorher gibt es nichts.
-  if (!werte) {
-    werte = await ergebnisse(termine);
-    await schreiben(speicher, roh, werte);
+  // Ergebnisse nachfragen, wenn ein vergangener Termin noch keines hat und
+  // der letzte Versuch lange genug her ist. Frueher haing das am Abruf des
+  // Terminplans - stand der im Speicher, wurde FRED nie gefragt, auch wenn
+  // inzwischen ein Schluessel da war.
+  const offen = termine.some((t) => {
+    if (new Date(t.zeit).getTime() > jetzt) return false;
+    const k = schluesselFuer(t);
+    return k && (werte || {})[k] === undefined;
+  });
+  const werteAlter = gespeichert && gespeichert.werte_zeit
+    ? jetzt - gespeichert.werte_zeit
+    : Infinity;
+
+  if (!werte || (offen && werteAlter > FRISCH_FRED)) {
+    const frisch = await ergebnisse(termine);
+    werte = Object.assign({}, werte || {}, frisch);
+    await schreiben(speicher, roh, werte, gespeichert ? gespeichert.zeit : jetzt);
   }
   for (const t of termine) {
     const k = schluesselFuer(t);
@@ -371,16 +386,26 @@ async function lesen(store) {
   try {
     const d = await store.get("ff-thisweek", { type: "json" });
     if (!d || !Array.isArray(d.roh) || !d.roh.length) return null;
-    return { zeit: Number(d.zeit) || 0, roh: d.roh, werte: d.werte || {} };
+    return {
+      zeit: Number(d.zeit) || 0,
+      roh: d.roh,
+      werte: d.werte || {},
+      werte_zeit: Number(d.werte_zeit) || 0
+    };
   } catch (e) {
     return null;
   }
 }
 
-async function schreiben(store, roh, werte) {
+async function schreiben(store, roh, werte, ffZeit) {
   if (!store) return;
   try {
-    await store.setJSON("ff-thisweek", { zeit: Date.now(), roh: roh, werte: werte || {} });
+    await store.setJSON("ff-thisweek", {
+      zeit: ffZeit || Date.now(),        // Alter des Terminplans nicht zuruecksetzen
+      werte_zeit: Date.now(),
+      roh: roh,
+      werte: werte || {}
+    });
   } catch (e) { /* Speichern ist Kuer, nicht Pflicht */ }
 }
 
