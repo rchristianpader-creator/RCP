@@ -490,6 +490,29 @@
   @media (prefers-reduced-motion: reduce) {
     .news-banner-track { animation: none; }
   }
+
+  /* Zweites Band: Wirtschaftstermine. Gleiche Bauweise wie oben, aber auf
+     weissem Grund und mit eigener Geschwindigkeit, damit die beiden Baender
+     nicht im Gleichschritt laufen. Die Dauer setzt das Skript, damit das Band
+     immer gleich schnell zieht, egal wie viele Termine drinstehen. */
+  .news-banner.wirtschaft {
+    background: var(--card);
+    border-bottom: 1px solid var(--hair);
+  }
+  .news-banner.wirtschaft .titel {
+    font-weight: 800;
+    letter-spacing: 0.08em;
+  }
+  .news-banner.wirtschaft .ergebnis {
+    background: var(--fg);
+    color: #fff;
+    padding: 3px 7px;
+    border-radius: 2px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+  }
+  .news-banner.wirtschaft .leise { color: var(--muted); }
+
   .card-head .info {
     margin-top: 10px;
     font-size: 13px;
@@ -1132,6 +1155,10 @@
     <span>Neu — Energie-These: KI ist kein Chip-Problem · <a href="energie-these.pdf" download>PDF herunterladen</a></span>
     <span>Neu — Energie-These: KI ist kein Chip-Problem · <a href="energie-these.pdf" download>PDF herunterladen</a></span>
   </div>
+</div>
+
+<div class="news-banner wirtschaft" id="wirtschaftBand" aria-label="Wirtschaftstermine" hidden>
+  <div class="news-banner-track" id="wirtschaftTrack"></div>
 </div>
 
 
@@ -2599,6 +2626,115 @@ if ("serviceWorker" in navigator) {
 
   if (aktiv) btn.classList.add("gekippt");
   knopf();
+})();
+
+
+// Wirtschaftstermine als Laufband: CPI, Core PCE, FOMC, Arbeitsmarkt und Co.
+// Vor der Veroeffentlichung Prognose und Vorwert, danach das Ergebnis im
+// Vergleich zur Prognose. Das Band bleibt aus, solange es nichts zu zeigen gibt.
+(function () {
+  var band = document.getElementById("wirtschaftBand");
+  var track = document.getElementById("wirtschaftTrack");
+  if (!band || !track) return;
+
+  var TEMPO = 38;                  // Pixel je Sekunde, unabhaengig von der Menge
+  var TAKT = 10 * 60 * 1000;       // alle zehn Minuten nachsehen
+  var stand = "";                  // Fingerabdruck, damit unveraendert nicht neu gebaut wird
+
+  function zahl(n, einheit) {
+    if (n === null || n === undefined) return "–";
+    var text = Number(n).toLocaleString("de-DE", {
+      minimumFractionDigits: Math.abs(n) < 10 && !Number.isInteger(n) ? 1 : 0,
+      maximumFractionDigits: 2
+    });
+    return einheit ? text + " " + einheit : text;
+  }
+
+  // "heute 14:30", "morgen 08:00", sonst "Di 05.08. 14:30" - alles Berliner Zeit
+  function wann(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return "";
+    var uhr = d.toLocaleTimeString("de-DE", {
+      timeZone: "Europe/Berlin", hour: "2-digit", minute: "2-digit"
+    });
+    var tag = function (x) {
+      return x.toLocaleDateString("de-DE", { timeZone: "Europe/Berlin" });
+    };
+    var jetzt = new Date();
+    var morgen = new Date(jetzt.getTime() + 86400000);
+    if (tag(d) === tag(jetzt)) return "heute " + uhr;
+    if (tag(d) === tag(morgen)) return "morgen " + uhr;
+    var kurz = d.toLocaleDateString("de-DE", {
+      timeZone: "Europe/Berlin", weekday: "short", day: "2-digit", month: "2-digit"
+    });
+    // "Mi., 29.07." -> "Mi 29.07." — Punkt und Komma stoeren in Versalien
+    return kurz.replace(/^(\w+)\.,/, "$1") + " " + uhr;
+  }
+
+  function zeile(t) {
+    var teile = ['<span class="titel">' + t.titel + "</span>"];
+    teile.push('<span class="leise">' + wann(t.zeit) + "</span>");
+
+    if (t.ergebnis !== null && t.ergebnis !== undefined) {
+      teile.push('<span class="ergebnis">Ergebnis ' + zahl(t.ergebnis, t.einheit) + "</span>");
+      if (t.prognose !== null && t.prognose !== undefined) {
+        var wie = t.ueber === null ? "gegen Prognose"
+                : (t.ergebnis === t.prognose ? "wie prognostiziert"
+                : (t.ueber ? "über Prognose" : "unter Prognose"));
+        teile.push('<span class="leise">' + wie + " " + zahl(t.prognose, t.einheit) + "</span>");
+      }
+    } else {
+      teile.push("Prognose " + zahl(t.prognose, t.einheit));
+      if (t.vorwert !== null && t.vorwert !== undefined) {
+        teile.push('<span class="leise">zuvor ' + zahl(t.vorwert, t.einheit) + "</span>");
+      }
+    }
+    return "<span>" + teile.join(" · ") + "</span>";
+  }
+
+  function bauen(termine) {
+    var fingerabdruck = termine.map(function (t) {
+      return [t.titel, t.zeit, t.prognose, t.vorwert, t.ergebnis].join("|");
+    }).join("~");
+    if (fingerabdruck === stand) return;     // nichts Neues, Band nicht zurueckwerfen
+    stand = fingerabdruck;
+
+    var eine = termine.map(zeile).join("");
+    track.innerHTML = eine + eine;           // zweimal, damit -50 % nahtlos umschlaegt
+    band.hidden = false;
+
+    // Dauer aus der Breite: das Band zieht immer gleich schnell
+    var breite = track.scrollWidth / 2;
+    if (breite > 0) track.style.animationDuration = Math.round(breite / TEMPO) + "s";
+  }
+
+  function laden() {
+    fetch("/.netlify/functions/kalender", { cache: "no-store" })
+      .then(function (r) {
+        if (!r.ok) throw new Error("Antwort " + r.status);
+        return r.json();
+      })
+      .then(function (d) {
+        if (!d || !d.ok || !d.termine || !d.termine.length) throw new Error("keine Termine");
+        bauen(d.termine);
+      })
+      .catch(function () {
+        // Ohne Termine bleibt das Band aus - lieber nichts als eine leere Leiste
+        if (!stand) band.hidden = true;
+      });
+  }
+
+  function start() {
+    laden();
+    setInterval(laden, TAKT);
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === "visible") laden();
+    });
+  }
+
+  var appEl = document.getElementById("app");
+  if (appEl && appEl.classList.contains("visible")) start();
+  else document.addEventListener("rcp:unlocked", start);
 })();
 
 </script>
