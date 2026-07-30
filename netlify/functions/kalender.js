@@ -70,14 +70,21 @@ export default async (request) => {
   let roh = null;
   let fehler = null;
   for (const url of versuche) {
+    const pfad = url.includes("/stable/") ? "stable" : "v3";
     try {
       const res = await fetch(url, { headers: { Accept: "application/json" } });
-      if (!res.ok) { fehler = "Antwort " + res.status; continue; }
-      const daten = await res.json();
+      const daten = await res.json().catch(() => null);
+
       if (Array.isArray(daten) && daten.length) { roh = daten; break; }
-      fehler = "leere Liste";
+
+      // Die Quelle meldet Fehler mal ueber den Status, mal im Koerper mit
+      // Status 200. Beides durchreichen, sonst steht man beim Suchen im Dunkeln.
+      const meldung = daten && !Array.isArray(daten)
+        ? (daten["Error Message"] || daten.message || daten.error || JSON.stringify(daten).slice(0, 200))
+        : null;
+      fehler = pfad + ": " + (meldung || (res.ok ? "leere Liste" : "Antwort " + res.status));
     } catch (e) {
-      fehler = e && e.message ? e.message : String(e);
+      fehler = pfad + ": " + (e && e.message ? e.message : String(e));
     }
   }
 
