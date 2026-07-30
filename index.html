@@ -2637,7 +2637,7 @@ if ("serviceWorker" in navigator) {
   var track = document.getElementById("wirtschaftTrack");
   if (!band || !track) return;
 
-  var TEMPO = 38;                  // Pixel je Sekunde, unabhaengig von der Menge
+  var TEMPO = 60;                  // Pixel je Sekunde, unabhaengig von der Menge
   var TAKT = 10 * 60 * 1000;       // alle zehn Minuten nachsehen
   var stand = "";                  // Fingerabdruck, damit unveraendert nicht neu gebaut wird
 
@@ -2671,23 +2671,21 @@ if ("serviceWorker" in navigator) {
     return kurz.replace(/^(\w+)\.,/, "$1") + " " + uhr;
   }
 
+  function hat(v) { return v !== null && v !== undefined; }
+
   function zeile(t) {
     var teile = ['<span class="titel">' + t.titel + "</span>"];
     teile.push('<span class="leise">' + wann(t.zeit) + "</span>");
 
-    if (t.ergebnis !== null && t.ergebnis !== undefined) {
-      teile.push('<span class="ergebnis">Ergebnis ' + zahl(t.ergebnis, t.einheit) + "</span>");
-      if (t.prognose !== null && t.prognose !== undefined) {
-        var wie = t.ueber === null ? "gegen Prognose"
-                : (t.ergebnis === t.prognose ? "wie prognostiziert"
-                : (t.ueber ? "über Prognose" : "unter Prognose"));
-        teile.push('<span class="leise">' + wie + " " + zahl(t.prognose, t.einheit) + "</span>");
-      }
-    } else {
+    // Immer dieselben drei Felder in derselben Reihenfolge: Aktuell,
+    // Prognose, Vorherige. Termine ganz ohne Zahlen - FOMC-Statement,
+    // Pressekonferenz - bekommen nur Name und Uhrzeit.
+    if (hat(t.ergebnis) || hat(t.prognose) || hat(t.vorwert)) {
+      teile.push(hat(t.ergebnis)
+        ? '<span class="ergebnis">Aktuell ' + zahl(t.ergebnis, t.einheit) + "</span>"
+        : '<span class="leise">Aktuell –</span>');
       teile.push("Prognose " + zahl(t.prognose, t.einheit));
-      if (t.vorwert !== null && t.vorwert !== undefined) {
-        teile.push('<span class="leise">zuvor ' + zahl(t.vorwert, t.einheit) + "</span>");
-      }
+      teile.push('<span class="leise">Vorherige ' + zahl(t.vorwert, t.einheit) + "</span>");
     }
     return "<span>" + teile.join(" · ") + "</span>";
   }
