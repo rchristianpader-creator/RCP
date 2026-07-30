@@ -73,10 +73,16 @@ const FRED = [
   [/^federal funds rate/i,          { id: "DFEDTARU", einheit: "lin", takt: "tag" }]
 ];
 
-// So weit darf der Beobachtungszeitraum vor dem Termin liegen. Verhindert,
-// dass der Wert des Vormonats als frisches Ergebnis erscheint, solange die
-// Veroeffentlichung noch aussteht.
-const ABSTAND = { monat: 70 * 86400000, quartal: 140 * 86400000, tag: 8 * 86400000 };
+// Wie weit der Beobachtungszeitraum vom Termin entfernt sein darf.
+// "vor" verhindert, dass der Wert des Vormonats als frisches Ergebnis
+// erscheint, solange die Veroeffentlichung noch aussteht.
+// "nach" braucht es fuer Tagesreihen: der FOMC-Beschluss vom 29. wirkt ab
+// dem 30., der Wert in FRED ist also spaeter datiert als der Termin.
+const ABSTAND = {
+  monat:   { vor: 70 * 86400000,  nach: 0 },
+  quartal: { vor: 140 * 86400000, nach: 0 },
+  tag:     { vor: 8 * 86400000,   nach: 5 * 86400000 }
+};
 
 // Kurze Namen fuers Band - "Core PCE Price Index m/m" ist zu lang
 const KURZ = [
@@ -153,6 +159,8 @@ export default async (request) => {
     return json({ ok: false, fehler: fehler.length ? fehler : ["keine Daten"] }, 502, "no-store");
   }
 
+  const pruefen = new URL(request.url).searchParams.get("pruef");
+
   if (new URL(request.url).searchParams.get("roh")) {
     return json({ ok: true, anzahl: roh.length, erster: roh[0] }, 200, "no-store");
   }
@@ -193,6 +201,10 @@ export default async (request) => {
       t.ergebnis = werte[k];
       t.ueber = t.prognose === null ? null : t.ergebnis > t.prognose;
     }
+  }
+
+  if (pruefen) {
+    return json({ ok: true, pruefung: await pruefung(termine) }, 200, "no-store");
   }
 
   return json(
@@ -252,12 +264,56 @@ async function ergebnisse(termine) {
       // und der Wert waere der des Vormonats.
       const zeitraum = new Date(beob.date + "T00:00:00Z").getTime();
       const abstand = new Date(t.zeit).getTime() - zeitraum;
-      if (!(abstand >= 0 && abstand <= (ABSTAND[reihe.takt] || ABSTAND.monat))) continue;
+      const grenze = ABSTAND[reihe.takt] || ABSTAND.monat;
+      if (abstand > grenze.vor || abstand < -grenze.nach) continue;
 
       const wert = parseFloat(beob.value);
       if (isFinite(wert)) out[t.voll + "@" + String(t.zeit).slice(0, 10)] = runden(wert);
     } catch (e) {
       // Ein Ausfall bei FRED laesst nur dieses eine Ergebnis leer
+    }
+  }
+  return out;
+}
+
+// Sagt je Termin, welche Reihe gefragt wurde, was zurueckkam und woran es
+// gegebenenfalls scheitert. Nur zum Nachsehen, nicht fuer die Anzeige.
+async function pruefung(termine) {
+  const key = process.env.FRED_KEY;
+  const jetzt = Date.now();
+  const out = [];
+  for (const t of termine) {
+    const treffer = FRED.find(([muster]) => muster.test(t.voll));
+    if (!treffer) { out.push({ termin: t.voll, urteil: "keine Reihe zugeordnet" }); continue; }
+    if (new Date(t.zeit).getTime() > jetzt) { out.push({ termin: t.voll, reihe: treffer[1].id, urteil: "steht noch aus" }); continue; }
+    if (!key) { out.push({ termin: t.voll, reihe: treffer[1].id, urteil: "kein FRED_KEY" }); continue; }
+
+    const reihe = treffer[1];
+    try {
+      const url = "https://api.stlouisfed.org/fred/series/observations" +
+        "?series_id=" + reihe.id + "&units=" + reihe.einheit +
+        "&sort_order=desc&limit=2&file_type=json&api_key=" + key;
+      const res = await fetch(url, { headers: { Accept: "application/json" } });
+      if (!res.ok) { out.push({ termin: t.voll, reihe: reihe.id, urteil: "FRED antwortet " + res.status }); continue; }
+      const daten = await res.json();
+      const alle = (daten && daten.observations) || [];
+      const beob = alle.find((o) => o.value && o.value !== ".");
+      if (!beob) { out.push({ termin: t.voll, reihe: reihe.id, urteil: "keine Beobachtung", zurueck: alle.length }); continue; }
+
+      const abstand = new Date(t.zeit).getTime() - new Date(beob.date + "T00:00:00Z").getTime();
+      const grenze = ABSTAND[reihe.takt] || ABSTAND.monat;
+      const passt = abstand <= grenze.vor && abstand >= -grenze.nach;
+      out.push({
+        termin: t.voll,
+        reihe: reihe.id,
+        zeitraum: beob.date,
+        wert: beob.value,
+        abstand_tage: Math.round(abstand / 86400000),
+        erlaubt: "-" + Math.round(grenze.nach / 86400000) + " bis " + Math.round(grenze.vor / 86400000),
+        urteil: passt ? "genommen" : "Zeitraum passt nicht zum Termin"
+      });
+    } catch (e) {
+      out.push({ termin: t.voll, reihe: reihe.id, urteil: "Fehler: " + (e && e.message ? e.message : String(e)) });
     }
   }
   return out;
