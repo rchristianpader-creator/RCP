@@ -247,6 +247,37 @@
     transform: scale(0.95);
   }
 
+  /* Aktives Setup: Kurs steht in der Einkaufszone */
+  nav a.nav-live {
+    background: var(--fg);
+    color: #fff;
+    border-color: var(--fg);
+    position: relative;
+  }
+  nav a.nav-live::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border: 1px solid var(--fg);
+    border-radius: 3px;
+    pointer-events: none;
+    animation: live-ring 1.9s var(--ease) infinite;
+  }
+  @keyframes live-ring {
+    0% { opacity: 0.5; transform: scale(1); }
+    70% { opacity: 0; transform: scale(1.16); }
+    100% { opacity: 0; transform: scale(1.16); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    nav a.nav-live::after { animation: none; opacity: 0.35; }
+  }
+  .card.card-live { border-color: var(--fg); }
+  .badge.aktiv {
+    border-color: var(--fg);
+    background: var(--fg);
+    color: #fff;
+  }
+
   .card {
     margin: 16px 14px 56px;
     border: 1px solid var(--hair);
@@ -2048,6 +2079,46 @@
           note.textContent = "Umrechnung gerade nicht verfügbar";
         }
       });
+  }
+
+  var appEl = document.getElementById("app");
+  if (appEl && appEl.classList.contains("visible")) start();
+  else document.addEventListener("rcp:unlocked", start);
+})();
+
+// Aktive Setups: Nav-Knopf pulsiert, wenn der Kurs in der Einkaufszone steht
+(function () {
+  function markieren(daten) {
+    if (!daten || !daten.positionen) return;
+    daten.positionen.forEach(function (p) {
+      if (!p.aktiv || !p.id) return;
+
+      var link = document.querySelector('nav a[href="#' + p.id + '"]');
+      if (link) link.classList.add("nav-live");
+
+      var karte = document.getElementById(p.id);
+      if (!karte) return;
+      karte.classList.add("card-live");
+
+      // Kennzeichen in der Karte, damit die Zuordnung eindeutig ist
+      var gruppe = karte.querySelector(".badges");
+      var reihe = gruppe || karte.querySelector(".row");
+      if (reihe && !reihe.querySelector(".badge.aktiv")) {
+        var tag = document.createElement("span");
+        tag.className = "badge aktiv";
+        tag.textContent = "AKTIV";
+        // In Karten mit Badge-Gruppe nach vorne, sonst ans Ende der Zeile
+        if (gruppe) gruppe.insertBefore(tag, gruppe.firstChild);
+        else reihe.appendChild(tag);
+      }
+    });
+  }
+
+  function start() {
+    fetch("/.netlify/functions/status")
+      .then(function (r) { return r.json(); })
+      .then(markieren)
+      .catch(function () {});
   }
 
   var appEl = document.getElementById("app");
