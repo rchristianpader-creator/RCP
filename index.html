@@ -2130,8 +2130,10 @@
       .then(function (daten) {
         if (!daten || !daten.positionen) throw new Error("keine Daten");
         markieren(daten);
+        var mitKurs = daten.positionen.filter(function (p) { return p.kurs; });
         var aktive = daten.positionen.filter(function (p) { return p.aktiv; });
-        if (!aktive.length) hinweis("kein Setup in der Zone");
+        if (!mitKurs.length) hinweis("keine Kurse abrufbar");
+        else if (!aktive.length) hinweis("kein Setup in der Zone (" + mitKurs.length + " Kurse geprüft)");
       })
       .catch(function (e) {
         hinweis("Setup-Prüfung nicht verfügbar (" + (e && e.message ? e.message : e) + ")");
