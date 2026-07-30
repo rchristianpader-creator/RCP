@@ -186,6 +186,11 @@ export default async (request) => {
       stand: new Date().toISOString(),
       quelle: quelle,
       alter_min: Math.round((Date.now() - (gespeichert ? gespeichert.zeit : Date.now())) / 60000),
+      // Damit sichtbar ist, warum "Aktuell" leer bleibt: ohne Schluessel
+      // wird FRED gar nicht erst gefragt, und das sah man der Antwort
+      // bisher nicht an.
+      ergebnisdienst: process.env.FRED_KEY ? "FRED" : "kein FRED_KEY gesetzt",
+      ergebnisse_da: Object.keys(werte || {}).length,
       termine: termine,
       hinweis: fehler.length ? fehler : undefined
     },
