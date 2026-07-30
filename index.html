@@ -274,49 +274,36 @@
   }
 
   /* Aktives Setup: Kurs steht in der Einkaufszone */
-  /* Nicht gefuellt: nur Rahmen und Puls */
+  /* Aktives Setup: ein gleichmaessiger Puls, gleicher Takt fuer Knopf und Karte */
   nav a.nav-live {
     background: transparent;
     color: var(--fg);
     border: 1px solid var(--fg);
-    position: relative;
-    animation: live-pulse 1.9s var(--ease) infinite;
+    animation: beat-nav 2s ease-in-out infinite;
   }
-  nav a.nav-live::after {
-    content: "";
-    position: absolute;
-    inset: -3px;
-    border: 1px solid var(--fg);
-    border-radius: 3px;
-    pointer-events: none;
-    animation: live-ring 1.9s var(--ease) infinite;
-  }
-  @keyframes live-ring {
-    0% { opacity: 0.55; transform: scale(1); }
-    70% { opacity: 0; transform: scale(1.18); }
-    100% { opacity: 0; transform: scale(1.18); }
-  }
-  @keyframes live-pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(17, 17, 17, 0.22); }
-    60% { box-shadow: 0 0 0 5px rgba(17, 17, 17, 0); }
+  @keyframes beat-nav {
+    0%   { box-shadow: 0 0 0 0 rgba(17, 17, 17, 0.30); }
+    50%  { box-shadow: 0 0 0 6px rgba(17, 17, 17, 0.06); }
+    100% { box-shadow: 0 0 0 0 rgba(17, 17, 17, 0.30); }
   }
 
-  /* Karte: deutlicher Rahmen mit ruhigem Puls */
   .card.card-live {
     border-color: var(--fg);
     border-width: 2px;
-    animation: live-card 2.4s var(--ease) infinite;
+    animation: beat-card 2s ease-in-out infinite;
   }
-  @keyframes live-card {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(17, 17, 17, 0.3); }
-    65% { box-shadow: 0 0 0 8px rgba(17, 17, 17, 0); }
+  @keyframes beat-card {
+    0%   { box-shadow: 0 0 0 0 rgba(17, 17, 17, 0.30); }
+    50%  { box-shadow: 0 0 0 8px rgba(17, 17, 17, 0.06); }
+    100% { box-shadow: 0 0 0 0 rgba(17, 17, 17, 0.30); }
   }
+
   @media (prefers-reduced-motion: reduce) {
     nav a.nav-live,
-    nav a.nav-live::after,
     .card.card-live { animation: none; }
-    nav a.nav-live::after { opacity: 0.35; }
+    nav a.nav-live { box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.12); }
   }
+
   .entry-note {
     padding: 10px 18px;
     background: var(--fg);
