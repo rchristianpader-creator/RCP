@@ -229,9 +229,30 @@ schreibt die SVG-Dateien, daraus werden die PNG gerendert:
 | `icon-maskable-512.png` | 512 | `logo-weiss-maske.svg` |
 
 Die Maske-Fassung ist kleiner gezeichnet, weil Android auf einen Kreis
-zuschneidet. Die Symbole liegen im Vorrat des Service Workers — nach einer
-Änderung muss `CACHE` in `sw.js` hochgezählt werden, sonst bleibt das alte
-Bild auf den Geräten stehen.
+zuschneidet.
+
+### Wenn sich das Symbol ändert
+
+Drei Stellen müssen zusammenpassen, sonst bleibt irgendwo das alte Bild stehen:
+
+1. `CACHE` in `sw.js` hochzählen — der Vorrat des Service Workers wird sonst
+   nicht erneuert.
+2. Dieselbe Nummer als `?v=` an alle Symbol-Adressen hängen: in `PRECACHE`, in
+   den vier HTML-Dateien und im Manifest. Ohne das gibt Safari beim Anlegen auf
+   dem Startbildschirm das Bild aus seinem eigenen Zwischenspeicher heraus.
+3. `sw-test` prüft beides — dass der Service Worker sich überhaupt noch
+   installiert, dass jede Adresse aus `PRECACHE` wirklich ein PNG liefert und
+   dass die Versionsnummern übereinstimmen.
+
+Punkt 3 ist wichtiger, als er aussieht: `caches.addAll` ist alles oder nichts.
+Eine einzige tote Adresse in `PRECACHE`, und der Service Worker installiert
+sich gar nicht mehr — still, ohne Fehlermeldung.
+
+**Auf dem iPhone reicht das trotzdem nicht.** iOS holt das Symbol genau einmal,
+beim „Zum Home-Bildschirm", und legt es zum Lesezeichen. Danach sieht es nie
+wieder nach. Es gibt keinen Weg, das von der Seite aus zu ändern — die App muss
+vom Startbildschirm gelöscht und neu angelegt werden. Android macht es von
+selbst: Chrome liest das Manifest erneut und tauscht das Bild aus.
 
 ## Wer gerade da ist
 

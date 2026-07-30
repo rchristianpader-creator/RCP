@@ -12,9 +12,9 @@ const CACHE = "aktien-liste-v32";
    erst abgelegt, wenn eine echte Antwort durchkommt. */
 const PRECACHE = [
   "/manifest.webmanifest",
-  "/icon-180.png",
-  "/icon-192.png",
-  "/icon-512.png"
+  "/icon-180.png?v=32",
+  "/icon-192.png?v=32",
+  "/icon-512.png?v=32"
 ];
 
 const STATIC = /\.(?:png|jpg|jpeg|svg|webp|ico|pdf|webmanifest)$/i;
