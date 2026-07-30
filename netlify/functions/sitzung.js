@@ -17,6 +17,7 @@ import crypto from "node:crypto";
 
 export const KEKS = "rcp_sitz";
 export const LADEN = "aktien-konten";
+export const BESUCH = "aktien-besuch";
 
 // Wie lange eine Sitzung gilt
 export const DAUER_KURZ = 12 * 60 * 60;        // ohne "merken": ein halber Tag

@@ -2,7 +2,6 @@
    Beim ersten Aufruf wird ein Schluesselpaar erzeugt und in Netlify Blobs gelegt.
    Setzt du VAPID_PUBLIC und VAPID_PRIVATE als Environment-Variablen, gelten die. */
 
-import webpush from "web-push";
 import { getStore } from "@netlify/blobs";
 
 export async function keys() {
@@ -16,6 +15,9 @@ export async function keys() {
   const saved = await store.get("vapid", { type: "json" });
   if (saved && saved.publicKey && saved.privateKey) return saved;
 
+  // Nur beim allerersten Mal wird ueberhaupt ein Paar erzeugt — dafuer muss
+  // web-push nicht bei jedem Kaltstart im Kopf stehen.
+  const webpush = (await import("web-push")).default;
   const fresh = webpush.generateVAPIDKeys();
   await store.setJSON("vapid", fresh);
   return fresh;

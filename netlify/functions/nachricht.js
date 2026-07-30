@@ -11,7 +11,6 @@
    Kursalarme bekommen. Geraete, die der Push-Dienst nicht mehr kennt (404/410),
    werden dabei aussortiert. */
 
-import webpush from "web-push";
 import { getStore } from "@netlify/blobs";
 import { keys } from "./vapid.js";
 import { chefLesen, geheimnis } from "./sitzung.js";
@@ -52,6 +51,9 @@ export default async (request) => {
     return json({ ok: false, fehler: "Kein Geraet angemeldet." }, 400);
   }
 
+  // Erst hier laden: das blosse Zaehlen der Geraete braucht es nicht, und
+  // was im Kopf steht, wird bei jedem Kaltstart mitgeladen.
+  const webpush = (await import("web-push")).default;
   const k = await keys();
   webpush.setVapidDetails(
     process.env.VAPID_SUBJECT || "mailto:push@rcp-aktien.netlify.app",
@@ -95,18 +97,21 @@ export default async (request) => {
   });
 };
 
+/* Jeder Eintrag ist eine eigene Anfrage an den Speicher. Nacheinander
+   gelesen wartet die Verwaltung beim Oeffnen auf eine Anfrage nach der
+   anderen — deshalb alle auf einmal. */
 async function geraete(store) {
-  const out = [];
   try {
     const l = await store.list({ prefix: "sub-" });
-    for (const blob of l.blobs || []) {
-      const s = await store.get(blob.key, { type: "json" }).catch(() => null);
-      if (s && s.endpoint && s.keys) out.push({ key: blob.key, sub: s });
-    }
+    const alle = await Promise.all(
+      (l.blobs || []).map((b) =>
+        store.get(b.key, { type: "json" }).catch(() => null).then((s) => ({ key: b.key, sub: s }))
+      )
+    );
+    return alle.filter((g) => g.sub && g.sub.endpoint && g.sub.keys);
   } catch (e) {
-    // leerer Store zaehlt als null Geraete
+    return [];   // leerer Store zaehlt als null Geraete
   }
-  return out;
 }
 
 function json(obj, status) {

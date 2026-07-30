@@ -143,8 +143,12 @@ wegnimmt, wenn weiter unten ein Skript stolpert.
 
 Anmeldeseite und Auftakt haben denselben Hintergrund: ein Kursverlauf aus
 Kerzen, der von rechts nach links durchlaeuft. Zwei Baender uebereinander, das
-hintere gross und langsam (5,2 s), das vordere kleiner und schnell (2,1 s) —
+hintere gross und langsam (15 s), das vordere kleiner und schneller (6 s) —
 daraus entsteht Tiefe, ohne dass ein zweites Motiv noetig waere.
+
+Die erste Fassung lief dreimal so schnell und war unruhig: ein Anmeldebildschirm
+soll nicht draengen. Das Verhaeltnis der beiden Baender zueinander ist geblieben,
+nur das Tempo ist heruntergenommen.
 
 Gezeichnet wird nichts live. `kerzen.py` erzeugt einmal ein SVG aus
 einem Zufallsweg mit Trends und Gegenbewegungen; steigende Kerzen bleiben hohl,
@@ -201,6 +205,29 @@ Jede Nachricht bekommt einen eigenen Tag, überschreibt die vorige also nicht.
 Antippen öffnet die Liste. Geräte, die der Push-Dienst nicht mehr kennt,
 werden beim Senden aussortiert und in der Rückmeldung gezählt.
 
+## Wer gerade da ist
+
+Ganz oben in der Verwaltung steht **Gerade auf der Seite**: wer die App in
+diesem Moment offen hat, mit welchem Gerät und seit wann. Jede Kontokarte trägt
+darunter eine eigene Zeile — entweder „jetzt auf der Seite" oder „auf der Seite
+vor 20 Minuten". Angemeldet zu sein und die App offen zu haben ist nicht
+dasselbe, deshalb stehen beide Zeiten getrennt.
+
+Jede geöffnete Seite meldet sich alle 45 Sekunden (`besuch.js`), solange das
+Fenster sichtbar ist. Wandert es in den Hintergrund oder wird es geschlossen,
+geht ein letzter Ruf raus — sonst hinge jemand noch zwei Minuten als anwesend
+herum, nachdem er die App längst zugemacht hat. Wer zwei Minuten lang nichts
+mehr gemeldet hat, gilt als weg; zwei ausgefallene Rufe sind also erlaubt.
+
+Gezählt wird je **Gerät**, nicht je Konto: sonst würde das Schließen des einen
+Fensters jemanden abmelden, der auf dem zweiten Gerät noch liest. Eine Kennung
+je Gerät liegt im `localStorage`. Die Verwaltung sieht alle 20 Sekunden nach.
+
+Gespeichert wird nur Name, Geräteart und Zeit — keine IP-Adresse, kein voller
+User-Agent. Wird ein Konto gelöscht, verschwinden seine Besuche mit.
+
+Nur die Verwaltung darf nachsehen; melden darf jedes angemeldete Konto.
+
 ## Prüfen
 
 | Adresse | Erwartung |
@@ -211,6 +238,7 @@ werden beim Senden aussortiert und in der Rückmeldung gezählt.
 | `/.netlify/functions/konto?tat=wer` | `{"ok":true,"angemeldet":true,…}` |
 | `/.netlify/functions/nachricht` | `{"ok":true,"geraete":3}` — nur als Verwaltung |
 | `/.netlify/functions/positionen` | `{"ok":true,"anzahl":10,"positionen":[…]}` |
+| `/.netlify/functions/besuch` | `{"ok":true,"da":1,"leute":[…]}` — nur als Verwaltung |
 
 Der Punkt vor `netlify` gehört dazu. Ohne ihn wäre es ein Dateipfad, keine Function.
 

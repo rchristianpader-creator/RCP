@@ -184,6 +184,71 @@
   .senden .ergebnis.gut { color: #15803d; }
   .senden .ergebnis.schlecht { color: #b91c1c; }
 
+  /* Wer gerade da ist */
+  .jetzt {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 16px;
+    margin-bottom: 30px;
+    animation: riseIn 0.4s var(--ease) both;
+  }
+  .jetzt > .titel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .jetzt > .titel .zahl {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+    color: var(--fg);
+    background: var(--soft);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 1px 6px;
+  }
+
+  /* Der Punkt schlaegt langsam — das unterscheidet "jetzt" von "zuletzt",
+     ohne dass eine Farbe noetig waere. */
+  .punkt {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--fg);
+    animation: pulsen 2.4s ease-in-out infinite;
+  }
+  @keyframes pulsen {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.2; }
+  }
+
+  .person {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 11px 0 10px;
+    border-top: 1px solid var(--hair);
+  }
+  .person:first-child { border-top: 0; padding-top: 8px; }
+  .person > .punkt { flex: none; margin-top: 6px; }
+  .person .wer { flex: 1; min-width: 0; }
+  .person .nam { font-size: 14px; font-weight: 600; }
+  .person .adr { font-size: 11px; color: var(--muted); word-break: break-all; }
+  .person .wann {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: right;
+    white-space: nowrap;
+    padding-top: 2px;
+  }
+
   .konto {
     background: var(--card);
     border: 1px solid var(--line);
@@ -192,6 +257,7 @@
     margin-bottom: 10px;
     animation: riseIn 0.4s var(--ease) both;
   }
+  .konto .zeile .punkt { margin-right: 6px; }
   .konto .kopf {
     display: flex;
     align-items: baseline;
@@ -271,7 +337,8 @@
   .fuss a { color: var(--fg); text-decoration: none; border-bottom: 1px solid var(--line); }
 
   @media (prefers-reduced-motion: reduce) {
-    .konto { animation: none; }
+    .konto, .jetzt, .senden { animation: none; }
+    .punkt { animation: none; }
     * { transition-duration: 0.01ms !important; }
   }
 </style>
@@ -288,6 +355,11 @@
 <div class="meldung" id="meldung"></div>
 
 <main>
+  <section class="jetzt" id="jetztKasten">
+    <div class="titel">Gerade auf der Seite <span class="zahl" id="jetztZahl">–</span></div>
+    <div id="jetztListe"><div class="leer">wird geladen …</div></div>
+  </section>
+
   <a class="weiter" href="/positionen.html">
     <span class="was">Positionen</span>
     <span class="wie">Symbole hinzufügen, ändern, sortieren</span>
@@ -389,6 +461,13 @@
       (k.gesperrt_bis ? " · vorübergehend gesperrt bis " + datum(k.gesperrt_bis) : "");
     d.appendChild(z2);
 
+    // Anmelden ist das eine, offen haben das andere — deshalb eine eigene Zeile
+    var z3 = document.createElement("div");
+    z3.className = "zeile";
+    zeilen[k.mail] = z3;
+    besuchZeile(k.mail);
+    d.appendChild(z3);
+
     if (k.mail === ich) return d;
 
     var kn = document.createElement("div");
@@ -425,7 +504,9 @@
         if (!a) return;
         if (!a.ok) { sagen(a.fehler || "Das hat nicht geklappt.", false); return; }
 
-        untertitel.textContent = a.konten.length === 1 ? "1 Konto" : a.konten.length + " Konten";
+        kontenZahl = a.konten.length;
+        untertitelSchreiben();
+        zeilen = {};
         inhalt.textContent = "";
 
         ["wartet", "frei", "gesperrt"].forEach(function (status) {
@@ -458,6 +539,157 @@
       })
       .catch(function () { sagen("Keine Verbindung.", false); });
   }
+
+  /* ---------- Wer gerade da ist, und wer zuletzt ---------- */
+
+  var API3 = "/.netlify/functions/besuch";
+  var jetztKasten = document.getElementById("jetztKasten");
+  var jetztZahl = document.getElementById("jetztZahl");
+  var jetztListe = document.getElementById("jetztListe");
+
+  var praesenz = {};    // mail -> was der Server ueber diese Person sagt
+  var zeilen = {};      // mail -> die Besuchszeile in ihrer Kontokarte
+  var bezug = 0;        // Serverzeit des letzten Abrufs; gegen falsch gehende Uhren
+  var daZahl = 0;
+  var kontenZahl = null;
+
+  function untertitelSchreiben() {
+    if (kontenZahl === null) return;
+    untertitel.textContent =
+      (kontenZahl === 1 ? "1 Konto" : kontenZahl + " Konten") +
+      " · " + (daZahl ? daZahl + " gerade da" : "niemand gerade da");
+  }
+
+  /* Wie lange ist das her */
+  function her(iso) {
+    var t = Date.parse(iso || "");
+    if (!t) return null;
+    var s = Math.max(0, Math.round((bezug - t) / 1000));
+    if (s < 90) return "gerade eben";
+    var m = Math.round(s / 60);
+    if (m < 60) return "vor " + m + " Minuten";
+    var h = Math.round(m / 60);
+    if (h < 24) return "vor " + h + (h === 1 ? " Stunde" : " Stunden");
+    var tg = Math.round(h / 24);
+    if (tg < 8) return "vor " + tg + (tg === 1 ? " Tag" : " Tagen");
+    return "am " + datum(iso);
+  }
+
+  /* Wie lange schon */
+  function schon(iso) {
+    var t = Date.parse(iso || "");
+    if (!t) return "";
+    var m = Math.round((bezug - t) / 60000);
+    if (m < 2) return "seit gerade eben";
+    if (m < 60) return "seit " + m + " Minuten";
+    var h = Math.floor(m / 60);
+    return "seit " + h + (h === 1 ? " Stunde" : " Stunden");
+  }
+
+  function geraeteDa(p) {
+    var arten = [];
+    (p.geraete || []).forEach(function (g) {
+      if (g.da && arten.indexOf(g.art) < 0) arten.push(g.art);
+    });
+    return arten.join(" + ");
+  }
+
+  function punkt() {
+    var s = document.createElement("span");
+    s.className = "punkt";
+    return s;
+  }
+
+  function besuchZeile(mail) {
+    var z = zeilen[mail];
+    if (!z) return;
+    var p = praesenz[mail];
+    z.textContent = "";
+
+    if (p && p.da) {
+      z.appendChild(punkt());
+      z.appendChild(document.createTextNode(
+        "jetzt auf der Seite · " + (geraeteDa(p) || "Gerät") + " · " + schon(p.seit)
+      ));
+    } else if (p && p.zuletzt) {
+      z.appendChild(document.createTextNode(
+        "auf der Seite " + her(p.zuletzt) +
+        (p.geraete && p.geraete[0] ? " · " + p.geraete[0].art : "")
+      ));
+    } else {
+      z.appendChild(document.createTextNode("noch nie auf der Seite"));
+    }
+  }
+
+  function personZeile(p) {
+    var d = document.createElement("div");
+    d.className = "person";
+    d.appendChild(punkt());
+
+    var wer = document.createElement("div");
+    wer.className = "wer";
+    var nam = document.createElement("div");
+    nam.className = "nam";
+    nam.textContent = p.name || p.mail;
+    wer.appendChild(nam);
+    if (p.name) {
+      var adr = document.createElement("div");
+      adr.className = "adr";
+      adr.textContent = p.mail;
+      wer.appendChild(adr);
+    }
+    d.appendChild(wer);
+
+    var wann = document.createElement("div");
+    wann.className = "wann";
+    wann.appendChild(document.createTextNode(geraeteDa(p) || "Gerät"));
+    wann.appendChild(document.createElement("br"));
+    wann.appendChild(document.createTextNode(schon(p.seit)));
+    d.appendChild(wann);
+
+    return d;
+  }
+
+  function besuchLaden() {
+    fetch(API3, { credentials: "same-origin", cache: "no-store" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (a) {
+        if (!a || !a.ok) { jetztKasten.hidden = true; return; }
+        jetztKasten.hidden = false;
+
+        bezug = Date.parse(a.jetzt) || Date.now();
+        praesenz = {};
+        a.leute.forEach(function (p) { praesenz[p.mail] = p; });
+
+        var da = a.leute.filter(function (p) { return p.da; });
+        daZahl = da.length;
+        jetztZahl.textContent = daZahl;
+
+        jetztListe.textContent = "";
+        if (!da.length) {
+          var leer = document.createElement("div");
+          leer.className = "leer";
+          leer.textContent = "Gerade ist niemand da.";
+          jetztListe.appendChild(leer);
+        } else {
+          da.forEach(function (p) { jetztListe.appendChild(personZeile(p)); });
+        }
+
+        Object.keys(zeilen).forEach(function (mail) { besuchZeile(mail); });
+        untertitelSchreiben();
+      })
+      .catch(function () {});
+  }
+
+  besuchLaden();
+  setInterval(function () {
+    if (document.visibilityState === "visible") besuchLaden();
+  }, 20000);
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible") besuchLaden();
+  });
+  // Sobald diese Seite sich selbst gemeldet hat, gleich noch einmal nachsehen
+  document.addEventListener("rcp:besuch", besuchLaden);
 
   /* ---------- Nachricht an alle ---------- */
 
@@ -549,5 +781,6 @@
   laden();
 })();
 </script>
+<script src="/besuch.js" defer></script>
 </body>
 </html>

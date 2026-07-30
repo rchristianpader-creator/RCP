@@ -21,11 +21,11 @@
    Konten liegen in Netlify Blobs, Store "aktien-konten". Passwoerter als
    scrypt-Hash mit eigenem Salz — im Klartext steht nichts. */
 
-import webpush from "web-push";
 import { getStore } from "@netlify/blobs";
 import { keys } from "./vapid.js";
 import {
   LADEN,
+  BESUCH,
   DAUER_KURZ,
   DAUER_LANG,
   geheimnis,
@@ -116,18 +116,23 @@ async function wer(request, store) {
   });
 }
 
-async function zaehleWartende(store) {
+/* Alle Konten auf einmal holen, nicht eins nach dem anderen: jeder Eintrag
+   ist eine eigene Anfrage an den Speicher, und die Liste soll beim Oeffnen
+   nicht erst eine Kette davon abwarten. */
+async function alleKonten(store) {
   try {
     const l = await store.list({ prefix: "nutzer/" });
-    let n = 0;
-    for (const blob of l.blobs || []) {
-      const k = await store.get(blob.key, { type: "json" }).catch(() => null);
-      if (k && k.status === "wartet") n++;
-    }
-    return n;
+    const alle = await Promise.all(
+      (l.blobs || []).map((b) => store.get(b.key, { type: "json" }).catch(() => null))
+    );
+    return alle.filter(Boolean);
   } catch (e) {
-    return 0;
+    return [];
   }
+}
+
+async function zaehleWartende(store) {
+  return (await alleKonten(store)).filter((k) => k.status === "wartet").length;
 }
 
 /* ---------- Registrierung ---------- */
@@ -187,13 +192,17 @@ async function meldeAnfrage(konto) {
     const push = getStore("aktien-push");
     const l = await push.list({ prefix: "sub-" });
 
-    const ziele = [];
-    for (const blob of l.blobs || []) {
-      const s = await push.get(blob.key, { type: "json" }).catch(() => null);
-      if (s && s.endpoint && s.rolle === "chef") ziele.push({ key: blob.key, sub: s });
-    }
+    const alle = await Promise.all(
+      (l.blobs || []).map((b) =>
+        push.get(b.key, { type: "json" }).catch(() => null).then((s) => ({ key: b.key, sub: s }))
+      )
+    );
+    const ziele = alle.filter((z) => z.sub && z.sub.endpoint && z.sub.rolle === "chef");
     if (!ziele.length) return;
 
+    // web-push erst hier laden: die Liste und die Anmeldung brauchen es nie,
+    // und was oben im Kopf steht, wird bei jedem Kaltstart mitgeladen.
+    const webpush = (await import("web-push")).default;
     const k = await keys();
     webpush.setVapidDetails(
       process.env.VAPID_SUBJECT || "mailto:push@rcp-aktien.netlify.app",
@@ -208,7 +217,7 @@ async function meldeAnfrage(konto) {
       url: "/verwaltung.html"
     });
 
-    for (const z of ziele) {
+    await Promise.all(ziele.map(async (z) => {
       try {
         await webpush.sendNotification(z.sub, nutzlast);
       } catch (e) {
@@ -217,7 +226,7 @@ async function meldeAnfrage(konto) {
           await push.delete(z.key).catch(() => {});
         }
       }
-    }
+    }));
   } catch (e) {
     // stiller Fehlschlag, die Anfrage steht
   }
@@ -342,11 +351,8 @@ async function liste(request, store) {
   const chef = await alsChef(request, store);
   if (!chef) return json({ ok: false, fehler: "nur fuer die Verwaltung" }, 403);
 
-  const l = await store.list({ prefix: "nutzer/" });
   const konten = [];
-  for (const blob of l.blobs || []) {
-    const k = await store.get(blob.key, { type: "json" }).catch(() => null);
-    if (!k) continue;
+  for (const k of await alleKonten(store)) {
     konten.push({
       mail: k.mail,
       name: k.name || "",
@@ -400,7 +406,19 @@ async function loeschen(request, store) {
   }
 
   await store.delete(schluessel(mail));
+  await besuchWeg(mail);
   return json({ ok: true, mail: mail });
+}
+
+/* Ein geloeschtes Konto soll auch nicht mehr in "wer war zuletzt da" stehen. */
+async function besuchWeg(mail) {
+  try {
+    const store = getStore(BESUCH);
+    const l = await store.list({ prefix: "da/" + schluessel(mail) + "/" });
+    await Promise.all((l.blobs || []).map((b) => store.delete(b.key).catch(() => {})));
+  } catch (e) {
+    // Das Konto ist weg, das genuegt
+  }
 }
 
 /* ---------- Kleinkram ---------- */

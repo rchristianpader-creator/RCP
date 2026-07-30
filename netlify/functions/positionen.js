@@ -16,7 +16,6 @@
    Beim allerersten Aufruf, solange nichts gespeichert ist, wird der Bestand
    aus positionen-start.js uebernommen. */
 
-import webpush from "web-push";
 import { getStore } from "@netlify/blobs";
 import { START } from "./positionen-start.js";
 import { keys } from "./vapid.js";
@@ -195,13 +194,16 @@ async function melden(neu) {
   try {
     const push = getStore("aktien-push");
     const l = await push.list({ prefix: "sub-" });
-    const ziele = [];
-    for (const blob of l.blobs || []) {
-      const s = await push.get(blob.key, { type: "json" }).catch(() => null);
-      if (s && s.endpoint && s.keys) ziele.push({ key: blob.key, sub: s });
-    }
+    const alle = await Promise.all(
+      (l.blobs || []).map((b) =>
+        push.get(b.key, { type: "json" }).catch(() => null).then((s) => ({ key: b.key, sub: s }))
+      )
+    );
+    const ziele = alle.filter((z) => z.sub && z.sub.endpoint && z.sub.keys);
     if (!ziele.length) return 0;
 
+    // Erst hier laden: das Lesen der Liste braucht web-push nie
+    const webpush = (await import("web-push")).default;
     const k = await keys();
     webpush.setVapidDetails(
       process.env.VAPID_SUBJECT || "mailto:push@rcp-aktien.netlify.app",
@@ -218,7 +220,7 @@ async function melden(neu) {
     });
 
     let raus = 0;
-    for (const z of ziele) {
+    await Promise.all(ziele.map(async (z) => {
       try {
         await webpush.sendNotification(z.sub, nutzlast);
         raus++;
@@ -227,7 +229,7 @@ async function melden(neu) {
           await push.delete(z.key).catch(() => {});
         }
       }
-    }
+    }));
     return raus;
   } catch (e) {
     return 0;
