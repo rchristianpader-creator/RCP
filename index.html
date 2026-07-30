@@ -317,6 +317,18 @@
     border-color: var(--fg);
     background: var(--fg);
     color: #fff;
+    animation: beat-badge 2s ease-in-out infinite;
+  }
+  /* Gleiche Dauer und gleiche Kurve wie beat-nav und beat-card: alle drei
+     Zeichen einer aktiven Position schlagen im Gleichtakt. Der Ring ist
+     kleiner, weil das Abzeichen selbst klein ist. */
+  @keyframes beat-badge {
+    0%   { box-shadow: 0 0 0 0 rgba(17, 17, 17, 0.30); }
+    50%  { box-shadow: 0 0 0 5px rgba(17, 17, 17, 0.06); }
+    100% { box-shadow: 0 0 0 0 rgba(17, 17, 17, 0.30); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .badge.aktiv { animation: none; }
   }
 
 
