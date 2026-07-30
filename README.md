@@ -31,6 +31,8 @@ netlify/functions/subscribe.js        Speichert angemeldete Geräte samt Besitze
 netlify/functions/alerts.js           Zonen-Prüfung, läuft alle 30 Minuten
 netlify/functions/push-test.js        Testmeldung an alle Geräte
 netlify/functions/on-publish.js       Meldet nach jedem Deploy, was neu ist
+netlify/functions/positionen.js       Die Watchlist als Daten (lesen, ändern)
+netlify/functions/positionen-start.js Der Bestand für den allerersten Aufruf
 netlify/functions/konto.js            Registrierung, Anmeldung, Freigabe
 netlify/functions/nachricht.js        Nachricht an alle Geräte (nur Verwaltung)
 netlify/functions/sitzung.js          Unterschrift und Passwort-Hash (kein Endpunkt)
@@ -39,6 +41,7 @@ netlify/edge-functions/tor.js         Die Sperre: prüft jede Anfrage vor allem 
 
 anmelden.html                         Anmelden und Zugang anfragen
 verwaltung.html                       Konten freigeben, sperren, löschen
+positionen.html                       Symbole hinzufügen, ändern, sortieren
 ```
 
 ## Deploy
@@ -53,12 +56,12 @@ Abhängigkeiten aus `package.json` selbst.
 3. In der Kopfzeile auf **Benachrichtigungen** tippen
 4. Im Blatt **Testmeldung senden** drücken
 
-Danach läuft es allein: `alerts.js` liest Symbole und Einkaufszonen direkt aus
-der veröffentlichten `index.html`, prüft alle 30 Minuten und meldet sich nur,
-wenn ein Kurs **neu** in seine Zone eintritt. Zwischen 23 und 7 Uhr ist Ruhe.
+Danach läuft es allein: `alerts.js` liest Symbole und Einkaufszonen aus der
+gespeicherten Watchlist, prüft alle 30 Minuten und meldet sich nur, wenn ein
+Kurs **neu** in seine Zone eintritt. Zwischen 23 und 7 Uhr ist Ruhe.
 
-Änderst du eine Zone im HTML, zieht der Alarm automatisch mit — es gibt keine
-zweite Liste zu pflegen.
+Änderst du eine Zone unter **Verwaltung → Positionen**, zieht der Alarm
+automatisch mit — es gibt keine zweite Liste zu pflegen.
 
 ## Meldung beim Veröffentlichen
 
@@ -86,6 +89,40 @@ Der erste Aufruf speichert nur den Stand, ohne zu senden.
 
 `SITE_PASSWORD` wird nicht mehr gebraucht und kann gelöscht werden.
 
+## Positionen
+
+Die Watchlist steht nicht mehr im HTML, sondern in Netlify Blobs (Store
+`aktien-positionen`, ein Eintrag mit der ganzen Liste). `index.html` baut Menü
+und Karten daraus auf; `status.js` und `alerts.js` lesen dieselbe Quelle, es
+gibt also weiterhin nur eine Liste zu pflegen.
+
+Bearbeitet wird sie unter **Verwaltung → Positionen**: hinzufügen, ändern,
+verschieben, entfernen, als NEU markieren. Gespeichert wird immer die ganze
+Liste auf einmal.
+
+Je Position:
+
+| Feld | Wofür |
+|---|---|
+| Name, Kürzel, Branche | Überschrift der Karte |
+| Beschriftung im Menü | der Chip oben — bei Gold steht dort `Gold`, auf der Karte `XAUUSD` |
+| Einkaufszone | zwei Zahlen, z. B. `50,12 – 39,19 USD` — daraus kommen Alarm und Sortierung |
+| Ziel | die Zeile unter der Überschrift |
+| TradingView-Symbol | `NASDAQ:INTC` — daraus wird der Chart gebaut |
+| Yahoo-Symbol | Kurse für Alarme und Statusband |
+| Suchbegriff für News | leer heißt: kein News-Block auf dieser Karte |
+| finanzen.net-Seite, Analyse-Chart | optional, beide https |
+| Anker | `#intc` in der Adresse — später nicht mehr ändern, sonst brechen alte Links |
+| NEU | Markierung am Chip und auf der Karte |
+
+Beim Speichern einer **neuen** Position geht automatisch eine Push-Meldung an
+alle Geräte. Änderungen an vorhandenen melden nichts.
+
+Der allererste Aufruf übernimmt den Bestand aus `positionen-start.js`. Danach
+ist der Store die Wahrheit; Änderungen an dieser Datei haben keine Wirkung mehr.
+
+Ohne Netz baut die Seite aus der zuletzt gesehenen Liste im lokalen Speicher.
+
 ## Nachricht an alle
 
 In der Verwaltung steht oben **Nachricht an alle**: Titel, Text, senden. Sie
@@ -106,6 +143,7 @@ werden beim Senden aussortiert und in der Rückmeldung gezählt.
 | `/.netlify/functions/alerts` | Alle Positionen mit Kurs, Zone und Status |
 | `/.netlify/functions/konto?tat=wer` | `{"ok":true,"angemeldet":true,…}` |
 | `/.netlify/functions/nachricht` | `{"ok":true,"geraete":3}` — nur als Verwaltung |
+| `/.netlify/functions/positionen` | `{"ok":true,"anzahl":10,"positionen":[…]}` |
 
 Der Punkt vor `netlify` gehört dazu. Ohne ihn wäre es ein Dateipfad, keine Function.
 

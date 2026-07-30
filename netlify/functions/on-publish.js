@@ -14,6 +14,7 @@ import webpush from "web-push";
 import { getStore } from "@netlify/blobs";
 import { keys } from "./vapid.js";
 import { dienstKopf } from "./sitzung.js";
+import { lesen, LADEN } from "./positionen.js";
 
 export default async () => {
   const store = getStore("aktien-push");
@@ -119,19 +120,10 @@ async function seiteLesen() {
       .trim();
   }
 
-  // Positionen: Kuerzel je Karte
-  const positionen = [];
-  let letzteId = "";
-  const blocks = html.split('<section class="card"');
-  for (let i = 1; i < blocks.length; i++) {
-    const block = blocks[i];
-    const id = (block.match(/^\s+id="([^"]+)"/) || [])[1];
-    const badge = (block.match(/<span class="badge">([^<]+)<\/span>/) || [])[1];
-    if (badge) {
-      positionen.push(badge.trim());
-      if (id) letzteId = id;
-    }
-  }
+  // Positionen kommen aus der gespeicherten Watchlist, nicht mehr aus dem HTML.
+  // Neue Eintraege meldet positionen.js beim Speichern selbst; hier bleibt es
+  // als Netz fuer den Fall, dass die Liste anders geaendert wurde.
+  const positionen = (await lesen(getStore(LADEN))).map((p) => p.badge).filter(Boolean);
 
   return { banner: banner, positionen: positionen, letzteId: letzteId };
 }

@@ -228,6 +228,16 @@
     margin-top: 16px;
   }
   .karten > .card { margin: 0 14px 56px; }
+  .karten-fehler {
+    margin: 0 14px 56px;
+    padding: 18px 16px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+  }
 
   /* Sortier-Knopf: nur das Zeichen, auf der Hoehe der Chips daneben.
      Was er tut, steht in aria-label und title — sichtbar ist der Zustand
@@ -1115,16 +1125,6 @@
 </header>
 
 <nav>
-  <a href="#uaa">UAA</a>
-  <a href="#dow">DOW</a>
-  <a href="#nvo">NVO</a>
-  <a href="#tsla">TSLA</a>
-  <a href="#btc">BTC</a>
-  <a href="#hut">HUT</a>
-  <a href="#gold">Gold</a>
-  <a href="#silber">Silber</a>
-  <a href="#intc" class="nav-new">INTC<span class="nav-neu">NEU</span></a>
-  <a href="#uuuu" class="nav-new">UUUU<span class="nav-neu">NEU</span></a>
   <button class="sort-chip" id="sortBtn" type="button" aria-pressed="false"
           aria-label="Nach Nähe zur Einkaufszone sortieren"
           title="Nach Nähe zur Einkaufszone sortieren"><span class="zeichen">⇅</span></button>
@@ -1163,285 +1163,8 @@
   <div class="fg-sub" id="fg-sub">Marktstimmung 0–100</div>
 </div>
 
-<div class="karten" id="karten">
+<div class="karten" id="karten"></div>
 
-<section class="card" id="uaa">
-  <div class="card-head">
-    <div class="row">
-      <h2>Under Armour, Inc.</h2>
-      <span class="badge">UAA</span>
-    </div>
-    <div class="info">Performance Apparel · <span class="zone">Einkaufszone 6,01 – 5,70 USD</span></div>
-  </div>
-  <div class="ziel-bar">
-    <span class="k">Ziel</span>
-    <span class="v">14,44 USD</span>
-  </div>
-  <div class="chart">
-    <iframe src="https://s.tradingview.com/widgetembed/?symbol=NYSE%3AUAA&interval=D&hidesidetoolbar=0&theme=light&style=1&locale=de&toolbarbg=ffffff&timezone=Europe%2FBerlin&withdateranges=1&overrides=%7B%22mainSeriesProperties.priceAxisProperties.log%22%3Atrue%7D" allowfullscreen loading="lazy"></iframe>
-  </div>
-      <div class="news-block" data-news-query="Under Armour Aktie" data-news-id="uaa" data-yahoo="UAA" data-fn-page="https://www.finanzen.net/nachrichten/alle/under_armour" data-news-keys="Under Armour|UAA">
-    <div class="news-label">News · Live<span class="live-dot" aria-hidden="true"></span></div>
-    <div class="news-rotator">
-      <div class="news-item active"><a href="#" style="opacity:0.5;pointer-events:none">Aktuelle Meldungen werden geladen…</a></div>
-    </div>
-    <div class="news-dots"><span class="on"></span></div>
-  </div>
-<div class="actions">
-    <a class="btn" href="https://de.tradingview.com/chart/IsFAfevG/" target="_blank" rel="noopener">Analyse-Chart (Fibos) öffnen</a>
-  </div>
-</section>
-
-<section class="card" id="dow">
-  <div class="card-head">
-    <div class="row">
-      <h2>Dow, Inc.</h2>
-      <span class="badge">DOW</span>
-    </div>
-    <div class="info">Chemie & Materialien · <span class="zone">Einkaufszone 29,52 – 27,05 USD</span></div>
-  </div>
-  <div class="ziel-bar">
-    <span class="k">Ziel</span>
-    <span class="v">88,90 USD</span>
-  </div>
-  <div class="chart">
-    <iframe src="https://s.tradingview.com/widgetembed/?symbol=NYSE%3ADOW&interval=D&hidesidetoolbar=0&theme=light&style=1&locale=de&toolbarbg=ffffff&timezone=Europe%2FBerlin&withdateranges=1&overrides=%7B%22mainSeriesProperties.priceAxisProperties.log%22%3Atrue%7D" allowfullscreen loading="lazy"></iframe>
-  </div>
-      <div class="news-block" data-news-query="Dow Aktie" data-news-id="dow" data-yahoo="DOW" data-fn-page="https://www.finanzen.net/nachrichten/alle/dow" data-news-keys="Dow Inc|Dow Chemical|DOW">
-    <div class="news-label">News · Live<span class="live-dot" aria-hidden="true"></span></div>
-    <div class="news-rotator">
-      <div class="news-item active"><a href="#" style="opacity:0.5;pointer-events:none">Aktuelle Meldungen werden geladen…</a></div>
-    </div>
-    <div class="news-dots"><span class="on"></span></div>
-  </div>
-<div class="actions">
-    <a class="btn" href="https://de.tradingview.com/chart/anWHZ0Ot/" target="_blank" rel="noopener">Analyse-Chart (Fibos) öffnen</a>
-  </div>
-</section>
-
-<section class="card" id="nvo">
-  <div class="card-head">
-    <div class="row">
-      <h2>Novo Nordisk A/S</h2>
-      <span class="badge">NVO</span>
-    </div>
-    <div class="info">Pharma · <span class="zone">Einkaufszone 42,67 – 40,75 USD</span></div>
-  </div>
-  <div class="ziel-bar">
-    <span class="k">Ziel</span>
-    <span class="v">76,23 USD</span>
-  </div>
-  <div class="chart">
-    <iframe src="https://s.tradingview.com/widgetembed/?symbol=NYSE%3ANVO&interval=D&hidesidetoolbar=0&theme=light&style=1&locale=de&toolbarbg=ffffff&timezone=Europe%2FBerlin&withdateranges=1&overrides=%7B%22mainSeriesProperties.priceAxisProperties.log%22%3Atrue%7D" allowfullscreen loading="lazy"></iframe>
-  </div>
-      <div class="news-block" data-news-query="Novo Nordisk Aktie" data-news-id="nvo" data-yahoo="NVO" data-fn-page="https://www.finanzen.net/nachrichten/alle/novo_nordisk" data-news-keys="Novo Nordisk|NVO">
-    <div class="news-label">News · Live<span class="live-dot" aria-hidden="true"></span></div>
-    <div class="news-rotator">
-      <div class="news-item active"><a href="#" style="opacity:0.5;pointer-events:none">Aktuelle Meldungen werden geladen…</a></div>
-    </div>
-    <div class="news-dots"><span class="on"></span></div>
-  </div>
-<div class="actions">
-    <a class="btn" href="https://de.tradingview.com/chart/01o3MapY/" target="_blank" rel="noopener">Analyse-Chart (Fibos) öffnen</a>
-  </div>
-</section>
-
-<section class="card" id="tsla">
-  <div class="card-head">
-    <div class="row">
-      <h2>Tesla, Inc.</h2>
-      <span class="badge">TSLA</span>
-    </div>
-    <div class="info">Elektrofahrzeuge & AI · <span class="zone">Einkaufszone 263 – 226 USD</span></div>
-  </div>
-  <div class="ziel-bar">
-    <span class="k">Ziel</span>
-    <span class="v">793 USD</span>
-  </div>
-  <div class="chart">
-    <iframe src="https://s.tradingview.com/widgetembed/?symbol=NASDAQ%3ATSLA&interval=D&hidesidetoolbar=0&theme=light&style=1&locale=de&toolbarbg=ffffff&timezone=Europe%2FBerlin&withdateranges=1&overrides=%7B%22mainSeriesProperties.priceAxisProperties.log%22%3Atrue%7D" allowfullscreen loading="lazy"></iframe>
-  </div>
-      <div class="news-block" data-news-query="Tesla Aktie" data-news-id="tsla" data-yahoo="TSLA" data-fn-page="https://www.finanzen.net/nachrichten/alle/tesla" data-news-keys="Tesla|TSLA">
-    <div class="news-label">News · Live<span class="live-dot" aria-hidden="true"></span></div>
-    <div class="news-rotator">
-      <div class="news-item active"><a href="#" style="opacity:0.5;pointer-events:none">Aktuelle Meldungen werden geladen…</a></div>
-    </div>
-    <div class="news-dots"><span class="on"></span></div>
-  </div>
-<div class="actions">
-    <a class="btn" href="https://de.tradingview.com/chart/nJwqfuat/" target="_blank" rel="noopener">Analyse-Chart (Fibos) öffnen</a>
-  </div>
-</section>
-
-<section class="card" id="btc">
-  <div class="card-head">
-    <div class="row">
-      <h2>Bitcoin</h2>
-      <span class="badge">BTCUSD</span>
-    </div>
-    <div class="info">Kryptowährung · <span class="zone">Einkaufszone 44.098 – 34.496 USD</span></div>
-  </div>
-  <div class="ziel-bar">
-    <span class="k">Ziel</span>
-    <span class="v">95.030 USD</span>
-  </div>
-  <div class="chart">
-    <iframe src="https://s.tradingview.com/widgetembed/?symbol=BINANCE%3ABTCUSDT&interval=D&hidesidetoolbar=0&theme=light&style=1&locale=de&toolbarbg=ffffff&timezone=Europe%2FBerlin&withdateranges=1&overrides=%7B%22mainSeriesProperties.priceAxisProperties.log%22%3Atrue%7D" allowfullscreen loading="lazy"></iframe>
-  </div>
-      <div class="news-block" data-news-query="Bitcoin Kurs" data-news-id="btc" data-yahoo="BTC-USD" data-fn-page="https://www.finanzen.net/nachrichten/alle/bitcoin" data-news-keys="Bitcoin|BTC|Krypto">
-    <div class="news-label">News · Live<span class="live-dot" aria-hidden="true"></span></div>
-    <div class="news-rotator">
-      <div class="news-item active"><a href="#" style="opacity:0.5;pointer-events:none">Aktuelle Meldungen werden geladen…</a></div>
-    </div>
-    <div class="news-dots"><span class="on"></span></div>
-  </div>
-<div class="actions">
-    <a class="btn" href="https://de.tradingview.com/chart/GL9h1XoG/" target="_blank" rel="noopener">Analyse-Chart (Fibos) öffnen</a>
-  </div>
-</section>
-
-<section class="card" id="hut">
-  <div class="card-head">
-    <div class="row">
-      <h2>Hut 8 Corp.</h2>
-      <span class="badge">HUT</span>
-    </div>
-    <div class="info">Bitcoin Mining / HPC · <span class="zone">Einkaufszone 28,94 – 19,97 USD</span></div>
-  </div>
-  <div class="ziel-bar">
-    <span class="k">Ziel</span>
-    <span class="v">140,04 USD</span>
-  </div>
-  <div class="chart">
-    <iframe src="https://s.tradingview.com/widgetembed/?symbol=NASDAQ%3AHUT&interval=D&hidesidetoolbar=0&theme=light&style=1&locale=de&toolbarbg=ffffff&timezone=Europe%2FBerlin&withdateranges=1&overrides=%7B%22mainSeriesProperties.priceAxisProperties.log%22%3Atrue%7D" allowfullscreen loading="lazy"></iframe>
-  </div>
-      <div class="news-block" data-news-query="Hut 8 Aktie" data-news-id="hut" data-yahoo="HUT" data-fn-page="https://www.finanzen.net/nachrichten/alle/hut_8" data-news-keys="Hut 8|Hut8|HUT">
-    <div class="news-label">News · Live<span class="live-dot" aria-hidden="true"></span></div>
-    <div class="news-rotator">
-      <div class="news-item active"><a href="#" style="opacity:0.5;pointer-events:none">Aktuelle Meldungen werden geladen…</a></div>
-    </div>
-    <div class="news-dots"><span class="on"></span></div>
-  </div>
-<div class="actions">
-    <a class="btn" href="https://de.tradingview.com/chart/Z0bGwKnE/" target="_blank" rel="noopener">Analyse-Chart (Fibos) öffnen</a>
-  </div>
-</section>
-
-<section class="card" id="gold">
-  <div class="card-head">
-    <div class="row">
-      <h2>Gold Spot</h2>
-      <span class="badge">XAUUSD</span>
-    </div>
-    <div class="info">Edelmetall · <span class="zone">Einkaufszone 3.763 – 3.330 USD</span></div>
-  </div>
-  <div class="ziel-bar">
-    <span class="k">Ziel</span>
-    <span class="v">5.101 – 6.258 USD</span>
-  </div>
-  <div class="chart">
-    <iframe src="https://s.tradingview.com/widgetembed/?symbol=OANDA%3AXAUUSD&interval=D&hidesidetoolbar=0&theme=light&style=1&locale=de&toolbarbg=ffffff&timezone=Europe%2FBerlin&withdateranges=1&overrides=%7B%22mainSeriesProperties.priceAxisProperties.log%22%3Atrue%7D" allowfullscreen loading="lazy"></iframe>
-  </div>
-      <div class="news-block" data-news-query="Goldpreis" data-news-id="gold" data-yahoo="GC=F" data-fn-page="https://www.finanzen.net/rohstoffe/goldpreis" data-news-keys="Goldpreis|Gold">
-    <div class="news-label">News · Live<span class="live-dot" aria-hidden="true"></span></div>
-    <div class="news-rotator">
-      <div class="news-item active"><a href="#" style="opacity:0.5;pointer-events:none">Aktuelle Meldungen werden geladen…</a></div>
-    </div>
-    <div class="news-dots"><span class="on"></span></div>
-  </div>
-<div class="actions">
-    <a class="btn" href="https://de.tradingview.com/chart/KAott5wx/" target="_blank" rel="noopener">Analyse-Chart (Fibos) öffnen</a>
-  </div>
-</section>
-
-<section class="card" id="silber">
-  <div class="card-head">
-    <div class="row">
-      <h2>Silber</h2>
-      <span class="badge">XAGUSD</span>
-    </div>
-    <div class="info">Edelmetall · <span class="zone">Einkaufszone 45,43 – 39,50 USD</span></div>
-  </div>
-  <div class="ziel-bar">
-    <span class="k">Ziel</span>
-    <span class="v">172 – 892 USD</span>
-  </div>
-  <div class="chart">
-    <iframe src="https://s.tradingview.com/widgetembed/?symbol=OANDA%3AXAGUSD&interval=D&hidesidetoolbar=0&theme=light&style=1&locale=de&toolbarbg=ffffff&timezone=Europe%2FBerlin&withdateranges=1&overrides=%7B%22mainSeriesProperties.priceAxisProperties.log%22%3Atrue%7D" allowfullscreen loading="lazy"></iframe>
-  </div>
-      <div class="news-block" data-news-query="Silberpreis" data-news-id="silber" data-yahoo="SI=F" data-fn-page="https://www.finanzen.net/rohstoffe/silberpreis" data-news-keys="Silberpreis|Silber">
-    <div class="news-label">News · Live<span class="live-dot" aria-hidden="true"></span></div>
-    <div class="news-rotator">
-      <div class="news-item active"><a href="#" style="opacity:0.5;pointer-events:none">Aktuelle Meldungen werden geladen…</a></div>
-    </div>
-    <div class="news-dots"><span class="on"></span></div>
-  </div>
-<div class="actions">
-    <a class="btn" href="https://de.tradingview.com/chart/XXF0Fgrb/" target="_blank" rel="noopener">Analyse-Chart (Fibos) öffnen</a>
-  </div>
-</section>
-
-<section class="card" id="intc">
-  <div class="card-head">
-    <div class="row">
-      <h2>Intel Corporation</h2>
-      <div class="badges">
-        <span class="badge neu">NEU</span>
-        <span class="badge">INTC</span>
-      </div>
-    </div>
-    <div class="info">Halbleiter · <span class="zone">Einkaufszone 50,12 – 39,19 USD</span></div>
-  </div>
-  <div class="ziel-bar">
-    <span class="k">Ziel</span>
-    <span class="v">295,75 USD</span>
-  </div>
-  <div class="chart">
-    <iframe src="https://s.tradingview.com/widgetembed/?symbol=NASDAQ%3AINTC&interval=D&hidesidetoolbar=0&theme=light&style=1&locale=de&toolbarbg=ffffff&timezone=Europe%2FBerlin&withdateranges=1&overrides=%7B%22mainSeriesProperties.priceAxisProperties.log%22%3Atrue%7D" allowfullscreen loading="lazy"></iframe>
-  </div>
-      <div class="news-block" data-news-query="Intel Aktie" data-news-id="intc" data-yahoo="INTC" data-fn-page="https://www.finanzen.net/nachrichten/alle/intel" data-news-keys="Intel|INTC">
-    <div class="news-label">News · Live<span class="live-dot" aria-hidden="true"></span></div>
-    <div class="news-rotator">
-      <div class="news-item active"><a href="#" style="opacity:0.5;pointer-events:none">Aktuelle Meldungen werden geladen…</a></div>
-    </div>
-    <div class="news-dots"><span class="on"></span></div>
-  </div>
-<div class="actions">
-    <a class="btn" href="https://de.tradingview.com/chart/EzouZ6ts/" target="_blank" rel="noopener">Analyse-Chart (Fibos) öffnen</a>
-  </div>
-</section>
-
-<section class="card" id="uuuu">
-  <div class="card-head">
-    <div class="row">
-      <h2>Energy Fuels Inc.</h2>
-      <div class="badges">
-        <span class="badge neu">NEU</span>
-        <span class="badge">UUUU</span>
-      </div>
-    </div>
-    <div class="info">Uran &amp; Seltene Erden · <span class="zone">Einkaufszone 9,44 – 7,31 USD</span></div>
-  </div>
-  <div class="ziel-bar">
-    <span class="k">Ziel</span>
-    <span class="v">243,56 USD</span>
-  </div>
-  <div class="chart">
-    <iframe src="https://s.tradingview.com/widgetembed/?symbol=AMEX%3AUUUU&interval=D&hidesidetoolbar=0&theme=light&style=1&locale=de&toolbarbg=ffffff&timezone=Europe%2FBerlin&withdateranges=1&overrides=%7B%22mainSeriesProperties.priceAxisProperties.log%22%3Atrue%7D" allowfullscreen loading="lazy"></iframe>
-  </div>
-      <div class="news-block" data-news-query="Energy Fuels UUUU Aktie" data-news-id="uuuu" data-yahoo="UUUU" data-fn-page="https://www.finanzen.net/nachrichten/alle/energy_fuels" data-news-keys="Energy Fuels|UUUU|Uran">
-    <div class="news-label">News · Live<span class="live-dot" aria-hidden="true"></span></div>
-    <div class="news-rotator">
-      <div class="news-item active"><a href="#" style="opacity:0.5;pointer-events:none">Aktuelle Meldungen werden geladen…</a></div>
-    </div>
-    <div class="news-dots"><span class="on"></span></div>
-  </div>
-<div class="actions">
-    <a class="btn" href="https://de.tradingview.com/chart/tx3UAbNF/" target="_blank" rel="noopener">Analyse-Chart (Fibos) öffnen</a>
-  </div>
-</section>
-
-</div>
 
 
 
@@ -1554,6 +1277,8 @@
   <button class="install-x" id="installBarX" type="button" aria-label="Hinweis ausblenden">&times;</button>
 </div>
 
+
+
 <div class="fx-note" id="fxNote" hidden></div>
 
 <footer>
@@ -1564,12 +1289,196 @@
 </div>
 
 <script>
+/* Die Watchlist aufbauen.
+
+   Die Karten standen bis hierher als HTML in dieser Datei. Jetzt kommen sie
+   aus /.netlify/functions/positionen, damit sich die Liste ueber die
+   Verwaltung aendern laesst, ohne die Seite anzufassen.
+
+   Gebaut wird genau einmal: erst die Daten holen, dann Nav und Karten setzen,
+   dann "rcp:karten" melden. Alle anderen Module warten darauf — vorher gaebe
+   es nichts, woran sie sich haengen koennten.
+
+   Ohne Netz greift die zuletzt gesehene Liste aus dem lokalen Speicher. */
+(function () {
+  var SPEICHER = "rcp:positionen";
+  var nav = document.querySelector("nav");
+  var stapel = document.getElementById("karten");
+  var sortKnopf = document.getElementById("sortBtn");
+  if (!nav || !stapel) return;
+
+  var TV = "https://s.tradingview.com/widgetembed/?symbol=$SYM" +
+    "&interval=D&hidesidetoolbar=0&theme=light&style=1&locale=de&toolbarbg=ffffff" +
+    "&timezone=Europe%2FBerlin&withdateranges=1" +
+    "&overrides=%7B%22mainSeriesProperties.priceAxisProperties.log%22%3Atrue%7D";
+
+  function el(tag, klasse, text) {
+    var n = document.createElement(tag);
+    if (klasse) n.className = klasse;
+    if (text !== undefined) n.textContent = text;
+    return n;
+  }
+
+  function chip(p) {
+    var a = el("a", p.neu ? "nav-new" : null, p.chip || p.badge);
+    a.href = "#" + p.id;
+    if (p.neu) a.appendChild(el("span", "nav-neu", "NEU"));
+    return a;
+  }
+
+  function karte(p) {
+    var s = el("section", "card");
+    s.id = p.id;
+
+    var kopf = el("div", "card-head");
+    var reihe = el("div", "row");
+    reihe.appendChild(el("h2", null, p.name));
+    if (p.neu) {
+      // Als neu markiert: NEU davor, beide in einer Gruppe — dort setzt auch
+      // die Aktiv-Anzeige ihr Kennzeichen ein
+      var gruppe = el("div", "badges");
+      gruppe.appendChild(el("span", "badge neu", "NEU"));
+      gruppe.appendChild(el("span", "badge", p.badge));
+      reihe.appendChild(gruppe);
+    } else {
+      reihe.appendChild(el("span", "badge", p.badge));
+    }
+    kopf.appendChild(reihe);
+
+    var info = el("div", "info");
+    if (p.branche) info.appendChild(document.createTextNode(p.branche + " · "));
+    info.appendChild(el("span", "zone", "Einkaufszone " + p.zone));
+    kopf.appendChild(info);
+    s.appendChild(kopf);
+
+    if (p.ziel) {
+      var bar = el("div", "ziel-bar");
+      bar.appendChild(el("span", "k", "Ziel"));
+      bar.appendChild(el("span", "v", p.ziel));
+      s.appendChild(bar);
+    }
+
+    var chart = el("div", "chart");
+    var rahmen = document.createElement("iframe");
+    rahmen.src = TV.replace("$SYM", encodeURIComponent(p.tv));
+    rahmen.setAttribute("allowfullscreen", "");
+    rahmen.setAttribute("loading", "lazy");
+    chart.appendChild(rahmen);
+    s.appendChild(chart);
+
+    if (p.frage) {
+      var news = el("div", "news-block");
+      news.setAttribute("data-news-query", p.frage);
+      news.setAttribute("data-news-id", p.id);
+      if (p.yahoo) news.setAttribute("data-yahoo", p.yahoo);
+      if (p.fn) news.setAttribute("data-fn-page", p.fn);
+      if (p.keys) news.setAttribute("data-news-keys", p.keys);
+
+      var label = el("div", "news-label", "News · Live");
+      var punkt = el("span", "live-dot");
+      punkt.setAttribute("aria-hidden", "true");
+      label.appendChild(punkt);
+      news.appendChild(label);
+
+      var rot = el("div", "news-rotator");
+      var erst = el("div", "news-item active");
+      var a = el("a", null, "Aktuelle Meldungen werden geladen…");
+      a.href = "#";
+      a.style.opacity = "0.5";
+      a.style.pointerEvents = "none";
+      erst.appendChild(a);
+      rot.appendChild(erst);
+      news.appendChild(rot);
+
+      var dots = el("div", "news-dots");
+      dots.appendChild(el("span", "on"));
+      news.appendChild(dots);
+      s.appendChild(news);
+    }
+
+    if (p.fibo) {
+      var akt = el("div", "actions");
+      var btn = el("a", "btn", "Analyse-Chart (Fibos) öffnen");
+      btn.href = p.fibo;
+      btn.target = "_blank";
+      btn.rel = "noopener";
+      akt.appendChild(btn);
+      s.appendChild(akt);
+    }
+
+    return s;
+  }
+
+  function bauen(liste) {
+    // Chips vor den Sortierknopf, der bleibt stehen
+    [].slice.call(nav.querySelectorAll("a")).forEach(function (a) { a.remove(); });
+    liste.forEach(function (p) {
+      if (sortKnopf) nav.insertBefore(chip(p), sortKnopf);
+      else nav.appendChild(chip(p));
+    });
+
+    stapel.textContent = "";
+    liste.forEach(function (p) { stapel.appendChild(karte(p)); });
+
+    window.rcpPositionen = liste;
+    document.dispatchEvent(new CustomEvent("rcp:karten", { detail: liste }));
+
+    // Steht ein Anker in der Adresse, jetzt erst kann er angesprungen werden
+    if (location.hash && location.hash.length > 1) {
+      var ziel = document.getElementById(location.hash.slice(1));
+      if (ziel) setTimeout(function () { ziel.scrollIntoView(); }, 60);
+    }
+  }
+
+  function gemerkt() {
+    try {
+      var roh = localStorage.getItem(SPEICHER);
+      var d = roh ? JSON.parse(roh) : null;
+      return d && Array.isArray(d.liste) && d.liste.length ? d.liste : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function merken(liste) {
+    try {
+      localStorage.setItem(SPEICHER, JSON.stringify({ zeit: Date.now(), liste: liste }));
+    } catch (e) {}
+  }
+
+  function scheitern() {
+    var hinweis = el("div", "karten-fehler",
+      "Die Liste konnte nicht geladen werden. Bitte die Seite neu laden.");
+    stapel.appendChild(hinweis);
+    document.dispatchEvent(new CustomEvent("rcp:karten", { detail: [] }));
+  }
+
+  fetch("/.netlify/functions/positionen", { credentials: "same-origin", cache: "no-store" })
+    .then(function (r) {
+      if (!r.ok) throw new Error("Antwort " + r.status);
+      return r.json();
+    })
+    .then(function (a) {
+      if (!a || !a.ok || !a.positionen || !a.positionen.length) throw new Error("keine Liste");
+      merken(a.positionen);
+      bauen(a.positionen);
+    })
+    .catch(function () {
+      var alt = gemerkt();
+      if (alt) bauen(alt);
+      else scheitern();
+    });
+})();
+</script>
+
+<script>
 (function () {
   // Precise nav scroll under sticky bar
   function stickyOffset() {
     var nav = document.querySelector("nav");
     return nav ? nav.getBoundingClientRect().height + 8 : 70;
   }
+  function binden() {
   document.querySelectorAll("nav a[href^='#']").forEach(function (a) {
     a.addEventListener("click", function (e) {
       var id = a.getAttribute("href");
@@ -1585,7 +1494,11 @@
       setTimeout(function () { el.style.boxShadow = "none"; }, 700);
     });
   });
+  }
 
+  // Die Chips entstehen erst mit den Karten
+  if (window.rcpPositionen) binden();
+  else document.addEventListener("rcp:karten", binden);
 })();
 </script>
 
@@ -1701,8 +1614,9 @@
     }, 2 * 60 * 1000);
   }
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
-  else init();
+  // Die News-Bloecke entstehen mit den Karten
+  if (window.rcpPositionen) init();
+  else document.addEventListener("rcp:karten", init);
 
   
   // Fear & Greed live
@@ -1804,7 +1718,6 @@
   var bar = document.getElementById("installBar");
   var barGo = document.getElementById("installBarGo");
   var barX = document.getElementById("installBarX");
-  var appEl = document.getElementById("app");
   var SEEN = "rcp_install_seen";
   var BAR_OFF = "rcp_install_bar_off";
   if (!btn || !sheet) return;
@@ -1893,8 +1806,7 @@
     if (!seen && !prompt) setTimeout(openSheet, 900);
   }
 
-  if (appEl && appEl.classList.contains("visible")) start();
-  else document.addEventListener("rcp:unlocked", start);
+  start();
 
   if (barGo) barGo.addEventListener("click", function () { openSheet(); });
   if (barX) barX.addEventListener("click", function () { hideBar(true); });
@@ -2286,9 +2198,9 @@
     window.addEventListener("online", aktualisieren);
   }
 
-  var appEl = document.getElementById("app");
-  if (appEl && appEl.classList.contains("visible")) start();
-  else document.addEventListener("rcp:unlocked", start);
+  // Erst wenn die Karten stehen, gibt es etwas zu tun
+  if (window.rcpPositionen) start();
+  else document.addEventListener("rcp:karten", start);
 })();
 
 // Aktive Setups: Nav-Knopf pulsiert, wenn der Kurs in der Einkaufszone steht
@@ -2387,9 +2299,9 @@
       });
   }
 
-  var appEl = document.getElementById("app");
-  if (appEl && appEl.classList.contains("visible")) start();
-  else document.addEventListener("rcp:unlocked", start);
+  // Erst wenn die Karten stehen, gibt es etwas zu tun
+  if (window.rcpPositionen) start();
+  else document.addEventListener("rcp:karten", start);
 })();
 
 // Service Worker: macht die Seite installierbar und offline-faehig
@@ -2787,9 +2699,9 @@ if ("serviceWorker" in navigator) {
     });
   }
 
-  var appEl = document.getElementById("app");
-  if (appEl && appEl.classList.contains("visible")) start();
-  else document.addEventListener("rcp:unlocked", start);
+  // Erst wenn die Karten stehen, gibt es etwas zu tun
+  if (window.rcpPositionen) start();
+  else document.addEventListener("rcp:karten", start);
 })();
 
 </script>

@@ -7,7 +7,8 @@
    Zonen und Symbole kommen aus der veroeffentlichten index.html — es gibt
    keine zweite Liste zu pflegen. */
 
-import { dienstKopf } from "./sitzung.js";
+import { getStore } from "@netlify/blobs";
+import { lesen, zonenZahlen, LADEN } from "./positionen.js";
 
 export default async () => {
   const watch = await zonen();
@@ -59,45 +60,19 @@ export default async () => {
   return json({ ok: true, rate: rate, positionen: positionen }, 200, "public, max-age=120");
 };
 
+/* Zonen und Symbole kommen aus der gespeicherten Watchlist. */
 async function zonen() {
-  const base = process.env.URL || process.env.DEPLOY_URL;
-  if (!base) return [];
-
-  const headers = { "User-Agent": "AktienListe-Status/1.0" };
-  // Das Tor laesst die eigene Seite nur mit unterschriebener Kennung durch
-  Object.assign(headers, dienstKopf());
-
-  let html = "";
-  try {
-    const res = await fetch(base + "/index.html", { headers });
-    if (!res.ok) return [];
-    html = await res.text();
-  } catch (e) {
-    return [];
-  }
-
+  const liste = await lesen(getStore(LADEN));
   const out = [];
-  const blocks = html.split('<section class="card"');
-  for (let i = 1; i < blocks.length; i++) {
-    const block = blocks[i];
-    const anchor = (block.match(/^\s+id="([^"]+)"/) || [])[1];
-    const yahoo = (block.match(/data-yahoo="([^"]+)"/) || [])[1];
-    const badge = (block.match(/<span class="badge">([^<]+)<\/span>/) || [])[1];
-    const zone = (block.match(/class="zone">Einkaufszone\s*([^<]+)</) || [])[1];
-    if (!anchor || !yahoo || !zone) continue;
-
-    const teile = zone.split(/[–-]/);
-    if (teile.length < 2) continue;
-    const a = num(teile[0]);
-    const b = num(teile[1]);
-    if (!isFinite(a) || !isFinite(b)) continue;
-
+  for (const p of liste) {
+    const z = zonenZahlen(p.zone);
+    if (!z || !p.yahoo) continue;
     out.push({
-      anchor: anchor,
-      badge: (badge || yahoo).trim(),
-      yahoo: yahoo,
-      high: Math.max(a, b),
-      low: Math.min(a, b)
+      anchor: p.id,
+      badge: (p.badge || p.yahoo).trim(),
+      yahoo: p.yahoo,
+      high: z.high,
+      low: z.low
     });
   }
   return out;

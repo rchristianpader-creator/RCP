@@ -91,6 +91,31 @@
     padding: 1px 6px;
   }
 
+  .weiter {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 15px 16px;
+    margin-bottom: 10px;
+    text-decoration: none;
+    color: var(--fg);
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.18s ease;
+  }
+  .weiter:active { background: var(--soft); }
+  .weiter .was { font-size: 14px; font-weight: 600; }
+  .weiter .wie { flex: 1; font-size: 12px; color: var(--muted); }
+  .weiter .pfeil { color: var(--muted); font-size: 15px; }
+  @media (max-width: 420px) {
+    .weiter { flex-wrap: wrap; }
+    .weiter .wie { flex-basis: 100%; }
+    .weiter .pfeil { position: absolute; right: 22px; }
+  }
+
   /* Nachricht an alle */
   .senden {
     background: var(--card);
@@ -263,6 +288,12 @@
 <div class="meldung" id="meldung"></div>
 
 <main>
+  <a class="weiter" href="/positionen.html">
+    <span class="was">Positionen</span>
+    <span class="wie">Symbole hinzufügen, ändern, sortieren</span>
+    <span class="pfeil">›</span>
+  </a>
+
   <section class="senden" id="sendeKasten" hidden>
     <div class="titel">Nachricht an alle</div>
     <input type="text" id="nTitel" maxlength="60" placeholder="Titel" autocomplete="off">

@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#fafafa">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<title>Positionen · Aktien-Liste</title>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #fafafa;
+    --fg: #111111;
+    --muted: #737373;
+    --line: #e5e5e5;
+    --soft: #f5f5f5;
+    --card: #ffffff;
+    --hair: #ebebeb;
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 100px;
+  }
+  @keyframes riseIn {
+    from { opacity: 0; transform: translate3d(0, 10px, 0); }
+    to   { opacity: 1; transform: translate3d(0, 0, 0); }
+  }
+
+  header {
+    position: relative;
+    padding: 36px 24px 26px;
+    text-align: center;
+    background: var(--card);
+    border-bottom: 1px solid var(--hair);
+  }
+  header .zurueck {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 6px 10px 6px 4px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  header .zurueck::before { content: "‹"; margin-right: 5px; font-size: 14px; }
+  header .label {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+  header .sub { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+  main { max-width: 640px; margin: 0 auto; padding: 20px 14px 0; }
+
+  .pos {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    margin-bottom: 10px;
+    animation: riseIn 0.35s var(--ease) both;
+  }
+  .pos.offen { border-color: var(--fg); }
+
+  .kopf {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 14px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .kopf .griff {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    min-width: 18px;
+  }
+  .kopf .marke {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 700;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 3px 7px;
+  }
+  .kopf .wie { flex: 1; font-size: 14px; font-weight: 600; }
+  .kopf .neu {
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    font-weight: 700;
+    color: #fff;
+    background: var(--fg);
+    border-radius: 2px;
+    padding: 2px 5px;
+  }
+  .kopf .pfeil { color: var(--muted); font-size: 13px; transition: transform 0.2s var(--ease); }
+  .pos.offen .kopf .pfeil { transform: rotate(90deg); }
+
+  .felder { display: none; padding: 0 14px 14px; border-top: 1px solid var(--hair); }
+  .pos.offen .felder { display: block; }
+
+  label.f { display: block; margin-top: 12px; }
+  label.f > span {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 5px;
+  }
+  label.f input {
+    width: 100%;
+    font: inherit;
+    font-size: 16px; /* unter 16px zoomt Safari beim Tippen */
+    color: var(--fg);
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 9px 11px;
+    transition: border-color 0.2s ease;
+  }
+  label.f input:focus { outline: none; border-color: var(--fg); }
+  label.f .hilfe { font-size: 11px; color: var(--muted); margin-top: 4px; text-transform: none; letter-spacing: 0; font-weight: 400; }
+
+  .zwei { display: flex; gap: 10px; }
+  .zwei > label.f { flex: 1; }
+
+  .schalter {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--fg);
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .schalter input { width: 17px; height: 17px; accent-color: #111; }
+
+  .werkzeug { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+  .werkzeug button, .knopf {
+    font: inherit;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--fg);
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 8px 12px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transform: translateZ(0);
+    transition: background 0.18s ease, border-color 0.18s ease, transform 0.12s var(--ease);
+  }
+  .werkzeug button:active, .knopf:active { transform: scale(0.96); }
+  .werkzeug button.rot { color: #b91c1c; border-color: #f0d0d0; }
+  .werkzeug button[disabled] { opacity: 0.35; cursor: default; }
+
+  .neuKnopf {
+    display: block;
+    width: 100%;
+    font: inherit;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--fg);
+    background: var(--card);
+    border: 1px dashed var(--line);
+    border-radius: 2px;
+    padding: 14px;
+    margin-top: 6px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .neuKnopf:active { background: var(--soft); }
+
+  .leiste {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 50;
+    background: rgba(255, 255, 255, 0.94);
+    -webkit-backdrop-filter: saturate(140%) blur(8px);
+    backdrop-filter: saturate(140%) blur(8px);
+    border-top: 1px solid var(--hair);
+    padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
+  }
+  .leiste .innen {
+    max-width: 640px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .leiste .stand { flex: 1; font-size: 12px; color: var(--muted); }
+  .leiste .stand.schlecht { color: #b91c1c; }
+  .leiste .stand.gut { color: #15803d; }
+  .leiste button {
+    font: inherit;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: #fff;
+    background: var(--fg);
+    border: 1px solid var(--fg);
+    border-radius: 2px;
+    padding: 12px 20px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transform: translateZ(0);
+    transition: opacity 0.2s ease, transform 0.12s var(--ease);
+  }
+  .leiste button:active { transform: scale(0.98); }
+  .leiste button[disabled] { opacity: 0.35; cursor: default; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pos { animation: none; }
+    * { transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="zurueck" href="/verwaltung.html">Verwaltung</a>
+  <div class="label">Watchlist</div>
+  <h1>Positionen</h1>
+  <p class="sub" id="untertitel">wird geladen …</p>
+</header>
+
+<main>
+  <div id="liste"></div>
+  <button type="button" class="neuKnopf" id="neuKnopf">Position hinzufügen</button>
+</main>
+
+<div class="leiste">
+  <div class="innen">
+    <div class="stand" id="stand">unverändert</div>
+    <button type="button" id="speichern" disabled>Speichern</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  var API = "/.netlify/functions/positionen";
+  var liste = document.getElementById("liste");
+  var stand = document.getElementById("stand");
+  var speichern = document.getElementById("speichern");
+  var untertitel = document.getElementById("untertitel");
+
+  var daten = [];
+  var start = "";
+
+  var FELDER = [
+    { k: "name", t: "Name", h: "So steht es über der Karte, z. B. Intel Corporation" },
+    { k: "badge", t: "Kürzel auf der Karte", h: "Rechts oben in der Karte, z. B. INTC" },
+    { k: "chip", t: "Beschriftung im Menü", h: "Der Knopf oben, oft dasselbe Kürzel — bei Gold steht dort Gold" },
+    { k: "branche", t: "Branche", h: "Kleine Zeile unter dem Namen" },
+    { k: "zone", t: "Einkaufszone", h: "Zwei Zahlen, z. B. 50,12 – 39,19 USD — daraus kommt der Alarm" },
+    { k: "ziel", t: "Ziel", h: "z. B. 295,75 USD" },
+    { k: "tv", t: "TradingView-Symbol", h: "Börse und Kürzel, z. B. NASDAQ:INTC — daraus wird der Chart" },
+    { k: "yahoo", t: "Yahoo-Symbol", h: "Für Kurse und Alarme, z. B. INTC, BTC-USD, GC=F" },
+    { k: "frage", t: "Suchbegriff für News", h: "z. B. Intel Aktie — leer lassen heißt keine News" },
+    { k: "fn", t: "finanzen.net-Seite", h: "Vollständige https-Adresse, optional" },
+    { k: "fibo", t: "Analyse-Chart", h: "Dein gespeicherter TradingView-Chart, optional" },
+    { k: "id", t: "Anker", h: "Kleinbuchstaben, wird in der Adresse benutzt (#intc) — später nicht mehr ändern" }
+  ];
+
+  function sagen(text, art) {
+    stand.textContent = text;
+    stand.className = "stand" + (art ? " " + art : "");
+  }
+
+  function verglichen() {
+    // Ohne die Anzeigefelder (_offen) — Aufklappen ist keine Aenderung
+    var jetzt = JSON.stringify(fuerServer());
+    var anders = jetzt !== start;
+    speichern.disabled = !anders;
+    if (anders) sagen(daten.length + " Positionen · nicht gespeichert");
+    else sagen(daten.length + " Positionen · unverändert");
+    return anders;
+  }
+
+  function el(tag, klasse, text) {
+    var n = document.createElement(tag);
+    if (klasse) n.className = klasse;
+    if (text !== undefined) n.textContent = text;
+    return n;
+  }
+
+  function feld(p, f) {
+    var l = el("label", "f");
+    l.appendChild(el("span", null, f.t));
+    var i = document.createElement("input");
+    i.type = "text";
+    i.value = p[f.k] || "";
+    i.autocapitalize = f.k === "id" || f.k === "tv" ? "none" : "sentences";
+    i.autocomplete = "off";
+    i.spellcheck = false;
+    i.addEventListener("input", function () {
+      p[f.k] = i.value;
+      if (f.k === "name" || f.k === "badge") zeichnen();
+      else verglichen();
+    });
+    l.appendChild(i);
+    if (f.h) l.appendChild(el("div", "hilfe", f.h));
+    return l;
+  }
+
+  function karte(p, i) {
+    var d = el("div", "pos" + (p._offen ? " offen" : ""));
+
+    var kopf = el("div", "kopf");
+    kopf.appendChild(el("span", "griff", (i + 1) + "."));
+    kopf.appendChild(el("span", "marke", p.badge || "?"));
+    kopf.appendChild(el("span", "wie", p.name || "Ohne Namen"));
+    if (p.neu) kopf.appendChild(el("span", "neu", "NEU"));
+    kopf.appendChild(el("span", "pfeil", "›"));
+    kopf.addEventListener("click", function () {
+      p._offen = !p._offen;
+      zeichnen();
+    });
+    d.appendChild(kopf);
+
+    var felder = el("div", "felder");
+
+    FELDER.forEach(function (f) { felder.appendChild(feld(p, f)); });
+
+    var s = el("label", "schalter");
+    var c = document.createElement("input");
+    c.type = "checkbox";
+    c.checked = p.neu === true;
+    c.addEventListener("change", function () { p.neu = c.checked; zeichnen(); });
+    s.appendChild(c);
+    s.appendChild(el("span", null, "Im Menü als NEU markieren"));
+    felder.appendChild(s);
+
+    var w = el("div", "werkzeug");
+
+    var hoch = el("button", null, "Nach oben");
+    hoch.type = "button";
+    hoch.disabled = i === 0;
+    hoch.addEventListener("click", function () {
+      daten.splice(i - 1, 0, daten.splice(i, 1)[0]);
+      zeichnen();
+    });
+    w.appendChild(hoch);
+
+    var runter = el("button", null, "Nach unten");
+    runter.type = "button";
+    runter.disabled = i === daten.length - 1;
+    runter.addEventListener("click", function () {
+      daten.splice(i + 1, 0, daten.splice(i, 1)[0]);
+      zeichnen();
+    });
+    w.appendChild(runter);
+
+    var weg = el("button", "rot", "Entfernen");
+    weg.type = "button";
+    weg.addEventListener("click", function () {
+      if (!confirm("„" + (p.name || p.badge) + "“ aus der Liste nehmen?")) return;
+      daten.splice(i, 1);
+      zeichnen();
+    });
+    w.appendChild(weg);
+
+    felder.appendChild(w);
+    d.appendChild(felder);
+    return d;
+  }
+
+  function zeichnen() {
+    liste.textContent = "";
+    daten.forEach(function (p, i) { liste.appendChild(karte(p, i)); });
+    untertitel.textContent = daten.length === 1 ? "1 Position" : daten.length + " Positionen";
+    verglichen();
+  }
+
+  function sauber(p) {
+    var raus = {};
+    Object.keys(p).forEach(function (k) { if (k.charAt(0) !== "_") raus[k] = p[k]; });
+    return raus;
+  }
+
+  function fuerServer() {
+    return daten.map(sauber);
+  }
+
+  document.getElementById("neuKnopf").addEventListener("click", function () {
+    daten.push({
+      id: "", name: "", badge: "", chip: "", neu: true, branche: "",
+      zone: "", ziel: "", tv: "", yahoo: "", frage: "", fn: "", keys: "", fibo: "",
+      _offen: true
+    });
+    zeichnen();
+    window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+  });
+
+  speichern.addEventListener("click", function () {
+    speichern.disabled = true;
+    var vorher = speichern.textContent;
+    speichern.textContent = "Speichert …";
+
+    fetch(API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ positionen: fuerServer() })
+    })
+      .then(function (r) { return r.json().catch(function () { return {}; }); })
+      .then(function (a) {
+        speichern.textContent = vorher;
+        if (!a || !a.ok) {
+          sagen((a && a.fehler) || "Das hat nicht geklappt.", "schlecht");
+          speichern.disabled = false;
+          return;
+        }
+        start = JSON.stringify(fuerServer());
+        speichern.disabled = true;
+        sagen(
+          "Gespeichert." +
+            (a.neu && a.neu.length ? " Neu: " + a.neu.join(" · ") : "") +
+            (a.gemeldet ? " · an " + a.gemeldet + " Geräte gemeldet" : ""),
+          "gut"
+        );
+      })
+      .catch(function () {
+        speichern.textContent = vorher;
+        speichern.disabled = false;
+        sagen("Keine Verbindung.", "schlecht");
+      });
+  });
+
+  window.addEventListener("beforeunload", function (e) {
+    if (JSON.stringify(fuerServer()) !== start) {
+      e.preventDefault();
+      e.returnValue = "";
+    }
+  });
+
+  fetch(API, { credentials: "same-origin", cache: "no-store" })
+    .then(function (r) {
+      if (r.status === 401) { location.replace("/anmelden.html?ziel=%2Fpositionen.html"); return null; }
+      return r.json();
+    })
+    .then(function (a) {
+      if (!a) return;
+      if (!a.ok) { sagen(a.fehler || "Das hat nicht geklappt.", "schlecht"); return; }
+      daten = a.positionen;
+      start = JSON.stringify(fuerServer());
+      zeichnen();
+    })
+    .catch(function () { sagen("Keine Verbindung.", "schlecht"); });
+})();
+</script>
+</body>
+</html>
