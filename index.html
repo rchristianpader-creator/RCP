@@ -867,20 +867,18 @@
     border-top: 1px solid var(--fg);
   }
   body.has-install-bar { padding-bottom: 104px; }
+  /* Das echte Symbol, keine nachgebaute Kachel — so zeigt der Streifen
+     immer das, was nachher auch auf dem Home-Bildschirm steht. */
   .install-mark {
     flex: 0 0 auto;
     width: 38px;
     height: 38px;
-    border-radius: 5px;
-    background: var(--fg);
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.06em;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: var(--card);
   }
+  .install-mark img { display: block; width: 100%; height: 100%; }
   .install-copy { flex: 1 1 auto; min-width: 0; }
   .install-copy b {
     display: block;
@@ -1663,8 +1661,9 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" aria-hidden="true">
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
-            <rect x="152" y="16" width="34" height="34" rx="8" fill="currentColor"/>
-            <text x="169" y="37" font-size="9" font-weight="700" fill="#fff" text-anchor="middle">RCP</text>
+            <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
+            <image href="/icon-192.png?v=32" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
           </svg>
         </div>
@@ -1674,7 +1673,7 @@
     <ol class="steps" id="stepsOther" hidden>
       <li><span class="n">1</span><span>Im Browsermenü <b>App installieren</b> oder <b>Zum Startbildschirm hinzufügen</b> wählen</span></li>
       <li><span class="n">2</span><span>Bestätigen</span></li>
-      <li><span class="n">3</span><span>App über das neue Icon <b>RCP</b> starten</span></li>
+      <li><span class="n">3</span><span>App über das neue Icon <b>Aktien-Liste</b> starten</span></li>
     </ol>
 
     <div class="sheet-note" id="installNote" hidden></div>
@@ -1701,7 +1700,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true">RCP</div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=32" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
