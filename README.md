@@ -139,6 +139,28 @@ Zwischenspeicher liegt; hoechstens 3 Sekunden, damit ein haengender Dienst
 niemanden aufhaelt. Dazu ein Notausgang direkt im Markup, der ihn auch dann
 wegnimmt, wenn weiter unten ein Skript stolpert.
 
+## Der Hintergrund aus Kerzen
+
+Anmeldeseite und Auftakt haben denselben Hintergrund: ein Kursverlauf aus
+Kerzen, der von rechts nach links durchlaeuft. Zwei Baender uebereinander, das
+hintere gross und langsam (5,2 s), das vordere kleiner und schnell (2,1 s) —
+daraus entsteht Tiefe, ohne dass ein zweites Motiv noetig waere.
+
+Gezeichnet wird nichts live. `kerzen.py` erzeugt einmal ein SVG aus
+einem Zufallsweg mit Trends und Gegenbewegungen; steigende Kerzen bleiben hohl,
+fallende sind gefuellt, also Kontrast ohne eine einzige Farbe. Die Reihe steht
+zweimal hintereinander im Bild, deshalb laeuft `translateX(-50%)` nahtlos um.
+
+Bewegt wird nur das Band als Ganzes per `transform` — eine Sache fuer den
+Compositor, kein Layout, kein Skript. Gemessen mit sechsfach gedrosseltem
+Prozessor kostet das keine messbare Ladezeit: erster Chart nach 1638–1677 ms
+mit Kerzen, 1690–1740 ms ohne. Bei `prefers-reduced-motion` stehen die Baender
+still, das Bild bleibt.
+
+Die Anmeldekarte ist milchig statt weiss (`backdrop-filter`), damit die Kerzen
+auch hinter ihr weiterlaufen; hinter dem Auftakt-Text liegt stattdessen ein
+weicher Lichthof, sonst waere "Charts werden geladen" nicht zu lesen.
+
 ## Fluessigkeit
 
 Zehn TradingView-Einbettungen sind zehn vollstaendige Anwendungen mit eigenen
