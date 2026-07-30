@@ -20,6 +20,23 @@ export default async () => {
   for (const item of watch) {
     const q = await quote(item.yahoo);
     const kurs = q && q.price ? q.price : null;
+    // Abstand zur Zone in Prozent: positiv darueber, negativ darunter, 0 = drin
+    let abstand = null;
+    if (kurs) {
+      if (kurs > item.high) abstand = (kurs / item.high - 1) * 100;
+      else if (kurs < item.low) abstand = (kurs / item.low - 1) * 100;
+      else abstand = 0;
+    }
+
+    // Ausgeloest: irgendeine Tageskerze der letzten Wochen ist in die Zone gelaufen
+    let beruehrt = null;
+    const kerzen = (q && q.kerzen) || [];
+    for (const k of kerzen) {
+      if (k.tief <= item.high) {
+        beruehrt = { zeit: k.zeit, tief: k.tief };  // letzte Beruehrung gewinnt
+      }
+    }
+
     positionen.push({
       id: item.anchor,
       badge: item.badge,
@@ -28,7 +45,12 @@ export default async () => {
       waehrung: (q && q.currency) || null,
       high: item.high,
       low: item.low,
-      aktiv: kurs !== null && kurs <= item.high && kurs >= item.low
+      abstand: abstand === null ? null : Math.round(abstand * 100) / 100,
+      in_zone: kurs !== null && kurs <= item.high && kurs >= item.low,
+      beruehrt_am: beruehrt ? new Date(beruehrt.zeit * 1000).toISOString().slice(0, 10) : null,
+      beruehrt_bei: beruehrt ? Math.round(beruehrt.tief * 100) / 100 : null,
+      // Setup gilt als aktiv, sobald der Kurs die Zone erreicht hat
+      aktiv: (kurs !== null && kurs <= item.high && kurs >= item.low) || beruehrt !== null
     });
   }
 
@@ -90,10 +112,11 @@ async function quote(symbol) {
 
 async function quoteYahoo(symbol) {
   try {
+    // Ein Monat Tageskerzen: liefert aktuellen Kurs UND die Tiefs der letzten Tage
     const url =
       "https://query1.finance.yahoo.com/v8/finance/chart/" +
       encodeURIComponent(symbol) +
-      "?range=1d&interval=15m";
+      "?range=1mo&interval=1d";
     const res = await fetch(url, {
       headers: {
         "User-Agent": "Mozilla/5.0 (compatible; AktienListe/1.0)",
@@ -102,9 +125,23 @@ async function quoteYahoo(symbol) {
     });
     if (!res.ok) return null;
     const data = await res.json();
-    const meta = data?.chart?.result?.[0]?.meta;
+    const result = data?.chart?.result?.[0];
+    const meta = result?.meta;
     if (!meta || !meta.regularMarketPrice) return null;
-    return { price: meta.regularMarketPrice, currency: meta.currency, quelle: "Yahoo" };
+
+    const zeiten = result.timestamp || [];
+    const tiefs = result.indicators?.quote?.[0]?.low || [];
+    const kerzen = [];
+    for (let i = 0; i < zeiten.length; i++) {
+      if (typeof tiefs[i] === "number") kerzen.push({ zeit: zeiten[i], tief: tiefs[i] });
+    }
+
+    return {
+      price: meta.regularMarketPrice,
+      currency: meta.currency,
+      quelle: "Yahoo",
+      kerzen: kerzen
+    };
   } catch (e) {
     return null;
   }
@@ -134,8 +171,15 @@ async function quoteStooq(symbol) {
     if (i < 0) return null;
     const price = parseFloat(werte[i]);
     if (!isFinite(price) || price <= 0) return null;
+    const iLow = spalten.indexOf("low");
+    const tief = iLow >= 0 ? parseFloat(werte[iLow]) : NaN;
     const cur = /xau|xag|usd$/.test(stooqSymbol(symbol)) || stooqSymbol(symbol).endsWith(".us") ? "USD" : "USD";
-    return { price: price, currency: cur, quelle: "Stooq" };
+    return {
+      price: price,
+      currency: cur,
+      quelle: "Stooq",
+      kerzen: isFinite(tief) ? [{ zeit: Math.floor(Date.now() / 1000), tief: tief }] : []
+    };
   } catch (e) {
     return null;
   }
