@@ -247,6 +247,32 @@
     transform: scale(0.95);
   }
 
+  /* Statuszeile unter dem Laufband */
+  .setup-strip {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 16px;
+    background: var(--card);
+    border-bottom: 1px solid var(--hair);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
+  }
+  .setup-strip a {
+    color: #fff;
+    background: var(--fg);
+    border-radius: 2px;
+    padding: 5px 9px;
+    text-decoration: none;
+    letter-spacing: 0.1em;
+  }
+
   /* Aktives Setup: Kurs steht in der Einkaufszone */
   nav a.nav-live {
     background: var(--fg);
@@ -272,6 +298,15 @@
     nav a.nav-live::after { animation: none; opacity: 0.35; }
   }
   .card.card-live { border-color: var(--fg); }
+  .entry-note {
+    padding: 10px 18px;
+    background: var(--fg);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
   .badge.aktiv {
     border-color: var(--fg);
     background: var(--fg);
@@ -1020,6 +1055,8 @@
   </div>
 </div>
 
+
+<div class="setup-strip" id="setupStrip">Setups werden geprüft…</div>
 
 <div class="fg-box" id="feargreed">
   <div class="fg-top">
@@ -2106,7 +2143,7 @@
       if (reihe && !reihe.querySelector(".badge.aktiv")) {
         var tag = document.createElement("span");
         tag.className = "badge aktiv";
-        tag.textContent = "AKTIV";
+        tag.textContent = p.in_zone ? "IN DER ZONE" : "AKTIV";
         // In Karten mit Badge-Gruppe nach vorne, sonst ans Ende der Zeile
         if (gruppe) gruppe.insertBefore(tag, gruppe.firstChild);
         else reihe.appendChild(tag);
@@ -2114,29 +2151,69 @@
     });
   }
 
-  function hinweis(text) {
-    var note = document.getElementById("fxNote");
-    if (!note) return;
-    note.hidden = false;
-    note.textContent = note.textContent ? note.textContent + " · " + text : text;
+  var strip = document.getElementById("setupStrip");
+
+  function datumKurz(iso) {
+    var t = String(iso).split("-");
+    return t.length === 3 ? t[2] + "." + t[1] + "." : iso;
+  }
+
+  function zahlFormat(n) {
+    var stellen = n >= 1000 ? 0 : 2;
+    return Number(n).toLocaleString("de-DE", {
+      minimumFractionDigits: stellen,
+      maximumFractionDigits: stellen
+    });
+  }
+
+  function zeile(html) {
+    if (strip) strip.innerHTML = html;
   }
 
   function start() {
     fetch("/.netlify/functions/status")
       .then(function (r) {
-        if (!r.ok) throw new Error("Status " + r.status);
+        if (!r.ok) throw new Error("Antwort " + r.status);
         return r.json();
       })
       .then(function (daten) {
-        if (!daten || !daten.positionen) throw new Error("keine Daten");
+        if (!daten || !daten.positionen) {
+          throw new Error((daten && daten.fehler) || "keine Daten");
+        }
         markieren(daten);
+
         var mitKurs = daten.positionen.filter(function (p) { return p.kurs; });
         var aktive = daten.positionen.filter(function (p) { return p.aktiv; });
-        if (!mitKurs.length) hinweis("keine Kurse abrufbar");
-        else if (!aktive.length) hinweis("kein Setup in der Zone (" + mitKurs.length + " Kurse geprüft)");
+
+        if (aktive.length) {
+          zeile("Aktiv: " + aktive.map(function (p) {
+            var zusatz = p.in_zone
+              ? "in der Zone"
+              : (p.beruehrt_am ? "Zone berührt " + datumKurz(p.beruehrt_am) : "ausgelöst");
+            return '<a href="#' + p.id + '">' + p.badge + "</a> " + zusatz;
+          }).join(" · "));
+        } else if (mitKurs.length) {
+          // Nächstliegende Position zeigen, damit die Zahl nachvollziehbar ist
+          var naechste = mitKurs.slice().sort(function (a, c) {
+            return Math.abs(a.abstand === null ? 999 : a.abstand) -
+                   Math.abs(c.abstand === null ? 999 : c.abstand);
+          })[0];
+
+          var text = "Kein Setup in der Zone";
+          if (naechste && naechste.abstand !== null) {
+            var richtung = naechste.abstand > 0 ? "über" : "unter";
+            text += " · <b>" + naechste.badge + " " + zahlFormat(naechste.kurs) + " USD</b> " +
+                    Math.abs(naechste.abstand).toFixed(1).replace(".", ",") + " % " + richtung +
+                    " Zone " + zahlFormat(naechste.high) + " – " + zahlFormat(naechste.low);
+          }
+          if (naechste && naechste.quelle) text += " · " + naechste.quelle;
+          zeile(text);
+        } else {
+          zeile("Keine Kurse abrufbar — beide Quellen ohne Antwort");
+        }
       })
       .catch(function (e) {
-        hinweis("Setup-Prüfung nicht verfügbar (" + (e && e.message ? e.message : e) + ")");
+        zeile("Setup-Prüfung fehlgeschlagen: " + (e && e.message ? e.message : e));
       });
   }
 
