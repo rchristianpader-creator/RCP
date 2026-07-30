@@ -908,6 +908,43 @@
     from { transform: scaleX(0); opacity: 0; }
     to { transform: scaleX(1); opacity: 0.3; }
   }
+  /* SCROLLEN, WAEHREND MAN SCROLLT
+     Zwei Bewegungen, die dem Finger folgen statt einmal abzulaufen:
+     der Kopf bleibt beim Wegscrollen etwas zurueck, und unter der Leiste
+     zeigt eine Linie, wie weit man in der Liste ist.
+
+     Beide haengen an zwei Variablen, die ein einziger Zuhoerer setzt —
+     bewegt wird nur transform, das kostet kein Layout. */
+
+  /* Der Inhalt bleibt zurueck — und wird am unteren Rand des Kopfes
+     abgeschnitten. Ohne das schimmert er beim Wegscrollen durch die
+     durchscheinende Leiste und liest sich als Schmierer. */
+  header { overflow: hidden; }
+  header .kopf-lauf {
+    transform: translate3d(0, calc(var(--rcp-oben, 0px) * 0.38), 0);
+    will-change: transform;
+  }
+
+  nav .nav-fortschritt {
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    height: 2px;
+    width: 100%;
+    background: var(--fg);
+    transform: scaleX(var(--rcp-lauf, 0));
+    transform-origin: 0 50%;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    will-change: transform;
+  }
+  nav.klebt .nav-fortschritt { opacity: 1; }
+
+  @media (prefers-reduced-motion: reduce) {
+    header .kopf-lauf { transform: none; }
+    nav .nav-fortschritt { display: none; }
+  }
+
   /* SCROLLEN
      Drei ruhige Dinge, die zusammen den Unterschied machen: die Karten
      steigen beim Erscheinen einmal auf, die Leiste bekommt eine Kante,
@@ -1160,6 +1197,7 @@
 
 <div id="app" class="visible">
 <header>
+ <div class="kopf-lauf">
   <div class="label">Watchlist</div>
   <h1>Aktien-Liste</h1>
   <p class="sub">Live-Charts · Technische Analyse</p>
@@ -1171,9 +1209,11 @@
     <a class="install-btn verwaltung-btn" id="verwaltungBtn" href="/verwaltung.html" hidden>Verwaltung</a>
   </div>
   <div class="konto-zeile" id="kontoZeile" hidden></div>
+ </div>
 </header>
 
 <nav>
+  <i class="nav-fortschritt" id="navFortschritt" aria-hidden="true"></i>
   <button class="sort-chip" id="sortBtn" type="button" aria-pressed="false"
           aria-label="Nach Nähe zur Einkaufszone sortieren"
           title="Nach Nähe zur Einkaufszone sortieren"><span class="zeichen">⇅</span></button>
@@ -2833,6 +2873,66 @@ if ("serviceWorker" in navigator) {
     window.addEventListener("scroll", function () {
       if (window.pageYOffset < 40) markieren("");
     }, { passive: true });
+
+    laufen(karten);
+  }
+
+  /* Was dem Finger folgt: der Kopf bleibt beim Wegscrollen etwas zurueck,
+     und die Linie unter der Leiste zeigt, wie weit man in der Liste ist.
+
+     Ein Zuhoerer, gerechnet wird erst im naechsten Einzelbild, geschrieben
+     werden nur zwei Variablen. Die Masse stehen fest, bis sich das Fenster
+     aendert — getBoundingClientRect bei jedem Bild waere hier der teure Weg. */
+  function laufen(karten) {
+    if (ruhig) return;
+    var kopf = document.querySelector("header .kopf-lauf");
+    var wurzel = document.documentElement;
+
+    var kopfHoehe = 0;
+    var anfang = 0;
+    var ende = 1;
+
+    function messen() {
+      var h = document.querySelector("header");
+      kopfHoehe = h ? h.offsetHeight : 0;
+      var erste = karten[0];
+      var letzte = karten[karten.length - 1];
+      if (!erste || !letzte) return;
+      anfang = erste.getBoundingClientRect().top + window.pageYOffset - window.innerHeight * 0.6;
+      ende = letzte.getBoundingClientRect().top + window.pageYOffset +
+             letzte.offsetHeight - window.innerHeight * 0.6;
+      if (ende <= anfang) ende = anfang + 1;
+    }
+
+    var wartet = false;
+    function rechnen() {
+      wartet = false;
+      var y = window.pageYOffset;
+
+      if (kopf) {
+        // Nur solange der Kopf ueberhaupt im Bild ist
+        var mit = y < kopfHoehe ? y : kopfHoehe;
+        wurzel.style.setProperty("--rcp-oben", mit + "px");
+      }
+
+      var teil = (y - anfang) / (ende - anfang);
+      teil = teil < 0 ? 0 : teil > 1 ? 1 : teil;
+      wurzel.style.setProperty("--rcp-lauf", teil.toFixed(4));
+    }
+
+    function anstossen() {
+      if (wartet) return;
+      wartet = true;
+      requestAnimationFrame(rechnen);
+    }
+
+    messen();
+    rechnen();
+    window.addEventListener("scroll", anstossen, { passive: true });
+    window.addEventListener("resize", function () { messen(); anstossen(); }, { passive: true });
+    // Die Charts kommen nach und nach, dabei waechst die Seite
+    setTimeout(function () { messen(); anstossen(); }, 1500);
+    setTimeout(function () { messen(); anstossen(); }, 5000);
   }
 
   if (window.rcpPositionen) start();
