@@ -603,6 +603,55 @@
     background: var(--fg);
     color: #fff;
   }
+
+  /* Konto im Kopf: Verwaltung als eigener Knopf, darunter wer angemeldet ist */
+  .verwaltung-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    text-decoration: none;
+  }
+  .verwaltung-btn .wartend {
+    min-width: 17px;
+    padding: 0 5px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0;
+    font-variant-numeric: tabular-nums;
+    line-height: 17px;
+    text-align: center;
+    color: #fff;
+    background: var(--fg);
+    border-radius: 9px;
+    animation: beat-badge 2s ease-in-out infinite;
+  }
+  /* Offene Anfragen: der Knopf faellt von selbst auf */
+  .verwaltung-btn.offen {
+    background: var(--fg);
+    color: #fff;
+  }
+  .verwaltung-btn.offen .wartend,
+  .verwaltung-btn:active .wartend {
+    background: #fff;
+    color: var(--fg);
+  }
+
+  .konto-zeile {
+    margin-top: 14px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .konto-zeile a {
+    color: var(--fg);
+    text-decoration: none;
+    border-bottom: 1px solid var(--line);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .konto-zeile .trenner { margin: 0 6px; color: var(--line); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .verwaltung-btn .wartend { animation: none; }
+  }
   .sheet {
     position: fixed;
     inset: 0;
@@ -832,36 +881,6 @@
     background: var(--line);
     margin: 0 auto 16px;
   }
-  footer .konto-zeile {
-    margin-top: 14px;
-    font-size: 11px;
-    color: var(--muted);
-  }
-  footer .konto-zeile a {
-    color: var(--fg);
-    text-decoration: none;
-    border-bottom: 1px solid var(--line);
-    -webkit-tap-highlight-color: transparent;
-  }
-  footer .konto-zeile .trenner { margin: 0 6px; color: var(--line); }
-  footer .konto-zeile .wartend {
-    display: inline-block;
-    margin-left: 6px;
-    min-width: 16px;
-    padding: 0 4px;
-    font-size: 10px;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    line-height: 16px;
-    text-align: center;
-    color: #fff;
-    background: var(--fg);
-    border-radius: 8px;
-    animation: beat-badge 2s ease-in-out infinite;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    footer .konto-zeile .wartend { animation: none; }
-  }
 
   @keyframes riseIn {
     from { opacity: 0; transform: translate3d(0, 12px, 0); }
@@ -1090,7 +1109,9 @@
   <div class="header-actions">
     <button class="install-btn" id="installBtn" type="button" hidden>App installieren</button>
     <button class="install-btn" id="pushBtn" type="button" hidden>Benachrichtigungen</button>
+    <a class="install-btn verwaltung-btn" id="verwaltungBtn" href="/verwaltung.html" hidden>Verwaltung</a>
   </div>
+  <div class="konto-zeile" id="kontoZeile" hidden></div>
 </header>
 
 <nav>
@@ -1539,7 +1560,6 @@
   <div class="line"></div>
   Live-Charts · TradingView · Fibos über den Button<br>
   Ralph Christian Pader · Juli 2026
-  <div class="konto-zeile" id="kontoZeile" hidden></div>
 </footer>
 </div>
 
@@ -2787,6 +2807,7 @@ if ("serviceWorker" in navigator) {
 (function () {
   var API = "/.netlify/functions/konto";
   var zeile = document.getElementById("kontoZeile");
+  var vBtn = document.getElementById("verwaltungBtn");
   if (!zeile) return;
 
   function trenner() {
@@ -2830,22 +2851,26 @@ if ("serviceWorker" in navigator) {
         return;
       }
 
-      zeile.textContent = "";
-      zeile.appendChild(document.createTextNode(a.name || a.mail));
-      if (a.chef) {
-        zeile.appendChild(trenner());
-        var v = document.createElement("a");
-        v.href = "/verwaltung.html";
-        v.textContent = "Verwaltung";
-        zeile.appendChild(v);
-        if (a.wartend > 0) {
+      if (a.chef && vBtn) {
+        var offen = a.wartend > 0;
+        if (offen) {
+          vBtn.classList.add("offen");
           var w = document.createElement("span");
           w.className = "wartend";
           w.textContent = a.wartend;
-          w.title = a.wartend === 1 ? "1 offene Anfrage" : a.wartend + " offene Anfragen";
-          v.appendChild(w);
+          vBtn.appendChild(w);
         }
+        vBtn.setAttribute(
+          "aria-label",
+          offen
+            ? "Verwaltung, " + a.wartend + (a.wartend === 1 ? " offene Anfrage" : " offene Anfragen")
+            : "Verwaltung"
+        );
+        vBtn.hidden = false;
       }
+
+      zeile.textContent = "";
+      zeile.appendChild(document.createTextNode("Angemeldet als " + (a.name || a.mail)));
       zeile.appendChild(trenner());
       zeile.appendChild(link("Abmelden", abmelden));
       zeile.hidden = false;

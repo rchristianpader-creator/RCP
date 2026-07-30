@@ -36,11 +36,26 @@
   }
 
   header {
+    position: relative;
     padding: 36px 24px 26px;
     text-align: center;
     background: var(--card);
     border-bottom: 1px solid var(--hair);
   }
+  header .zurueck {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 6px 10px 6px 4px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  header .zurueck::before { content: "‹"; margin-right: 5px; font-size: 14px; }
   header .label {
     font-size: 10px;
     letter-spacing: 0.22em;
@@ -171,6 +186,7 @@
 <body>
 
 <header>
+  <a class="zurueck" href="/">Zur Liste</a>
   <div class="label">Verwaltung</div>
   <h1>Zugänge</h1>
   <p class="sub" id="untertitel">wird geladen …</p>

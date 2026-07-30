@@ -110,15 +110,16 @@ sehen. Der frühere PIN stand im Quelltext und war nur ein Vorhang; er ist weg.
    Solange sie fehlt, zeigt jede Adresse eine Einrichtungsseite mit Vorschlag.
 2. `/anmelden.html` aufrufen, **Zugang anfragen**, eigene Adresse und Passwort
    eintragen. Das erste Konto ist sofort die Verwaltung.
-3. Anmelden. In der Fußzeile steht nun **Verwaltung**.
+3. Anmelden. Oben in der Kopfzeile steht nun **Verwaltung**.
 
 **Weitere Leute**
 
 Sie fragen selbst unter `/anmelden.html` an und landen auf *Wartet auf
 Freigabe*. Du bekommst im selben Moment eine Push-Meldung — Antippen führt
 direkt in die Verwaltung. Dort steht **Freigeben** oder **Ablehnen**; erst
-danach kommt jemand rein. Solange etwas offen ist, trägt der Link
-*Verwaltung* in der Fußleiste eine Zahl.
+danach kommt jemand rein. Der Knopf **Verwaltung** steht oben in der
+Kopfzeile neben *Benachrichtigungen*; solange etwas offen ist, wird er
+schwarz ausgefüllt und trägt die Zahl der offenen Anfragen.
 
 Die Meldung geht nur an Geräte, an denen die Verwaltung angemeldet ist —
 `subscribe.js` merkt sich zu jedem Gerät, wer daran hängt. Kursalarme gehen
