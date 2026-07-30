@@ -274,11 +274,13 @@
   }
 
   /* Aktives Setup: Kurs steht in der Einkaufszone */
+  /* Nicht gefuellt: nur Rahmen und Puls */
   nav a.nav-live {
-    background: var(--fg);
-    color: #fff;
-    border-color: var(--fg);
+    background: transparent;
+    color: var(--fg);
+    border: 1px solid var(--fg);
     position: relative;
+    animation: live-pulse 1.9s var(--ease) infinite;
   }
   nav a.nav-live::after {
     content: "";
@@ -290,14 +292,31 @@
     animation: live-ring 1.9s var(--ease) infinite;
   }
   @keyframes live-ring {
-    0% { opacity: 0.5; transform: scale(1); }
-    70% { opacity: 0; transform: scale(1.16); }
-    100% { opacity: 0; transform: scale(1.16); }
+    0% { opacity: 0.55; transform: scale(1); }
+    70% { opacity: 0; transform: scale(1.18); }
+    100% { opacity: 0; transform: scale(1.18); }
+  }
+  @keyframes live-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(17, 17, 17, 0.22); }
+    60% { box-shadow: 0 0 0 5px rgba(17, 17, 17, 0); }
+  }
+
+  /* Karte: deutlicher Rahmen mit ruhigem Puls */
+  .card.card-live {
+    border-color: var(--fg);
+    border-width: 2px;
+    animation: live-card 2.4s var(--ease) infinite;
+  }
+  @keyframes live-card {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(17, 17, 17, 0.3); }
+    65% { box-shadow: 0 0 0 8px rgba(17, 17, 17, 0); }
   }
   @media (prefers-reduced-motion: reduce) {
-    nav a.nav-live::after { animation: none; opacity: 0.35; }
+    nav a.nav-live,
+    nav a.nav-live::after,
+    .card.card-live { animation: none; }
+    nav a.nav-live::after { opacity: 0.35; }
   }
-  .card.card-live { border-color: var(--fg); }
   .entry-note {
     padding: 10px 18px;
     background: var(--fg);
