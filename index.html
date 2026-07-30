@@ -2114,11 +2114,28 @@
     });
   }
 
+  function hinweis(text) {
+    var note = document.getElementById("fxNote");
+    if (!note) return;
+    note.hidden = false;
+    note.textContent = note.textContent ? note.textContent + " · " + text : text;
+  }
+
   function start() {
     fetch("/.netlify/functions/status")
-      .then(function (r) { return r.json(); })
-      .then(markieren)
-      .catch(function () {});
+      .then(function (r) {
+        if (!r.ok) throw new Error("Status " + r.status);
+        return r.json();
+      })
+      .then(function (daten) {
+        if (!daten || !daten.positionen) throw new Error("keine Daten");
+        markieren(daten);
+        var aktive = daten.positionen.filter(function (p) { return p.aktiv; });
+        if (!aktive.length) hinweis("kein Setup in der Zone");
+      })
+      .catch(function (e) {
+        hinweis("Setup-Prüfung nicht verfügbar (" + (e && e.message ? e.message : e) + ")");
+      });
   }
 
   var appEl = document.getElementById("app");
