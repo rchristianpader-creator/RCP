@@ -7,7 +7,11 @@
 
      <base64url(JSON)>.<base64url(HMAC-SHA256 ueber den ersten Teil)>
 
-   Passwoerter liegen nie im Klartext: scrypt mit eigenem Salz je Konto. */
+   Passwoerter liegen nie im Klartext: scrypt mit eigenem Salz je Konto.
+
+   Diese Datei ist ein Baustein, kein Endpunkt. Netlify behandelt aber jede
+   Datei im Functions-Verzeichnis als Function und verlangt einen Default-
+   Export — deshalb steht unten einer, der nur 404 sagt. */
 
 import crypto from "node:crypto";
 
@@ -115,3 +119,11 @@ export function mailGueltig(mail) {
 export function schluessel(mail) {
   return "nutzer/" + crypto.createHash("sha256").update(mailNormal(mail)).digest("hex");
 }
+
+/* Kein Endpunkt — siehe Kopf der Datei. */
+export default async () => {
+  return new Response(JSON.stringify({ ok: false, fehler: "kein Endpunkt" }), {
+    status: 404,
+    headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" }
+  });
+};
