@@ -556,16 +556,71 @@
   }
 
   .chart {
+    position: relative;
     width: 100%;
     height: 400px;
     background: #f3f3f3;
     border-top: 1px solid var(--hair);
   }
   .chart iframe {
+    position: relative;
+    z-index: 1;
     width: 100%;
     height: 100%;
     border: 0;
     display: block;
+    /* Erst zeigen, wenn wirklich etwas gezeichnet ist — sonst blitzt
+       ein weisser Kasten auf, waehrend TradingView noch aufbaut. */
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+  .chart.chart-da iframe { opacity: 1; }
+
+  /* Was man sieht, solange der Chart noch nicht steht. Ein leerer weisser
+     Kasten sieht aus wie ein Fehler; ein beschrifteter sieht aus wie Warten. */
+  .chart-warte {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--soft);
+  }
+  .chart-warte .kuerzel {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: #c4c4c4;
+  }
+  .chart-warte .wort {
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: #cfcfcf;
+  }
+  .chart-warte::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 2px;
+    width: 100%;
+    background: #e2e2e2;
+    transform-origin: 0 50%;
+    animation: wartelinie 1.6s var(--ease) infinite;
+  }
+  @keyframes wartelinie {
+    0%   { transform: scaleX(0); opacity: 0; }
+    35%  { opacity: 1; }
+    100% { transform: scaleX(1); opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .chart-warte::after { animation: none; transform: scaleX(1); opacity: 0.5; }
+    .chart iframe { transition: none; }
   }
 
   .actions {
@@ -1557,6 +1612,7 @@
     // in die Naehe kommt. Die Adresse steht solange am Kasten.
     var chart = el("div", "chart");
     chart.setAttribute("data-chart", TV.replace("$SYM", encodeURIComponent(p.tv)));
+    chart.setAttribute("data-badge", p.badge || "");
     s.appendChild(chart);
 
     if (p.frage) {
@@ -1626,45 +1682,95 @@
 
   /* Charts kommen und gehen.
 
-     Vorgeladen wird grosszuegig — anderthalb Bildschirme im Voraus —, damit
-     der Chart schon steht, wenn man ankommt. Was weiter als drei Bildschirme
-     entfernt ist, wird wieder ausgehaengt: eine TradingView-Einbettung ist
-     eine vollstaendige Anwendung mit eigenen Zeitgebern und Verbindungen,
-     und zehn davon gleichzeitig bremsen jedes Telefon.
+     Zehn TradingView-Einbettungen gleichzeitig sind der teuerste Posten der
+     Seite — jede ist eine vollstaendige Anwendung. Geladen wird deshalb nur,
+     was in die Naehe kommt.
 
-     Zwei Beobachter statt Scroll-Rechnerei: einer mit weitem Rand fuers
-     Einsetzen, einer mit noch weiterem fuers Entfernen. */
+     Der Vorlauf ist bewusst gross: beim schnellen Wischen ueberholt man sonst
+     das Laden und sieht einen weissen Kasten.
+
+     Ausgehaengt wird praktisch nie — zehn Bildschirme weit. Bei der jetzigen
+     Laenge heisst das: einmal geladen, bleibt geladen, Zurueckscrollen wartet
+     nie wieder. Die Grenze ist nur ein Netz fuer den Fall, dass die Liste
+     eines Tages sehr lang wird.
+
+     Und weil TradingView selbst Sekunden braucht, steht bis dahin ein
+     Platzhalter mit dem Kuerzel. Ein leerer weisser Kasten sieht aus wie ein
+     Fehler; ein beschrifteter sieht aus wie Warten. */
   function charts() {
     var kaesten = [].slice.call(stapel.querySelectorAll(".chart[data-chart]"));
-    if (!kaesten.length || !("IntersectionObserver" in window)) {
-      // Ohne Beobachter alle einsetzen — lieber langsam als leer
-      kaesten.forEach(einsetzen);
-      return;
+    if (!kaesten.length) return;
+
+    function platzhalter(k) {
+      if (k.querySelector(".chart-warte")) return;
+      var w = el("div", "chart-warte");
+      w.appendChild(el("span", "kuerzel", k.getAttribute("data-badge") || ""));
+      w.appendChild(el("span", "wort", "Chart lädt …"));
+      k.appendChild(w);
     }
 
     function einsetzen(k) {
-      if (k.firstChild) return;
+      if (!k || k.querySelector("iframe")) return;
+      platzhalter(k);
       var f = document.createElement("iframe");
-      f.src = k.getAttribute("data-chart");
       f.setAttribute("allowfullscreen", "");
-      f.setAttribute("title", "Chart");
+      f.setAttribute("title", "Chart " + (k.getAttribute("data-badge") || ""));
+      f.addEventListener("load", function () {
+        // Der Rahmen ist da, TradingView zeichnet noch einen Moment
+        setTimeout(function () {
+          k.classList.add("chart-da");
+        }, 400);
+      });
+      f.src = k.getAttribute("data-chart");
       k.appendChild(f);
     }
 
     function raus(k) {
-      if (!k.firstChild) return;
-      k.textContent = "";
+      if (!k) return;
+      var f = k.querySelector("iframe");
+      if (!f) return;
+      f.remove();
+      k.classList.remove("chart-da");
     }
 
+    kaesten.forEach(platzhalter);
+
+    if (!("IntersectionObserver" in window)) {
+      kaesten.forEach(einsetzen);
+      return;
+    }
+
+    /* Beobachtet wird die KARTE, nicht der Chart-Kasten in ihr.
+
+       Die Karten tragen content-visibility: was weit weg ist, wird gar nicht
+       erst gezeichnet — und dann meldet der Beobachter alles darin als nicht
+       sichtbar. Der Kasten waere also ausgerechnet dort "weg", wo er nur
+       uebersprungen wird, und flog gleich wieder raus. Die Karte selbst hat
+       dank contain-intrinsic-size immer eine Groesse. */
+    var zuKarte = new WeakMap();
+    kaesten.forEach(function (k) {
+      var karte = k.closest(".card");
+      if (karte) zuKarte.set(karte, k);
+    });
+
     var nah = new IntersectionObserver(function (eintraege) {
-      eintraege.forEach(function (e) { if (e.isIntersecting) einsetzen(e.target); });
-    }, { rootMargin: "150% 0px" });
+      eintraege.forEach(function (e) {
+        if (e.isIntersecting) einsetzen(zuKarte.get(e.target));
+      });
+    }, { rootMargin: "250% 0px" });
 
     var weit = new IntersectionObserver(function (eintraege) {
-      eintraege.forEach(function (e) { if (!e.isIntersecting) raus(e.target); });
-    }, { rootMargin: "300% 0px" });
+      eintraege.forEach(function (e) {
+        if (!e.isIntersecting) raus(zuKarte.get(e.target));
+      });
+    }, { rootMargin: "1000% 0px" });
 
-    kaesten.forEach(function (k) { nah.observe(k); weit.observe(k); });
+    kaesten.forEach(function (k) {
+      var karte = k.closest(".card");
+      if (!karte) return;
+      nah.observe(karte);
+      weit.observe(karte);
+    });
   }
 
   function gemerkt() {

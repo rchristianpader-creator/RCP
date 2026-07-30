@@ -127,9 +127,22 @@ Ohne Netz baut die Seite aus der zuletzt gesehenen Liste im lokalen Speicher.
 
 Zehn TradingView-Einbettungen sind zehn vollstaendige Anwendungen mit eigenen
 Zeitgebern und Verbindungen. Deshalb haengt die Seite nur die Charts ein, die
-in die Naehe kommen — anderthalb Bildschirme im Voraus, damit sie schon stehen,
-wenn man ankommt — und haengt sie jenseits von drei Bildschirmen wieder aus.
-Gleichzeitig laufen so etwa fuenf statt zehn.
+in die Naehe kommen: zweieinhalb Bildschirme im Voraus, damit sie auch beim
+schnellen Wischen schon stehen. Beim Laden sind es drei von zehn.
+
+Ausgehaengt wird praktisch nie — erst zehn Bildschirme weit. Einmal geladen
+bleibt geladen, Zurueckscrollen wartet nicht wieder. Die Grenze ist nur ein
+Netz fuer den Fall, dass die Liste sehr lang wird.
+
+Solange TradingView noch zeichnet, steht ein Platzhalter mit dem Kuerzel und
+einer laufenden Linie; der Rahmen wird erst eingeblendet, wenn wirklich etwas
+da ist. Ein leerer weisser Kasten sieht aus wie ein Fehler, ein beschrifteter
+sieht aus wie Warten.
+
+Beobachtet wird dabei die Karte, nicht der Chart-Kasten in ihr: die Karten
+tragen `content-visibility`, und was uebersprungen wird, meldet alles darin
+als unsichtbar — der Kasten waere ausgerechnet dann "weg", wenn er nur nicht
+gezeichnet wird.
 
 Bewegt wird beim Scrollen alles **ausser** dem Chart. Wer den Vorfahren eines
 fremden `<iframe>` verwandelt, laesst es bei jedem Bild neu zeichnen; gemessen
