@@ -1347,7 +1347,6 @@
         <li><span class="n">✓</span><div class="step-body"><div class="step-text">Gerät angemeldet</div></div></li>
         <li><span class="n">✓</span><div class="step-body"><div class="step-text">Alle Einkaufszonen aus dieser Liste werden überwacht</div></div></li>
       </ol>
-      <button class="btn" id="pushTest" type="button">Testmeldung senden</button>
     </div>
     <div class="sheet-note" id="pushNote" hidden></div>
   </div>
@@ -1782,7 +1781,6 @@
   var btn = document.getElementById("pushBtn");
   var sheet = document.getElementById("pushSheet");
   var closeBtn = document.getElementById("pushClose");
-  var testBtn = document.getElementById("pushTest");
   var note = document.getElementById("pushNote");
   var okBlock = document.getElementById("pushOk");
   var title = document.getElementById("pushTitle");
@@ -1934,23 +1932,6 @@
         ? ""
         : "<br>Die Liste läuft nicht vom Home-Bildschirm — im Safari-Tab liefert iOS keine Benachrichtigungen.";
       showNote("Anmeldung fehlgeschlagen.<br>" + (e && e.message ? e.message : e) + hint);
-    });
-  }
-
-  if (testBtn) {
-    testBtn.addEventListener("click", function () {
-      testBtn.textContent = "Wird gesendet…";
-      fetch("/.netlify/functions/push-test")
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-          testBtn.textContent = data && data.ok ? "Gesendet" : "Fehlgeschlagen";
-          if (!data || !data.ok) showNote("Der Server konnte nicht senden: " + JSON.stringify(data));
-          setTimeout(function () { testBtn.textContent = "Testmeldung senden"; }, 2500);
-        })
-        .catch(function (e) {
-          testBtn.textContent = "Testmeldung senden";
-          showNote("Test fehlgeschlagen: " + (e && e.message ? e.message : e));
-        });
     });
   }
 
