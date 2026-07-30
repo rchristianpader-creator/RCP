@@ -3,7 +3,8 @@
 
    Automatisch, ohne Konfiguration:
    - Zonen und Symbole liest die Function direkt aus der veroeffentlichten index.html
-   - Verglichen wird in der Waehrung des Charts (USD), ohne Umrechnung
+   - Verglichen wird in der Waehrung des Charts (USD); die Meldung zeigt Euro,
+     live umgerechnet ueber EURUSD=X
    - Empfaenger kommen aus Netlify Blobs (dort landen sie beim Tippen auf "Benachrichtigungen")
    - VAPID-Schluessel werden beim ersten Aufruf erzeugt und gespeichert
 
@@ -48,6 +49,9 @@ export default async () => {
     k.privateKey
   );
 
+  // Wechselkurs fuer die Anzeige in Euro. Verglichen wird weiter in USD,
+  // das ist dieselbe Bedingung und unabhaengig vom Wechselkurs.
+  const rate = await eurUsd();
   const report = [];
 
   for (const item of watch) {
@@ -66,9 +70,18 @@ export default async () => {
     const was = await store.get(key).catch(() => null);
 
     if (inZone && was !== "in") {
+      let text;
+      if (rate && cur === "USD") {
+        text =
+          eur(price / rate) + " EUR (" + fmt(price) + " USD) — Zone " +
+          eur(item.high / rate) + " bis " + eur(item.low / rate) + " EUR";
+      } else {
+        text = fmt(price) + " " + cur + " — Zone " + fmt(item.high) + " bis " + fmt(item.low) + " " + cur;
+      }
+
       await senden(store, subs, {
         title: item.label + " in der Zone",
-        body: fmt(price) + " " + cur + " — Zone " + fmt(item.high) + " bis " + fmt(item.low) + " " + cur,
+        body: text,
         url: "/#" + item.anchor,
         tag: item.badge
       });
@@ -215,6 +228,20 @@ async function quote(symbol) {
   } catch (e) {
     return null;
   }
+}
+
+async function eurUsd() {
+  const q = await quote("EURUSD=X");
+  const r = q && q.price;
+  return r && isFinite(r) && r > 0.5 && r < 2 ? r : null;
+}
+
+function eur(n) {
+  const stellen = n >= 1000 ? 0 : 2;
+  return Number(n).toLocaleString("de-DE", {
+    minimumFractionDigits: stellen,
+    maximumFractionDigits: stellen
+  });
 }
 
 function fmt(n) {
