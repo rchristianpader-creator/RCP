@@ -12,10 +12,16 @@
      ergebnis  tatsaechlicher Wert (null, solange nicht veroeffentlicht)
      ueber     true/false/null - liegt das Ergebnis ueber der Prognose
 
-   Quelle ist der woechentliche Kalender von ForexFactory. Er braucht keinen
-   Schluessel und kein Kontingent. Der Wirtschaftskalender von Financial
-   Modeling Prep waere die Alternative, ist dort aber ein Bezahl-Endpunkt:
-   der kostenlose Tarif bekommt darauf HTTP 402.
+   Zwei Quellen, weil keine allein alles hat:
+
+   - Termin, Prognose und Vorwert kommen vom woechentlichen Kalender von
+     ForexFactory. Der ist frei abrufbar, fuehrt aber kein Feld fuer den
+     tatsaechlichen Wert - er ist ein Terminplan, kein Ergebnisdienst.
+   - Das Ergebnis kommt aus FRED, der Datenbank der Federal Reserve Bank of
+     St. Louis. Dort steht der amtliche Wert, meist Minuten nach der
+     Veroeffentlichung. Braucht einen kostenlosen Schluessel in FRED_KEY.
+
+   Ohne FRED_KEY laeuft alles weiter, nur bleibt "ergebnis" leer.
 
    Aufruf mit ?roh=1 gibt den ersten unveraenderten Datensatz zurueck -
    hilfreich, falls die Quelle ihre Feldnamen aendert. */
@@ -40,6 +46,34 @@ const QUELLEN = [
 // gespeicherte Stand weitergereicht, auch wenn er aelter ist.
 const FRISCH = 15 * 60 * 1000;
 const NOTNAGEL = 24 * 3600 * 1000;   // so alt darf der Speicher hoechstens werden
+
+// Zuordnung der Termine zu den Datenreihen in FRED. Nur Reihen, bei denen
+// die Entsprechung eindeutig ist - eine falsche Zahl waere schlimmer als
+// gar keine. Termine ohne Eintrag behalten "Aktuell -".
+//   pch = Veraenderung zum Vormonat in Prozent
+//   pc1 = Veraenderung zum Vorjahr in Prozent
+//   chg = Veraenderung in der Einheit der Reihe (bei PAYEMS: Tausend Stellen)
+//   lin = der Wert selbst
+const FRED = [
+  [/^core pce price index m\/m/i,   { id: "PCEPILFE", einheit: "pch", takt: "monat" }],
+  [/^core pce price index y\/y/i,   { id: "PCEPILFE", einheit: "pc1", takt: "monat" }],
+  [/^pce price index m\/m/i,        { id: "PCEPI",    einheit: "pch", takt: "monat" }],
+  [/^core cpi m\/m/i,               { id: "CPILFESL", einheit: "pch", takt: "monat" }],
+  [/^cpi m\/m/i,                    { id: "CPIAUCSL", einheit: "pch", takt: "monat" }],
+  [/^cpi y\/y/i,                    { id: "CPIAUCSL", einheit: "pc1", takt: "monat" }],
+  [/^ppi m\/m/i,                    { id: "PPIFIS",   einheit: "pch", takt: "monat" }],
+  [/^non-?farm employment change/i, { id: "PAYEMS",   einheit: "chg", takt: "monat" }],
+  [/^unemployment rate/i,           { id: "UNRATE",   einheit: "lin", takt: "monat" }],
+  [/^average hourly earnings m\/m/i,{ id: "CES0500000003", einheit: "pch", takt: "monat" }],
+  [/^retail sales m\/m/i,           { id: "RSAFS",    einheit: "pch", takt: "monat" }],
+  [/gdp q\/q/i,                     { id: "A191RL1Q225SBEA", einheit: "lin", takt: "quartal" }],
+  [/^federal funds rate/i,          { id: "DFEDTARU", einheit: "lin", takt: "tag" }]
+];
+
+// So weit darf der Beobachtungszeitraum vor dem Termin liegen. Verhindert,
+// dass der Wert des Vormonats als frisches Ergebnis erscheint, solange die
+// Veroeffentlichung noch aussteht.
+const ABSTAND = { monat: 70 * 86400000, quartal: 140 * 86400000, tag: 8 * 86400000 };
 
 // Kurze Namen fuers Band - "Core PCE Price Index m/m" ist zu lang
 const KURZ = [
@@ -79,11 +113,13 @@ export default async (request) => {
   const alter = gespeichert ? Date.now() - gespeichert.zeit : Infinity;
 
   let roh = [];
+  let werte = null;
   let quelle = "Speicher";
   const fehler = [];
 
   if (alter < FRISCH) {
     roh = gespeichert.roh;                       // frisch genug, Quelle in Ruhe lassen
+    werte = gespeichert.werte || {};
   } else {
     for (const url of QUELLEN) {
       try {
@@ -102,10 +138,10 @@ export default async (request) => {
     }
 
     if (roh.length) {
-      quelle = "ForexFactory";
-      await schreiben(speicher, roh);
+      quelle = "ForexFactory";   // geschrieben wird erst unten, mit den Ergebnissen
     } else if (gespeichert && alter < NOTNAGEL) {
       roh = gespeichert.roh;                     // Quelle streikt: alter Stand ist besser als nichts
+      werte = gespeichert.werte || {};
       quelle = "Speicher (Quelle streikt)";
     }
   }
@@ -130,6 +166,20 @@ export default async (request) => {
     .sort((a, b) => new Date(a.zeit) - new Date(b.zeit))
     .slice(0, MAX);
 
+  // Ergebnisse: entweder aus dem Speicher oder frisch bei FRED holen.
+  // Nur fuer Termine, die schon vorbei sind - vorher gibt es nichts.
+  if (!werte) {
+    werte = await ergebnisse(termine);
+    await schreiben(speicher, roh, werte);
+  }
+  for (const t of termine) {
+    const k = schluesselFuer(t);
+    if (k && werte[k] !== undefined && werte[k] !== null) {
+      t.ergebnis = werte[k];
+      t.ueber = t.prognose === null ? null : t.ergebnis > t.prognose;
+    }
+  }
+
   return json(
     {
       ok: true,
@@ -143,6 +193,57 @@ export default async (request) => {
     "public, max-age=900"
   );
 };
+
+/* ---------- Ergebnisse aus FRED ---------- */
+
+function schluesselFuer(t) {
+  const treffer = FRED.find(([muster]) => muster.test(t.voll));
+  return treffer ? t.voll + "@" + String(t.zeit).slice(0, 10) : null;
+}
+
+async function ergebnisse(termine) {
+  const out = {};
+  const key = process.env.FRED_KEY;
+  if (!key) return out;
+
+  const jetzt = Date.now();
+  for (const t of termine) {
+    if (new Date(t.zeit).getTime() > jetzt) continue;      // steht noch aus
+    const treffer = FRED.find(([muster]) => muster.test(t.voll));
+    if (!treffer) continue;
+    const reihe = treffer[1];
+
+    try {
+      const url = "https://api.stlouisfed.org/fred/series/observations" +
+        "?series_id=" + reihe.id +
+        "&units=" + reihe.einheit +
+        "&sort_order=desc&limit=2&file_type=json&api_key=" + key;
+      const res = await fetch(url, { headers: { Accept: "application/json" } });
+      if (!res.ok) continue;
+      const daten = await res.json();
+      const beob = (daten && daten.observations || []).find((o) => o.value && o.value !== ".");
+      if (!beob) continue;
+
+      // Der Beobachtungszeitraum muss zum Termin passen: liegt er zu weit
+      // zurueck, ist die Veroeffentlichung noch nicht in FRED angekommen
+      // und der Wert waere der des Vormonats.
+      const zeitraum = new Date(beob.date + "T00:00:00Z").getTime();
+      const abstand = new Date(t.zeit).getTime() - zeitraum;
+      if (!(abstand >= 0 && abstand <= (ABSTAND[reihe.takt] || ABSTAND.monat))) continue;
+
+      const wert = parseFloat(beob.value);
+      if (isFinite(wert)) out[t.voll + "@" + String(t.zeit).slice(0, 10)] = runden(wert);
+    } catch (e) {
+      // Ein Ausfall bei FRED laesst nur dieses eine Ergebnis leer
+    }
+  }
+  return out;
+}
+
+function runden(n) {
+  // Prozentwerte auf eine Nachkommastelle, Stellenzahlen ganz
+  return Math.abs(n) >= 100 ? Math.round(n) : Math.round(n * 10) / 10;
+}
 
 /* ---------- Filter ---------- */
 
@@ -262,16 +363,16 @@ async function lesen(store) {
   try {
     const d = await store.get("ff-thisweek", { type: "json" });
     if (!d || !Array.isArray(d.roh) || !d.roh.length) return null;
-    return { zeit: Number(d.zeit) || 0, roh: d.roh };
+    return { zeit: Number(d.zeit) || 0, roh: d.roh, werte: d.werte || {} };
   } catch (e) {
     return null;
   }
 }
 
-async function schreiben(store, roh) {
+async function schreiben(store, roh, werte) {
   if (!store) return;
   try {
-    await store.setJSON("ff-thisweek", { zeit: Date.now(), roh: roh });
+    await store.setJSON("ff-thisweek", { zeit: Date.now(), roh: roh, werte: werte || {} });
   } catch (e) { /* Speichern ist Kuer, nicht Pflicht */ }
 }
 
