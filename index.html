@@ -232,6 +232,14 @@
     font-weight: 600;
     letter-spacing: 0.04em;
     padding: 6px 12px;
+    /* Feste Hoehe fuer alle: die NEU-Chips sind wegen ihres oberen
+       Abstands hoeher, und eine Flex-Reihe richtet sich nach dem
+       hoechsten Element. Ohne das aendert sich die Kastengroesse,
+       sobald das Sortieren einen NEU-Chip in eine andere Reihe schiebt. */
+    min-height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     border: 1px solid var(--line);
     border-radius: 2px;
     text-decoration: none;
@@ -352,8 +360,8 @@
     font: inherit;
     font-size: 14px;
     line-height: 1;
-    width: 30px;
-    height: 30px;
+    width: 34px;
+    height: 34px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -433,8 +441,9 @@
   }
   nav a.nav-new {
     position: relative;
-    padding-top: 10px;
-    padding-bottom: 6px;
+    /* Gleicher Innenabstand wie die anderen: die feste Hoehe und die
+       zentrierte Ausrichtung halten die Beschriftung jetzt auf einer
+       Linie mit den uebrigen Chips. */
     min-width: 52px;
     text-align: center;
   }
