@@ -5,7 +5,8 @@
 export default async () => {
   const versuche = [
     { url: "https://query1.finance.yahoo.com/v8/finance/chart/EURUSD=X?range=1d&interval=5m", name: "Yahoo" },
-    { url: "https://api.frankfurter.app/latest?from=EUR&to=USD", name: "Frankfurter (EZB)" }
+    { url: "https://api.frankfurter.app/latest?from=EUR&to=USD", name: "Frankfurter (EZB)" },
+    { url: "https://open.er-api.com/v6/latest/EUR", name: "exchangerate-api" }
   ];
 
   for (const v of versuche) {
@@ -23,6 +24,7 @@ export default async () => {
       if (v.name === "Yahoo") {
         rate = data?.chart?.result?.[0]?.meta?.regularMarketPrice ?? null;
       } else {
+        // Frankfurter: rates.USD ; exchangerate-api: rates.USD
         rate = data?.rates?.USD ?? null;
       }
 

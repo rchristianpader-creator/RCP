@@ -2059,69 +2059,195 @@
 // Euro-Werte: die USD-Niveaus aus den Charts live in Euro umrechnen
 (function () {
   var note = document.getElementById("fxNote");
+  var SPEICHER = "rcp:fx";          // letzter guter Kurs, damit sofort Euro dasteht
+  var MAX_ALTER = 24 * 3600 * 1000; // aelter als ein Tag wird nicht mehr gezeigt
+  var TAKT = 5 * 60 * 1000;         // Kurs alle fuenf Minuten frisch holen
+  var ZAHL = /\d[\d.]*(?:,\d+)?/g;
+
+  var aktuell = null;   // { rate, quelle, zeit, gecacht }
+  var laeuft = false;
 
   function zahl(text) {
     // "40.557" -> 40557 ; "8,68" -> 8.68
     return parseFloat(String(text).replace(/[^\d.,]/g, "").replace(/\./g, "").replace(",", "."));
   }
 
-  function eur(wert) {
-    var stellen = wert >= 1000 ? 0 : 2;
+  function eur(wert, mitKomma) {
+    // Nachkommastellen wie in der USD-Angabe: "263" -> "229", "6,01" -> "5,24"
+    var stellen = mitKomma === false || wert >= 1000 ? 0 : 2;
     return wert.toLocaleString("de-DE", {
       minimumFractionDigits: stellen,
       maximumFractionDigits: stellen
     });
   }
 
+  // "5.101 – 6.258 USD" -> "4.448 – 5.456 EUR" ; auch einzelne Werte und Bereiche
+  function inEuro(text, rate) {
+    var ok = false;
+    var umgerechnet = String(text).replace(ZAHL, function (treffer) {
+      var wert = zahl(treffer) / rate;
+      if (!isFinite(wert)) return treffer;
+      ok = true;
+      return eur(wert, treffer.indexOf(",") !== -1);
+    });
+    if (!ok) return null;
+    return umgerechnet.replace(/USD/g, "EUR").replace(/\s+/g, " ").trim();
+  }
+
+  function gueltig(rate) {
+    return typeof rate === "number" && isFinite(rate) && rate > 0.5 && rate < 2;
+  }
+
   function rechnen(rate) {
-    // Einkaufszonen
+    if (!gueltig(rate)) return;
+
+    // Einkaufszonen — Zeile anlegen oder den vorhandenen Wert nachziehen
     document.querySelectorAll(".card-head .info").forEach(function (info) {
       var zone = info.querySelector(".zone");
-      if (!zone || info.parentNode.querySelector(".info-fx")) return;
-      var treffer = zone.textContent.match(/([\d.,]+)\s*[–-]\s*([\d.,]+)/);
-      if (!treffer) return;
-      var oben = zahl(treffer[1]) / rate;
-      var unten = zahl(treffer[2]) / rate;
-      if (!isFinite(oben) || !isFinite(unten)) return;
-      var zeile = document.createElement("div");
-      zeile.className = "info-fx";
-      zeile.innerHTML = "in Euro: <b>" + eur(oben) + " – " + eur(unten) + " EUR</b>";
-      info.parentNode.insertBefore(zeile, info.nextSibling);
+      if (!zone) return;
+      var quelle = zone.textContent.replace(/Einkaufszone/i, "");
+      var euroText = inEuro(quelle, rate);
+      if (!euroText) return;
+
+      var zeile = info.parentNode.querySelector(".info-fx");
+      if (!zeile) {
+        zeile = document.createElement("div");
+        zeile.className = "info-fx";
+        info.parentNode.insertBefore(zeile, info.nextSibling);
+      }
+      zeile.innerHTML = "in Euro: <b>" + euroText + "</b>";
     });
 
-    // Kursziele
+    // Kursziele — einzelne Ziele und Bereiche ("172 – 892 USD")
     document.querySelectorAll(".ziel-bar").forEach(function (bar) {
       var v = bar.querySelector(".v");
-      if (!v || bar.querySelector(".v-fx")) return;
-      var wert = zahl(v.textContent);
-      if (!isFinite(wert)) return;
-      var span = document.createElement("span");
-      span.className = "v-fx";
-      span.textContent = eur(wert / rate) + " EUR";
-      v.parentNode.insertBefore(span, v.nextSibling);
+      if (!v) return;
+      var euroText = inEuro(v.textContent, rate);
+      if (!euroText) return;
+
+      var span = bar.querySelector(".v-fx");
+      if (!span) {
+        span = document.createElement("span");
+        span.className = "v-fx";
+        v.parentNode.insertBefore(span, v.nextSibling);
+      }
+      span.textContent = euroText;
     });
   }
 
-  function start() {
-    fetch("/.netlify/functions/fx")
-      .then(function (r) { return r.json(); })
+  function uhrzeit(zeit) {
+    var d = new Date(zeit);
+    if (isNaN(d.getTime())) return null;
+    return d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+  }
+
+  function hinweis() {
+    if (!note) return;
+    note.hidden = false;
+
+    if (!aktuell) {
+      note.textContent = "Umrechnung gerade nicht verfügbar · nächster Versuch läuft";
+      return;
+    }
+
+    var text =
+      "Euro-Werte umgerechnet mit 1 EUR = " +
+      aktuell.rate.toLocaleString("de-DE", { minimumFractionDigits: 4, maximumFractionDigits: 4 }) +
+      " USD";
+    if (aktuell.quelle) text += " · " + aktuell.quelle;
+    var zeit = uhrzeit(aktuell.zeit);
+    if (zeit) text += " · " + (aktuell.gecacht ? "Stand " + zeit : zeit + " Uhr");
+    note.textContent = text;
+  }
+
+  function merken(data) {
+    try {
+      localStorage.setItem(SPEICHER, JSON.stringify({
+        rate: data.rate, quelle: data.quelle, zeit: data.zeit
+      }));
+    } catch (e) { /* privates Fenster o.ae. — dann eben ohne Zwischenspeicher */ }
+  }
+
+  function gemerkt() {
+    try {
+      var roh = localStorage.getItem(SPEICHER);
+      if (!roh) return null;
+      var data = JSON.parse(roh);
+      if (!gueltig(data && data.rate)) return null;
+      var alter = Date.now() - new Date(data.zeit).getTime();
+      if (!isFinite(alter) || alter > MAX_ALTER) return null;
+      return data;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function anwenden(data, gecacht) {
+    aktuell = {
+      rate: data.rate,
+      quelle: data.quelle || null,
+      zeit: data.zeit || new Date().toISOString(),
+      gecacht: !!gecacht
+    };
+    rechnen(aktuell.rate);
+    hinweis();
+  }
+
+  function ladeJson(pfad) {
+    return fetch(pfad, { cache: "no-store" }).then(function (r) {
+      if (!r.ok) throw new Error(pfad + " " + r.status);
+      return r.json();
+    });
+  }
+
+  // Erst die FX-Funktion, dann der Status-Endpunkt als zweite Quelle
+  function holeRate() {
+    return ladeJson("/.netlify/functions/fx")
+      .catch(function () { return ladeJson("/.netlify/functions/status"); })
       .then(function (data) {
-        if (!data || !data.rate) throw new Error("kein Kurs");
-        rechnen(data.rate);
-        if (note) {
-          note.hidden = false;
-          note.textContent =
-            "Euro-Werte umgerechnet mit 1 EUR = " +
-            data.rate.toLocaleString("de-DE", { minimumFractionDigits: 4, maximumFractionDigits: 4 }) +
-            " USD · " + data.quelle;
-        }
+        if (!data || !gueltig(data.rate)) throw new Error("kein Kurs");
+        return {
+          rate: Number(data.rate),
+          quelle: data.quelle || "Yahoo",
+          zeit: data.zeit || new Date().toISOString()
+        };
+      });
+  }
+
+  function aktualisieren() {
+    if (laeuft) return;
+    laeuft = true;
+
+    holeRate()
+      .catch(function () {
+        // ein zweiter Versuch, Netz auf dem Handy wacht manchmal spaeter auf
+        return new Promise(function (fertig) { setTimeout(fertig, 2000); }).then(holeRate);
+      })
+      .then(function (data) {
+        merken(data);
+        anwenden(data, false);
       })
       .catch(function () {
-        if (note) {
-          note.hidden = false;
-          note.textContent = "Umrechnung gerade nicht verfügbar";
-        }
-      });
+        // Kein frischer Kurs: gemerkten Kurs stehen lassen, sonst Hinweis zeigen
+        if (!aktuell) hinweis();
+      })
+      .then(function () { laeuft = false; }, function () { laeuft = false; });
+  }
+
+  function start() {
+    var alt = gemerkt();
+    if (alt) anwenden(alt, true);   // sofort Euro-Werte, auch offline
+    aktualisieren();
+
+    setInterval(aktualisieren, TAKT);
+
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState !== "visible") return;
+      var alter = aktuell ? Date.now() - new Date(aktuell.zeit).getTime() : Infinity;
+      if (!isFinite(alter) || alter > 2 * 60 * 1000) aktualisieren();
+    });
+
+    window.addEventListener("online", aktualisieren);
   }
 
   var appEl = document.getElementById("app");
