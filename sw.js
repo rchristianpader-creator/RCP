@@ -5,7 +5,7 @@
    - everything else (TradingView, /.netlify/functions/*): straight to network, never cached
    Bump CACHE on every deploy so old shells are dropped. */
 
-const CACHE = "aktien-liste-v13";
+const CACHE = "aktien-liste-v14";
 
 const PRECACHE = [
   "/",

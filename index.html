@@ -511,6 +511,11 @@
     padding: 12px 16px 13px;
     -webkit-tap-highlight-color: transparent;
     cursor: pointer;
+    /* Senkrecht scrollt die Seite wie immer, waagerecht werten wir selbst
+       aus. Ohne das faengt der Browser die Geste ab. */
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
   }
   .wirtschaft-block .news-label {
     display: flex;
@@ -2794,8 +2799,78 @@ if ("serviceWorker" in navigator) {
     laufen();
   }
 
-  // Antippen schaltet weiter und setzt die Uhr zurueck, damit man in Ruhe liest
+  function aktives() { return rotator.querySelector(".news-item.active"); }
+
+  // Wischen: der Eintrag folgt dem Finger und rastet ein. Wird die Strecke
+  // nicht erreicht, federt er zurueck.
+  var zieh = null;
+  var gewischt = 0;
+
+  function gleiten(richtung) {
+    var raus = aktives();
+    zeigen(idx + richtung);
+    var rein = aktives();
+    if (!raus || !rein || raus === rein) return;
+
+    var weg = richtung > 0 ? -70 : 70;
+    raus.style.transform = "translateX(" + weg + "px)";
+    rein.style.transition = "none";
+    rein.style.transform = "translateX(" + (-weg) + "px)";
+    requestAnimationFrame(function () {
+      rein.style.transition = "";
+      rein.style.transform = "";
+    });
+    window.setTimeout(function () { raus.style.transform = ""; }, 520);
+  }
+
+  block.addEventListener("touchstart", function (e) {
+    if (e.touches.length !== 1) return;
+    zieh = { x: e.touches[0].clientX, y: e.touches[0].clientY, dx: 0, quer: false };
+    if (uhr) clearInterval(uhr);          // waehrend der Geste nicht wechseln
+  }, { passive: true });
+
+  block.addEventListener("touchmove", function (e) {
+    if (!zieh) return;
+    var dx = e.touches[0].clientX - zieh.x;
+    var dy = e.touches[0].clientY - zieh.y;
+
+    if (!zieh.quer) {
+      // Erst entscheiden, wohin die Geste geht. Senkrecht gehoert der Seite.
+      if (Math.abs(dy) > Math.abs(dx)) { zieh = null; laufen(); return; }
+      if (Math.abs(dx) < 8) return;
+      zieh.quer = true;
+    }
+
+    e.preventDefault();
+    zieh.dx = dx;
+    var el = aktives();
+    if (el) {
+      el.style.transition = "none";
+      el.style.transform = "translateX(" + dx + "px)";
+    }
+  }, { passive: false });
+
+  function loslassen() {
+    if (!zieh) return;
+    var dx = zieh.dx, quer = zieh.quer;
+    zieh = null;
+
+    var el = aktives();
+    if (el) { el.style.transition = ""; el.style.transform = ""; }
+
+    if (quer && Math.abs(dx) > 45) {
+      gewischt = Date.now();
+      gleiten(dx < 0 ? 1 : -1);           // nach links gewischt: naechster
+    }
+    laufen();
+  }
+  block.addEventListener("touchend", loslassen);
+  block.addEventListener("touchcancel", loslassen);
+
+  // Antippen schaltet weiter und setzt die Uhr zurueck, damit man in Ruhe liest.
+  // Nach einem Wisch nicht, sonst springt es zwei Eintraege weiter.
   block.addEventListener("click", function () {
+    if (Date.now() - gewischt < 400) return;
     zeigen(idx + 1);
     laufen();
   });
