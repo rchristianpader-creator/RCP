@@ -32,6 +32,7 @@ netlify/functions/alerts.js           Zonen-Prüfung, läuft alle 30 Minuten
 netlify/functions/push-test.js        Testmeldung an alle Geräte
 netlify/functions/on-publish.js       Meldet nach jedem Deploy, was neu ist
 netlify/functions/konto.js            Registrierung, Anmeldung, Freigabe
+netlify/functions/nachricht.js        Nachricht an alle Geräte (nur Verwaltung)
 netlify/functions/sitzung.js          Unterschrift und Passwort-Hash (kein Endpunkt)
 
 netlify/edge-functions/tor.js         Die Sperre: prüft jede Anfrage vor allem anderen
@@ -85,6 +86,17 @@ Der erste Aufruf speichert nur den Stand, ohne zu senden.
 
 `SITE_PASSWORD` wird nicht mehr gebraucht und kann gelöscht werden.
 
+## Nachricht an alle
+
+In der Verwaltung steht oben **Nachricht an alle**: Titel, Text, senden. Sie
+geht an jedes Gerät, das Benachrichtigungen angemeldet hat — dieselben
+Empfänger wie bei den Kursalarmen, unabhängig davon, wem das Gerät gehört.
+Vor dem Absenden fragt die Seite nach und nennt die Zahl der Geräte.
+
+Jede Nachricht bekommt einen eigenen Tag, überschreibt die vorige also nicht.
+Antippen öffnet die Liste. Geräte, die der Push-Dienst nicht mehr kennt,
+werden beim Senden aussortiert und in der Rückmeldung gezählt.
+
 ## Prüfen
 
 | Adresse | Erwartung |
@@ -93,6 +105,7 @@ Der erste Aufruf speichert nur den Stand, ohne zu senden.
 | `/.netlify/functions/push-test` | Testmeldung auf allen angemeldeten Geräten |
 | `/.netlify/functions/alerts` | Alle Positionen mit Kurs, Zone und Status |
 | `/.netlify/functions/konto?tat=wer` | `{"ok":true,"angemeldet":true,…}` |
+| `/.netlify/functions/nachricht` | `{"ok":true,"geraete":3}` — nur als Verwaltung |
 
 Der Punkt vor `netlify` gehört dazu. Ohne ihn wäre es ein Dateipfad, keine Function.
 

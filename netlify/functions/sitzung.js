@@ -120,6 +120,28 @@ export function schluessel(mail) {
   return "nutzer/" + crypto.createHash("sha256").update(mailNormal(mail)).digest("hex");
 }
 
+/* Wer stellt diese Anfrage? Liest den Keks, schlaegt das Konto frisch nach
+   und gibt nur zurueck, was auch wirklich freigegeben ist. Die Rolle steht
+   damit nie im Keks zur Debatte, sondern immer im gespeicherten Konto. */
+export async function kontoLesen(request) {
+  const token = keksLesen(request, KEKS) || request.headers.get("x-rcp-sitzung") || "";
+  const s = pruefen(token);
+  if (!s || !s.m) return null;
+  try {
+    const { getStore } = await import("@netlify/blobs");
+    const k = await getStore(LADEN).get(schluessel(s.m), { type: "json" });
+    if (!k || k.status !== "frei") return null;
+    return k;
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function chefLesen(request) {
+  const k = await kontoLesen(request);
+  return k && k.rolle === "chef" ? k : null;
+}
+
 /* Kein Endpunkt — siehe Kopf der Datei. */
 export default async () => {
   return new Response(JSON.stringify({ ok: false, fehler: "kein Endpunkt" }), {
