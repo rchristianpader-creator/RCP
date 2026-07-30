@@ -18,14 +18,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png">
 
 <style>
   :root {
@@ -1738,13 +1738,14 @@
     if (!bar) return;
     bar.hidden = true;
     document.body.classList.remove("has-install-bar");
-    if (remember) { try { localStorage.setItem(BAR_OFF, "1"); } catch (e) {} }
+    // Nur fuer diese Sitzung: beim naechsten Start ist die Leiste wieder da
+    if (remember) { try { sessionStorage.setItem(BAR_OFF, "1"); } catch (e) {} }
   }
 
   function showBar() {
     if (!bar) return;
     var off = false;
-    try { off = localStorage.getItem(BAR_OFF) === "1"; } catch (e) {}
+    try { off = sessionStorage.getItem(BAR_OFF) === "1"; } catch (e) {}
     if (off) return;
     bar.hidden = false;
     document.body.classList.add("has-install-bar");

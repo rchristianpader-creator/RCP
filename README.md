@@ -16,7 +16,7 @@ sw.js                                 Service Worker: Offline-Rückfall, Push-Em
 netlify.toml                          Build, Functions, gesperrte Pfade
 package.json                          Abhängigkeiten für die Functions
 energie-these.pdf                     Download aus dem Laufband
-og-preview.png                         Link-Vorschaubild
+og-preview-black.png                  Link-Vorschaubild (WhatsApp, iMessage)
 icon-180.png                          Home-Bildschirm (iOS)
 icon-192.png / icon-512.png           App-Icons
 icon-maskable-512.png                 Android, beschnittfest
@@ -26,6 +26,7 @@ netlify/functions/vapid.js            Erzeugt und verwaltet das VAPID-Schlüssel
 netlify/functions/subscribe.js        Speichert angemeldete Geräte
 netlify/functions/alerts.js           Zonen-Prüfung, läuft alle 30 Minuten
 netlify/functions/push-test.js        Testmeldung an alle Geräte
+netlify/functions/on-publish.js       Meldet nach jedem Deploy, was neu ist
 
 netlify/edge-functions/site-password.js   Optional: Passwort für alle Pfade
 ```
@@ -48,6 +49,21 @@ wenn ein Kurs **neu** in seine Zone eintritt. Zwischen 23 und 7 Uhr ist Ruhe.
 
 Änderst du eine Zone im HTML, zieht der Alarm automatisch mit — es gibt keine
 zweite Liste zu pflegen.
+
+## Meldung beim Veröffentlichen
+
+`on-publish.js` wird nach jedem erfolgreichen Deploy aufgerufen und vergleicht
+die Seite mit dem letzten Stand:
+
+* Text im Laufband geändert → genau dieser Text geht als Meldung raus
+* Neue Position in der Liste → "Neu in der Liste: UUUU"
+* Nichts geändert → keine Meldung
+
+Einmal in Netlify einrichten: **Site configuration** → **Notifications** →
+**Add notification** → **Outgoing webhook** → Event **Deploy succeeded** →
+URL `https://rcp-aktien.netlify.app/.netlify/functions/on-publish`
+
+Der erste Aufruf speichert nur den Stand, ohne zu senden.
 
 ## Environment-Variablen
 
