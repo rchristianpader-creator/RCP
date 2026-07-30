@@ -581,24 +581,13 @@
      alte Eintrag aus, dann kommt der neue. Ueberlappen sie sich, liest man
      eine halbe Sekunde lang beide uebereinander - bei einer Zeile
      Nachrichtentext faellt das nicht auf, bei Ueberschrift plus Werte-Zeile
-     schon. Diese Regeln stehen bewusst vor .geht/.kommt: gleiche
-     Spezifitaet, die spaetere gewinnt, also behaelt das Wischen sein
-     Weiterschieben. */
+     schon. Gilt fuer alle drei Auslöser gleich: automatischer Wechsel,
+     Antippen und Wischen. */
   .wirtschaft-block .news-rotator .news-item {
     transition: opacity 0.16s ease, transform 0.16s ease;
   }
   .wirtschaft-block .news-rotator .news-item.active {
     transition: opacity 0.24s ease 0.16s, transform 0.24s ease 0.16s;
-  }
-
-  /* Beim Wischen wandern zwei Eintraege gemeinsam durchs Bild. Beide sind
-     dabei voll sichtbar und stehen nebeneinander; der Rahmen schneidet ab.
-     Wuerden sie stattdessen ineinander ueberblenden, laege der alte als
-     Geist hinter dem neuen - und man liest beide gleichzeitig. */
-  .wirtschaft-block .news-rotator .news-item.geht,
-  .wirtschaft-block .news-rotator .news-item.kommt {
-    opacity: 1;
-    transition: transform 0.34s var(--ease);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -2830,38 +2819,6 @@ if ("serviceWorker" in navigator) {
   var zieh = null;
   var gewischt = 0;
 
-  function gleiten(richtung) {
-    var raus = aktives();
-    if (!raus) return;
-    raus.classList.add("geht");     // vor dem Wechsel, sonst blitzt er weg
-
-    zeigen(idx + richtung);
-    var rein = aktives();
-    if (!rein || rein === raus) { raus.classList.remove("geht"); return; }
-    rein.classList.add("kommt");
-
-    // Startpunkte ohne Uebergang setzen, dann beide in einem Zug fahren
-    var weg = richtung > 0 ? -100 : 100;
-    rein.style.transition = "none";
-    rein.style.transform = "translateX(" + (-weg) + "%)";
-    raus.style.transition = "none";
-    void rotator.offsetWidth;
-
-    rein.style.transition = "";
-    raus.style.transition = "";
-    rein.style.transform = "translateX(0)";
-    raus.style.transform = "translateX(" + weg + "%)";
-
-    window.setTimeout(function () {
-      [raus, rein].forEach(function (el) {
-        el.classList.remove("geht");
-        el.classList.remove("kommt");
-        el.style.transition = "";
-        el.style.transform = "";
-      });
-    }, 380);
-  }
-
   block.addEventListener("touchstart", function (e) {
     if (e.touches.length !== 1) return;
     zieh = { x: e.touches[0].clientX, y: e.touches[0].clientY, dx: 0, quer: false };
@@ -2893,13 +2850,25 @@ if ("serviceWorker" in navigator) {
     if (!zieh) return;
     var dx = zieh.dx, quer = zieh.quer;
     zieh = null;
+    var el = aktives();
 
     if (quer && Math.abs(dx) > 45) {
       gewischt = Date.now();
-      gleiten(dx < 0 ? 1 : -1);           // nach links gewischt: naechster
-    } else {
-      var el = aktives();                 // zu kurz: zurueckfedern
-      if (el) { el.style.transition = ""; el.style.transform = ""; }
+      zeigen(idx + (dx < 0 ? 1 : -1));    // nach links gewischt: naechster
+      // Der gezogene Eintrag blendet dort aus, wo der Finger ihn gelassen
+      // hat - er springt also nicht erst zurueck. Waagerecht weiterschieben
+      // waere falsch: dabei stuenden zwei Termine nebeneinander im Kasten,
+      // und ohne trennende Kante liest sich das wie uebereinander.
+      if (el) {
+        el.style.transition = "opacity 0.16s ease";
+        window.setTimeout(function () {
+          el.style.transition = "";
+          el.style.transform = "";
+        }, 200);
+      }
+    } else if (el) {
+      el.style.transition = "";           // zu kurz: zurueckfedern
+      el.style.transform = "";
     }
     laufen();
   }
