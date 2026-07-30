@@ -359,6 +359,23 @@
     color: #fff;
     border-color: var(--fg);
   }
+  /* Das Zeichen kippt beim Umschalten — die Pfeile tauschen die Seiten,
+     was genau das ist, was mit der Liste passiert. */
+  nav .sort-chip .zeichen {
+    display: block;
+    transition: transform 0.3s var(--ease);
+  }
+  nav .sort-chip.gekippt .zeichen { transform: rotate(180deg); }
+
+  /* Beim Umsortieren taucht der Stapel kurz ab. Der Umbau passiert im
+     Tiefpunkt: dort sieht man den Sprung nicht, und auch nicht, dass
+     nachrutschende Karten ihre Charts nachladen. */
+  .karten.wechselt { will-change: opacity; }
+
+  @media (prefers-reduced-motion: reduce) {
+    nav .sort-chip .zeichen { transition: none; }
+    .karten { transition: none !important; }
+  }
 
   .card {
     margin: 16px 14px 56px;
@@ -1093,7 +1110,7 @@
   <a href="#uuuu" class="nav-new">UUUU<span class="nav-neu">NEU</span></a>
   <button class="sort-chip" id="sortBtn" type="button" aria-pressed="false"
           aria-label="Nach Nähe zur Einkaufszone sortieren"
-          title="Nach Nähe zur Einkaufszone sortieren">⇅</button>
+          title="Nach Nähe zur Einkaufszone sortieren"><span class="zeichen">⇅</span></button>
 </nav>
 
 <div class="news-banner" aria-label="Neuigkeit">
@@ -2418,15 +2435,28 @@ if ("serviceWorker" in navigator) {
 // Die Daten kommen aus dem Status-Abruf, der ohnehin laeuft; sortiert wird
 // ueber die CSS-Eigenschaft order, damit keine Karte den Platz im DOM
 // wechselt und ihren Chart neu laedt.
+//
+// Bewegung: die Nav-Chips wandern sichtbar an ihren neuen Platz (gemessen,
+// zurueckversetzt, zurueckgefahren — FLIP). Die Karten sind hoeher als der
+// Bildschirm, ein Gleiten ueber 3000 Pixel waere nur ein Zucken; sie tauchen
+// deshalb kurz ab, wechseln im Tiefpunkt die Reihenfolge und kommen wieder.
 (function () {
   var KEY = "rcp:sort";
   var btn = document.getElementById("sortBtn");
   var stapel = document.getElementById("karten");
   if (!btn || !stapel) return;
 
+  var AB = 120;      // abtauchen: schnell raus
+  var TIEF = 0.25;   // wie weit der Stapel abtaucht
+  var AUF = 300;     // auftauchen: langsam zurueck
+  var CHIP = 380;    // Weg der Chips
+  var VERSATZ = 12;  // Staffelung je Chip, damit sie nicht im Gleichschritt fliegen
+  var ruhig = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
   var aktiv = false;
   try { aktiv = localStorage.getItem(KEY) === "zone"; } catch (e) {}
   var positionen = null;
+  var laeuft = false;
 
   function karten() {
     return [].slice.call(stapel.children).filter(function (el) {
@@ -2440,19 +2470,87 @@ if ("serviceWorker" in navigator) {
     return Math.abs(p.abstand === null || p.abstand === undefined ? 9999 : p.abstand);
   }
 
-  function anwenden() {
-    var k = karten(), l = navLinks();
-    if (!aktiv || !positionen) {
-      k.forEach(function (el) { el.style.order = ""; });
-      l.forEach(function (el) { el.style.order = ""; });
-      return;
-    }
+  // Rangfolge: kleinster Abstand zuerst, in der Zone stehende also ganz oben
+  function rangfolge() {
+    if (!aktiv || !positionen) return null;
     var rang = {};
     positionen.slice().sort(function (a, b) { return weit(a) - weit(b); })
       .forEach(function (p, i) { if (p.id) rang[p.id] = i + 1; });
+    return rang;
+  }
 
-    k.forEach(function (el) { el.style.order = rang[el.id] || 90; });
-    l.forEach(function (el) { el.style.order = rang[el.getAttribute("href").slice(1)] || 90; });
+  function ordnenKarten(rang) {
+    karten().forEach(function (el) {
+      el.style.order = rang ? (rang[el.id] || 90) : "";
+    });
+  }
+  function ordnenNav(rang) {
+    navLinks().forEach(function (el) {
+      var id = el.getAttribute("href").slice(1);
+      el.style.order = rang ? (rang[id] || 90) : "";
+    });
+  }
+
+  // Chips: erst messen, dann umstellen, dann an den alten Platz zurueckversetzen
+  // und von dort zurueckfahren. Nur transform, damit es auf der GPU bleibt.
+  function chipsBewegen(rang) {
+    var el = navLinks();
+    var vorher = el.map(function (e) { return e.getBoundingClientRect(); });
+    ordnenNav(rang);
+    var nachher = el.map(function (e) { return e.getBoundingClientRect(); });
+
+    el.forEach(function (e, i) {
+      var dx = vorher[i].left - nachher[i].left;
+      var dy = vorher[i].top - nachher[i].top;
+      if (!dx && !dy) return;
+      e.style.transition = "none";
+      e.style.transform = "translate3d(" + dx + "px, " + dy + "px, 0)";
+      e.style.willChange = "transform";
+    });
+
+    requestAnimationFrame(function () {
+      el.forEach(function (e, i) {
+        if (!e.style.transform) return;
+        e.style.transition = "transform " + CHIP + "ms var(--ease) " + (i * VERSATZ) + "ms";
+        e.style.transform = "translate3d(0, 0, 0)";
+      });
+      window.setTimeout(function () {
+        el.forEach(function (e) {
+          e.style.transition = "";
+          e.style.transform = "";
+          e.style.willChange = "";
+        });
+      }, CHIP + el.length * VERSATZ + 40);
+    });
+  }
+
+  function anwenden(mitBewegung) {
+    var rang = rangfolge();
+
+    if (!mitBewegung || ruhig) {   // beim Laden und bei reduzierter Bewegung: sofort
+      ordnenNav(rang);
+      ordnenKarten(rang);
+      return;
+    }
+
+    laeuft = true;
+    chipsBewegen(rang);
+
+    stapel.classList.add("wechselt");
+    stapel.style.transition = "opacity " + AB + "ms var(--ease)";
+    stapel.style.opacity = String(TIEF);
+
+    window.setTimeout(function () {
+      ordnenKarten(rang);                       // Umbau im Tiefpunkt
+      stapel.style.transition = "opacity " + AUF + "ms var(--ease)";
+      stapel.style.opacity = "1";
+      window.setTimeout(function () {
+        stapel.style.transition = "";
+        stapel.style.opacity = "";
+        stapel.classList.remove("wechselt");
+        laeuft = false;
+      }, AUF + 40);
+    }, AB);
   }
 
   function knopf() {
@@ -2466,23 +2564,28 @@ if ("serviceWorker" in navigator) {
   }
 
   btn.addEventListener("click", function () {
+    if (laeuft) return;                         // kein zweiter Lauf mitten im ersten
     aktiv = !aktiv;
     try {
       if (aktiv) localStorage.setItem(KEY, "zone");
       else localStorage.removeItem(KEY);
     } catch (e) {}
-    anwenden();
+    btn.classList.toggle("gekippt", aktiv);
+    anwenden(true);
     knopf();
   });
 
   document.addEventListener("rcp:status", function (e) {
     var daten = e.detail;
     if (!daten || !daten.positionen) return;
+    var erstesMal = positionen === null;
     positionen = daten.positionen;
-    anwenden();
+    // Beim ersten Eintreffen still ordnen, spaeter mit Bewegung
+    anwenden(!erstesMal && aktiv);
     knopf();
   });
 
+  if (aktiv) btn.classList.add("gekippt");
   knopf();
 })();
 
