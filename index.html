@@ -500,27 +500,81 @@
     .news-banner-track { animation: none; }
   }
 
-  /* Zweites Band: Wirtschaftstermine. Gleiche Bauweise wie oben, aber auf
-     weissem Grund und mit eigener Geschwindigkeit, damit die beiden Baender
-     nicht im Gleichschritt laufen. Die Dauer setzt das Skript, damit das Band
-     immer gleich schnell zieht, egal wie viele Termine drinstehen. */
-  .news-banner.wirtschaft {
+  /* Wirtschaftstermine: ein Termin steht still, der Kasten wechselt.
+     Gleiche Bauweise wie die News in den Karten - .news-rotator,
+     .news-item und .news-dots kommen von dort und werden hier nur
+     wiederverwendet. Ein Laufband war der falsche Weg: man muss warten,
+     bis der Text vorbeigezogen ist, statt ihn im Stehen zu lesen. */
+  .wirtschaft-block {
     background: var(--card);
     border-bottom: 1px solid var(--hair);
+    padding: 12px 16px 13px;
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
   }
-  .news-banner.wirtschaft .titel {
-    font-weight: 800;
+  .wirtschaft-block .news-label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #666;
+    margin-bottom: 9px;
+  }
+  .wirtschaft-block .zaehler {
+    margin-left: auto;
+    font-weight: 600;
     letter-spacing: 0.08em;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
   }
-  .news-banner.wirtschaft .ergebnis {
+  .wirtschaft-block .news-rotator { height: 52px; }
+  /* Hoehere Spezifitaet als .news-rotator .news-item weiter unten, sonst
+     bleibt es bei center und die Ueberschrift springt beim Wechsel, je
+     nachdem ob der Termin Zahlen hat. */
+  .wirtschaft-block .news-rotator .news-item { align-items: flex-start; }
+  .wirtschaft-block .w-inhalt { width: 100%; }
+  .wirtschaft-block .w-kopf {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+    color: var(--fg);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .wirtschaft-block .w-kopf .wann {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 0;
+  }
+  .wirtschaft-block .w-werte {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+    margin-top: 7px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #555;
+    font-variant-numeric: tabular-nums;
+  }
+  .wirtschaft-block .w-werte .ergebnis {
     background: var(--fg);
     color: #fff;
     padding: 3px 7px;
     border-radius: 2px;
     font-weight: 800;
-    letter-spacing: 0.08em;
   }
-  .news-banner.wirtschaft .leise { color: var(--muted); }
+  .wirtschaft-block .w-werte .leise { color: var(--muted); font-weight: 600; }
+  .wirtschaft-block .news-dots { margin-top: 10px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wirtschaft-block .news-item { transition: none; }
+  }
 
   .card-head .info {
     margin-top: 10px;
@@ -1166,8 +1220,10 @@
   </div>
 </div>
 
-<div class="news-banner wirtschaft" id="wirtschaftBand" aria-label="Wirtschaftstermine" hidden>
-  <div class="news-banner-track" id="wirtschaftTrack"></div>
+<div class="wirtschaft-block" id="wirtschaftBlock" aria-label="Wirtschaftstermine USA" hidden>
+  <div class="news-label">Wirtschaftstermine · USA<span class="zaehler" id="wirtschaftZaehler"></span></div>
+  <div class="news-rotator" id="wirtschaftRotator"></div>
+  <div class="news-dots" id="wirtschaftDots"></div>
 </div>
 
 
@@ -2642,15 +2698,20 @@ if ("serviceWorker" in navigator) {
 // Vor der Veroeffentlichung Prognose und Vorwert, danach das Ergebnis im
 // Vergleich zur Prognose. Das Band bleibt aus, solange es nichts zu zeigen gibt.
 (function () {
-  var band = document.getElementById("wirtschaftBand");
-  var track = document.getElementById("wirtschaftTrack");
-  if (!band || !track) return;
+  var block = document.getElementById("wirtschaftBlock");
+  var rotator = document.getElementById("wirtschaftRotator");
+  var punkte = document.getElementById("wirtschaftDots");
+  var zaehler = document.getElementById("wirtschaftZaehler");
+  if (!block || !rotator || !punkte) return;
 
-  var TEMPO = 60;                  // Pixel je Sekunde, unabhaengig von der Menge
+  var WECHSEL = 6000;              // so lange steht ein Termin
   var TAKT = 10 * 60 * 1000;       // alle zehn Minuten nachsehen
   var SPEICHER = "rcp:kalender";   // letzte gute Termine
   var MAX_ALTER = 12 * 3600 * 1000;
   var stand = "";                  // Fingerabdruck, damit unveraendert nicht neu gebaut wird
+  var idx = 0;
+  var uhr = null;
+  var ruhig = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   function zahl(n, einheit) {
     if (n === null || n === undefined) return "–";
@@ -2665,7 +2726,7 @@ if ("serviceWorker" in navigator) {
   function wann(iso) {
     var d = new Date(iso);
     if (isNaN(d.getTime())) return "";
-    var uhr = d.toLocaleTimeString("de-DE", {
+    var uhrzeit = d.toLocaleTimeString("de-DE", {
       timeZone: "Europe/Berlin", hour: "2-digit", minute: "2-digit"
     });
     var tag = function (x) {
@@ -2673,49 +2734,71 @@ if ("serviceWorker" in navigator) {
     };
     var jetzt = new Date();
     var morgen = new Date(jetzt.getTime() + 86400000);
-    if (tag(d) === tag(jetzt)) return "heute " + uhr;
-    if (tag(d) === tag(morgen)) return "morgen " + uhr;
+    if (tag(d) === tag(jetzt)) return "heute " + uhrzeit;
+    if (tag(d) === tag(morgen)) return "morgen " + uhrzeit;
     var kurz = d.toLocaleDateString("de-DE", {
       timeZone: "Europe/Berlin", weekday: "short", day: "2-digit", month: "2-digit"
     });
-    // "Mi., 29.07." -> "Mi 29.07." — Punkt und Komma stoeren in Versalien
-    return kurz.replace(/^(\w+)\.,/, "$1") + " " + uhr;
+    // "Mi., 29.07." -> "Mi 29.07." — Punkt und Komma stoeren hier
+    return kurz.replace(/^(\w+)\.,/, "$1") + " " + uhrzeit;
   }
 
   function hat(v) { return v !== null && v !== undefined; }
 
-  function zeile(t) {
-    var teile = ['<span class="titel">' + t.titel + "</span>"];
-    teile.push('<span class="leise">' + wann(t.zeit) + "</span>");
-
-    // Immer dieselben drei Felder in derselben Reihenfolge: Aktuell,
-    // Prognose, Vorherige. Termine ganz ohne Zahlen - FOMC-Statement,
-    // Pressekonferenz - bekommen nur Name und Uhrzeit.
+  function eintrag(t) {
+    var werte = "";
+    // Immer dieselben drei Felder in derselben Reihenfolge. Termine ganz
+    // ohne Zahlen - FOMC-Statement, Pressekonferenz - bekommen keine Zeile.
     if (hat(t.ergebnis) || hat(t.prognose) || hat(t.vorwert)) {
-      teile.push(hat(t.ergebnis)
-        ? '<span class="ergebnis">Aktuell ' + zahl(t.ergebnis, t.einheit) + "</span>"
-        : '<span class="leise">Aktuell –</span>');
-      teile.push("Prognose " + zahl(t.prognose, t.einheit));
-      teile.push('<span class="leise">Vorherige ' + zahl(t.vorwert, t.einheit) + "</span>");
+      werte = '<div class="w-werte">' +
+        (hat(t.ergebnis)
+          ? '<span class="ergebnis">Aktuell ' + zahl(t.ergebnis, t.einheit) + "</span>"
+          : '<span class="leise">Aktuell –</span>') +
+        "<span>Prognose " + zahl(t.prognose, t.einheit) + "</span>" +
+        '<span class="leise">Vorherige ' + zahl(t.vorwert, t.einheit) + "</span>" +
+        "</div>";
     }
-    return "<span>" + teile.join(" · ") + "</span>";
+    return '<div class="news-item"><div class="w-inhalt">' +
+      '<div class="w-kopf">' + t.titel + ' <span class="wann">' + wann(t.zeit) + "</span></div>" +
+      werte + "</div></div>";
+  }
+
+  function zeigen(n) {
+    var items = rotator.querySelectorAll(".news-item");
+    var dots = punkte.querySelectorAll("span");
+    if (!items.length) return;
+    idx = ((n % items.length) + items.length) % items.length;
+    items.forEach(function (el, i) { el.classList.toggle("active", i === idx); });
+    dots.forEach(function (el, i) { el.classList.toggle("on", i === idx); });
+    if (zaehler) zaehler.textContent = (idx + 1) + " von " + items.length;
+  }
+
+  function laufen() {
+    if (uhr) clearInterval(uhr);
+    var anzahl = rotator.querySelectorAll(".news-item").length;
+    if (anzahl < 2 || ruhig) return;
+    uhr = setInterval(function () { zeigen(idx + 1); }, WECHSEL);
   }
 
   function bauen(termine) {
     var fingerabdruck = termine.map(function (t) {
       return [t.titel, t.zeit, t.prognose, t.vorwert, t.ergebnis].join("|");
     }).join("~");
-    if (fingerabdruck === stand) return;     // nichts Neues, Band nicht zurueckwerfen
+    if (fingerabdruck === stand) return;     // nichts Neues, Kasten nicht zuruecksetzen
     stand = fingerabdruck;
 
-    var eine = termine.map(zeile).join("");
-    track.innerHTML = eine + eine;           // zweimal, damit -50 % nahtlos umschlaegt
-    band.hidden = false;
-
-    // Dauer aus der Breite: das Band zieht immer gleich schnell
-    var breite = track.scrollWidth / 2;
-    if (breite > 0) track.style.animationDuration = Math.round(breite / TEMPO) + "s";
+    rotator.innerHTML = termine.map(eintrag).join("");
+    punkte.innerHTML = termine.map(function () { return "<span></span>"; }).join("");
+    block.hidden = false;
+    zeigen(0);
+    laufen();
   }
+
+  // Antippen schaltet weiter und setzt die Uhr zurueck, damit man in Ruhe liest
+  block.addEventListener("click", function () {
+    zeigen(idx + 1);
+    laufen();
+  });
 
   function merken(termine) {
     try {
@@ -2759,7 +2842,7 @@ if ("serviceWorker" in navigator) {
         if (stand) return;
         var alt = gemerkt();
         if (alt) bauen(alt);
-        else band.hidden = true;
+        else block.hidden = true;
       });
   }
 
