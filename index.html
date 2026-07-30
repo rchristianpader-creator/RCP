@@ -2733,7 +2733,7 @@ if ("serviceWorker" in navigator) {
   }
 
   function laden() {
-    fetch("/.netlify/functions/kalender", { cache: "no-store" })
+    fetch("/.netlify/functions/kalender")   // ohne no-store: die Antwort darf zwischengespeichert werden
       .then(function (r) {
         if (!r.ok) throw new Error("Antwort " + r.status);
         return r.json();

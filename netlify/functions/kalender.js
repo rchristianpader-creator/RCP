@@ -20,6 +20,8 @@
    Aufruf mit ?roh=1 gibt den ersten unveraenderten Datensatz zurueck -
    hilfreich, falls die Quelle ihre Feldnamen aendert. */
 
+import { getStore } from "@netlify/blobs";
+
 const TAGE_ZURUECK = 3;   // schon veroeffentlichte Termine noch zeigen
 const TAGE_VORAUS = 10;   // so weit nach vorne schauen
 const MAX = 12;           // mehr passt in kein Laufband
@@ -31,6 +33,13 @@ const MAX = 12;           // mehr passt in kein Laufband
 const QUELLEN = [
   "https://nfs.faireconomy.media/ff_calendar_thisweek.json"
 ];
+
+// Die Quelle drosselt (HTTP 429), wenn jeder Seitenaufruf bei ihr landet.
+// Deshalb liegt ein Serverspeicher davor: hoechstens ein Abruf je Viertelstunde,
+// egal wie viele Leute die Seite oeffnen. Faellt die Quelle aus, wird der
+// gespeicherte Stand weitergereicht, auch wenn er aelter ist.
+const FRISCH = 15 * 60 * 1000;
+const NOTNAGEL = 24 * 3600 * 1000;   // so alt darf der Speicher hoechstens werden
 
 // Kurze Namen fuers Band - "Core PCE Price Index m/m" ist zu lang
 const KURZ = [
@@ -65,22 +74,39 @@ export default async (request) => {
   const von = jetzt - TAGE_ZURUECK * 86400000;
   const bis = jetzt + TAGE_VORAUS * 86400000;
 
+  const speicher = laden_speicher();
+  const gespeichert = await lesen(speicher);
+  const alter = gespeichert ? Date.now() - gespeichert.zeit : Infinity;
+
   let roh = [];
-  const fehler = [];   // jeden Versuch festhalten, nicht nur den letzten
-  for (const url of QUELLEN) {
-    const name = url.includes("nextweek") ? "naechste Woche" : "diese Woche";
-    try {
-      const res = await fetch(url, {
-        headers: {
-          "User-Agent": "Mozilla/5.0 (compatible; AktienListe/1.0)",
-          Accept: "application/json"
-        }
-      });
-      const daten = await res.json().catch(() => null);
-      if (Array.isArray(daten)) { roh = roh.concat(daten); continue; }
-      fehler.push(name + ": " + (res.ok ? "keine Liste" : "Antwort " + res.status));
-    } catch (e) {
-      fehler.push(name + ": " + (e && e.message ? e.message : String(e)));
+  let quelle = "Speicher";
+  const fehler = [];
+
+  if (alter < FRISCH) {
+    roh = gespeichert.roh;                       // frisch genug, Quelle in Ruhe lassen
+  } else {
+    for (const url of QUELLEN) {
+      try {
+        const res = await fetch(url, {
+          headers: {
+            "User-Agent": "Mozilla/5.0 (compatible; AktienListe/1.0)",
+            Accept: "application/json"
+          }
+        });
+        const daten = await res.json().catch(() => null);
+        if (Array.isArray(daten) && daten.length) { roh = roh.concat(daten); continue; }
+        fehler.push("diese Woche: " + (res.ok ? "keine Liste" : "Antwort " + res.status));
+      } catch (e) {
+        fehler.push("diese Woche: " + (e && e.message ? e.message : String(e)));
+      }
+    }
+
+    if (roh.length) {
+      quelle = "ForexFactory";
+      await schreiben(speicher, roh);
+    } else if (gespeichert && alter < NOTNAGEL) {
+      roh = gespeichert.roh;                     // Quelle streikt: alter Stand ist besser als nichts
+      quelle = "Speicher (Quelle streikt)";
     }
   }
 
@@ -108,7 +134,8 @@ export default async (request) => {
     {
       ok: true,
       stand: new Date().toISOString(),
-      quelle: "ForexFactory",
+      quelle: quelle,
+      alter_min: Math.round((Date.now() - (gespeichert ? gespeichert.zeit : Date.now())) / 60000),
       termine: termine,
       hinweis: fehler.length ? fehler : undefined
     },
@@ -218,6 +245,34 @@ function feld(obj, namen) {
 function datum(d, versatz) {
   const x = new Date(d.getTime() + versatz * 86400000);
   return x.toISOString().slice(0, 10);
+}
+
+/* ---------- Serverspeicher ---------- */
+
+function laden_speicher() {
+  try {
+    return getStore("aktien-kalender");
+  } catch (e) {
+    return null;   // ohne Blobs laeuft es weiter, nur ohne Zwischenspeicher
+  }
+}
+
+async function lesen(store) {
+  if (!store) return null;
+  try {
+    const d = await store.get("ff-thisweek", { type: "json" });
+    if (!d || !Array.isArray(d.roh) || !d.roh.length) return null;
+    return { zeit: Number(d.zeit) || 0, roh: d.roh };
+  } catch (e) {
+    return null;
+  }
+}
+
+async function schreiben(store, roh) {
+  if (!store) return;
+  try {
+    await store.setJSON("ff-thisweek", { zeit: Date.now(), roh: roh });
+  } catch (e) { /* Speichern ist Kuer, nicht Pflicht */ }
 }
 
 function json(obj, status, cache) {
