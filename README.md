@@ -205,6 +205,34 @@ Jede Nachricht bekommt einen eigenen Tag, überschreibt die vorige also nicht.
 Antippen öffnet die Liste. Geräte, die der Push-Dienst nicht mehr kennt,
 werden beim Senden aussortiert und in der Rückmeldung gezählt.
 
+## Das App-Symbol
+
+Vorher stand da ein schwarzes Quadrat mit „RCP" — auf einem schwarzen
+Hintergrundbild war es kaum zu finden, und mit der App hatte es nichts zu tun.
+
+Jetzt trägt es dasselbe Motiv wie der laufende Hintergrund: vier Kerzen,
+steigende hohl, fallende gefüllt, ein Rücksetzer und ein Anstieg, der höher
+endet als er begann. Gebaut nach den Regeln, nach denen Apples eigene Symbole
+gebaut sind — volle Kachel mit leichtem Verlauf, ein einziges Zeichen groß und
+mittig darauf, keine Haarlinien, keine selbst gezeichneten runden Ecken.
+
+Die Kachel ist weiß, weil die App selbst hell ist und weil Grün und Blau auf
+einem iPhone-Startbildschirm gegen FaceTime, Telefon, Nachrichten, Mail und
+App Store antreten müssten. `logo.py` kennt alle drei Farben; ein Aufruf
+schreibt die SVG-Dateien, daraus werden die PNG gerendert:
+
+| Datei | Größe | Quelle |
+|---|---|---|
+| `icon-180.png` | 180 | `logo-weiss.svg` |
+| `icon-192.png` | 192 | `logo-weiss.svg` |
+| `icon-512.png` | 512 | `logo-weiss.svg` |
+| `icon-maskable-512.png` | 512 | `logo-weiss-maske.svg` |
+
+Die Maske-Fassung ist kleiner gezeichnet, weil Android auf einen Kreis
+zuschneidet. Die Symbole liegen im Vorrat des Service Workers — nach einer
+Änderung muss `CACHE` in `sw.js` hochgezählt werden, sonst bleibt das alte
+Bild auf den Geräten stehen.
+
 ## Wer gerade da ist
 
 Ganz oben in der Verwaltung steht **Gerade auf der Seite**: wer die App in
