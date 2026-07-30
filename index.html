@@ -227,7 +227,14 @@
     flex-direction: column;
     margin-top: 16px;
   }
-  .karten > .card { margin: 0 14px 56px; }
+  .karten > .card {
+    margin: 0 14px 56px;
+    /* Was weit weg ist, zeichnet der Browser gar nicht erst. Die Hoehe ist
+       vorgegeben, damit die Seite trotzdem die richtige Laenge hat und
+       Sprungmarken stimmen. */
+    content-visibility: auto;
+    contain-intrinsic-size: auto 760px;
+  }
   .karten-fehler {
     margin: 0 14px 56px;
     padding: 18px 16px;
@@ -919,10 +926,30 @@
   /* Der Inhalt bleibt zurueck — und wird am unteren Rand des Kopfes
      abgeschnitten. Ohne das schimmert er beim Wegscrollen durch die
      durchscheinende Leiste und liest sich als Schmierer. */
-  header { overflow: hidden; }
-  header .kopf-lauf {
-    transform: translate3d(0, calc(var(--rcp-oben, 0px) * 0.38), 0);
-    will-change: transform;
+  /* clip, nicht hidden: hidden macht den Kopf zu einem eigenen Scrollbereich,
+     und dann steht die Uhr still, an der die Parallaxe haengt. clip schneidet
+     genauso ab, ohne einen Scrollbereich zu eroeffnen. */
+  header { overflow: clip; }
+  header .kopf-lauf { will-change: transform; }
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      /* Der Kopf bleibt zurueck — vom Browser gerechnet, ohne Zuhoerer.
+         Die Strecke ist der Weg des Kopfes aus dem Bild. */
+      /* Die Uhr ist der Scrollstand der Seite, die Strecke in Pixeln
+         vorgegeben: von ganz oben bis der Kopf durch ist. view() waere
+         naheliegender, faengt hier aber nicht bei null an — der Inhalt saesse
+         schon im Ruhezustand versetzt. --kopf-hoehe setzt das Skript einmal
+         nach dem Aufbau, nicht bei jedem Bild. */
+      header .kopf-lauf {
+        animation: kopfLauf linear both;
+        animation-timeline: scroll(root block);
+        animation-range: 0 var(--kopf-hoehe, 380px);
+      }
+      @keyframes kopfLauf {
+        from { transform: translate3d(0, 0, 0); }
+        to   { transform: translate3d(0, 38%, 0); }
+      }
+    }
   }
 
   nav .nav-fortschritt {
@@ -932,13 +959,26 @@
     height: 2px;
     width: 100%;
     background: var(--fg);
-    transform: scaleX(var(--rcp-lauf, 0));
+    transform: scaleX(0);
     transform-origin: 0 50%;
     opacity: 0;
     transition: opacity 0.3s ease;
     will-change: transform;
   }
   nav.klebt .nav-fortschritt { opacity: 1; }
+  @supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+      /* Wie weit man in der Seite ist — ebenfalls ohne Zuhoerer */
+      nav .nav-fortschritt {
+        animation: fortschritt linear both;
+        animation-timeline: scroll(root block);
+      }
+      @keyframes fortschritt {
+        from { transform: scaleX(0); }
+        to   { transform: scaleX(1); }
+      }
+    }
+  }
 
   @media (prefers-reduced-motion: reduce) {
     header .kopf-lauf { transform: none; }
@@ -978,29 +1018,67 @@
     animation: cardIn 0.5s var(--ease) both;
   }
 
-  /* DIE KARTEN HAENGEN AM FINGER
-     Kein einmaliger Auftritt mehr, sondern eine Bewegung, die genau der
-     Scrollstellung folgt: von unten herein wachsen, oben schrumpfend
-     verschwinden. Das rechnet der Browser selbst auf der Grafikeinheit,
-     ohne Zuhoerer und ohne ein einziges Javascript-Bild.
+  /* DIE KARTE FOLGT DEM FINGER — ABER NICHT DER CHART
 
-     Nur wo view() koennen: sonst bleibt es beim einmaligen Auftauchen,
-     das der Beobachter weiter uebernimmt. */
+     Zuerst wurde die ganze Karte verkleinert und geblendet. Das sah gut aus
+     und war der teuerste Posten der Seite: in jeder Karte steckt ein fremdes
+     <iframe>, und wer dessen Vorfahren verwandelt, laesst es bei jedem Bild
+     neu zeichnen. Gemessen ueber einen Scrollstoss: 76 ms Stilberechnung und
+     358 ms Hauptfaden — ohne die Verwandlung 25 ms und 259 ms.
+
+     Deshalb bewegt sich jetzt alles AUSSER dem Chart, und zwar zeitversetzt:
+     erst der Kopf, dann die Zielleiste, dann News und Knopf. Der Chart steht
+     still und wird nicht angefasst. Das ist zugleich der deutlichere Effekt,
+     weil die Zeilen einzeln kommen statt die Karte als Block.
+
+     Die Uhr dafuer haengt an der Karte (view-timeline-name); die Teile darin
+     lesen sie. So laufen alle Teile einer Karte auf derselben Strecke. */
   @supports (animation-timeline: view()) {
     @media (prefers-reduced-motion: no-preference) {
-      /* Eine einzige Animation ueber den ganzen Durchlauf. Zwei getrennte
-         waeren naheliegend — aber die spaetere fuellt immer und wuerde die
-         fruehere ueberall ueberschreiben; das Hereinkommen liefe nie. */
       .karten > .card {
-        transform-origin: 50% 0;
-        animation: kartenLauf linear both;
-        animation-timeline: view();
+        view-timeline-name: --karte;
+        view-timeline-axis: block;
       }
-      @keyframes kartenLauf {
-        0%   { opacity: 0; transform: translate3d(0, 44px, 0) scale(0.94); }
-        20%  { opacity: 1; transform: none; }
-        78%  { opacity: 1; transform: none; }
-        100% { opacity: 0.18; transform: translate3d(0, -14px, 0) scale(0.93); }
+
+      .karten > .card > .card-head,
+      .karten > .card > .ziel-bar,
+      .karten > .card > .news-block,
+      .karten > .card > .actions {
+        animation: teilLauf linear both;
+        animation-timeline: --karte;
+      }
+
+      /* Zeitversetzt: jeder Teil hat seinen eigenen Abschnitt der Strecke */
+      .karten > .card > .card-head { animation-range: entry 2% entry 26%; }
+      .karten > .card > .ziel-bar  { animation-range: entry 8% entry 32%; }
+      .karten > .card > .news-block { animation-range: entry 14% entry 38%; }
+      .karten > .card > .actions   { animation-range: entry 20% entry 44%; }
+
+      @keyframes teilLauf {
+        from { opacity: 0; transform: translate3d(0, 26px, 0); }
+        to   { opacity: 1; transform: none; }
+      }
+
+      /* Und eine Haarlinie, die sich ueber den Kartenkopf zieht.
+         Nur transform, kein Layout, kein Neuzeichnen des Charts. */
+      .karten > .card > .card-head { position: relative; }
+      .karten > .card > .card-head::after {
+        content: "";
+        position: absolute;
+        left: 18px;
+        right: 18px;
+        bottom: 0;
+        height: 1px;
+        background: var(--fg);
+        transform: scaleX(0);
+        transform-origin: 0 50%;
+        animation: kanteLauf linear both;
+        animation-timeline: --karte;
+        animation-range: entry 4% entry 34%;
+      }
+      @keyframes kanteLauf {
+        from { transform: scaleX(0); opacity: 0.55; }
+        to   { transform: scaleX(1); opacity: 0.12; }
       }
     }
   }
@@ -1474,12 +1552,11 @@
       s.appendChild(bar);
     }
 
+    // Der Chart wird nicht gleich eingesetzt. Zehn TradingView-Anwendungen
+    // gleichzeitig sind der teuerste Posten der Seite; geladen wird nur, was
+    // in die Naehe kommt. Die Adresse steht solange am Kasten.
     var chart = el("div", "chart");
-    var rahmen = document.createElement("iframe");
-    rahmen.src = TV.replace("$SYM", encodeURIComponent(p.tv));
-    rahmen.setAttribute("allowfullscreen", "");
-    rahmen.setAttribute("loading", "lazy");
-    chart.appendChild(rahmen);
+    chart.setAttribute("data-chart", TV.replace("$SYM", encodeURIComponent(p.tv)));
     s.appendChild(chart);
 
     if (p.frage) {
@@ -1537,6 +1614,7 @@
     liste.forEach(function (p) { stapel.appendChild(karte(p)); });
 
     window.rcpPositionen = liste;
+    charts();
     document.dispatchEvent(new CustomEvent("rcp:karten", { detail: liste }));
 
     // Steht ein Anker in der Adresse, jetzt erst kann er angesprungen werden
@@ -1544,6 +1622,49 @@
       var ziel = document.getElementById(location.hash.slice(1));
       if (ziel) setTimeout(function () { ziel.scrollIntoView(); }, 60);
     }
+  }
+
+  /* Charts kommen und gehen.
+
+     Vorgeladen wird grosszuegig — anderthalb Bildschirme im Voraus —, damit
+     der Chart schon steht, wenn man ankommt. Was weiter als drei Bildschirme
+     entfernt ist, wird wieder ausgehaengt: eine TradingView-Einbettung ist
+     eine vollstaendige Anwendung mit eigenen Zeitgebern und Verbindungen,
+     und zehn davon gleichzeitig bremsen jedes Telefon.
+
+     Zwei Beobachter statt Scroll-Rechnerei: einer mit weitem Rand fuers
+     Einsetzen, einer mit noch weiterem fuers Entfernen. */
+  function charts() {
+    var kaesten = [].slice.call(stapel.querySelectorAll(".chart[data-chart]"));
+    if (!kaesten.length || !("IntersectionObserver" in window)) {
+      // Ohne Beobachter alle einsetzen — lieber langsam als leer
+      kaesten.forEach(einsetzen);
+      return;
+    }
+
+    function einsetzen(k) {
+      if (k.firstChild) return;
+      var f = document.createElement("iframe");
+      f.src = k.getAttribute("data-chart");
+      f.setAttribute("allowfullscreen", "");
+      f.setAttribute("title", "Chart");
+      k.appendChild(f);
+    }
+
+    function raus(k) {
+      if (!k.firstChild) return;
+      k.textContent = "";
+    }
+
+    var nah = new IntersectionObserver(function (eintraege) {
+      eintraege.forEach(function (e) { if (e.isIntersecting) einsetzen(e.target); });
+    }, { rootMargin: "150% 0px" });
+
+    var weit = new IntersectionObserver(function (eintraege) {
+      eintraege.forEach(function (e) { if (!e.isIntersecting) raus(e.target); });
+    }, { rootMargin: "300% 0px" });
+
+    kaesten.forEach(function (k) { nah.observe(k); weit.observe(k); });
   }
 
   function gemerkt() {
@@ -1592,8 +1713,20 @@
   // Precise nav scroll under sticky bar
   function stickyOffset() {
     var nav = document.querySelector("nav");
-    return nav ? nav.getBoundingClientRect().height + 8 : 70;
+    return nav ? nav.getBoundingClientRect().height + 14 : 76;
   }
+  /* Wo steht die Karte wirklich?
+
+     getBoundingClientRect liefert die VERWANDELTE Box. Waehrend des Scrollens
+     ist eine Karte kleiner und verschoben — gemessen wurde also der falsche
+     Platz, und der Sprung landete um bis zu vierzig Pixel zu hoch: der Titel
+     verschwand hinter der Leiste. offsetTop kennt keine Verwandlung. */
+  function layoutOben(el) {
+    var y = 0;
+    for (var n = el; n; n = n.offsetParent) y += n.offsetTop;
+    return y;
+  }
+
   function binden() {
   document.querySelectorAll("nav a[href^='#']").forEach(function (a) {
     a.addEventListener("click", function (e) {
@@ -1602,7 +1735,7 @@
       var el = document.querySelector(id);
       if (!el) return;
       e.preventDefault();
-      var top = el.getBoundingClientRect().top + window.pageYOffset - stickyOffset();
+      var top = layoutOben(el) - stickyOffset();
       window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
       // Ziel kurz einrahmen, der Ring verklingt von selbst
       el.classList.remove("angesprungen");
@@ -2915,6 +3048,19 @@ if ("serviceWorker" in navigator) {
      aendert — getBoundingClientRect bei jedem Bild waere hier der teure Weg. */
   function laufen(karten) {
     if (ruhig) return;
+
+    // Die Strecke der Kopf-Parallaxe einmal festhalten. Kein Scroll-Zuhoerer:
+    // das hier laeuft beim Aufbau und wenn sich das Fenster aendert.
+    var kopf = document.querySelector("header");
+    function kopfHoehe() {
+      if (kopf) document.documentElement.style.setProperty("--kopf-hoehe", kopf.offsetHeight + "px");
+    }
+    kopfHoehe();
+    window.addEventListener("resize", kopfHoehe, { passive: true });
+    setTimeout(kopfHoehe, 1200);
+
+    // Wo der Browser das selbst kann, laeuft beim Scrollen gar kein Skript mehr
+    if (window.CSS && CSS.supports && CSS.supports("animation-timeline: scroll()")) return;
     var kopf = document.querySelector("header .kopf-lauf");
     var wurzel = document.documentElement;
 

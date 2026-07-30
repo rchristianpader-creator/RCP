@@ -123,6 +123,22 @@ ist der Store die Wahrheit; Änderungen an dieser Datei haben keine Wirkung mehr
 
 Ohne Netz baut die Seite aus der zuletzt gesehenen Liste im lokalen Speicher.
 
+## Fluessigkeit
+
+Zehn TradingView-Einbettungen sind zehn vollstaendige Anwendungen mit eigenen
+Zeitgebern und Verbindungen. Deshalb haengt die Seite nur die Charts ein, die
+in die Naehe kommen — anderthalb Bildschirme im Voraus, damit sie schon stehen,
+wenn man ankommt — und haengt sie jenseits von drei Bildschirmen wieder aus.
+Gleichzeitig laufen so etwa fuenf statt zehn.
+
+Bewegt wird beim Scrollen alles **ausser** dem Chart. Wer den Vorfahren eines
+fremden `<iframe>` verwandelt, laesst es bei jedem Bild neu zeichnen; gemessen
+ueber einen Scrollstoss kostete das 76 ms Stilberechnung statt 26 ms.
+
+Abseitige Karten zeichnet der Browser wegen `content-visibility: auto` gar
+nicht erst. Die Kopf-Parallaxe und die Fortschrittslinie haengen an
+CSS-Zeitachsen — beim Scrollen laeuft kein rechnendes Skript.
+
 ## Nachricht an alle
 
 In der Verwaltung steht oben **Nachricht an alle**: Titel, Text, senden. Sie
