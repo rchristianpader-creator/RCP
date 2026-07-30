@@ -191,6 +191,9 @@ export default async (request) => {
       // bisher nicht an.
       ergebnisdienst: process.env.FRED_KEY ? "FRED" : "kein FRED_KEY gesetzt",
       ergebnisse_da: Object.keys(werte || {}).length,
+      // Nur die Namen, nie die Werte: zeigt, ob die Variable unter einer
+      // anderen Schreibweise angelegt wurde oder ob sie ganz fehlt.
+      gefundene_namen: Object.keys(process.env).filter((n) => /fred/i.test(n)),
       termine: termine,
       hinweis: fehler.length ? fehler : undefined
     },
