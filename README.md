@@ -123,6 +123,22 @@ ist der Store die Wahrheit; Änderungen an dieser Datei haben keine Wirkung mehr
 
 Ohne Netz baut die Seite aus der zuletzt gesehenen Liste im lokalen Speicher.
 
+## Der Auftakt
+
+Wer die App vom Home-Bildschirm oeffnet und angemeldet geblieben ist, sah
+bisher zuerst eine halbfertige Seite: Karten ohne Charts, Zahlen ohne Kurse.
+Jetzt liegt fuer diese Sekunden ein Auftakt darueber — Name der App, "Angemeldet
+als …", ein Strich, der sich fuellt, und darunter, woran gerade gearbeitet wird.
+
+Er wartet auf drei Dinge: die Liste steht, der oberste Chart hat gezeichnet,
+die Kurse sind da. Dazwischen laeuft alles ganz normal weiter — die Zeit wird
+also genutzt, nicht hinzugefuegt.
+
+Zwei Grenzen: mindestens 900 ms, damit es nicht zuckt, wenn alles schon im
+Zwischenspeicher liegt; hoechstens 3 Sekunden, damit ein haengender Dienst
+niemanden aufhaelt. Dazu ein Notausgang direkt im Markup, der ihn auch dann
+wegnimmt, wenn weiter unten ein Skript stolpert.
+
 ## Fluessigkeit
 
 Zehn TradingView-Einbettungen sind zehn vollstaendige Anwendungen mit eigenen

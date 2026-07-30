@@ -970,6 +970,97 @@
     from { transform: scaleX(0); opacity: 0; }
     to { transform: scaleX(1); opacity: 0.3; }
   }
+  /* DER AUFTAKT
+     Wer die App vom Home-Bildschirm oeffnet und angemeldet bleibt, sieht
+     sonst eine halbfertige Seite: Karten ohne Charts, Zahlen ohne Kurse.
+     Diese Sekunden bekommen jetzt eine Form — und werden zugleich genutzt,
+     denn darunter baut sich alles auf und die ersten Charts laden schon. */
+  .auftakt {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    text-align: center;
+    padding: 32px 28px;
+    transition: opacity 0.45s var(--ease), visibility 0.45s;
+  }
+  .auftakt.weg {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .auftakt .label {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 12px;
+    animation: auftaktRein 0.5s var(--ease) 0.05s both;
+  }
+  .auftakt h1 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    animation: auftaktRein 0.5s var(--ease) 0.12s both;
+  }
+  .auftakt .wer {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 8px;
+    min-height: 19px;
+    opacity: 0;
+    transform: translate3d(0, 5px, 0);
+    transition: opacity 0.4s var(--ease), transform 0.4s var(--ease);
+  }
+  .auftakt .wer.da { opacity: 1; transform: none; }
+
+  /* Ein Strich, der sich fuellt. Kein Kreisel: der wuerde behaupten, es
+     ginge etwas rund. Der Strich sagt, wie weit es ist. */
+  .auftakt .balken {
+    width: 132px;
+    height: 1px;
+    background: var(--line);
+    margin: 26px auto 0;
+    overflow: hidden;
+    animation: auftaktRein 0.5s var(--ease) 0.2s both;
+  }
+  .auftakt .balken i {
+    display: block;
+    height: 100%;
+    width: 100%;
+    background: var(--fg);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: transform 0.5s var(--ease);
+  }
+  .auftakt .tun {
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    margin-top: 14px;
+    animation: auftaktRein 0.5s var(--ease) 0.26s both;
+  }
+  @keyframes auftaktRein {
+    from { opacity: 0; transform: translate3d(0, 8px, 0); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .auftakt .label,
+    .auftakt h1,
+    .auftakt .balken,
+    .auftakt .tun { animation: none; }
+    .auftakt,
+    .auftakt .wer,
+    .auftakt .balken i { transition: none; }
+  }
+
   /* SCROLLEN, WAEHREND MAN SCROLLT
      Zwei Bewegungen, die dem Finger folgen statt einmal abzulaufen:
      der Kopf bleibt beim Wegscrollen etwas zurueck, und unter der Leiste
@@ -1354,6 +1445,27 @@
 </style>
 </head>
 <body>
+
+<!-- Der Auftakt. Steht sofort da, noch bevor irgendein Skript laeuft, und
+     deckt die Sekunden zu, in denen Liste und Charts entstehen. -->
+<div id="auftakt" class="auftakt" role="status" aria-live="polite">
+  <div class="auftakt-mitte">
+    <div class="label">Geschützt</div>
+    <h1>Aktien-Liste</h1>
+    <p class="wer" id="auftaktWer">&nbsp;</p>
+    <div class="balken"><i id="auftaktBalken"></i></div>
+    <p class="tun" id="auftaktTun">Liste wird geladen</p>
+  </div>
+</div>
+
+<script>
+  /* Notausgang, unabhaengig von allem anderen. Stolpert weiter unten ein
+     Skript, bleibt der Auftakt sonst fuer immer stehen und sperrt aus. */
+  setTimeout(function () {
+    var a = document.getElementById("auftakt");
+    if (a) a.classList.add("weg");
+  }, 6000);
+</script>
 
 <div id="app" class="visible">
 <header>
@@ -2652,6 +2764,8 @@
       })
       .catch(function (e) {
         zeile("Setup-Prüfung fehlgeschlagen: " + (e && e.message ? e.message : e));
+        // Auch ein Fehlschlag ist eine Antwort — der Auftakt darf nicht warten
+        document.dispatchEvent(new Event("rcp:status-fehler"));
       });
   }
 
@@ -3223,6 +3337,100 @@ if ("serviceWorker" in navigator) {
 </script>
 
 <script>
+/* Der Auftakt steuert sich selbst.
+
+   Er verschwindet, wenn drei Dinge erledigt sind: die Liste steht, der
+   oberste Chart hat gezeichnet, und die Kurse sind da. Dazwischen sagt er,
+   woran gerade gearbeitet wird — die Zeit vergeht ohnehin, sie soll nur
+   nicht wie Stillstand aussehen.
+
+   Zwei Grenzen: mindestens 900 ms, damit es nicht zuckt, wenn alles schon im
+   Zwischenspeicher liegt. Und hoechstens 3 Sekunden, damit ein haengender
+   Dienst niemanden aufhaelt — der Auftakt geht dann trotzdem weg. Was bis
+   dahin nicht geladen ist, laedt eben sichtbar weiter. */
+(function () {
+  var kasten = document.getElementById("auftakt");
+  if (!kasten) return;
+
+  var balken = document.getElementById("auftaktBalken");
+  var wer = document.getElementById("auftaktWer");
+  var tun = document.getElementById("auftaktTun");
+  var begonnen = Date.now();
+  var fertig = false;
+
+  var MINDESTENS = 900;
+  var HOECHSTENS = 3000;
+
+  // Was der Auftakt abwartet, in der Reihenfolge, in der es eintrifft
+  var schritte = [
+    { name: "liste", wort: "Liste wird geladen", da: false },
+    { name: "chart", wort: "Charts werden geladen", da: false },
+    { name: "kurse", wort: "Kurse werden geholt", da: false }
+  ];
+
+  function zeichnen() {
+    var da = schritte.filter(function (s) { return s.da; }).length;
+    if (balken) balken.style.transform = "scaleX(" + (da / schritte.length).toFixed(3) + ")";
+    var offen = schritte.filter(function (s) { return !s.da; })[0];
+    if (tun && offen) tun.textContent = offen.wort;
+    if (!offen) schluss();
+  }
+
+  function erledigt(name) {
+    var s = schritte.filter(function (x) { return x.name === name; })[0];
+    if (!s || s.da) return;
+    s.da = true;
+    zeichnen();
+  }
+
+  function schluss() {
+    if (fertig) return;
+    fertig = true;
+    if (tun) tun.textContent = "Fertig";
+    if (balken) balken.style.transform = "scaleX(1)";
+    var warten = Math.max(0, MINDESTENS - (Date.now() - begonnen));
+    setTimeout(function () {
+      kasten.classList.add("weg");
+      setTimeout(function () {
+        if (kasten.parentNode) kasten.parentNode.removeChild(kasten);
+      }, 600);
+    }, warten);
+  }
+
+  // Notausgang: haengt irgendetwas, geht der Auftakt trotzdem
+  setTimeout(schluss, HOECHSTENS);
+
+  // 1. Die Liste steht
+  document.addEventListener("rcp:karten", function () {
+    erledigt("liste");
+
+    // 2. Der oberste Chart hat gezeichnet
+    var erster = document.querySelector(".karten > .card .chart");
+    if (!erster) { erledigt("chart"); return; }
+    if (erster.classList.contains("chart-da")) { erledigt("chart"); return; }
+    var wache = new MutationObserver(function () {
+      if (erster.classList.contains("chart-da")) {
+        wache.disconnect();
+        erledigt("chart");
+      }
+    });
+    wache.observe(erster, { attributes: true, attributeFilter: ["class"] });
+  });
+
+  // 3. Die Kurse sind da (dasselbe Ergebnis, das die Aktiv-Anzeige benutzt)
+  document.addEventListener("rcp:status", function () { erledigt("kurse"); });
+  document.addEventListener("rcp:status-fehler", function () { erledigt("kurse"); });
+
+  // Wer da ist, sobald das Konto geantwortet hat
+  document.addEventListener("rcp:konto", function (e) {
+    if (!wer || !e.detail) return;
+    wer.textContent = "Angemeldet als " + e.detail;
+    wer.classList.add("da");
+  });
+})();
+</script>
+
+<script>
 /* Konto: wer ist da, abmelden, Verwaltung.
 
    Die eigentliche Sperre sitzt vor der Seite (netlify/edge-functions/tor.js) —
@@ -3294,6 +3502,9 @@ if ("serviceWorker" in navigator) {
         );
         vBtn.hidden = false;
       }
+
+      // Der Auftakt zeigt den Namen, sobald er bekannt ist
+      document.dispatchEvent(new CustomEvent("rcp:konto", { detail: a.name || a.mail }));
 
       zeile.textContent = "";
       zeile.appendChild(document.createTextNode("Angemeldet als " + (a.name || a.mail)));
