@@ -60,17 +60,19 @@ export default async (request) => {
   const von = datum(heute, -TAGE_ZURUECK);
   const bis = datum(heute, TAGE_VORAUS);
 
-  // Zwei Adressformen: die Quelle hat ihre Pfade umgestellt, die aeltere
-  // funktioniert weiter. Erst die neue, dann die alte.
+  // Die Quelle hat ihre Pfade umgestellt; der alte v3-Pfad ist seit
+  // August 2025 abgeschaltet. Kandidaten der Reihe nach, der erste
+  // brauchbare gewinnt - steht der richtige vorn, bleibt es bei einem
+  // Abruf je Aufruf.
   const versuche = [
-    `https://financialmodelingprep.com/stable/economic-calendar?from=${von}&to=${bis}&apikey=${schluessel}`,
-    `https://financialmodelingprep.com/api/v3/economic_calendar?from=${von}&to=${bis}&apikey=${schluessel}`
+    ["stable", `https://financialmodelingprep.com/stable/economic-calendar?from=${von}&to=${bis}&apikey=${schluessel}`],
+    ["stable-s", `https://financialmodelingprep.com/stable/economics-calendar?from=${von}&to=${bis}&apikey=${schluessel}`],
+    ["v3", `https://financialmodelingprep.com/api/v3/economic_calendar?from=${von}&to=${bis}&apikey=${schluessel}`]
   ];
 
   let roh = null;
-  let fehler = null;
-  for (const url of versuche) {
-    const pfad = url.includes("/stable/") ? "stable" : "v3";
+  const fehler = [];   // jeden Versuch festhalten, nicht nur den letzten
+  for (const [pfad, url] of versuche) {
     try {
       const res = await fetch(url, { headers: { Accept: "application/json" } });
       const daten = await res.json().catch(() => null);
@@ -82,14 +84,14 @@ export default async (request) => {
       const meldung = daten && !Array.isArray(daten)
         ? (daten["Error Message"] || daten.message || daten.error || JSON.stringify(daten).slice(0, 200))
         : null;
-      fehler = pfad + ": " + (meldung || (res.ok ? "leere Liste" : "Antwort " + res.status));
+      fehler.push(pfad + ": " + (meldung || (res.ok ? "leere Liste" : "Antwort " + res.status)));
     } catch (e) {
-      fehler = pfad + ": " + (e && e.message ? e.message : String(e));
+      fehler.push(pfad + ": " + (e && e.message ? e.message : String(e)));
     }
   }
 
   if (!roh) {
-    return json({ ok: false, fehler: fehler || "keine Daten" }, 502, "no-store");
+    return json({ ok: false, fehler: fehler.length ? fehler : ["keine Daten"] }, 502, "no-store");
   }
 
   if (new URL(request.url).searchParams.get("roh")) {
