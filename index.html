@@ -386,18 +386,18 @@
     color: #666;
   }
 
-  /* Live umgerechnete Euro-Werte */
-  .info-eur {
+  /* Live in Euro umgerechnete Chart-Werte */
+  .info-fx {
     margin-top: 6px;
     font-size: 12px;
     color: var(--muted);
     letter-spacing: 0.01em;
   }
-  .info-eur b {
+  .info-fx b {
     font-weight: 700;
     color: #444;
   }
-  .ziel-bar .v-eur {
+  .ziel-bar .v-fx {
     display: block;
     margin-top: 2px;
     font-size: 11px;
@@ -1982,7 +1982,7 @@
   }
 })();
 
-// Euro-Werte: USD-Niveaus live in Euro umrechnen
+// Euro-Werte: die USD-Niveaus aus den Charts live in Euro umrechnen
 (function () {
   var note = document.getElementById("fxNote");
 
@@ -2003,14 +2003,14 @@
     // Einkaufszonen
     document.querySelectorAll(".card-head .info").forEach(function (info) {
       var zone = info.querySelector(".zone");
-      if (!zone || info.parentNode.querySelector(".info-eur")) return;
+      if (!zone || info.parentNode.querySelector(".info-fx")) return;
       var treffer = zone.textContent.match(/([\d.,]+)\s*[–-]\s*([\d.,]+)/);
       if (!treffer) return;
       var oben = zahl(treffer[1]) / rate;
       var unten = zahl(treffer[2]) / rate;
       if (!isFinite(oben) || !isFinite(unten)) return;
       var zeile = document.createElement("div");
-      zeile.className = "info-eur";
+      zeile.className = "info-fx";
       zeile.innerHTML = "in Euro: <b>" + eur(oben) + " – " + eur(unten) + " EUR</b>";
       info.parentNode.insertBefore(zeile, info.nextSibling);
     });
@@ -2018,11 +2018,11 @@
     // Kursziele
     document.querySelectorAll(".ziel-bar").forEach(function (bar) {
       var v = bar.querySelector(".v");
-      if (!v || bar.querySelector(".v-eur")) return;
+      if (!v || bar.querySelector(".v-fx")) return;
       var wert = zahl(v.textContent);
       if (!isFinite(wert)) return;
       var span = document.createElement("span");
-      span.className = "v-eur";
+      span.className = "v-fx";
       span.textContent = eur(wert / rate) + " EUR";
       v.parentNode.insertBefore(span, v.nextSibling);
     });
@@ -2045,7 +2045,7 @@
       .catch(function () {
         if (note) {
           note.hidden = false;
-          note.textContent = "Euro-Umrechnung gerade nicht verfügbar";
+          note.textContent = "Umrechnung gerade nicht verfügbar";
         }
       });
   }
