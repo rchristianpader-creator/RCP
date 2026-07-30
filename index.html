@@ -978,6 +978,33 @@
     animation: cardIn 0.5s var(--ease) both;
   }
 
+  /* DIE KARTEN HAENGEN AM FINGER
+     Kein einmaliger Auftritt mehr, sondern eine Bewegung, die genau der
+     Scrollstellung folgt: von unten herein wachsen, oben schrumpfend
+     verschwinden. Das rechnet der Browser selbst auf der Grafikeinheit,
+     ohne Zuhoerer und ohne ein einziges Javascript-Bild.
+
+     Nur wo view() koennen: sonst bleibt es beim einmaligen Auftauchen,
+     das der Beobachter weiter uebernimmt. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      /* Eine einzige Animation ueber den ganzen Durchlauf. Zwei getrennte
+         waeren naheliegend — aber die spaetere fuellt immer und wuerde die
+         fruehere ueberall ueberschreiben; das Hereinkommen liefe nie. */
+      .karten > .card {
+        transform-origin: 50% 0;
+        animation: kartenLauf linear both;
+        animation-timeline: view();
+      }
+      @keyframes kartenLauf {
+        0%   { opacity: 0; transform: translate3d(0, 44px, 0) scale(0.94); }
+        20%  { opacity: 1; transform: none; }
+        78%  { opacity: 1; transform: none; }
+        100% { opacity: 0.18; transform: translate3d(0, -14px, 0) scale(0.93); }
+      }
+    }
+  }
+
   /* Sprung aus dem Menue: ein Ring, der von selbst verklingt.
      Bewusst ein Uebergang und keine Animation — die Regel fuers Auftauchen
      ist spezifischer und wuerde eine zweite animation-Angabe schlucken. */
@@ -2823,8 +2850,11 @@ if ("serviceWorker" in navigator) {
     var karten = [].slice.call(stapel.querySelectorAll(".card"));
     if (!karten.length || !geht) return;
 
-    // Auftauchen — einmal je Karte, danach nicht mehr beobachten
-    if (!ruhig) {
+    // Auftauchen — einmal je Karte, danach nicht mehr beobachten.
+    // Faellt weg, wo der Browser die Bewegung selbst an die Scrollstellung
+    // haengen kann; dann macht das CSS die ganze Arbeit.
+    var selbst = window.CSS && CSS.supports && CSS.supports("animation-timeline: view()");
+    if (!ruhig && !selbst) {
       stapel.classList.add("animiert");
       var auftritt = new IntersectionObserver(function (eintraege) {
         eintraege.forEach(function (e) {
