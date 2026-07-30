@@ -908,6 +908,55 @@
     from { transform: scaleX(0); opacity: 0; }
     to { transform: scaleX(1); opacity: 0.3; }
   }
+  /* SCROLLEN
+     Drei ruhige Dinge, die zusammen den Unterschied machen: die Karten
+     steigen beim Erscheinen einmal auf, die Leiste bekommt eine Kante,
+     sobald sie klebt, und der Chip des Abschnitts, in dem man gerade
+     steht, ist markiert. */
+
+  .nav-wache { height: 1px; margin: 0; }
+
+  nav {
+    transition: background 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+  }
+  nav.klebt {
+    background: rgba(250, 250, 250, 0.88);
+    -webkit-backdrop-filter: saturate(150%) blur(12px);
+    backdrop-filter: saturate(150%) blur(12px);
+    border-bottom-color: var(--line);
+    box-shadow: 0 8px 20px -18px rgba(17, 17, 17, 0.5);
+  }
+
+  /* Wo man gerade ist. Nur die Kante — der pulsierende Ring gehoert
+     den aktiven Setups und darf nicht verwaessert werden. */
+  nav a.nav-hier {
+    border-color: var(--fg);
+    background: var(--soft);
+  }
+
+  /* Auftauchen beim Scrollen. Die Klasse setzt erst das Skript, damit
+     ohne Javascript nichts unsichtbar bleibt. */
+  .karten.animiert > .card { opacity: 0; }
+  .karten.animiert > .card.sichtbar {
+    animation: cardIn 0.5s var(--ease) both;
+  }
+
+  /* Sprung aus dem Menue: ein Ring, der von selbst verklingt.
+     Bewusst ein Uebergang und keine Animation — die Regel fuers Auftauchen
+     ist spezifischer und wuerde eine zweite animation-Angabe schlucken. */
+  .card { transition: box-shadow 0.9s ease-out; }
+  .card.angesprungen {
+    box-shadow: 0 0 0 1px rgba(17, 17, 17, 0.32);
+    transition-duration: 0.12s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .karten.animiert > .card { opacity: 1; }
+    .karten.animiert > .card.sichtbar { animation: none; }
+    .card, .card.angesprungen { transition: none; }
+    nav { transition: none; }
+  }
+
   @keyframes shakeX {
     0%, 100% { transform: translate3d(0, 0, 0); }
     20% { transform: translate3d(-8px, 0, 0); }
@@ -1488,10 +1537,11 @@
       e.preventDefault();
       var top = el.getBoundingClientRect().top + window.pageYOffset - stickyOffset();
       window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-      // brief highlight of target card
-      el.style.transition = "box-shadow 0.35s ease";
-      el.style.boxShadow = "0 0 0 1px #111";
-      setTimeout(function () { el.style.boxShadow = "none"; }, 700);
+      // Ziel kurz einrahmen, der Ring verklingt von selbst
+      el.classList.remove("angesprungen");
+      void el.offsetWidth;
+      el.classList.add("angesprungen");
+      setTimeout(function () { el.classList.remove("angesprungen"); }, 650);
     });
   });
   }
@@ -2707,6 +2757,88 @@ if ("serviceWorker" in navigator) {
 </script>
 
 
+
+<script>
+// Scrollen: Karten steigen auf, die Leiste bekommt eine Kante, sobald sie
+// klebt, und der Chip des Abschnitts, in dem man steht, ist markiert.
+(function () {
+  var nav = document.querySelector("nav");
+  var stapel = document.getElementById("karten");
+  if (!nav || !stapel) return;
+
+  var ruhig = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var geht = "IntersectionObserver" in window;
+
+  // Die Leiste klebt, sobald diese Marke aus dem Bild ist
+  if (geht) {
+    var wache = document.createElement("div");
+    wache.className = "nav-wache";
+    nav.parentNode.insertBefore(wache, nav);
+    new IntersectionObserver(function (e) {
+      nav.classList.toggle("klebt", !e[0].isIntersecting);
+    }, { threshold: 0 }).observe(wache);
+  }
+
+  function start() {
+    var karten = [].slice.call(stapel.querySelectorAll(".card"));
+    if (!karten.length || !geht) return;
+
+    // Auftauchen — einmal je Karte, danach nicht mehr beobachten
+    if (!ruhig) {
+      stapel.classList.add("animiert");
+      var auftritt = new IntersectionObserver(function (eintraege) {
+        eintraege.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          e.target.classList.add("sichtbar");
+          auftritt.unobserve(e.target);
+        });
+      }, { rootMargin: "0px 0px -10% 0px", threshold: 0.01 });
+      karten.forEach(function (k) { auftritt.observe(k); });
+
+      // Beim Sortieren wandern Karten an neue Plaetze; dann ist das
+      // Auftauchen erledigt und darf nicht dazwischenfunken.
+      var sortBtn = document.getElementById("sortBtn");
+      if (sortBtn) {
+        sortBtn.addEventListener("click", function () {
+          karten.forEach(function (k) { k.classList.add("sichtbar"); });
+          setTimeout(function () { stapel.classList.remove("animiert"); }, 700);
+        }, { once: true });
+      }
+    }
+
+    // Wo stehe ich? Markiert wird die Karte, die den mittleren Streifen
+    // des Bildschirms schneidet.
+    var chips = {};
+    [].slice.call(nav.querySelectorAll("a[href^='#']")).forEach(function (a) {
+      chips[a.getAttribute("href").slice(1)] = a;
+    });
+
+    var hier = "";
+    function markieren(id) {
+      if (id === hier) return;
+      hier = id;
+      Object.keys(chips).forEach(function (k) {
+        chips[k].classList.toggle("nav-hier", k === id);
+      });
+    }
+
+    var streifen = new IntersectionObserver(function (eintraege) {
+      eintraege.forEach(function (e) {
+        if (e.isIntersecting) markieren(e.target.id);
+      });
+    }, { rootMargin: "-45% 0px -50% 0px", threshold: 0 });
+    karten.forEach(function (k) { streifen.observe(k); });
+
+    // Ganz oben gehoert die Markierung niemandem
+    window.addEventListener("scroll", function () {
+      if (window.pageYOffset < 40) markieren("");
+    }, { passive: true });
+  }
+
+  if (window.rcpPositionen) start();
+  else document.addEventListener("rcp:karten", start);
+})();
+</script>
 
 <script>
 /* Konto: wer ist da, abmelden, Verwaltung.
