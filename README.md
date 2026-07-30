@@ -31,8 +31,13 @@ netlify/functions/subscribe.js        Speichert angemeldete Geräte
 netlify/functions/alerts.js           Zonen-Prüfung, läuft alle 30 Minuten
 netlify/functions/push-test.js        Testmeldung an alle Geräte
 netlify/functions/on-publish.js       Meldet nach jedem Deploy, was neu ist
+netlify/functions/konto.js            Registrierung, Anmeldung, Freigabe
+netlify/functions/sitzung.js          Unterschrift und Passwort-Hash (kein Endpunkt)
 
-netlify/edge-functions/site-password.js   Optional: Passwort für alle Pfade
+netlify/edge-functions/tor.js         Die Sperre: prüft jede Anfrage vor allem anderen
+
+anmelden.html                         Anmelden und Zugang anfragen
+verwaltung.html                       Konten freigeben, sperren, löschen
 ```
 
 ## Deploy
@@ -71,14 +76,14 @@ Der erste Aufruf speichert nur den Stand, ohne zu senden.
 
 ## Environment-Variablen
 
-Alle optional. Ohne sie funktioniert die Push-Kette vollständig, die Schlüssel
-liegen dann in Netlify Blobs.
-
 | Name | Zweck |
 |---|---|
-| `SITE_PASSWORD` | Aktiviert den Passwortschutz für alle Pfade |
-| `VAPID_PUBLIC` / `VAPID_PRIVATE` | Eigenes Schlüsselpaar statt des automatisch erzeugten |
-| `VAPID_SUBJECT` | Kontaktadresse im Push-Header, z. B. `mailto:…` |
+| `RCP_GEHEIMNIS` | **Pflicht.** Unterschreibt die Anmeldungen. Ohne sie bleibt die Seite zu. Ein langer Zufallstext, einmal gesetzt und nie geändert — ein neuer Wert meldet alle ab. |
+| `ADMIN_MAIL` | Optional. Nur diese Adresse wird beim Registrieren zur Verwaltung. Ohne sie wird das **erste** angelegte Konto zur Verwaltung. |
+| `VAPID_PUBLIC` / `VAPID_PRIVATE` | Optional. Eigenes Schlüsselpaar statt des automatisch erzeugten. |
+| `VAPID_SUBJECT` | Optional. Kontaktadresse im Push-Header, z. B. `mailto:…` |
+
+`SITE_PASSWORD` wird nicht mehr gebraucht und kann gelöscht werden.
 
 ## Prüfen
 
@@ -87,11 +92,44 @@ liegen dann in Netlify Blobs.
 | `/.netlify/functions/vapid` | `{"publicKey":"B…"}` |
 | `/.netlify/functions/push-test` | Testmeldung auf allen angemeldeten Geräten |
 | `/.netlify/functions/alerts` | Alle Positionen mit Kurs, Zone und Status |
+| `/.netlify/functions/konto?tat=wer` | `{"ok":true,"angemeldet":true,…}` |
 
 Der Punkt vor `netlify` gehört dazu. Ohne ihn wäre es ein Dateipfad, keine Function.
 
-## Hinweis
+## Anmeldung
 
-Der PIN vor der Liste prüft im Browser und hält Neugierige ab, mehr nicht.
-Echten Schutz gibt nur `SITE_PASSWORD`, weil der auf dem Server greift und auch
-für PDF, Icons und Functions gilt.
+Die Seite ist serverseitig geschlossen. `netlify/edge-functions/tor.js` läuft
+vor allem anderen und lässt nur durch, wer einen gültigen Sitzungs-Keks
+mitbringt — das gilt für `index.html` genauso wie für das PDF, die Icons und
+die Functions. Ohne Anmeldung bekommt der Browser die Seite gar nicht erst zu
+sehen. Der frühere PIN stand im Quelltext und war nur ein Vorhang; er ist weg.
+
+**Einrichten**
+
+1. In Netlify `RCP_GEHEIMNIS` setzen (langer Zufallstext) und neu deployen.
+   Solange sie fehlt, zeigt jede Adresse eine Einrichtungsseite mit Vorschlag.
+2. `/anmelden.html` aufrufen, **Zugang anfragen**, eigene Adresse und Passwort
+   eintragen. Das erste Konto ist sofort die Verwaltung.
+3. Anmelden. In der Fußzeile steht nun **Verwaltung**.
+
+**Weitere Leute**
+
+Sie fragen selbst unter `/anmelden.html` an und landen auf *Wartet auf
+Freigabe*. Erst nach dem Tippen auf **Freigeben** in `/verwaltung.html` kommen
+sie rein. Sperren und Löschen gehen an derselben Stelle; wer gesperrt wird,
+fliegt beim nächsten Aufruf raus.
+
+**Wie es zusammenhängt**
+
+* Passwörter liegen als scrypt-Hash mit eigenem Salz in Netlify Blobs
+  (Store `aktien-konten`), im Klartext steht nichts.
+* Der Keks ist `HttpOnly` und `Secure` — kein Skript im Browser kommt an ihn
+  heran. Ohne **Angemeldet bleiben** gilt er einen halben Tag, mit drei Monate.
+* Fünf Fehlversuche sperren das Konto für eine Viertelstunde.
+* Face ID kommt vom Gerät: die Felder heißen so, wie Safari sie erwartet,
+  deshalb bietet der Schlüsselbund das gespeicherte Passwort per Face ID an.
+* Die installierte App auf dem iPhone hat einen eigenen Keks-Speicher — dort
+  meldet man sich einmal getrennt an.
+* `status.js`, `alerts.js` und `on-publish.js` lesen die veröffentlichte
+  `index.html`. Sie unterschreiben sich dafür selbst eine kurzlebige Kennung
+  (`dienstKopf()` in `sitzung.js`), sonst würde das Tor sie aussperren.

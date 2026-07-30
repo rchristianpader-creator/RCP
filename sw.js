@@ -5,11 +5,12 @@
    - everything else (TradingView, /.netlify/functions/*): straight to network, never cached
    Bump CACHE on every deploy so old shells are dropped. */
 
-const CACHE = "aktien-liste-v17";
+const CACHE = "aktien-liste-v18";
 
+/* Ohne Sitzung liefert das Tor statt der Seite eine Weiterleitung zur
+   Anmeldung — deshalb wird das Dokument hier nicht vorgeladen, sondern
+   erst abgelegt, wenn eine echte Antwort durchkommt. */
 const PRECACHE = [
-  "/",
-  "/index.html",
   "/manifest.webmanifest",
   "/icon-180.png",
   "/icon-192.png",
@@ -32,6 +33,16 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+function istApp(res) {
+  if (!res || !res.ok || res.redirected) return false;
+  if (res.headers.get("x-rcp-anmeldung")) return false;
+  try {
+    return new URL(res.url).pathname !== "/anmelden.html";
+  } catch (e) {
+    return true;
+  }
+}
+
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
@@ -39,14 +50,19 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
   if (url.pathname.startsWith("/.netlify/")) return;
+  if (url.pathname === "/anmelden.html" || url.pathname === "/verwaltung.html") return;
 
-  // Document: always try the network so prices and news are current
+  // Document: always try the network so prices and news are current.
+  // Never store the login page as the app shell — without a session the gate
+  // answers every navigation with a redirect to /anmelden.html.
   if (req.mode === "navigate" || (req.headers.get("accept") || "").includes("text/html")) {
     event.respondWith(
       fetch(req)
         .then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put("/index.html", copy));
+          if (istApp(res)) {
+            const copy = res.clone();
+            caches.open(CACHE).then((c) => c.put("/index.html", copy));
+          }
           return res;
         })
         .catch(() => caches.match("/index.html"))

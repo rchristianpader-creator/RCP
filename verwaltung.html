@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#fafafa">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<title>Verwaltung · Aktien-Liste</title>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #fafafa;
+    --fg: #111111;
+    --muted: #737373;
+    --line: #e5e5e5;
+    --soft: #f5f5f5;
+    --card: #ffffff;
+    --hair: #ebebeb;
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 48px;
+  }
+
+  @keyframes riseIn {
+    from { opacity: 0; transform: translate3d(0, 10px, 0); }
+    to   { opacity: 1; transform: translate3d(0, 0, 0); }
+  }
+
+  header {
+    padding: 36px 24px 26px;
+    text-align: center;
+    background: var(--card);
+    border-bottom: 1px solid var(--hair);
+  }
+  header .label {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+  header .sub { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+  main { max-width: 640px; margin: 0 auto; padding: 20px 14px 0; }
+
+  .gruppe { margin-bottom: 30px; }
+  .gruppe > .titel {
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    margin: 0 4px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .gruppe > .titel .zahl {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+    color: var(--fg);
+    background: var(--soft);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 1px 6px;
+  }
+
+  .konto {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    animation: riseIn 0.4s var(--ease) both;
+  }
+  .konto .kopf {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .konto .mail { font-size: 14px; font-weight: 600; word-break: break-all; }
+  .konto .rolle {
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: #fff;
+    background: var(--fg);
+    border-radius: 2px;
+    padding: 2px 6px;
+  }
+  .konto .zeile {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 5px;
+  }
+  .konto .knoepfe {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .konto button {
+    font: inherit;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--fg);
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 8px 12px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transform: translateZ(0);
+    transition: background 0.18s ease, border-color 0.18s ease, transform 0.12s var(--ease);
+  }
+  .konto button:active { transform: scale(0.96); }
+  .konto button.stark { background: var(--fg); color: #fff; border-color: var(--fg); }
+  .konto button.rot { color: #b91c1c; border-color: #f0d0d0; }
+  .konto button[disabled] { opacity: 0.4; cursor: default; }
+
+  .leer {
+    font-size: 13px;
+    color: var(--muted);
+    padding: 14px 4px;
+  }
+
+  .meldung {
+    max-width: 640px;
+    margin: 0 auto 16px;
+    padding: 0 18px;
+    font-size: 13px;
+    min-height: 18px;
+  }
+  .meldung.schlecht { color: #b91c1c; }
+  .meldung.gut { color: #15803d; }
+
+  .fuss {
+    max-width: 640px;
+    margin: 10px auto 0;
+    padding: 18px 18px 0;
+    border-top: 1px solid var(--hair);
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.8;
+  }
+  .fuss a { color: var(--fg); text-decoration: none; border-bottom: 1px solid var(--line); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .konto { animation: none; }
+    * { transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="label">Verwaltung</div>
+  <h1>Zugänge</h1>
+  <p class="sub" id="untertitel">wird geladen …</p>
+</header>
+
+<div class="meldung" id="meldung"></div>
+
+<main id="inhalt"></main>
+
+<div class="fuss">
+  <a href="/">Zurück zur Liste</a> · <a href="#" id="abmelden">Abmelden</a>
+</div>
+
+<script>
+(function () {
+  var API = "/.netlify/functions/konto";
+  var inhalt = document.getElementById("inhalt");
+  var meldung = document.getElementById("meldung");
+  var untertitel = document.getElementById("untertitel");
+
+  var TITEL = { wartet: "Wartet auf Freigabe", frei: "Freigegeben", gesperrt: "Gesperrt" };
+
+  function sagen(text, gut) {
+    meldung.textContent = text || "";
+    meldung.className = "meldung " + (text ? (gut ? "gut" : "schlecht") : "");
+  }
+
+  function datum(iso) {
+    if (!iso) return "–";
+    var d = new Date(iso);
+    if (isNaN(d)) return "–";
+    return d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "2-digit" }) +
+      " " + d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+  }
+
+  function tat(pfad, daten) {
+    return fetch(API + "?tat=" + pfad, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify(daten || {})
+    }).then(function (r) { return r.json().catch(function () { return {}; }); });
+  }
+
+  function knopf(text, klasse, fn) {
+    var b = document.createElement("button");
+    b.textContent = text;
+    if (klasse) b.className = klasse;
+    b.addEventListener("click", function () {
+      b.disabled = true;
+      fn().then(function (a) {
+        if (a && a.ok) { sagen("", true); laden(); }
+        else { b.disabled = false; sagen((a && a.fehler) || "Das hat nicht geklappt.", false); }
+      }).catch(function () {
+        b.disabled = false;
+        sagen("Keine Verbindung.", false);
+      });
+    });
+    return b;
+  }
+
+  function karte(k, ich) {
+    var d = document.createElement("div");
+    d.className = "konto";
+
+    var kopf = document.createElement("div");
+    kopf.className = "kopf";
+    var m = document.createElement("div");
+    m.className = "mail";
+    m.textContent = k.mail;
+    kopf.appendChild(m);
+    if (k.rolle === "chef") {
+      var r = document.createElement("span");
+      r.className = "rolle";
+      r.textContent = "Verwaltung";
+      kopf.appendChild(r);
+    }
+    d.appendChild(kopf);
+
+    var z1 = document.createElement("div");
+    z1.className = "zeile";
+    z1.textContent = (k.name ? k.name + " · " : "") + "angefragt " + datum(k.erstellt);
+    d.appendChild(z1);
+
+    var z2 = document.createElement("div");
+    z2.className = "zeile";
+    z2.textContent = "zuletzt angemeldet " + datum(k.zuletzt) +
+      (k.gesperrt_bis ? " · vorübergehend gesperrt bis " + datum(k.gesperrt_bis) : "");
+    d.appendChild(z2);
+
+    if (k.mail === ich) return d;
+
+    var kn = document.createElement("div");
+    kn.className = "knoepfe";
+
+    if (k.status !== "frei") {
+      kn.appendChild(knopf("Freigeben", "stark", function () {
+        return tat("entscheiden", { mail: k.mail, status: "frei" });
+      }));
+    }
+    if (k.status !== "gesperrt") {
+      kn.appendChild(knopf("Sperren", "", function () {
+        return tat("entscheiden", { mail: k.mail, status: "gesperrt" });
+      }));
+    }
+    kn.appendChild(knopf("Löschen", "rot", function () {
+      if (!confirm("Konto " + k.mail + " endgültig löschen?")) return Promise.resolve({ ok: false, fehler: "" });
+      return tat("loeschen", { mail: k.mail });
+    }));
+
+    d.appendChild(kn);
+    return d;
+  }
+
+  function laden() {
+    fetch(API + "?tat=liste", { credentials: "same-origin", cache: "no-store" })
+      .then(function (r) {
+        if (r.status === 403) { location.replace("/"); return null; }
+        if (r.status === 401) { location.replace("/anmelden.html?ziel=%2Fverwaltung.html"); return null; }
+        return r.json();
+      })
+      .then(function (a) {
+        if (!a) return;
+        if (!a.ok) { sagen(a.fehler || "Das hat nicht geklappt.", false); return; }
+
+        untertitel.textContent = a.konten.length === 1 ? "1 Konto" : a.konten.length + " Konten";
+        inhalt.textContent = "";
+
+        ["wartet", "frei", "gesperrt"].forEach(function (status) {
+          var teil = a.konten.filter(function (k) { return k.status === status; });
+          if (!teil.length && status !== "wartet") return;
+
+          var g = document.createElement("div");
+          g.className = "gruppe";
+
+          var t = document.createElement("div");
+          t.className = "titel";
+          t.appendChild(document.createTextNode(TITEL[status]));
+          var zahl = document.createElement("span");
+          zahl.className = "zahl";
+          zahl.textContent = teil.length;
+          t.appendChild(zahl);
+          g.appendChild(t);
+
+          if (!teil.length) {
+            var leer = document.createElement("div");
+            leer.className = "leer";
+            leer.textContent = "Keine offenen Anfragen.";
+            g.appendChild(leer);
+          } else {
+            teil.forEach(function (k) { g.appendChild(karte(k, a.ich)); });
+          }
+
+          inhalt.appendChild(g);
+        });
+      })
+      .catch(function () { sagen("Keine Verbindung.", false); });
+  }
+
+  document.getElementById("abmelden").addEventListener("click", function (e) {
+    e.preventDefault();
+    tat("abmelden").then(function () { location.replace("/anmelden.html"); });
+  });
+
+  laden();
+})();
+</script>
+</body>
+</html>

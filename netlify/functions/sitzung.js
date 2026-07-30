@@ -1,0 +1,117 @@
+/* Gemeinsame Bausteine fuer Anmeldung und Sitzung.
+
+   Ein einziges Geheimnis, Environment-Variable RCP_GEHEIMNIS, unterschreibt
+   die Sitzungs-Kekse. Dieselbe Variable prueft die Edge Function am Tor
+   (netlify/edge-functions/tor.js) — deshalb muss das Format beidseitig
+   identisch bleiben:
+
+     <base64url(JSON)>.<base64url(HMAC-SHA256 ueber den ersten Teil)>
+
+   Passwoerter liegen nie im Klartext: scrypt mit eigenem Salz je Konto. */
+
+import crypto from "node:crypto";
+
+export const KEKS = "rcp_sitz";
+export const LADEN = "aktien-konten";
+
+// Wie lange eine Sitzung gilt
+export const DAUER_KURZ = 12 * 60 * 60;        // ohne "merken": ein halber Tag
+export const DAUER_LANG = 90 * 24 * 60 * 60;   // mit "merken": drei Monate
+
+export function geheimnis() {
+  return process.env.RCP_GEHEIMNIS || "";
+}
+
+export function signieren(daten, sekunden) {
+  const g = geheimnis();
+  if (!g) return null;
+  const nutz = Object.assign({}, daten, { a: Math.floor(Date.now() / 1000) + sekunden });
+  const teil = Buffer.from(JSON.stringify(nutz), "utf8").toString("base64url");
+  const sig = crypto.createHmac("sha256", g).update(teil).digest("base64url");
+  return teil + "." + sig;
+}
+
+export function pruefen(token) {
+  const g = geheimnis();
+  if (!g || !token) return null;
+  const punkt = token.indexOf(".");
+  if (punkt < 1) return null;
+
+  const teil = token.slice(0, punkt);
+  const sig = token.slice(punkt + 1);
+  const soll = crypto.createHmac("sha256", g).update(teil).digest("base64url");
+  if (sig.length !== soll.length) return null;
+  if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(soll))) return null;
+
+  let daten = null;
+  try {
+    daten = JSON.parse(Buffer.from(teil, "base64url").toString("utf8"));
+  } catch (e) {
+    return null;
+  }
+  if (!daten || !daten.a || daten.a < Math.floor(Date.now() / 1000)) return null;
+  return daten;
+}
+
+/* Kopfzeile fuer Anfragen, die eine Function an die eigene Seite stellt
+   (status.js, alerts.js, on-publish.js lesen die veroeffentlichte
+   index.html). Ohne sie wuerde das Tor die eigene Seite aussperren. */
+export function dienstKopf() {
+  const t = signieren({ m: "dienst", r: "dienst" }, 120);
+  return t ? { "x-rcp-sitzung": t } : {};
+}
+
+export function keksLesen(request, name) {
+  const roh = request.headers.get("cookie") || "";
+  for (const stueck of roh.split(";")) {
+    const i = stueck.indexOf("=");
+    if (i < 0) continue;
+    if (stueck.slice(0, i).trim() === name) return decodeURIComponent(stueck.slice(i + 1).trim());
+  }
+  return "";
+}
+
+export function keksSetzen(wert, sekunden) {
+  const teile = [
+    KEKS + "=" + encodeURIComponent(wert),
+    "Path=/",
+    "HttpOnly",
+    "Secure",
+    "SameSite=Lax"
+  ];
+  if (sekunden > 0) teile.push("Max-Age=" + sekunden);
+  return teile.join("; ");
+}
+
+export function keksLoeschen() {
+  return KEKS + "=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0";
+}
+
+/* Passwort */
+
+export function hashen(passwort, salz) {
+  const s = salz || crypto.randomBytes(16).toString("hex");
+  const h = crypto.scryptSync(String(passwort), s, 64).toString("hex");
+  return { salz: s, hash: h };
+}
+
+export function passtPasswort(passwort, salz, hash) {
+  if (!salz || !hash) return false;
+  const eigen = hashen(passwort, salz).hash;
+  if (eigen.length !== hash.length) return false;
+  return crypto.timingSafeEqual(Buffer.from(eigen, "hex"), Buffer.from(hash, "hex"));
+}
+
+/* Konten */
+
+export function mailNormal(mail) {
+  return String(mail || "").trim().toLowerCase();
+}
+
+export function mailGueltig(mail) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail);
+}
+
+export function schluessel(mail) {
+  return "nutzer/" + crypto.createHash("sha256").update(mailNormal(mail)).digest("hex");
+}

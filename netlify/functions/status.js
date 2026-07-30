@@ -7,6 +7,8 @@
    Zonen und Symbole kommen aus der veroeffentlichten index.html — es gibt
    keine zweite Liste zu pflegen. */
 
+import { dienstKopf } from "./sitzung.js";
+
 export default async () => {
   const watch = await zonen();
   if (!watch.length) {
@@ -62,9 +64,8 @@ async function zonen() {
   if (!base) return [];
 
   const headers = { "User-Agent": "AktienListe-Status/1.0" };
-  if (process.env.SITE_PASSWORD) {
-    headers.Authorization = "Basic " + btoa("status:" + process.env.SITE_PASSWORD);
-  }
+  // Das Tor laesst die eigene Seite nur mit unterschriebener Kennung durch
+  Object.assign(headers, dienstKopf());
 
   let html = "";
   try {

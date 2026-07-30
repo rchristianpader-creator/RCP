@@ -13,6 +13,7 @@
 import webpush from "web-push";
 import { getStore } from "@netlify/blobs";
 import { keys } from "./vapid.js";
+import { dienstKopf } from "./sitzung.js";
 
 export default async () => {
   const store = getStore("aktien-push");
@@ -94,9 +95,8 @@ async function seiteLesen() {
   if (!base) return null;
 
   const headers = { "User-Agent": "AktienListe-Publish/1.0" };
-  if (process.env.SITE_PASSWORD) {
-    headers.Authorization = "Basic " + btoa("publish:" + process.env.SITE_PASSWORD);
-  }
+  // Das Tor laesst die eigene Seite nur mit unterschriebener Kennung durch
+  Object.assign(headers, dienstKopf());
 
   let html = "";
   try {

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="color-scheme" content="light">
-<link rel="manifest" href="/manifest.webmanifest">
+<link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#fafafa">
 <link rel="apple-touch-icon" href="/icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -51,129 +51,6 @@
     line-height: 1.45;
     -webkit-font-smoothing: antialiased;
     padding-bottom: 40px;
-  }
-
-  /* LOCK */
-  #lock {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    background: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 32px 24px;
-    transition: opacity 0.35s ease, visibility 0.35s;
-  }
-  #lock.hidden {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-  }
-  #lock .lock-label,
-  #lock h1,
-  #lock .lock-sub,
-  #lock .pin-wrap,
-  #lock .keypad {
-    animation: riseIn 0.55s var(--ease) both;
-  }
-  #lock .lock-label { animation-delay: 0.02s; }
-  #lock h1 {
-    font-size: 24px;
-    font-weight: 700;
-    letter-spacing: -0.3px;
-    margin-bottom: 8px;
-    animation-delay: 0.06s;
-  }
-  #lock .lock-label {
-    font-size: 10px;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--muted);
-    font-weight: 600;
-    margin-bottom: 12px;
-  }
-  #lock .lock-sub {
-    font-size: 13px;
-    color: var(--muted);
-    margin-bottom: 28px;
-    animation-delay: 0.1s;
-  }
-  #lock .pin-wrap {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 22px;
-    animation-delay: 0.14s;
-  }
-  #lock .pin-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    border: 1.5px solid var(--fg);
-    background: transparent;
-    transform: translateZ(0);
-    transition: background 0.15s ease, transform 0.2s var(--ease);
-  }
-  #lock .pin-dot.filled {
-    background: var(--fg);
-    transform: scale(1.12);
-  }
-  #lock .keypad {
-    display: grid;
-    grid-template-columns: repeat(3, 72px);
-    gap: 12px;
-    margin-top: 8px;
-    animation-delay: 0.18s;
-  }
-  #lock .key {
-    width: 72px;
-    height: 72px;
-    border: 1px solid var(--line);
-    border-radius: 50%;
-    background: var(--card);
-    font-size: 22px;
-    font-weight: 600;
-    color: var(--fg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    user-select: none;
-    -webkit-user-select: none;
-    -webkit-tap-highlight-color: transparent;
-    transform: translateZ(0);
-    transition: background 0.15s ease, transform 0.12s var(--ease);
-  }
-  #lock .key:active {
-    background: var(--soft);
-    transform: scale(0.92);
-  }
-  #lock .key.empty {
-    border: none;
-    background: transparent;
-    pointer-events: none;
-  }
-  #lock .error {
-    margin-top: 18px;
-    font-size: 13px;
-    color: #b91c1c;
-    min-height: 20px;
-    opacity: 0;
-    transform: translate3d(0, 4px, 0);
-    transition: opacity 0.2s ease, transform 0.2s ease;
-  }
-  #lock .error.show {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-  #lock .shake {
-    animation: shakeX 0.4s ease;
-  }
-
-  #app { display: none; }
-  #app.visible {
-    display: block;
   }
 
   header {
@@ -955,6 +832,18 @@
     background: var(--line);
     margin: 0 auto 16px;
   }
+  footer .konto-zeile {
+    margin-top: 14px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  footer .konto-zeile a {
+    color: var(--fg);
+    text-decoration: none;
+    border-bottom: 1px solid var(--line);
+    -webkit-tap-highlight-color: transparent;
+  }
+  footer .konto-zeile .trenner { margin: 0 6px; color: var(--line); }
 
   @keyframes riseIn {
     from { opacity: 0; transform: translate3d(0, 12px, 0); }
@@ -1173,34 +1062,7 @@
 </head>
 <body>
 
-<div id="lock">
-  <div class="lock-label">Geschützt</div>
-  <h1>Aktien-Liste</h1>
-  <p class="lock-sub">PIN eingeben</p>
-  <div class="pin-wrap" id="pinDots">
-    <div class="pin-dot"></div>
-    <div class="pin-dot"></div>
-    <div class="pin-dot"></div>
-    <div class="pin-dot"></div>
-  </div>
-  <div class="keypad" id="keypad">
-    <div class="key" data-k="1">1</div>
-    <div class="key" data-k="2">2</div>
-    <div class="key" data-k="3">3</div>
-    <div class="key" data-k="4">4</div>
-    <div class="key" data-k="5">5</div>
-    <div class="key" data-k="6">6</div>
-    <div class="key" data-k="7">7</div>
-    <div class="key" data-k="8">8</div>
-    <div class="key" data-k="9">9</div>
-    <div class="key empty"></div>
-    <div class="key" data-k="0">0</div>
-    <div class="key" data-k="del">⌫</div>
-  </div>
-  <div class="error" id="pinError">Falscher PIN</div>
-</div>
-
-<div id="app">
+<div id="app" class="visible">
 <header>
   <div class="label">Watchlist</div>
   <h1>Aktien-Liste</h1>
@@ -1659,74 +1521,12 @@
   <div class="line"></div>
   Live-Charts · TradingView · Fibos über den Button<br>
   Ralph Christian Pader · Juli 2026
+  <div class="konto-zeile" id="kontoZeile" hidden></div>
 </footer>
 </div>
 
 <script>
 (function () {
-  var PIN = "2310";
-  var entered = "";
-  var dots = document.querySelectorAll("#pinDots .pin-dot");
-  var err = document.getElementById("pinError");
-  var lock = document.getElementById("lock");
-  var app = document.getElementById("app");
-  var pinWrap = document.getElementById("pinDots");
-
-  // Kein Merken: der PIN wird bei jedem Start verlangt
-
-  function updateDots() {
-    for (var i = 0; i < 4; i++) {
-      if (i < entered.length) dots[i].classList.add("filled");
-      else dots[i].classList.remove("filled");
-    }
-  }
-
-  function unlock(instant) {
-    if (instant) {
-      lock.classList.add("hidden");
-      app.classList.add("visible");
-      document.dispatchEvent(new Event("rcp:unlocked"));
-      return;
-    }
-    lock.classList.add("hidden");
-    setTimeout(function () {
-      app.classList.add("visible");
-      document.dispatchEvent(new Event("rcp:unlocked"));
-    }, 200);
-  }
-
-  function wrong() {
-    err.classList.add("show");
-    pinWrap.classList.add("shake");
-    entered = "";
-    updateDots();
-    setTimeout(function () {
-      err.classList.remove("show");
-      pinWrap.classList.remove("shake");
-    }, 650);
-  }
-
-  function press(k) {
-    if (k === "del") {
-      entered = entered.slice(0, -1);
-      updateDots();
-      return;
-    }
-    if (entered.length >= 4) return;
-    entered += k;
-    updateDots();
-    if (entered.length === 4) {
-      if (entered === PIN) setTimeout(function () { unlock(false); }, 180);
-      else setTimeout(wrong, 140);
-    }
-  }
-
-  document.getElementById("keypad").addEventListener("click", function (e) {
-    var t = e.target.closest(".key");
-    if (!t || !t.dataset.k) return;
-    press(t.dataset.k);
-  });
-
   // Precise nav scroll under sticky bar
   function stickyOffset() {
     var nav = document.querySelector("nav");
@@ -2948,7 +2748,78 @@ if ("serviceWorker" in navigator) {
 
 
 
+<script>
+/* Konto: wer ist da, abmelden, Verwaltung.
 
+   Die eigentliche Sperre sitzt vor der Seite (netlify/edge-functions/tor.js) —
+   ohne gueltige Sitzung liefert der Server diese Datei gar nicht erst aus.
+   Hier geht es nur noch um die Anzeige und den einen Fall, den der Server
+   nicht abfangen kann: der Service Worker legt die Seite offline ab, und
+   die Sitzung laeuft zwischendurch ab. */
+(function () {
+  var API = "/.netlify/functions/konto";
+  var zeile = document.getElementById("kontoZeile");
+  if (!zeile) return;
+
+  function trenner() {
+    var s = document.createElement("span");
+    s.className = "trenner";
+    s.textContent = "·";
+    return s;
+  }
+
+  function link(text, fn) {
+    var a = document.createElement("a");
+    a.href = "#";
+    a.textContent = text;
+    a.addEventListener("click", function (e) {
+      e.preventDefault();
+      fn();
+    });
+    return a;
+  }
+
+  function abmelden() {
+    fetch(API + "?tat=abmelden", { method: "POST", credentials: "same-origin" })
+      .catch(function () {})
+      .then(function () {
+        // Der abgelegte Stand darf nicht offline weiterleben
+        if (window.caches && caches.keys) {
+          return caches.keys().then(function (k) {
+            return Promise.all(k.map(function (n) { return caches.delete(n); }));
+          }).catch(function () {});
+        }
+      })
+      .then(function () { location.replace("/anmelden.html"); });
+  }
+
+  fetch(API + "?tat=wer", { credentials: "same-origin", cache: "no-store" })
+    .then(function (r) { return r.json(); })
+    .then(function (a) {
+      if (!a || !a.angemeldet) {
+        // Sitzung abgelaufen, Seite kam aus dem Zwischenspeicher
+        location.replace("/anmelden.html");
+        return;
+      }
+
+      zeile.textContent = "";
+      zeile.appendChild(document.createTextNode(a.name || a.mail));
+      if (a.chef) {
+        zeile.appendChild(trenner());
+        var v = document.createElement("a");
+        v.href = "/verwaltung.html";
+        v.textContent = "Verwaltung";
+        zeile.appendChild(v);
+      }
+      zeile.appendChild(trenner());
+      zeile.appendChild(link("Abmelden", abmelden));
+      zeile.hidden = false;
+    })
+    .catch(function () {
+      // Offline: nichts anzeigen, nichts umleiten
+    });
+})();
+</script>
 
 </body>
 </html>

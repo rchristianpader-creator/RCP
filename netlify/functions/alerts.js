@@ -14,6 +14,7 @@
 import webpush from "web-push";
 import { getStore } from "@netlify/blobs";
 import { keys } from "./vapid.js";
+import { dienstKopf } from "./sitzung.js";
 
 const QUIET_FROM = 23;
 const QUIET_TO = 7;
@@ -147,9 +148,8 @@ async function zonen() {
   if (!base) return [];
 
   const headers = { "User-Agent": "AktienListe-Alerts/1.0" };
-  if (process.env.SITE_PASSWORD) {
-    headers.Authorization = "Basic " + btoa("alerts:" + process.env.SITE_PASSWORD);
-  }
+  // Das Tor laesst die eigene Seite nur mit unterschriebener Kennung durch
+  Object.assign(headers, dienstKopf());
 
   let html = "";
   try {

@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#fafafa">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="robots" content="noindex, nofollow">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<title>Anmelden · Aktien-Liste</title>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #fafafa;
+    --fg: #111111;
+    --muted: #737373;
+    --line: #e5e5e5;
+    --soft: #f5f5f5;
+    --card: #ffffff;
+    --hair: #ebebeb;
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 20px;
+  }
+
+  @keyframes riseIn {
+    from { opacity: 0; transform: translate3d(0, 10px, 0); }
+    to   { opacity: 1; transform: translate3d(0, 0, 0); }
+  }
+
+  .kasten {
+    width: 100%;
+    max-width: 380px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 32px 24px 26px;
+    animation: riseIn 0.55s var(--ease) both;
+  }
+
+  .marke { text-align: center; margin-bottom: 26px; }
+  .marke .label {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .marke h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+  .marke .sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  .reiter {
+    display: flex;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 22px;
+  }
+  .reiter button {
+    flex: 1;
+    font: inherit;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--muted);
+    background: var(--card);
+    border: none;
+    padding: 11px 6px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .reiter button + button { border-left: 1px solid var(--line); }
+  .reiter button[aria-selected="true"] {
+    background: var(--fg);
+    color: #fff;
+  }
+
+  label.feld {
+    display: block;
+    margin-bottom: 14px;
+  }
+  /* hidden gewinnt sonst nicht gegen die Klasse */
+  label.feld[hidden], .merken[hidden] { display: none; }
+  label.feld > span {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  input[type="email"],
+  input[type="password"],
+  input[type="text"] {
+    width: 100%;
+    font: inherit;
+    font-size: 16px; /* unter 16px zoomt Safari beim Tippen */
+    color: var(--fg);
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 11px 12px;
+    transition: border-color 0.2s ease;
+  }
+  input:focus {
+    outline: none;
+    border-color: var(--fg);
+  }
+
+  .merken {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 13px;
+    color: var(--muted);
+    margin: 4px 0 18px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .merken input { width: 16px; height: 16px; accent-color: #111; }
+
+  button.senden {
+    width: 100%;
+    font: inherit;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: #fff;
+    background: var(--fg);
+    border: 1px solid var(--fg);
+    border-radius: 2px;
+    padding: 13px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transform: translateZ(0);
+    transition: opacity 0.2s ease, transform 0.12s var(--ease);
+  }
+  button.senden:active { transform: scale(0.985); }
+  button.senden[disabled] { opacity: 0.45; cursor: default; }
+
+  .meldung {
+    font-size: 13px;
+    margin-top: 16px;
+    min-height: 18px;
+    opacity: 0;
+    transform: translate3d(0, 4px, 0);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  .meldung.zeig { opacity: 1; transform: translate3d(0, 0, 0); }
+  .meldung.schlecht { color: #b91c1c; }
+  .meldung.gut { color: #15803d; }
+
+  .fuss {
+    margin-top: 22px;
+    padding-top: 16px;
+    border-top: 1px solid var(--hair);
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  @keyframes shakeX {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    20% { transform: translate3d(-6px, 0, 0); }
+    40% { transform: translate3d(5px, 0, 0); }
+    60% { transform: translate3d(-3px, 0, 0); }
+    80% { transform: translate3d(2px, 0, 0); }
+  }
+  .ruettel { animation: shakeX 0.4s ease; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .kasten, .ruettel { animation: none; }
+    * { transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="kasten" id="kasten">
+  <div class="marke">
+    <div class="label">Geschützt</div>
+    <h1>Aktien-Liste</h1>
+    <p class="sub" id="untertitel">Anmelden mit E-Mail und Passwort</p>
+  </div>
+
+  <div class="reiter" role="tablist">
+    <button type="button" id="reiterAn" role="tab" aria-selected="true">Anmelden</button>
+    <button type="button" id="reiterNeu" role="tab" aria-selected="false">Zugang anfragen</button>
+  </div>
+
+  <form id="formular" autocomplete="on" novalidate>
+    <label class="feld" id="feldName" hidden>
+      <span>Name</span>
+      <input type="text" id="name" name="name" autocomplete="name" autocapitalize="words">
+    </label>
+
+    <label class="feld">
+      <span>E-Mail</span>
+      <input type="email" id="mail" name="username" autocomplete="username" inputmode="email"
+             autocapitalize="none" autocorrect="off" required>
+    </label>
+
+    <label class="feld">
+      <span>Passwort</span>
+      <input type="password" id="passwort" name="password" autocomplete="current-password" required>
+    </label>
+
+    <label class="merken" id="feldMerken">
+      <input type="checkbox" id="merken" checked>
+      <span>Angemeldet bleiben</span>
+    </label>
+
+    <button type="submit" class="senden" id="senden">Anmelden</button>
+  </form>
+
+  <div class="meldung" id="meldung" role="status" aria-live="polite"></div>
+
+  <div class="fuss" id="fuss">
+    Kein Konto? Zugang anfragen — die Freigabe erfolgt von Hand.
+  </div>
+</div>
+
+<script>
+(function () {
+  var API = "/.netlify/functions/konto";
+
+  var reiterAn = document.getElementById("reiterAn");
+  var reiterNeu = document.getElementById("reiterNeu");
+  var formular = document.getElementById("formular");
+  var feldName = document.getElementById("feldName");
+  var feldMerken = document.getElementById("feldMerken");
+  var name = document.getElementById("name");
+  var mail = document.getElementById("mail");
+  var passwort = document.getElementById("passwort");
+  var merken = document.getElementById("merken");
+  var senden = document.getElementById("senden");
+  var meldung = document.getElementById("meldung");
+  var untertitel = document.getElementById("untertitel");
+  var fuss = document.getElementById("fuss");
+  var kasten = document.getElementById("kasten");
+
+  var modus = "anmelden";
+
+  function ziel() {
+    var p = new URLSearchParams(location.search).get("ziel") || "/";
+    // Nur eigene Pfade, nie eine fremde Adresse
+    if (p.charAt(0) !== "/" || p.charAt(1) === "/") return "/";
+    return p;
+  }
+
+  function sagen(text, gut) {
+    meldung.textContent = text;
+    meldung.className = "meldung zeig " + (gut ? "gut" : "schlecht");
+    if (!gut && text) {
+      kasten.classList.remove("ruettel");
+      void kasten.offsetWidth;
+      kasten.classList.add("ruettel");
+      setTimeout(function () { kasten.classList.remove("ruettel"); }, 450);
+    }
+  }
+
+  function leeren() {
+    meldung.textContent = "";
+    meldung.className = "meldung";
+  }
+
+  function wechsel(neu) {
+    modus = neu;
+    leeren();
+    var reg = neu === "registrieren";
+    reiterAn.setAttribute("aria-selected", reg ? "false" : "true");
+    reiterNeu.setAttribute("aria-selected", reg ? "true" : "false");
+    feldName.hidden = !reg;
+    feldMerken.hidden = reg;
+    senden.textContent = reg ? "Zugang anfragen" : "Anmelden";
+    untertitel.textContent = reg
+      ? "Ein Konto anfragen — freigegeben wird von Hand"
+      : "Anmelden mit E-Mail und Passwort";
+    fuss.textContent = reg
+      ? "Nach der Anfrage wird das Konto freigegeben. Danach kannst du dich anmelden."
+      : "Kein Konto? Zugang anfragen — die Freigabe erfolgt von Hand.";
+    passwort.setAttribute("autocomplete", reg ? "new-password" : "current-password");
+    passwort.value = "";
+  }
+
+  reiterAn.addEventListener("click", function () { wechsel("anmelden"); });
+  reiterNeu.addEventListener("click", function () { wechsel("registrieren"); });
+
+  formular.addEventListener("submit", function (e) {
+    e.preventDefault();
+    leeren();
+
+    var daten = {
+      mail: mail.value.trim(),
+      passwort: passwort.value
+    };
+    if (modus === "registrieren") daten.name = name.value.trim();
+    else daten.merken = merken.checked;
+
+    if (!daten.mail || !daten.passwort) {
+      sagen("Bitte E-Mail und Passwort ausfüllen.", false);
+      return;
+    }
+
+    senden.disabled = true;
+    var vorher = senden.textContent;
+    senden.textContent = modus === "registrieren" ? "Wird gesendet …" : "Prüfe …";
+
+    fetch(API + "?tat=" + modus, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify(daten)
+    })
+      .then(function (r) { return r.json().catch(function () { return {}; }); })
+      .then(function (a) {
+        senden.disabled = false;
+        senden.textContent = vorher;
+
+        if (!a || a.ok !== true) {
+          sagen((a && a.fehler) || "Das hat nicht geklappt.", false);
+          return;
+        }
+
+        if (modus === "registrieren") {
+          sagen(a.hinweis || "Anfrage ist eingegangen.", true);
+          if (a.status === "frei") setTimeout(function () { wechsel("anmelden"); }, 1400);
+          return;
+        }
+
+        sagen("Angemeldet.", true);
+        location.replace(ziel());
+      })
+      .catch(function () {
+        senden.disabled = false;
+        senden.textContent = vorher;
+        sagen("Keine Verbindung. Noch einmal versuchen.", false);
+      });
+  });
+
+  // Wer schon angemeldet ist, muss die Seite nicht sehen
+  fetch(API + "?tat=wer", { credentials: "same-origin", cache: "no-store" })
+    .then(function (r) { return r.json(); })
+    .then(function (a) { if (a && a.angemeldet) location.replace(ziel()); })
+    .catch(function () {});
+
+  mail.focus();
+})();
+</script>
+</body>
+</html>
