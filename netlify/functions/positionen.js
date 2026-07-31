@@ -14,7 +14,11 @@
    die Reihenfolge steckt darin, und ein Schreibvorgang ist immer vollstaendig.
 
    Beim allerersten Aufruf, solange nichts gespeichert ist, wird der Bestand
-   aus positionen-start.js uebernommen. */
+   aus positionen-start.js uebernommen.
+
+   Zwei Anlaesse melden sich von selbst: eine Position kommt dazu, oder eine
+   vorhandene wird als ueberarbeitet markiert. Beides nur beim Uebergang —
+   sonst ginge bei jedem Umsortieren dasselbe noch einmal raus. */
 
 import { getStore } from "@netlify/blobs";
 import { START } from "./positionen-start.js";
@@ -61,18 +65,31 @@ export default async (request) => {
   const vorher = await lesen(store);
   await store.setJSON(EINTRAG, { zeit: new Date().toISOString(), von: chef.mail, liste: gepruft.liste });
 
-  // Was ist dazugekommen? Das ist die Meldung wert.
-  const alteIds = vorher.map((p) => p.id);
-  const neu = gepruft.liste.filter((p) => alteIds.indexOf(p.id) < 0);
+  /* Was ist dazugekommen, was wurde ueberarbeitet? Beides ist die Meldung
+     wert — aber nur beim Uebergang. Sonst ginge bei jedem Umsortieren
+     dieselbe Meldung noch einmal raus: gemeldet wird, was vorher nicht
+     markiert war und es jetzt ist.
+
+     Wer neu ist, ist nicht auch ueberarbeitet — der steht schon in der
+     ersten Meldung. */
+  const alt = new Map(vorher.map((p) => [p.id, p]));
+  const neu = gepruft.liste.filter((p) => !alt.has(p.id));
+  const ueberarbeitet = gepruft.liste.filter((p) => {
+    const v = alt.get(p.id);
+    return v && p.update && !v.update;
+  });
+
   let gemeldet = 0;
-  if (neu.length && body.melden !== false) {
-    gemeldet = await melden(neu);
+  if (body.melden !== false) {
+    if (neu.length) gemeldet += await melden("Neu in der Liste", neu, "neu");
+    if (ueberarbeitet.length) gemeldet += await melden("Überarbeitet", ueberarbeitet, "update");
   }
 
   return json({
     ok: true,
     anzahl: gepruft.liste.length,
     neu: neu.map((p) => p.badge),
+    ueberarbeitet: ueberarbeitet.map((p) => p.badge),
     gemeldet: gemeldet
   });
 };
@@ -192,15 +209,19 @@ function zahl(s) {
   );
 }
 
-/* ---------- Meldung bei neuen Positionen ---------- */
+/* ---------- Meldung bei neuen und ueberarbeiteten Positionen ----------
 
-async function melden(neu) {
-  const namen = neu.map((p) => p.badge).join(" · ");
+   Dieselbe Machart fuer beides, nur mit anderer Ueberschrift. Der Anhaenger
+   trennt sie, damit eine Meldung die andere nicht ueberschreibt, wenn beides
+   in einem Zug passiert. */
+
+async function melden(titel, welche, anhaenger) {
+  const namen = welche.map((p) => p.badge).join(" · ");
 
   // Erst ins Buch. Ob gerade ein Geraet angemeldet ist, aendert nichts
-  // daran, dass die Position neu ist.
-  await notieren({ titel: "Neu in der Liste", text: namen,
-                   url: "/#" + neu[0].id, art: "position" });
+  // daran, dass es passiert ist.
+  await notieren({ titel: titel, text: namen,
+                   url: "/#" + welche[0].id, art: "position" });
 
   try {
     const push = getStore("aktien-push");
@@ -223,10 +244,10 @@ async function melden(neu) {
     );
 
     const nutzlast = JSON.stringify({
-      title: "Neu in der Liste",
+      title: titel,
       body: namen,
-      tag: "neu-" + Date.now().toString(36),
-      url: "/#" + neu[0].id
+      tag: anhaenger + "-" + Date.now().toString(36),
+      url: "/#" + welche[0].id
     });
 
     let raus = 0;

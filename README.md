@@ -119,8 +119,27 @@ auch schon überarbeitet. Im Editor schaltet deshalb das eine das andere aus.
 Kommen trotzdem beide an — von Hand, über die Function —, gewinnt NEU; es wird
 immer nur **ein** Zeichen gezeigt.
 
-Push gibt es nur für wirklich neue Positionen. Ein UPDATE ist eine Notiz an der
-Karte, kein Anlass, jemanden zu wecken.
+### Was sich von selbst meldet
+
+Zwei Anlässe gehen als Push an alle Geräte und stehen danach in der Glocke:
+
+| Anlass | Meldung |
+|---|---|
+| Eine Position kommt dazu | **Neu in der Liste** · die Kürzel |
+| Eine vorhandene wird als UPDATE markiert | **Überarbeitet** · die Kürzel |
+
+Beides nur **beim Übergang**: gemeldet wird, was vorher nicht markiert war und
+es jetzt ist. Sonst ginge bei jedem Umsortieren dasselbe noch einmal raus. Wird
+die Markierung weggenommen und später wieder gesetzt, ist das ein neuer
+Übergang und meldet sich wieder.
+
+Wer neu ist, ist nicht auch überarbeitet — eine frisch angelegte Position steht
+nur in der ersten Meldung, auch wenn beide Haken gesetzt wären. Passiert beides
+in einem Zug, gehen zwei Meldungen raus, mit verschiedenen Anhängern, damit
+eine die andere nicht überschreibt.
+
+Der Editor sagt nach dem Speichern, was gemeldet wurde: „Gespeichert. Neu: …
+Überarbeitet: … · an 3 Geräte gemeldet".
 
 Je Position:
 
@@ -137,8 +156,10 @@ Je Position:
 | Anker | `#intc` in der Adresse — später nicht mehr ändern, sonst brechen alte Links |
 | NEU | Markierung am Chip und auf der Karte |
 
-Beim Speichern einer **neuen** Position geht automatisch eine Push-Meldung an
-alle Geräte. Änderungen an vorhandenen melden nichts.
+Gemeldet wird beim Speichern nur, was oben unter „Was sich von selbst meldet"
+steht: eine Position kommt dazu, oder eine vorhandene wird als UPDATE markiert.
+Eine geänderte Zone, ein neues Ziel, eine andere Reihenfolge — das alles geht
+still durch.
 
 Der allererste Aufruf übernimmt den Bestand aus `positionen-start.js`. Danach
 ist der Store die Wahrheit; Änderungen an dieser Datei haben keine Wirkung mehr.
