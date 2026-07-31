@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="light">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#fafafa">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=55">
-<link rel="apple-touch-icon" href="/icon-180.png?v=55">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=56">
+<link rel="apple-touch-icon" href="/icon-180.png?v=56">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=55">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=56">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=55">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=56">
 
 <script>
 /* Im Browser oder als App?
@@ -1762,13 +1762,6 @@
     from { opacity: 0; transform: translate3d(0, 10px, 0); }
     to { opacity: 1; transform: translate3d(0, 0, 0); }
   }
-  /* Der Rueckfall fuer Browser ohne scrollgebundene Animation. Weiter Weg
-     wie beim Original, aber ohne Skalierung: hier faehrt die ganze Karte,
-     und die ist Vorfahr des Charts. */
-  @keyframes cardIn {
-    from { opacity: 0; transform: translate3d(0, 42px, 0); }
-    to { opacity: 1; transform: translate3d(0, 0, 0); }
-  }
   @keyframes lineIn {
     from { transform: scaleX(0); opacity: 0; }
     to { transform: scaleX(1); opacity: 0.3; }
@@ -1964,11 +1957,12 @@
         animation-timeline: scroll(root block);
         animation-range: 0 var(--kopf-hoehe, 380px);
       }
-      /* Der Kopf bleibt nicht nur zurueck — er sinkt weg: weiter, kleiner,
-         blasser. Im Kopf steckt kein Chart, deshalb ist das hier frei. */
+      /* Der Kopf bleibt nicht nur zurueck — er sinkt weg: fast eine ganze
+         Kopfhoehe, deutlich kleiner, fast durchsichtig. Im Kopf steckt kein
+         Chart, deshalb ist das hier frei. */
       @keyframes kopfLauf {
         from { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
-        to   { transform: translate3d(0, 62%, 0) scale(0.9); opacity: 0.32; }
+        to   { transform: translate3d(0, 92%, 0) scale(0.78); opacity: 0.12; }
       }
     }
   }
@@ -2032,13 +2026,6 @@
     background: var(--soft);
   }
 
-  /* Auftauchen beim Scrollen. Die Klasse setzt erst das Skript, damit
-     ohne Javascript nichts unsichtbar bleibt. */
-  .karten.animiert > .card { opacity: 0; }
-  .karten.animiert > .card.sichtbar {
-    animation: cardIn 0.62s var(--ease) both;
-  }
-
   /* DIE KARTE FOLGT DEM FINGER — ABER NICHT DER CHART
 
      Zuerst wurde die ganze Karte verkleinert und geblendet. Das sah gut aus
@@ -2047,13 +2034,55 @@
      neu zeichnen. Gemessen ueber einen Scrollstoss: 76 ms Stilberechnung und
      358 ms Hauptfaden — ohne die Verwandlung 25 ms und 259 ms.
 
-     Deshalb bewegt sich jetzt alles AUSSER dem Chart, und zwar zeitversetzt:
-     erst der Kopf, dann die Zielleiste, dann News und Knopf. Der Chart steht
-     still und wird nicht angefasst. Das ist zugleich der deutlichere Effekt,
-     weil die Zeilen einzeln kommen statt die Karte als Block.
+     Deshalb bewegt sich alles AUSSER dem Chart, und zwar zeitversetzt: erst
+     der Kopf, dann die Zielleiste, dann News und Knopf. Der Chart steht still
+     und wird nicht angefasst.
 
-     Die Uhr dafuer haengt an der Karte (view-timeline-name); die Teile darin
-     lesen sie. So laufen alle Teile einer Karte auf derselben Strecke. */
+     Die Bewegung selbst ist gross: 110 Pixel Weg, aus 0,86 Groesse und um
+     18 Grad nach hinten gekippt. Die Perspektive steht im transform selbst
+     und nicht am Vorfahren — sonst zoege sie den Chart in einen 3D-Raum,
+     und genau das soll er nicht.
+
+     Die Deckkraft ist frueher da als die Bewegung: die Zeile steht schon
+     lesbar, waehrend sie ihren letzten Zentimeter noch faehrt. */
+  @keyframes teilLauf {
+    from {
+      opacity: 0;
+      transform: perspective(900px) translate3d(0, 110px, 0) rotateX(18deg) scale(0.86);
+    }
+    55% { opacity: 1; }
+    to {
+      opacity: 1;
+      transform: perspective(900px) translate3d(0, 0, 0) rotateX(0deg) scale(1);
+    }
+  }
+
+  /* Eine Haarlinie, die sich ueber den Kartenkopf zieht: erst ein breiter
+     dunkler Strich, am Ende die ruhige Kante, die stehen bleibt. */
+  @keyframes kanteLauf {
+    from { transform: scaleX(0) scaleY(5); opacity: 1; }
+    to   { transform: scaleX(1) scaleY(1); opacity: 0.12; }
+  }
+
+  .karten > .card > .card-head { position: relative; }
+  .karten > .card > .card-head::after {
+    content: "";
+    position: absolute;
+    left: 18px;
+    right: 18px;
+    bottom: 0;
+    height: 1px;
+    background: var(--fg);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    opacity: 0;
+  }
+
+  /* ---- Der eine Weg: die Bewegung haengt am Finger ----
+
+     Die Uhr haengt an der Karte (view-timeline-name); die Teile darin lesen
+     sie. So laufen alle Teile einer Karte auf derselben Strecke, und die
+     Bewegung folgt dem Scrollen statt einmal abzulaufen. */
   @supports (animation-timeline: view()) {
     @media (prefers-reduced-motion: no-preference) {
       .karten > .card {
@@ -2071,51 +2100,53 @@
 
       /* Zeitversetzt: jeder Teil hat seinen eigenen Abschnitt der Strecke.
 
-         Die Abschnitte liegen weit auseinander und ueberlappen nur zur
-         Haelfte — so kommt eine Zeile nach der anderen und nicht alles
-         beinahe zugleich. Der letzte Teil ist erst bei 62 % der Einfahrt
-         fertig: die Karte baut sich auf, waehrend man sie schon ansieht. */
-      .karten > .card > .card-head { animation-range: entry 0% entry 30%; }
-      .karten > .card > .ziel-bar  { animation-range: entry 10% entry 41%; }
-      .karten > .card > .news-block { animation-range: entry 21% entry 52%; }
-      .karten > .card > .actions   { animation-range: entry 31% entry 62%; }
+         Die Abschnitte ueberlappen nur zu einem Drittel — so kommt eine Zeile
+         nach der anderen und nicht alles beinahe zugleich. Der letzte Teil
+         ist erst bei 82 % der Einfahrt fertig: die Karte baut sich auf,
+         waehrend man sie schon ansieht. */
+      .karten > .card > .card-head { animation-range: entry 0% entry 34%; }
+      .karten > .card > .ziel-bar  { animation-range: entry 14% entry 50%; }
+      .karten > .card > .news-block { animation-range: entry 30% entry 66%; }
+      .karten > .card > .actions   { animation-range: entry 46% entry 82%; }
 
-      /* Weiter Weg, ein Hauch kleiner am Anfang, und die Deckkraft kommt
-         frueher als die Bewegung — dann steht die Zeile schon lesbar da,
-         waehrend sie ihren letzten Zentimeter noch faehrt.
-
-         Skaliert wird nur der Teil, nie die Karte: im Chart steckt ein
-         fremdes <iframe>, und wer dessen Vorfahren verwandelt, laesst es
-         bei jedem Bild neu zeichnen. Kopf, Zielleiste, News und Knopf sind
-         Geschwister des Charts, nicht seine Vorfahren. */
-      @keyframes teilLauf {
-        from { opacity: 0; transform: translate3d(0, 54px, 0) scale(0.955); }
-        62%  { opacity: 1; }
-        to   { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
-      }
-
-      /* Und eine Haarlinie, die sich ueber den Kartenkopf zieht.
-         Nur transform, kein Layout, kein Neuzeichnen des Charts. */
-      .karten > .card > .card-head { position: relative; }
       .karten > .card > .card-head::after {
-        content: "";
-        position: absolute;
-        left: 18px;
-        right: 18px;
-        bottom: 0;
-        height: 1px;
-        background: var(--fg);
-        transform: scaleX(0);
-        transform-origin: 0 50%;
         animation: kanteLauf linear both;
         animation-timeline: --karte;
-        animation-range: entry 2% entry 44%;
+        animation-range: entry 2% entry 52%;
       }
-      /* Sie faehrt aus dem Nichts auf die volle Breite und wird dabei von
-         einem deutlichen Strich zur Haarlinie, die stehen bleibt. */
-      @keyframes kanteLauf {
-        from { transform: scaleX(0) scaleY(2.5); opacity: 0.9; }
-        to   { transform: scaleX(1) scaleY(1); opacity: 0.12; }
+    }
+  }
+
+  /* ---- Der andere Weg: an der Uhr ----
+
+     Wo der Browser die Bewegung nicht selbst an die Scrollstellung haengen
+     kann — auf dem iPhone der Regelfall —, setzt ein Beobachter "sichtbar",
+     und dieselben Teile fahren nacheinander ab. Frueher fuhr hier die ganze
+     Karte einmal auf, leise und als Block; jetzt ist es derselbe Aufbau wie
+     drueben, nur an der Uhr statt am Finger. Und billiger obendrein: die
+     Karte selbst wird gar nicht mehr angefasst.
+
+     Die Regel gilt nur, wo es den anderen Weg nicht gibt — sonst gewaenne
+     sie mit ihren vier Klassen gegen ihn. */
+  @supports not (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .karten.animiert > .card > .card-head,
+      .karten.animiert > .card > .ziel-bar,
+      .karten.animiert > .card > .news-block,
+      .karten.animiert > .card > .actions { opacity: 0; }
+
+      .karten.animiert > .card.sichtbar > .card-head,
+      .karten.animiert > .card.sichtbar > .ziel-bar,
+      .karten.animiert > .card.sichtbar > .news-block,
+      .karten.animiert > .card.sichtbar > .actions {
+        animation: teilLauf 0.78s var(--weich, cubic-bezier(0.32, 0.72, 0, 1)) both;
+      }
+      .karten.animiert > .card.sichtbar > .ziel-bar   { animation-delay: 0.1s; }
+      .karten.animiert > .card.sichtbar > .news-block { animation-delay: 0.2s; }
+      .karten.animiert > .card.sichtbar > .actions    { animation-delay: 0.3s; }
+
+      .karten.animiert > .card.sichtbar > .card-head::after {
+        animation: kanteLauf 0.9s var(--weich, cubic-bezier(0.32, 0.72, 0, 1)) both;
       }
     }
   }
@@ -2130,8 +2161,13 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .karten.animiert > .card { opacity: 1; }
-    .karten.animiert > .card.sichtbar { animation: none; }
+    .karten.animiert > .card,
+    .karten.animiert > .card > .card-head,
+    .karten.animiert > .card > .ziel-bar,
+    .karten.animiert > .card > .news-block,
+    .karten.animiert > .card > .actions { opacity: 1; animation: none; }
+    /* Die Kante steht dann einfach da, statt sich aufzuziehen */
+    .karten > .card > .card-head::after { transform: scaleX(1); opacity: 0.12; }
     .card, .card.angesprungen { transition: none; }
     nav { transition: none; }
   }
@@ -2473,7 +2509,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=55" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=56" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -2591,7 +2627,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=55" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=56" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -2686,7 +2722,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=55" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=56" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -4340,7 +4376,9 @@ if ("serviceWorker" in navigator) {
       if (sortBtn) {
         sortBtn.addEventListener("click", function () {
           karten.forEach(function (k) { k.classList.add("sichtbar"); });
-          setTimeout(function () { stapel.classList.remove("animiert"); }, 700);
+          // Lang genug, dass der letzte Teil (0,3 s Vorlauf, 0,78 s Lauf)
+          // ausfaehrt, statt mitten in der Bewegung anzuspringen
+          setTimeout(function () { stapel.classList.remove("animiert"); }, 1300);
         }, { once: true });
       }
     }
@@ -4704,7 +4742,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=55";
+      i.src = "/icon-512.png?v=56";
     });
     return symbolBild;
   }

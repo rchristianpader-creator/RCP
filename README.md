@@ -253,28 +253,53 @@ CSS-Zeitachsen — beim Scrollen laeuft kein rechnendes Skript.
 ### Wie laut das Scrollen ist
 
 Die Bewegung war lange bewusst zurueckhaltend und wirkte dadurch beliebig.
-Jetzt ist sie deutlich:
+Jetzt ist sie unuebersehbar:
 
-- **Der Weg** eines Kartenteils betraegt 54 statt 26 Pixel, und der Teil kommt
-  aus `scale(0.955)` herein.
-- **Die Deckkraft kommt frueher als die Bewegung** (bei 62 % der Strecke) — die
+- **Der Weg** eines Kartenteils betraegt 110 statt 26 Pixel.
+- Er kommt aus **`scale(0.86)`** und **um 18 Grad nach hinten gekippt** herein.
+  Die Perspektive steht im `transform` selbst (`perspective(900px)`), nicht am
+  Vorfahren — sonst zoege sie den Chart in einen 3D-Raum, und genau das soll er
+  nicht.
+- **Die Deckkraft kommt frueher als die Bewegung** (bei 55 % der Strecke) — die
   Zeile steht schon lesbar da, waehrend sie ihren letzten Zentimeter noch faehrt.
-- **Die Abschnitte liegen weit auseinander** (0–30 %, 10–41 %, 21–52 %, 31–62 %
-  der Einfahrt) und ueberlappen nur zur Haelfte. Vorher deckten sie sich fast,
-  und die Karte kam als Block.
-- **Die Haarlinie** faehrt aus `scaleY(2.5)` bei 0,9 Deckkraft auf eine
-  1-Pixel-Linie bei 0,12 — ein Strich, der sich zur Kante beruhigt.
-- **Der Kopf sinkt weg** statt nur zurueckzubleiben: 62 % statt 38 %, dazu
-  `scale(0.9)` und Deckkraft 0,32.
+- **Die Abschnitte liegen weit auseinander** (0–34 %, 14–50 %, 30–66 %, 46–82 %
+  der Einfahrt) und ueberlappen nur zu einem Drittel. Gemessen bei einer Karte
+  600 Pixel vor dem Bild: Kopf steht, Zielleiste bei 54 Pixel, News bei 103, der
+  Knopf hat noch nicht angefangen. Das ist die Welle.
+- **Die Haarlinie** faehrt aus `scaleY(5)` bei voller Deckkraft auf eine
+  1-Pixel-Linie bei 0,12 — ein breiter Strich, der sich zur Kante beruhigt.
+- **Der Kopf sinkt weg** statt nur zurueckzubleiben: 92 % statt 38 %, dazu
+  `scale(0.78)` und Deckkraft 0,12.
 
 Skaliert wird dabei **nie die Karte** — Kopf, Zielleiste, News und Knopf sind
-Geschwister des Charts, nicht seine Vorfahren. Der Rueckfall fuer Browser ohne
-scrollgebundene Animation (`cardIn`) faehrt weiter (42 statt 16 Pixel), aber
-ohne Skalierung: dort bewegt sich die ganze Karte.
+Geschwister des Charts, nicht seine Vorfahren.
 
-`scroll-test` misst die Lautstaerke nach — Weg, Groesse, Abstand zwischen
-erstem und letztem Teil, und dass der Chart weiterhin unberuehrt bleibt.
-`fluss-test` prueft, dass das Scrollen fluessig bleibt.
+### Der leise Weg war der wichtigere
+
+Zwei Wege fuehren zu derselben Bewegung, und lange war nur einer laut.
+
+Wo der Browser `animation-timeline: view()` kann (Chrome), haengt die Bewegung
+am Finger. Wo nicht — **auf dem iPhone der Regelfall** — setzt ein
+`IntersectionObserver` die Klasse `sichtbar`, und die Bewegung laeuft an der
+Uhr ab. Dieser zweite Weg liess frueher die **ganze Karte** einmal um 16 Pixel
+aufsteigen, waehrend drueben vier Teile nacheinander kamen. Wer die Liste auf
+dem iPhone ansah, bekam von der ganzen Arbeit fast nichts mit — und lauter
+wurde durch jede Aenderung am ersten Weg auch nichts.
+
+Jetzt fahren beide Wege **dieselben vier Teile mit denselben Keyframes**
+(`teilLauf`), nur die Uhr ist eine andere: dort die Scrollstellung, hier
+0,78 s Lauf mit 0,1 s Versatz je Teil. Nebenbei ist der zweite Weg damit auch
+billiger geworden — die Karte selbst wird gar nicht mehr angefasst, und sie ist
+der Vorfahr des Charts.
+
+Die Weiche ist `@supports not (animation-timeline: view())`. Sie **muss** dort
+stehen: die Regeln des zweiten Wegs tragen vier Klassen und wuerden sonst gegen
+den ersten gewinnen, auch wo es ihn gibt.
+
+`scroll-test` misst den ersten Weg, `rueckfall-test` den zweiten — dafuer wirft
+er den scrollgebundenen Zweig aus dem Stylesheet und haengt den Rumpf der
+Weiche nackt ein, denn Chromium laesst sich nicht sagen, es koenne etwas nicht.
+`fluss-test` prueft, dass das Scrollen trotz allem fluessig bleibt.
 
 ## Nachricht an alle
 
