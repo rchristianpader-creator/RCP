@@ -205,6 +205,24 @@ Jede Nachricht bekommt einen eigenen Tag, überschreibt die vorige also nicht.
 Antippen öffnet die Liste. Geräte, die der Push-Dienst nicht mehr kennt,
 werden beim Senden aussortiert und in der Rückmeldung gezählt.
 
+## Die Vorschau beim Verschicken
+
+Wer die Adresse in WhatsApp oder iMessage schickt, schickt einen Roboter los,
+der die Seite holt und daraus die Karte baut. Der Roboter hat keine
+Anmeldung — das Tor leitet ihn auf `/anmelden.html` weiter.
+
+Deshalb stehen die Open-Graph-Angaben **dort**, nicht nur auf `index.html`.
+Vorher standen sie nur auf der Liste, die der Roboter nie zu sehen bekam; im
+Chat kam die nackte Adresse an, ohne Bild und ohne Titel. Das Bild selbst ist
+ohne Anmeldung erreichbar (`OFFEN_ANFANG` in `tor.js`).
+
+Bei jedem neuen Vorschaubild muss die Nummer im `?v=` hoch, sonst zeigen die
+Dienste ihre alte Kopie — sie merken sich das Bild je Adresse, oft wochenlang.
+
+`sw-test` geht den Weg des Roboters nach: Wurzel ohne Keks anfragen, der
+Weiterleitung folgen, Titel/Text/Bild aus dem Kopf lesen, das Bild ohne
+Anmeldung holen und prüfen, dass es ein PNG unter 600 KB ist.
+
 ## Der Rundgang
 
 Beim allerersten Start legt sich eine Führung über die Liste: ein Ausschnitt
