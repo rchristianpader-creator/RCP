@@ -5,16 +5,16 @@
    - everything else (TradingView, /.netlify/functions/*): straight to network, never cached
    Bump CACHE on every deploy so old shells are dropped. */
 
-const CACHE = "aktien-liste-v37";
+const CACHE = "aktien-liste-v38";
 
 /* Ohne Sitzung liefert das Tor statt der Seite eine Weiterleitung zur
    Anmeldung — deshalb wird das Dokument hier nicht vorgeladen, sondern
    erst abgelegt, wenn eine echte Antwort durchkommt. */
 const PRECACHE = [
   "/manifest.webmanifest",
-  "/icon-180.png?v=37",
-  "/icon-192.png?v=37",
-  "/icon-512.png?v=37"
+  "/icon-180.png?v=38",
+  "/icon-192.png?v=38",
+  "/icon-512.png?v=38"
 ];
 
 const STATIC = /\.(?:png|jpg|jpeg|svg|webp|ico|pdf|webmanifest)$/i;
@@ -101,6 +101,17 @@ self.addEventListener("push", (event) => {
       badge: "/icon-192.png",
       tag: data.tag || "aktien-liste",
       data: { url: data.url || "/" }
+    }).then(() => {
+      // Ist die App gerade offen, soll sie nicht erst beim naechsten Start
+      // merken, dass etwas hereingekommen ist. Der Zaehler am
+      // Verwaltungsknopf zieht damit sofort nach.
+      return self.clients.matchAll({ type: "window", includeUncontrolled: true })
+        .then((list) => {
+          for (const client of list) {
+            client.postMessage({ art: "push", tag: data.tag || "" });
+          }
+        })
+        .catch(() => {});
     })
   );
 });

@@ -387,6 +387,37 @@ wieder nach. Es gibt keinen Weg, das von der Seite aus zu ändern — die App mu
 vom Startbildschirm gelöscht und neu angelegt werden. Android macht es von
 selbst: Chrome liest das Manifest erneut und tauscht das Bild aus.
 
+## Auf dem Laufenden bleiben
+
+Der Zähler am Verwaltungsknopf stand früher **nur einmal**, beim Laden. Kam
+währenddessen eine Anfrage herein, meldete sie sich zwar per Push — die App
+zeigte sie aber erst nach einem Neustart. Jetzt wird nachgesehen:
+
+- wenn die App wieder in den Vordergrund kommt,
+- alle 60 Sekunden, solange sie sichtbar ist,
+- und **sofort**, wenn der Service Worker eine Meldung durchreicht: er schickt
+  nach `showNotification` ein `postMessage` an alle offenen Fenster.
+
+Der Knopf wird dabei jedes Mal frisch beschriftet. Vorher wurde das
+Zählerzeichen nur angehängt — bei jedem Durchgang eines mehr.
+
+## Ein Tipp muss reichen
+
+Freigeben brauchte zwei Tipps. Beim Antippen passierte sichtbar nichts, bis der
+Server geantwortet hatte und die ganze Liste neu stand; wer nicht wusste, ob es
+gezählt hat, tippte noch einmal. Drei Ursachen, drei Änderungen:
+
+1. **Keine Rückmeldung.** Jetzt wechselt der Knopf sofort auf „…", die Karte
+   wird blass, und alle Knöpfe darin sind gesperrt. Ein zweiter Tipp kann gar
+   nicht mehr durchgehen — der Test zählt mit, dass genau **eine** Entscheidung
+   rausgeht.
+2. **Die Liste flog bei jeder Aktion neu ein.** `riseIn` lief auf jeder Karte
+   bei jedem Aufbau. Wer während der halben Sekunde tippte, traf daneben. Jetzt
+   bewegt sich nur der erste Aufbau.
+3. **Die Besuchszeile wechselte die Höhe.** Sie wird alle 20 Sekunden neu
+   geschrieben; war sie mal ein-, mal zweizeilig, rückten die Knöpfe darunter
+   genau dann weg, wenn jemand tippt. Jetzt ist sie immer genau eine Zeile.
+
 ## Wer gerade da ist
 
 Ganz oben in der Verwaltung steht **Gerade auf der Seite**: wer die App in

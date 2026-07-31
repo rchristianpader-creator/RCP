@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="light">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#fafafa">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=37">
-<link rel="apple-touch-icon" href="/icon-180.png?v=37">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=38">
+<link rel="apple-touch-icon" href="/icon-180.png?v=38">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=37">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=38">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=37">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=38">
 
 <script>
 /* Im Browser oder als App?
@@ -1959,7 +1959,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=37" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=38" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -2077,7 +2077,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=37" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=38" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -2116,7 +2116,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=37" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=38" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -3995,45 +3995,88 @@ if ("serviceWorker" in navigator) {
       .then(function () { location.replace("/anmelden.html"); });
   }
 
-  fetch(API + "?tat=wer", { credentials: "same-origin", cache: "no-store" })
-    .then(function (r) { return r.json(); })
-    .then(function (a) {
-      if (!a || !a.angemeldet) {
-        // Sitzung abgelaufen, Seite kam aus dem Zwischenspeicher
-        location.replace("/anmelden.html");
-        return;
-      }
+  /* Der Zaehler am Verwaltungsknopf stand frueher nur einmal, beim Laden.
+     Kam waehrenddessen eine Anfrage herein, meldete sie sich zwar per Push,
+     aber die App zeigte sie erst nach einem Neustart. Deshalb wird jetzt
+     nachgesehen:
 
-      if (a.chef && vBtn) {
-        var offen = a.wartend > 0;
-        if (offen) {
-          vBtn.classList.add("offen");
-          var w = document.createElement("span");
-          w.className = "wartend";
-          w.textContent = a.wartend;
-          vBtn.appendChild(w);
+       - wenn die App wieder in den Vordergrund kommt,
+       - alle 60 Sekunden, solange sie sichtbar ist,
+       - und sofort, wenn der Service Worker eine Meldung durchreicht.
+
+     Der Knopf wird dabei jedes Mal frisch beschriftet — sonst haengte sich
+     bei jedem Durchgang ein weiteres Zaehlerzeichen daran. */
+
+  function knopfSetzen(a) {
+    if (!vBtn) return;
+    if (!a.chef) { vBtn.hidden = true; return; }
+    var alt = vBtn.querySelector(".wartend");
+    if (alt) alt.parentNode.removeChild(alt);
+
+    var offen = a.wartend > 0;
+    vBtn.classList.toggle("offen", offen);
+    if (offen) {
+      var w = document.createElement("span");
+      w.className = "wartend";
+      w.textContent = a.wartend;
+      vBtn.appendChild(w);
+    }
+    vBtn.setAttribute(
+      "aria-label",
+      offen
+        ? "Verwaltung, " + a.wartend + (a.wartend === 1 ? " offene Anfrage" : " offene Anfragen")
+        : "Verwaltung"
+    );
+    vBtn.hidden = false;
+  }
+
+  var lief = false;
+  function nachsehen(erstesMal) {
+    if (lief) return;
+    lief = true;
+    fetch(API + "?tat=wer", { credentials: "same-origin", cache: "no-store" })
+      .then(function (r) { return r.json(); })
+      .then(function (a) {
+        lief = false;
+        if (!a || !a.angemeldet) {
+          // Sitzung abgelaufen, Seite kam aus dem Zwischenspeicher
+          if (erstesMal) location.replace("/anmelden.html");
+          return;
         }
-        vBtn.setAttribute(
-          "aria-label",
-          offen
-            ? "Verwaltung, " + a.wartend + (a.wartend === 1 ? " offene Anfrage" : " offene Anfragen")
-            : "Verwaltung"
-        );
-        vBtn.hidden = false;
-      }
 
-      // Der Auftakt zeigt den Namen, sobald er bekannt ist
-      document.dispatchEvent(new CustomEvent("rcp:konto", { detail: a.name || a.mail }));
+        knopfSetzen(a);
+        if (!erstesMal) return;
 
-      zeile.textContent = "";
-      zeile.appendChild(document.createTextNode("Angemeldet als " + (a.name || a.mail)));
-      zeile.appendChild(trenner());
-      zeile.appendChild(link("Abmelden", abmelden));
-      zeile.hidden = false;
-    })
-    .catch(function () {
-      // Offline: nichts anzeigen, nichts umleiten
+        // Der Auftakt zeigt den Namen, sobald er bekannt ist
+        document.dispatchEvent(new CustomEvent("rcp:konto", { detail: a.name || a.mail }));
+
+        zeile.textContent = "";
+        zeile.appendChild(document.createTextNode("Angemeldet als " + (a.name || a.mail)));
+        zeile.appendChild(trenner());
+        zeile.appendChild(link("Abmelden", abmelden));
+        zeile.hidden = false;
+      })
+      .catch(function () {
+        lief = false;
+        // Offline: nichts anzeigen, nichts umleiten
+      });
+  }
+
+  nachsehen(true);
+
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible") nachsehen(false);
+  });
+  setInterval(function () {
+    if (document.visibilityState === "visible") nachsehen(false);
+  }, 60000);
+
+  // Der Service Worker sagt Bescheid, sobald eine Meldung hereinkommt
+  if (navigator.serviceWorker) {
+    navigator.serviceWorker.addEventListener("message", function (e) {
+      if (e.data && e.data.art === "push") nachsehen(false);
     });
+  }
 })();
 </script>
 

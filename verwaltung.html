@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#fafafa">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=37">
-<link rel="apple-touch-icon" href="/icon-180.png?v=37">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=38">
+<link rel="apple-touch-icon" href="/icon-180.png?v=38">
 <title>Verwaltung · Aktien-Liste</title>
 <style>
   :root {
@@ -259,6 +259,20 @@
     animation: riseIn 0.4s var(--ease) both;
   }
   .konto .zeile .punkt { margin-right: 6px; }
+  /* Die Besuchszeile wird alle 20 Sekunden neu geschrieben. Waere sie mal
+     ein-, mal zweizeilig, ruckten die Knoepfe darunter genau dann weg, wenn
+     jemand tippt. Deshalb immer genau eine Zeile. */
+  .konto .zeile.besuch {
+    min-height: 18px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* Waehrend eine Aktion laeuft */
+  .konto.laeuft { opacity: 0.55; }
+  /* Nur beim ersten Aufbau einfliegen. Danach wuerde jede Aktion die ganze
+     Liste noch einmal bewegen — und wer waehrenddessen tippt, trifft daneben. */
+  body.geladen .konto { animation: none; }
   .konto .kopf {
     display: flex;
     align-items: baseline;
@@ -416,17 +430,44 @@
     }).then(function (r) { return r.json().catch(function () { return {}; }); });
   }
 
+  /* Ein Tipp muss reichen — und man muss sehen, dass er angekommen ist.
+
+     Vorher passierte beim Antippen sichtbar nichts, bis der Server geantwortet
+     hatte und die ganze Liste neu stand. Wer nicht wusste, ob es gezaehlt hat,
+     tippte noch einmal. Jetzt wechselt der Knopf sofort auf "…", die Karte
+     wird blass, und alle Knoepfe darin sind gesperrt. */
   function knopf(text, klasse, fn) {
     var b = document.createElement("button");
     b.textContent = text;
     if (klasse) b.className = klasse;
     b.addEventListener("click", function () {
-      b.disabled = true;
+      var karte = b.closest(".konto");
+      if (karte && karte.classList.contains("laeuft")) return;
+
+      var vorher = b.textContent;
+      b.textContent = "…";
+      if (karte) {
+        karte.classList.add("laeuft");
+        karte.querySelectorAll("button").forEach(function (x) { x.disabled = true; });
+      } else {
+        b.disabled = true;
+      }
+
+      function zurueck() {
+        b.textContent = vorher;
+        if (karte) {
+          karte.classList.remove("laeuft");
+          karte.querySelectorAll("button").forEach(function (x) { x.disabled = false; });
+        } else {
+          b.disabled = false;
+        }
+      }
+
       fn().then(function (a) {
         if (a && a.ok) { sagen("", true); laden(); }
-        else { b.disabled = false; sagen((a && a.fehler) || "Das hat nicht geklappt.", false); }
+        else { zurueck(); sagen((a && a.fehler) || "Das hat nicht geklappt.", false); }
       }).catch(function () {
-        b.disabled = false;
+        zurueck();
         sagen("Keine Verbindung.", false);
       });
     });
@@ -464,7 +505,7 @@
 
     // Anmelden ist das eine, offen haben das andere — deshalb eine eigene Zeile
     var z3 = document.createElement("div");
-    z3.className = "zeile";
+    z3.className = "zeile besuch";
     zeilen[k.mail] = z3;
     besuchZeile(k.mail);
     d.appendChild(z3);
@@ -537,6 +578,11 @@
 
           inhalt.appendChild(g);
         });
+
+        // Ab jetzt fliegt nichts mehr ein: jede weitere Aktion soll die
+        // Liste austauschen, ohne dass sie sich noch einmal bewegt.
+        // Die Besuchszeilen fuellt karte() schon aus dem letzten Stand
+        document.body.classList.add("geladen");
       })
       .catch(function () { sagen("Keine Verbindung.", false); });
   }
