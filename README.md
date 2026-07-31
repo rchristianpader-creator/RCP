@@ -308,6 +308,60 @@ das Feld nicht; Android und Chrome zeigen es groß im Banner (`image` in
 dort ist es ohnehin am nützlichsten, weil man es dort auch wiederfindet. Der
 Hinweis steht in der Verwaltung neben dem Knopf, damit die Erwartung stimmt.
 
+## Flüssigkeit
+
+Gemessen wird bei **sechsfach gedrosseltem Prozessor** — ein Telefon, das ein
+paar Jahre auf dem Buckel hat. Ziel ist ein Bild alle 16,7 ms; über 32 ms sieht
+man einen Ruckler.
+
+| Wo | Mittlerer Bildabstand | Bilder über 32 ms |
+|---|---|---|
+| Anmeldeseite, Kerzen laufen | 17 ms | 0 |
+| Ruhezustand | 17 ms | 0 |
+| Scrollen durch die ganze Liste | 16 ms | 0 |
+| Glocke aufmachen | 18 ms | 2 (schlechtestes 50 ms) |
+| Ein Schritt im Rundgang | 18 ms | 3 (schlechtestes 67 ms) |
+
+Der Start: **592 ms** bis DOMContentLoaded, erster Inhalt nach **200 ms**,
+Karten stehen nach **1,6 s** — alles gedrosselt, also grob ein Sechstel davon
+auf einem heutigen Telefon.
+
+### Was gemessen wurde und was daraus folgte
+
+Vier Verdächtige wurden einzeln abgeschaltet und nachgemessen:
+
+- **`backdrop-filter` in der Kopfleiste** — kostet beim Scrollen **nichts**
+  Messbares. Bleibt.
+- **`content-visibility` auf den Karten** — schaltet man es ab, wird Scrollen
+  *schlechter* (3 statt 0 Ruckler). Es trägt also, wie gedacht.
+- **Der wandernde Ausschnitt im Rundgang** (`left/top/width/height` auf einem
+  Element mit `box-shadow: 0 0 0 9999px`) — 3 lange Bilder je Schritt. Die
+  naheliegende Umstellung auf `transform` würde genau die Eigenschaft
+  zerstören, die den Schleier billig macht: bei `scale(0)` verschwände der
+  Schatten mit. Der Preis wäre ein Aufblitzen der Seite bei jedem Schritt —
+  dafür sind 2 Bilder je Schritt zu wenig Gewinn. Bleibt, wie es ist.
+- **Der Kerzen-Hintergrund** — kostet nichts. Bleibt.
+
+Geändert wurde nur, was sich auch messen ließ:
+
+1. **`prefers-reduced-motion` beendet die Animationen jetzt wirklich.** Vorher
+   stand dort nur `animation-duration: 0.01ms` — die endlosen Animationen
+   liefen damit unsichtbar schnell *weiter*, statt aufzuhören. Mit
+   `animation-iteration-count: 1` gehen sie einmal durch und sind fertig. Der
+   Test zählt nach: bei „weniger Bewegung" läuft **keine** endlose Animation
+   mehr.
+2. **Bilder reservieren ihren Platz** (`aspect-ratio: 16/9` an den Bildern in
+   der Glocke und im Beitrag). Vorher hatten sie vor dem Laden die Höhe null
+   und schoben die Liste weg, sobald sie ankamen.
+
+Was gemessen wurde und nichts brachte, ist auch wieder draußen —
+`content-visibility` auf dem Laufband hat die Animation nicht angehalten, also
+steht es nicht drin.
+
+`fluss-test` hält das fest. Die Schwellen liegen **über** den gemessenen
+Werten, nicht darauf: die Maschine, auf der das läuft, ist nicht immer gleich
+schnell. Was dort reißt, ist eine echte Verschlechterung, kein Rauschen.
+
 ## Im Browser statt in der App
 
 Auf dem Telefon soll die Liste als App laufen — nur dort kommen die Meldungen
@@ -326,6 +380,29 @@ Der erste Versuch war eine Liste mit verschlossenen Feldern statt der Charts.
 Das war zu viel: halbe Sachen sind schlechter als gar keine, eine Liste voller
 Schlösser liest sich wie eine kaputte Seite. Entweder richtig oder eben nicht
 hier.
+
+### Die Verwaltung ist ausgenommen
+
+Wer die Liste pflegt, braucht sie auch am Schreibtisch und unterwegs im
+Browser. Für die Verwaltung ist die Sperre deshalb aus — alles ist da: Leiste,
+Karten, Charts, News, Termine, Marktstimmung, Glocke, Beiträge. Für alle
+anderen bleibt es, wie es war.
+
+Die Seite kann das nicht selbst wissen: der Sitzungs-Keks ist `HttpOnly`, kein
+Skript kommt daran. Im **Tor** ist die Unterschrift aber ohnehin schon geprüft
+— also legt es der Verwaltung ein lesbares Zeichen daneben (`rcp_frei=1`), und
+das Kopfskript in `index.html` sieht vor dem ersten Bild nach. Nur an Seiten,
+nicht an jedes Symbol: sonst hinge an jeder Anfrage ein `Set-Cookie`.
+
+Das Zeichen folgt der Rolle, nicht dem Gerät: bei jedem Seitenaufruf wird es
+neu gesetzt oder gelöscht. Wer die Verwaltung abgibt, hat es beim nächsten
+Aufruf nicht mehr.
+
+**Es ist ein Komfortschalter, kein Schloss.** Es steuert nur, welche Teile der
+Oberfläche gezeigt werden. Alles Echte hängt weiter am Tor und an
+`chefLesen()` in den Functions — wer sich das Zeichen von Hand setzt, sieht
+dieselbe Liste, die er in der App ohnehin sähe, und kommt an nichts heran, an
+das er nicht ohnehin herankäme.
 
 Dahinter laufen die Kerzen wie auf der Anmeldeseite, der Kasten ist milchig,
 Symbol, Text und Knopf kommen um 100/180/280 ms versetzt nach. Die Kerzen

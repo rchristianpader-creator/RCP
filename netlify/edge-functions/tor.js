@@ -41,10 +41,43 @@ export default async (request, context) => {
 
   const token = keksLesen(request) || request.headers.get("x-rcp-sitzung") || "";
   const daten = await pruefen(token, geheim);
-  if (daten) return context.next();
+  if (daten) return await durchlassen(context, url, daten);
 
   return abweisen(request, url);
 };
+
+/* Im Browser bleibt die Liste zu — das soll dazu bringen, die App zu
+   nehmen. Fuer die Verwaltung gilt das nicht: wer die Liste pflegt,
+   braucht sie auch am Schreibtisch und unterwegs im Browser.
+
+   Die Seite selbst kann das nicht wissen: der Sitzungs-Keks ist HttpOnly,
+   kein Skript kommt daran. Hier ist die Unterschrift aber schon geprueft —
+   also legt das Tor ein lesbares Zeichen daneben, und das Kopfskript in
+   index.html sieht vor dem ersten Bild nach.
+
+   Nur an Seiten, nicht an jedes Symbol: sonst haengte an jeder Anfrage ein
+   Set-Cookie. */
+async function durchlassen(context, url, daten) {
+  const seite = url.pathname === "/" || url.pathname.endsWith(".html");
+  if (!seite) return context.next();
+
+  const antwort = await context.next();
+  /* Das Zeichen ist Beiwerk. Kommt von dort etwas zurueck, an das sich keine
+     Kopfzeile haengen laesst, geht die Antwort trotzdem durch — eine Sperre,
+     die an einer Nebensache scheitert, waere schlimmer als keine. */
+  if (!antwort || !antwort.headers || typeof antwort.headers.append !== "function") {
+    return antwort;
+  }
+
+  const chef = daten && daten.r === "chef";
+  antwort.headers.append(
+    "set-cookie",
+    chef
+      ? "rcp_frei=1; Path=/; Secure; SameSite=Lax; Max-Age=" + 90 * 24 * 60 * 60
+      : "rcp_frei=; Path=/; Secure; SameSite=Lax; Max-Age=0"
+  );
+  return antwort;
+}
 
 function abweisen(request, url) {
   const akzeptiert = request.headers.get("accept") || "";
