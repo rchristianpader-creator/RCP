@@ -443,6 +443,43 @@ alles kurz auf und verschwindet dann wieder.
 `web-test` prüft alle drei Fälle: im Browser zu, als App offen, am Schreibtisch
 offen.
 
+### Eine Spalte am Schreibtisch
+
+Am Telefon füllt jeder Block die Breite. Ab **720 Pixeln** steht alles in einer
+Spalte von höchstens 780 Pixeln in der Mitte — Kopf, Reiter, Marktstimmung und
+Karten auf derselben Linie.
+
+Genau das war kaputt. Die Regel galt nur für `.card`, und seit die Karten in
+einem Flex-Stapel liegen (`.karten`, sortiert über `order`, damit kein Chart
+neu lädt), gewann `.karten > .card { margin: 0 14px 56px }` gegen das
+Mittigsetzen: zwei Klassen schlagen eine, Media Queries ändern daran nichts.
+Ergebnis: Kopf und Marktstimmung in der Mitte, die Karten am linken Rand
+klebend, rechts eine leere Hälfte.
+
+Die Spalte steht jetzt an **einer** Stelle, am Ende des Stylesheets — was dort
+steht, kommt nach allen Grundregeln und gewinnt ohne Spezifitäts-Tricks.
+
+Der zweite Fallstrick steckt im Flexbox-Modell: **ein Flex-Kind mit
+selbsttätigem Außenabstand quer zur Richtung hört auf, sich zu dehnen.**
+`margin-left/right: auto` machte die Karte nicht mittig, sondern 374 Pixel
+breit — so breit wie ihr Text. Im Stapel wird deshalb mit `align-self: center`
+und fester Breite gearbeitet, außerhalb mit dem gewohnten `margin: auto`.
+
+Die Bänder bleiben über die ganze Breite: das Laufband muss laufen können, der
+Setup-Streifen steht ohnehin mittig. Beim Terminkasten wächst nur sein
+Innenabstand mit (`padding-left: max(14px, (100% - 780px) / 2)`), bis sein
+linksbündiger Text genau dort beginnt wie die Karte. Ihn stattdessen innen
+mittig zu setzen wäre falsch: er richtete sich dann an seiner eigenen
+Innenkante aus, und zwischen 720 und 808 Pixeln liefe er um 16 Pixel neben der
+Spalte.
+
+`breite-test` misst bei 390, 719, 720, 800, 1512 und 2560 Pixeln nach: Breite,
+Abstand links, Abstand rechts, ob nichts über den Rand steht — und ob die Karte
+noch 780 Pixel breit ist statt auf ihre Inhaltsbreite zurückzufallen.
+
+Verwaltung und Positionen standen schon vorher richtig, die Blätter auch: 520
+Pixel, unten in der Mitte.
+
 ## Die Vorschau beim Verschicken
 
 Wer die Adresse in WhatsApp oder iMessage schickt, schickt einen Roboter los,
