@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#fafafa">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=43">
-<link rel="apple-touch-icon" href="/icon-180.png?v=43">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=44">
+<link rel="apple-touch-icon" href="/icon-180.png?v=44">
 <title>Verwaltung · Aktien-Liste</title>
 <style>
   :root {
@@ -205,6 +205,69 @@
     -webkit-tap-highlight-color: transparent;
   }
   .beitrag .wahl input { width: 17px; height: 17px; margin: 0; accent-color: #111; }
+  .beitrag .linkreihe { display: flex; gap: 8px; align-items: stretch; }
+  .beitrag .linkreihe input { flex: 1; margin-bottom: 10px; }
+  .beitrag .linkreihe button {
+    flex: none;
+    margin-bottom: 10px;
+    color: var(--fg);
+    background: none;
+    border: 1px solid var(--line);
+    padding: 10px 14px;
+  }
+  .beitrag .linkreihe button:hover { border-color: var(--fg); }
+
+  /* Die Vorschau — dasselbe, was auch ein Bote daraus machen wuerde */
+  .beitrag .karte {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    animation: riseIn 0.3s var(--ease) both;
+  }
+  .beitrag .karte img {
+    flex: none;
+    width: 84px;
+    height: 84px;
+    object-fit: cover;
+    background: var(--soft);
+    border-right: 1px solid var(--line);
+  }
+  .beitrag .karte .dazu {
+    flex: 1;
+    min-width: 0;
+    padding: 11px 34px 11px 12px;
+  }
+  .beitrag .karte .dazu b {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+  .beitrag .karte .dazu span {
+    display: block;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .beitrag .karte > button {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 24px;
+    height: 24px;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0;
+    color: var(--muted);
+    background: var(--card);
+    border: 1px solid var(--line);
+  }
+
   .beitrag .stand {
     border-top: 1px solid var(--line);
     margin-top: 16px;
@@ -456,9 +519,22 @@
   <section class="senden beitrag" id="beitragKasten" hidden>
     <div class="titel">Beitrag veröffentlichen</div>
     <p class="hinweis">Erscheint in der Liste zum Nachlesen, läuft oben im Band
-      und steht in der Glocke. Leerzeilen trennen Absätze.</p>
+      und steht in der Glocke. Entweder einen fremden Artikel verlinken oder
+      selbst schreiben — Leerzeilen trennen Absätze.</p>
+    <div class="linkreihe">
+      <input type="url" id="bLink" placeholder="Link zu einem Artikel" autocomplete="off" inputmode="url">
+      <button type="button" id="bHolen">Nachsehen</button>
+    </div>
+    <div class="karte" id="bVorschau" hidden>
+      <img id="bVorschauBild" alt="" hidden>
+      <div class="dazu">
+        <b id="bVorschauTitel"></b>
+        <span id="bVorschauQuelle"></span>
+      </div>
+      <button type="button" id="bVorschauWeg" aria-label="Vorschau verwerfen">&times;</button>
+    </div>
     <input type="text" id="bTitel" maxlength="120" placeholder="Überschrift" autocomplete="off">
-    <textarea id="bText" class="lang" maxlength="20000" placeholder="Text"></textarea>
+    <textarea id="bText" class="lang" maxlength="20000" placeholder="Text — bei einem Link darf er leer bleiben"></textarea>
     <label class="wahl"><input type="checkbox" id="bPush" checked> Alle benachrichtigen</label>
     <div class="reihe">
       <span class="zahl" id="bZahl"></span>
@@ -904,6 +980,14 @@
     var titel = document.getElementById("bTitel");
     var text = document.getElementById("bText");
     var push = document.getElementById("bPush");
+    var linkEl = document.getElementById("bLink");
+    var holenBtn = document.getElementById("bHolen");
+    var karte = document.getElementById("bVorschau");
+    var vBild = document.getElementById("bVorschauBild");
+    var vTitel = document.getElementById("bVorschauTitel");
+    var vQuelle = document.getElementById("bVorschauQuelle");
+    var vWeg = document.getElementById("bVorschauWeg");
+    var vorschau = null;
     var zahl = document.getElementById("bZahl");
     var knopf = document.getElementById("bSenden");
     var ergebnis = document.getElementById("bErgebnis");
@@ -940,7 +1024,7 @@
         var b = document.createElement("b");
         b.textContent = a.titel;
         var s = document.createElement("span");
-        s.textContent = wann(a.zeit);
+        s.textContent = wann(a.zeit) + (a.quelle ? " · " + a.quelle : "");
         was.appendChild(b);
         was.appendChild(s);
         var weg = document.createElement("button");
@@ -984,25 +1068,73 @@
         .catch(function () {});
     }
 
+    /* Nachsehen, was hinter dem Link steht. Die Ueberschrift wandert ins
+       Feld darunter — dort laesst sie sich noch aendern, falls das Portal
+       einen Werbetitel gesetzt hat. */
+    function karteZeigen(v) {
+      vorschau = v;
+      if (!v) { karte.hidden = true; return; }
+      vTitel.textContent = v.titel;
+      vQuelle.textContent = v.quelle || "";
+      if (v.bild) { vBild.src = v.bild; vBild.hidden = false; }
+      else { vBild.removeAttribute("src"); vBild.hidden = true; }
+      karte.hidden = false;
+    }
+
+    holenBtn.addEventListener("click", function () {
+      zeigen("", true);
+      var u = linkEl.value.trim();
+      if (!u) { zeigen("Erst einen Link einsetzen.", false); linkEl.focus(); return; }
+      if (!/^https?:\/\//i.test(u)) { u = "https://" + u; linkEl.value = u; }
+
+      holenBtn.disabled = true;
+      var vorher = holenBtn.textContent;
+      holenBtn.textContent = "…";
+      schicken({ tat: "vorschau", url: u }, function (a) {
+        holenBtn.disabled = false;
+        holenBtn.textContent = vorher;
+        if (!a || !a.ok || !a.vorschau) {
+          zeigen((a && a.fehler) || "Von dieser Adresse kommt nichts zurück.", false);
+          return;
+        }
+        karteZeigen(a.vorschau);
+        linkEl.value = a.vorschau.link;
+        if (!titel.value.trim()) titel.value = a.vorschau.titel;
+      });
+    });
+
+    vWeg.addEventListener("click", function () { karteZeigen(null); });
+    linkEl.addEventListener("input", function () { if (!linkEl.value.trim()) karteZeigen(null); });
+
     knopf.addEventListener("click", function () {
       zeigen("", true);
       var t = titel.value.trim();
       var b = text.value.trim();
+      var u = linkEl.value.trim();
       if (!t) { zeigen("Die Überschrift fehlt.", false); titel.focus(); return; }
-      if (!b) { zeigen("Der Text fehlt.", false); text.focus(); return; }
+      if (!b && !u) { zeigen("Entweder ein Text oder ein Link.", false); text.focus(); return; }
       if (!confirm("„" + t + "“ veröffentlichen?" + (push.checked ? " Alle Geräte werden benachrichtigt." : ""))) return;
 
       knopf.disabled = true;
       var vorher = knopf.textContent;
       knopf.textContent = "Stellt ein …";
 
-      schicken({ titel: t, text: b, push: push.checked }, function (a) {
+      schicken({
+        titel: t,
+        text: b,
+        link: u,
+        bild: (vorschau && vorschau.bild) || "",
+        quelle: (vorschau && vorschau.quelle) || "",
+        push: push.checked
+      }, function (a) {
         knopf.disabled = false;
         knopf.textContent = vorher;
         if (!a || !a.ok) { zeigen((a && a.fehler) || "Das hat nicht geklappt.", false); return; }
         zeigen("Steht." + (a.gesendet ? " An " + a.gesendet + (a.gesendet === 1 ? " Gerät" : " Geräte") + " gemeldet." : ""), true);
         titel.value = "";
         text.value = "";
+        linkEl.value = "";
+        karteZeigen(null);
         stellen(a.artikel);
       });
     });

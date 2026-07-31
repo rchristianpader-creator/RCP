@@ -35,6 +35,9 @@ netlify/functions/positionen.js       Die Watchlist als Daten (lesen, ändern)
 netlify/functions/positionen-start.js Der Bestand für den allerersten Aufruf
 netlify/functions/konto.js            Registrierung, Anmeldung, Freigabe
 netlify/functions/nachricht.js        Nachricht an alle Geräte (nur Verwaltung)
+netlify/functions/artikel.js          Eigene Beitraege: schreiben, lesen, verlinken
+netlify/functions/meldungen.js        Das Buch hinter der Glocke
+netlify/functions/besuch.js           Wer gerade auf der Seite ist
 netlify/functions/sitzung.js          Unterschrift und Passwort-Hash (kein Endpunkt)
 
 netlify/edge-functions/tor.js         Die Sperre: prüft jede Anfrage vor allem anderen
@@ -464,9 +467,18 @@ Bis hierher kam alles, was in der Liste „News" hieß, von außen: die
 Schlagzeilen in den Karten von Yahoo, das Laufband ganz oben stand als Text
 in `index.html`. Etwas Eigenes zu veröffentlichen ging nur über den Code.
 
-Jetzt gibt es in der Verwaltung **Beitrag veröffentlichen**: Überschrift, Text,
-ein Haken für „Alle benachrichtigen". Was dabei entsteht, geht drei Wege in die
-App:
+Jetzt gibt es in der Verwaltung **Beitrag veröffentlichen**. Zwei Arten:
+
+- **Nur einen Link.** Adresse einsetzen, **Nachsehen** drücken — die Function
+  holt sich Überschrift, Vorschaubild und Quelle von der Seite selbst (Open
+  Graph, dieselben Angaben, aus denen auch WhatsApp seine Karte baut) und zeigt
+  die Karte zur Kontrolle. Die Überschrift wandert ins Feld darunter und lässt
+  sich dort noch ändern, falls das Portal einen Werbetitel gesetzt hat. Ein Text
+  ist dann nicht nötig.
+- **Selbst geschrieben.** Überschrift und Text, Leerzeilen trennen Absätze.
+
+Dazu ein Haken für „Alle benachrichtigen". Was dabei entsteht, geht drei Wege in
+die App:
 
 1. Das **Band ganz oben** zeigt den neuesten Beitrag und führt zu ihm. Steht
    noch keiner, bleibt der fest eingebaute Text stehen.
@@ -476,11 +488,16 @@ App:
    Glocke. Ein Tipp darauf öffnet den Beitrag im Blatt, ohne die Seite neu zu
    laden — die App ist ja schon offen.
 
-Gelesen wird in einem Blatt: Überschrift, Datum, Verfasser, Text. Leerzeilen
-trennen Absätze, mehr Auszeichnung gibt es nicht. Gesetzt wird über
-`textContent`, nie über `innerHTML` — was in der Verwaltung getippt wird, ist
-Text und kein Markup. Unten steht **Als Bild teilen**, dasselbe Bild wie bei
-den Nachrichten, wieder ohne Adresse.
+In der Liste sieht ein verlinkter Beitrag aus wie die Karte eines Boten: Bild
+links, Überschrift daneben, Quelle darunter in 10px-Versalien — kein buntes
+Zeichen davor, die Liste ist schwarzweiß. Ein selbst geschriebener steht ohne
+Bild da, dafür mit Anriss.
+
+Gelesen wird in einem Blatt: Überschrift, Datum, Quelle oder Verfasser, das
+Vorschaubild, der Text. Gesetzt wird über `textContent`, nie über `innerHTML` —
+was in der Verwaltung getippt wird, ist Text und kein Markup. Unten führt
+**Artikel öffnen** zur Quelle (nur beim verlinkten), und **Teilen** schickt den
+Link weiter; wo keiner hinführt, das gemalte Bild.
 
 ### Was wo liegt
 
@@ -496,50 +513,83 @@ Lesen darf jeder Angemeldete, schreiben nur die Verwaltung (`chefLesen`). Der
 Test schickt einen Gast gegen die Function: er bekommt **403**, und danach ist
 auch wirklich nichts entstanden.
 
+### Beim Nachsehen wird nicht alles abgerufen
+
+Eine Function, die jede Adresse abruft, die man ihr hinhält, wäre ein Werkzeug
+für andere Zwecke — auch wenn nur die Verwaltung sie anstoßen kann. Deshalb:
+nur `http` und `https`, und nichts, was ins eigene Netz zeigt (`localhost`,
+`127.*`, `10.*`, `192.168.*`, `172.16–31.*`, `169.254.*` — der
+Metadaten-Dienst —, `fc/fd/fe80`, `.local`, `.internal`).
+
+Gelesen werden höchstens 300 KB: der Kopf steht vorn, und ein Portal mit
+Endlos-Strom hält die Function damit nicht auf. Neun Sekunden Frist, eine
+Kennung im `User-Agent` — ohne die liefern manche Portale nur eine Sperrseite.
+
+Überschriften kommen als HTML herein, mit `&uuml;` und `&ndash;`. Die
+gebräuchlichen Namen stehen in einer Tabelle, alles andere kommt als Zahl und
+wird darüber aufgelöst.
+
+`vorschau-test` prüft das ohne Netz — die Seite wird im Test gestellt: og:title
+gewinnt vor `<title>`, Attribute in beliebiger Reihenfolge, relative Bilder
+werden gegen die Seite aufgelöst, und für **keine** der zwölf verbotenen
+Adressen geht auch nur ein Ruf hinaus.
+
 **Zurücknehmen** löscht den Beitrag. Der Eintrag in der Glocke bleibt stehen —
 ein Tipp darauf sagt dann „Dieser Beitrag wurde zurückgenommen".
 
 ## Eine Meldung weitergeben
 
-Oben rechts in jedem News-Kasten steht **Teilen**. Was dabei herauskommt, ist
-ein Bild — kein Link.
+Oben rechts in jedem News-Kasten steht **Teilen**. Was dabei rausgeht, hängt
+davon ab, ob es etwas zu öffnen gibt.
 
-Der Grund: ein gewöhnliches `navigator.share` mit `url` hängt in WhatsApp die
-Adresse an die Nachricht. Genau das soll nicht passieren. Geteilt wird deshalb
-eine Datei, und der Aufruf trägt **kein** `url`-Feld:
+### Wo ein Link hinführt, geht der Link raus
+
+Eine Meldung aus einem News-Kasten hat eine Adresse. Die geht als `url` mit:
 
 ```js
-navigator.share({ files: [datei], title: titel, text: titel })
+navigator.share({ title: titel, text: titel, url: link })
 ```
 
-Das Bild wird an Ort und Stelle gezeichnet, 1080 × 1080, im Zuschnitt der App:
-`#fafafa` als Grund, oben links das Symbol mit denselben runden Ecken wie auf
-dem Telefon, daneben „AKTIEN-LISTE" und der Name der Position. Die Überschrift
-steht groß in der Mitte und bekommt bis zu acht Zeilen; was nicht mehr passt,
-endet mit drei Punkten statt mitten im Wort. Unten ein Haarstrich, der Name und
-das Kürzel. Nirgends eine Adresse.
+Der Bote holt sich davon selbst Überschrift, Vorschaubild und Quelle
+(Open Graph) und baut daraus **seine eigene Karte** — genau das Bild, das
+WhatsApp zeigt, wenn man eine Adresse einsetzt. Das sieht besser aus als alles
+Gemalte, und der Empfänger kann den Artikel öffnen.
+
+Zuvor war es andersherum gebaut: ein gezeichnetes Bild ohne `url`, damit keine
+Adresse zu sehen ist. Das hielt zwar den Link aus der Nachricht, nahm dem
+Empfänger aber auch den Artikel. Die Karte des Boten kann beides.
+
+Ob die Adresse dabei zusätzlich als Text mitläuft, entscheidet der Bote — nicht
+diese App.
+
+Am Schreibtisch, wo es kein Teilen gibt, wandert die Adresse in die
+Zwischenablage; der Knopf sagt kurz **Kopiert**.
+
+### Wo keiner hinführt, wird gezeichnet
+
+Ein selbst geschriebener Beitrag steht nur in dieser App — dorthin führt keine
+Adresse. Für den wird weiterhin ein Bild gezeichnet, 1080 × 1080, im Zuschnitt
+der App: `#fafafa` als Grund, oben links das Symbol mit denselben runden Ecken
+wie auf dem Telefon, daneben „AKTIEN-LISTE" und der Name. Die Überschrift steht
+groß in der Mitte und bekommt bis zu acht Zeilen; was nicht mehr passt, endet
+mit drei Punkten statt mitten im Wort. Unten ein Haarstrich und der Name.
 
 Gezeichnet, nicht geholt: ein fremdes Vorschaubild würde die Leinwand verderben
 (cross-origin), und dann ließe sie sich nicht mehr ausgeben. Das Symbol ist von
 hier, das geht.
 
-Wo Dateien nicht geteilt werden können — ältere Browser, Schreibtisch — wird
-das Bild heruntergeladen und die Überschrift in die Zwischenablage gelegt. Auch
-dann ohne Adresse.
+Wo Dateien nicht geteilt werden können, wird das Bild heruntergeladen und die
+Überschrift in die Zwischenablage gelegt.
 
-Der Knopf zeigt sich erst, wenn wirklich Meldungen geladen sind
+Der Knopf im News-Kasten zeigt sich erst, wenn wirklich Meldungen geladen sind
 (`.news-block[data-live="1"]`); vorher gäbe es nichts zu teilen. Im Browser
 steht er gar nicht erst da, dort ist die Liste ohnehin zu.
 
-**Der Empfänger kann den Artikel damit nicht öffnen.** Das ist der Preis
-dafür, dass keine Adresse zu sehen ist — beides zusammen geht nicht. Soll der
-Link mitkommen, ist es eine Zeile: `url` in den Aufruf, und WhatsApp hängt ihn
-wieder an.
-
-Der Test greift genau darauf ab: der Aufruf darf kein `url`-Feld tragen, und
-**jedes einzelne Wort**, das auf die Leinwand gemalt wird, wird gegen
-`https?:`, `://`, `www.`, `netlify` und Endungen wie `.de`/`.com`/`.app`
-gehalten.
+Zwei Tests, zwei Wege: `teilen-test` prüft, dass aus einem News-Kasten die
+Adresse der **gerade sichtbaren** Meldung rausgeht — nicht die einer anderen —
+und `beitrag-test`, dass beim selbst geschriebenen Beitrag eine Datei geht,
+kein `url`, und dass **jedes einzelne Wort** auf der Leinwand gegen `https?:`,
+`://`, `www.`, `netlify` und Endungen wie `.de`/`.app` gehalten wird.
 
 ## Auf dem Laufenden bleiben
 

@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="light">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#fafafa">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=43">
-<link rel="apple-touch-icon" href="/icon-180.png?v=43">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=44">
+<link rel="apple-touch-icon" href="/icon-180.png?v=44">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=43">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=44">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=43">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=44">
 
 <script>
 /* Im Browser oder als App?
@@ -956,6 +956,44 @@
     line-height: 1.5;
     color: var(--muted);
   }
+  /* Ein verlinkter Artikel: Bild links, Ueberschrift und Quelle daneben —
+     dieselbe Karte, die auch ein Bote daraus machen wuerde. */
+  .beitrag-eintrag .mitbild {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .beitrag-eintrag .mitbild img {
+    flex: none;
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    background: var(--soft);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+  }
+  /* Die Quelle im Ton der uebrigen Beschriftungen — 10px, gesperrt,
+     Grossbuchstaben. Kein buntes Zeichen davor: die Liste ist schwarzweiss. */
+  .beitrag-eintrag .quelle {
+    display: block;
+    margin-top: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  #beitragEiner .beitrag-bild {
+    display: block;
+    width: 100%;
+    max-height: 220px;
+    object-fit: cover;
+    background: var(--soft);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    margin-top: 14px;
+  }
+  #beitragEiner .btn + .btn { margin-top: 8px; }
   .beitrag-zurueck {
     font: inherit;
     font-size: 10px;
@@ -2165,7 +2203,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=43" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=44" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -2283,7 +2321,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=43" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=44" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -2331,8 +2369,10 @@
       <button class="beitrag-zurueck" id="beitragZurueck" type="button">Alle Beiträge</button>
       <h3 id="beitragKopf">&nbsp;</h3>
       <p class="sheet-sub" id="beitragWann">&nbsp;</p>
+      <img class="beitrag-bild" id="beitragBild" alt="" hidden>
       <div class="beitrag-koerper" id="beitragKoerper"></div>
-      <button class="btn" id="beitragTeilen" type="button">Als Bild teilen</button>
+      <a class="btn" id="beitragAuf" target="_blank" rel="noopener" hidden>Artikel öffnen</a>
+      <button class="btn" id="beitragTeilen" type="button">Teilen</button>
     </div>
   </div>
 </div>
@@ -2357,7 +2397,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=43" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=44" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -4345,20 +4385,22 @@ if ("serviceWorker" in navigator) {
 </script>
 
 <script>
-/* Teilen: die Ueberschrift als Bild, ohne sichtbaren Link.
+/* Teilen — auf zwei Wegen, je nachdem, ob es etwas zu oeffnen gibt.
 
-   Ein normales navigator.share mit url haengt in WhatsApp die Adresse an die
-   Nachricht — genau das soll nicht passieren. Stattdessen wird hier ein Bild
-   gezeichnet und als Datei geteilt: Ueberschrift, Wert und Zeichen der App.
-   Der Empfaenger sieht eine Karte, keinen Link.
+   Fuehrt ein Link hin (eine Meldung, ein verlinkter Beitrag), geht der Link
+   raus. Der Bote holt sich davon Ueberschrift, Vorschaubild und Quelle und
+   baut daraus seine eigene Karte — genau das Bild, das WhatsApp zeigt, wenn
+   man eine Adresse einsetzt. Und der Empfaenger kann den Artikel oeffnen.
 
-   Gezeichnet wird auf einer Leinwand, nicht aus dem Netz geholt. Ein fremdes
-   Vorschaubild wuerde die Leinwand verderben (cross-origin), und dann laesst
-   sie sich nicht mehr ausgeben. Das Symbol ist von hier, das geht.
+   Fuehrt keiner hin — ein selbst geschriebener Beitrag steht nur in dieser
+   App —, wird hier eine Karte gezeichnet: Ueberschrift, Wert und Zeichen der
+   App, 1080 mal 1080. Gezeichnet, nicht geholt: ein fremdes Vorschaubild
+   wuerde die Leinwand verderben (cross-origin), und dann laesst sie sich
+   nicht mehr ausgeben. Das Symbol ist von hier, das geht.
 
    Wo Dateien nicht geteilt werden koennen — aeltere Browser, Schreibtisch —
    wird das Bild heruntergeladen und die Ueberschrift in die Zwischenablage
-   gelegt. Auch dann ohne Adresse. */
+   gelegt. */
 (function () {
   var SEITE = 1080;
   var symbolBild = null;
@@ -4369,7 +4411,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=43";
+      i.src = "/icon-512.png?v=44";
     });
     return symbolBild;
   }
@@ -4521,24 +4563,54 @@ if ("serviceWorker" in navigator) {
     }).catch(zurueck);
   }
 
+  /* Wo ein Link hinfuehrt, geht der Link raus. Der Bote holt sich davon
+     selbst Ueberschrift und Vorschaubild und baut daraus seine Karte — die
+     sieht besser aus als alles Gemalte, und der Empfaenger kann den Artikel
+     auch oeffnen. Ob die Adresse dabei als Text mitlaeuft, entscheidet der
+     Bote, nicht diese App. */
+  function linkSchicken(knopf, titel, link) {
+    var vorher = knopf.innerHTML;
+    knopf.classList.add("laeuft");
+    knopf.disabled = true;
+    knopf.textContent = "…";
+
+    function zurueck() {
+      knopf.innerHTML = vorher;
+      knopf.classList.remove("laeuft");
+      knopf.disabled = false;
+    }
+
+    if (navigator.share) {
+      return navigator.share({ title: titel, text: titel, url: link }).then(zurueck, zurueck);
+    }
+    // Am Schreibtisch: in die Zwischenablage, damit sich der Link einsetzen laesst
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(link).then(function () {
+        knopf.textContent = "Kopiert";
+        setTimeout(zurueck, 1400);
+      }, zurueck);
+    }
+    zurueck();
+  }
+
   function teilen(knopf) {
     var kasten = knopf.closest(".news-block");
     var karte = knopf.closest(".card");
     if (!kasten) return;
     var a = kasten.querySelector(".news-item.active a") || kasten.querySelector(".news-item a");
     var titel = a ? a.textContent.trim() : "";
-    if (!titel || a.getAttribute("href") === "#") return;
+    var link = a ? a.getAttribute("href") : "";
+    if (!titel || !link || link === "#") return;
 
-    var name = karte ? ((karte.querySelector("h2") || {}).textContent || "").trim() : "";
-    // Das Kuerzel steht immer als letztes Zeichen im Kopf — davor kann noch
-    // NEU oder UPDATE stehen.
-    var zeichen = karte ? karte.querySelectorAll(".card-head .badge") : [];
-    var kuerzel = zeichen.length ? zeichen[zeichen.length - 1].textContent.trim() : "";
-
-    losschicken(knopf, titel, name, kuerzel);
+    linkSchicken(knopf, titel, link);
   }
 
-  /* Fuer die eigenen Beitraege: dasselbe Bild, andere Herkunft. */
+  /* Fuer die eigenen Beitraege: verlinkt geht der Link, selbst geschrieben
+     das gemalte Bild — dorthin fuehrt ja keine Adresse. */
+  window.rcpLinkTeilen = function (knopf, titel, link) {
+    if (!titel || !link) return;
+    linkSchicken(knopf, titel, link);
+  };
   window.rcpBildTeilen = function (knopf, titel, name) {
     if (!titel) return;
     losschicken(knopf, titel, name || "Beitrag", "");
@@ -4578,6 +4650,8 @@ if ("serviceWorker" in navigator) {
   var kopf = document.getElementById("beitragKopf");
   var wannEl = document.getElementById("beitragWann");
   var koerper = document.getElementById("beitragKoerper");
+  var bildEl = document.getElementById("beitragBild");
+  var aufBtn = document.getElementById("beitragAuf");
   var teilenBtn = document.getElementById("beitragTeilen");
   var zuBtn = document.getElementById("beitragClose");
   var zurueckBtn = document.getElementById("beitragZurueck");
@@ -4651,12 +4725,40 @@ if ("serviceWorker" in navigator) {
       w.textContent = wann(a.zeit);
       reihe.appendChild(t);
       reihe.appendChild(w);
-      b.appendChild(reihe);
+
+      var anriss = null;
       if (a.vorspann) {
-        var v = document.createElement("div");
-        v.className = "anriss";
-        v.textContent = a.vorspann;
-        b.appendChild(v);
+        anriss = document.createElement("div");
+        anriss.className = "anriss";
+        anriss.textContent = a.vorspann;
+      }
+      var quelle = null;
+      if (a.quelle) {
+        quelle = document.createElement("span");
+        quelle.className = "quelle";
+        quelle.textContent = a.quelle;
+      }
+
+      if (a.bild) {
+        // Mit Bild wird es eine Karte: Bild links, alles andere daneben
+        var karte = document.createElement("div");
+        karte.className = "mitbild";
+        var i = document.createElement("img");
+        i.src = a.bild;
+        i.alt = "";
+        i.loading = "lazy";
+        i.addEventListener("error", function () { i.style.display = "none"; });
+        var daneben = document.createElement("div");
+        daneben.appendChild(reihe);
+        if (anriss) daneben.appendChild(anriss);
+        if (quelle) daneben.appendChild(quelle);
+        karte.appendChild(i);
+        karte.appendChild(daneben);
+        b.appendChild(karte);
+      } else {
+        b.appendChild(reihe);
+        if (anriss) b.appendChild(anriss);
+        if (quelle) b.appendChild(quelle);
       }
       b.addEventListener("click", function () { lesen(a.id); });
       liste.appendChild(b);
@@ -4666,8 +4768,12 @@ if ("serviceWorker" in navigator) {
   function zeigen(a) {
     offen = a;
     kopf.textContent = a.titel;
-    wannEl.textContent = wann(a.zeit) + (a.von ? " · " + a.von : "");
+    wannEl.textContent = wann(a.zeit) + (a.quelle ? " · " + a.quelle : (a.von ? " · " + a.von : ""));
+    if (a.bild) { bildEl.src = a.bild; bildEl.hidden = false; }
+    else { bildEl.removeAttribute("src"); bildEl.hidden = true; }
     absaetze(a.text);
+    if (a.link) { aufBtn.href = a.link; aufBtn.hidden = false; }
+    else { aufBtn.removeAttribute("href"); aufBtn.hidden = true; }
     uebersicht.hidden = true;
     einer.hidden = false;
     blatt.querySelector(".sheet-card").scrollTop = 0;
@@ -4678,6 +4784,8 @@ if ("serviceWorker" in navigator) {
     kopf.textContent = "…";
     wannEl.textContent = "";
     koerper.textContent = "";
+    bildEl.hidden = true;
+    aufBtn.hidden = true;
     uebersicht.hidden = true;
     einer.hidden = false;
     fetch(API + "?id=" + encodeURIComponent(id), { credentials: "same-origin", cache: "no-store" })
@@ -4726,9 +4834,13 @@ if ("serviceWorker" in navigator) {
   });
   if (fussBtn) fussBtn.addEventListener("click", function () { oeffnen(null); });
 
+  /* Verlinkt: der Link geht raus, dann baut der Bote selbst seine Karte mit
+     Ueberschrift und Bild. Selbst geschrieben: da fuehrt kein Link hin, also
+     das gemalte Bild. */
   teilenBtn.addEventListener("click", function () {
-    if (!offen || !window.rcpBildTeilen) return;
-    window.rcpBildTeilen(teilenBtn, offen.titel, "Beitrag");
+    if (!offen) return;
+    if (offen.link && window.rcpLinkTeilen) return window.rcpLinkTeilen(teilenBtn, offen.titel, offen.link);
+    if (window.rcpBildTeilen) window.rcpBildTeilen(teilenBtn, offen.titel, "Beitrag");
   });
 
   // Aus dem Band heraus
