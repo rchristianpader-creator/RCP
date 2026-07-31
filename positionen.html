@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#fafafa">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=45">
-<link rel="apple-touch-icon" href="/icon-180.png?v=45">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=46">
+<link rel="apple-touch-icon" href="/icon-180.png?v=46">
 <title>Positionen · Aktien-Liste</title>
 <style>
   :root {
@@ -459,6 +459,8 @@
         sagen(
           "Gespeichert." +
             (a.neu && a.neu.length ? " Neu: " + a.neu.join(" · ") : "") +
+            (a.geaendert && a.geaendert.length
+              ? " Geändert: " + a.geaendert.join(" · ") : "") +
             (a.ueberarbeitet && a.ueberarbeitet.length
               ? " Überarbeitet: " + a.ueberarbeitet.join(" · ") : "") +
             (a.gemeldet ? " · an " + a.gemeldet + " Geräte gemeldet" : ""),

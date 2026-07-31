@@ -121,25 +121,39 @@ immer nur **ein** Zeichen gezeigt.
 
 ### Was sich von selbst meldet
 
-Zwei Anlässe gehen als Push an alle Geräte und stehen danach in der Glocke:
+Drei Anlässe gehen als Push an alle Geräte und stehen danach in der Glocke:
 
-| Anlass | Meldung |
-|---|---|
-| Eine Position kommt dazu | **Neu in der Liste** · die Kürzel |
-| Eine vorhandene wird als UPDATE markiert | **Überarbeitet** · die Kürzel |
+| Anlass | Überschrift | Text |
+|---|---|---|
+| Eine Position kommt dazu | **Neu in der Liste** | die Kürzel |
+| Die Einkaufszone ändert sich | **Neue Einkaufszone** | `UAA · Zone 7,00 – 6,00 USD` |
+| Das Kursziel ändert sich | **Neues Kursziel** | `UAA · Ziel 20,00 USD` |
+| Beides zugleich | **Zone und Ziel geändert** | beide Zahlen |
+| UPDATE wird gesetzt, ohne dass sich die Zahlen ändern | **Überarbeitet** | die Kürzel |
 
-Beides nur **beim Übergang**: gemeldet wird, was vorher nicht markiert war und
-es jetzt ist. Sonst ginge bei jedem Umsortieren dasselbe noch einmal raus. Wird
-die Markierung weggenommen und später wieder gesetzt, ist das ein neuer
-Übergang und meldet sich wieder.
+Die Zahlen stehen in der Meldung, nicht nur das Kürzel — auf dem Sperrbildschirm
+ist das der Unterschied zwischen „irgendwas hat sich geändert" und „die Zone
+liegt jetzt hier". Sind mehrere Positionen betroffen, würde das zu lang; dann
+stehen nur die Kürzel.
 
-Wer neu ist, ist nicht auch überarbeitet — eine frisch angelegte Position steht
-nur in der ersten Meldung, auch wenn beide Haken gesetzt wären. Passiert beides
-in einem Zug, gehen zwei Meldungen raus, mit verschiedenen Anhängern, damit
-eine die andere nicht überschreibt.
+Jede Position landet in **höchstens einer** Meldung. Wer beim Ändern der Zone
+auch den UPDATE-Haken setzt — der Normalfall — bekommt die mit den Zahlen; sie
+sagt mehr als das Wort. Eine frisch angelegte Position steht nur unter „Neu",
+auch wenn beide Haken gesetzt wären.
+
+Gemeldet wird nur der **Übergang**. Sonst ginge bei jedem Umsortieren dasselbe
+noch einmal raus. Wird die UPDATE-Markierung weggenommen und später wieder
+gesetzt, ist das ein neuer Übergang und meldet sich wieder.
+
+Still bleiben: Name, Branche, Symbole, Reihenfolge, das Wegnehmen einer
+Markierung, das Entfernen einer Position. Dass etwas *nicht mehr* markiert ist,
+ist keine Nachricht an alle Geräte.
+
+Passiert mehreres in einem Zug, gehen mehrere Meldungen raus, jede mit eigenem
+Anhänger, damit eine die andere auf dem Sperrbildschirm nicht überschreibt.
 
 Der Editor sagt nach dem Speichern, was gemeldet wurde: „Gespeichert. Neu: …
-Überarbeitet: … · an 3 Geräte gemeldet".
+Geändert: … Überarbeitet: … · an 3 Geräte gemeldet".
 
 Je Position:
 
@@ -156,10 +170,8 @@ Je Position:
 | Anker | `#intc` in der Adresse — später nicht mehr ändern, sonst brechen alte Links |
 | NEU | Markierung am Chip und auf der Karte |
 
-Gemeldet wird beim Speichern nur, was oben unter „Was sich von selbst meldet"
-steht: eine Position kommt dazu, oder eine vorhandene wird als UPDATE markiert.
-Eine geänderte Zone, ein neues Ziel, eine andere Reihenfolge — das alles geht
-still durch.
+Was sich beim Speichern von selbst meldet, steht oben unter „Was sich von
+selbst meldet".
 
 Der allererste Aufruf übernimmt den Bestand aus `positionen-start.js`. Danach
 ist der Store die Wahrheit; Änderungen an dieser Datei haben keine Wirkung mehr.

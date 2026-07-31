@@ -16,9 +16,10 @@
    Beim allerersten Aufruf, solange nichts gespeichert ist, wird der Bestand
    aus positionen-start.js uebernommen.
 
-   Zwei Anlaesse melden sich von selbst: eine Position kommt dazu, oder eine
-   vorhandene wird als ueberarbeitet markiert. Beides nur beim Uebergang —
-   sonst ginge bei jedem Umsortieren dasselbe noch einmal raus. */
+   Drei Anlaesse melden sich von selbst: eine Position kommt dazu, ihre Zone
+   oder ihr Ziel aendert sich, oder sie wird als ueberarbeitet markiert. Immer
+   nur beim Uebergang — sonst ginge bei jedem Umsortieren dasselbe noch
+   einmal raus. */
 
 import { getStore } from "@netlify/blobs";
 import { START } from "./positionen-start.js";
@@ -65,30 +66,51 @@ export default async (request) => {
   const vorher = await lesen(store);
   await store.setJSON(EINTRAG, { zeit: new Date().toISOString(), von: chef.mail, liste: gepruft.liste });
 
-  /* Was ist dazugekommen, was wurde ueberarbeitet? Beides ist die Meldung
-     wert — aber nur beim Uebergang. Sonst ginge bei jedem Umsortieren
-     dieselbe Meldung noch einmal raus: gemeldet wird, was vorher nicht
-     markiert war und es jetzt ist.
+  /* Drei Anlaesse, und jede Position hoechstens in einem — sonst bekaeme man
+     fuer denselben Handgriff zwei Meldungen:
 
-     Wer neu ist, ist nicht auch ueberarbeitet — der steht schon in der
-     ersten Meldung. */
+       1. dazugekommen
+       2. Zone oder Ziel geaendert — die Zahlen, um die es hier ueberhaupt
+          geht; die Meldung nennt sie
+       3. als UPDATE markiert, ohne dass sich an den Zahlen etwas geaendert
+          haette
+
+     Wer beim Aendern auch den Haken setzt — der Normalfall — bekommt (2):
+     die Zahlen sagen mehr als das Wort.
+
+     Gemeldet wird nur der Uebergang. Sonst ginge bei jedem Umsortieren
+     dasselbe noch einmal raus. */
   const alt = new Map(vorher.map((p) => [p.id, p]));
   const neu = gepruft.liste.filter((p) => !alt.has(p.id));
-  const ueberarbeitet = gepruft.liste.filter((p) => {
+
+  const geaendert = [];
+  const ueberarbeitet = [];
+  for (const p of gepruft.liste) {
     const v = alt.get(p.id);
-    return v && p.update && !v.update;
-  });
+    if (!v) continue;                                   // steht schon unter "neu"
+    if (p.zone !== v.zone || p.ziel !== v.ziel) geaendert.push({ p: p, v: v });
+    else if (p.update && !v.update) ueberarbeitet.push(p);
+  }
 
   let gemeldet = 0;
   if (body.melden !== false) {
-    if (neu.length) gemeldet += await melden("Neu in der Liste", neu, "neu");
-    if (ueberarbeitet.length) gemeldet += await melden("Überarbeitet", ueberarbeitet, "update");
+    if (neu.length) {
+      gemeldet += await melden("Neu in der Liste", kuerzel(neu), neu[0].id, "neu");
+    }
+    if (geaendert.length) {
+      gemeldet += await melden(titelAenderung(geaendert), textAenderung(geaendert),
+                               geaendert[0].p.id, "aenderung");
+    }
+    if (ueberarbeitet.length) {
+      gemeldet += await melden("Überarbeitet", kuerzel(ueberarbeitet), ueberarbeitet[0].id, "update");
+    }
   }
 
   return json({
     ok: true,
     anzahl: gepruft.liste.length,
     neu: neu.map((p) => p.badge),
+    geaendert: geaendert.map((x) => x.p.badge),
     ueberarbeitet: ueberarbeitet.map((p) => p.badge),
     gemeldet: gemeldet
   });
@@ -209,19 +231,44 @@ function zahl(s) {
   );
 }
 
-/* ---------- Meldung bei neuen und ueberarbeiteten Positionen ----------
+/* ---------- Die Meldungen ----------
 
-   Dieselbe Machart fuer beides, nur mit anderer Ueberschrift. Der Anhaenger
-   trennt sie, damit eine Meldung die andere nicht ueberschreibt, wenn beides
-   in einem Zug passiert. */
+   Dieselbe Machart fuer alle drei, nur mit anderer Ueberschrift. Der
+   Anhaenger trennt sie, damit eine die andere nicht ueberschreibt, wenn
+   mehreres in einem Zug passiert. */
 
-async function melden(titel, welche, anhaenger) {
-  const namen = welche.map((p) => p.badge).join(" · ");
+function kuerzel(welche) {
+  return welche.map((p) => p.badge).join(" · ");
+}
 
+/* Die Ueberschrift sagt, was sich geaendert hat — auf dem Sperrbildschirm
+   ist das der Unterschied zwischen "irgendwas" und "die Zone". */
+function titelAenderung(paare) {
+  const zone = paare.some((x) => x.p.zone !== x.v.zone);
+  const ziel = paare.some((x) => x.p.ziel !== x.v.ziel);
+  if (zone && ziel) return "Zone und Ziel geändert";
+  if (zone) return "Neue Einkaufszone";
+  return "Neues Kursziel";
+}
+
+/* Bei einer einzelnen Position stehen die Zahlen darunter — darum geht es
+   ja. Bei mehreren wuerde das zu lang, dann nur die Kuerzel. */
+function textAenderung(paare) {
+  if (paare.length === 1) {
+    const { p, v } = paare[0];
+    const teile = [p.badge];
+    if (p.zone !== v.zone) teile.push("Zone " + p.zone);
+    if (p.ziel !== v.ziel) teile.push(p.ziel ? "Ziel " + p.ziel : "Ziel entfernt");
+    return teile.join(" · ");
+  }
+  return paare.map((x) => x.p.badge).join(" · ");
+}
+
+async function melden(titel, namen, id, anhaenger) {
   // Erst ins Buch. Ob gerade ein Geraet angemeldet ist, aendert nichts
   // daran, dass es passiert ist.
   await notieren({ titel: titel, text: namen,
-                   url: "/#" + welche[0].id, art: "position" });
+                   url: "/#" + id, art: "position" });
 
   try {
     const push = getStore("aktien-push");
@@ -247,7 +294,7 @@ async function melden(titel, welche, anhaenger) {
       title: titel,
       body: namen,
       tag: anhaenger + "-" + Date.now().toString(36),
-      url: "/#" + welche[0].id
+      url: "/#" + id
     });
 
     let raus = 0;
