@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#fafafa">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=47">
-<link rel="apple-touch-icon" href="/icon-180.png?v=47">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=48">
+<link rel="apple-touch-icon" href="/icon-180.png?v=48">
 <title>Verwaltung · Aktien-Liste</title>
 <style>
   :root {
@@ -184,6 +184,65 @@
   }
   .senden .ergebnis.gut { color: #15803d; }
   .senden .ergebnis.schlecht { color: #b91c1c; }
+
+  /* Bild zur Nachricht */
+  .bildwahl {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 2px 0 10px;
+  }
+  .bildwahl .knopf {
+    flex: none;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--fg);
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 8px 12px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: border-color 0.18s ease;
+  }
+  .bildwahl .knopf:hover { border-color: var(--fg); }
+  .bildwahl .hinweis { flex: 1; min-width: 200px; font-size: 11px; color: var(--muted); line-height: 1.45; }
+  /* Das Dateifeld steckt hinter dem Knopf. Ohne diese Zeile machte die
+     Regel fuer .senden input daraus wieder einen sichtbaren Kasten. */
+  .senden input[type="file"][hidden] { display: none; }
+  .bildvorschau {
+    position: relative;
+    margin-bottom: 10px;
+    animation: riseIn 0.3s var(--ease) both;
+  }
+  .bildvorschau img {
+    display: block;
+    width: 100%;
+    max-height: 220px;
+    object-fit: cover;
+    background: var(--soft);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+  }
+  .bildvorschau button {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 26px;
+    height: 26px;
+    font: inherit;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0;
+    color: var(--fg);
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    cursor: pointer;
+  }
 
   /* Positionen markieren — dieselben Kuerzel wie im Menue der Liste */
   .marken { margin: 2px 0 12px; }
@@ -540,6 +599,15 @@
     <div class="titel">Nachricht an alle</div>
     <input type="text" id="nTitel" maxlength="60" placeholder="Titel" autocomplete="off">
     <textarea id="nText" maxlength="300" rows="3" placeholder="Text"></textarea>
+    <div class="bildwahl">
+      <label class="knopf" for="nBild">Bild hinzufügen</label>
+      <input type="file" id="nBild" accept="image/*" hidden>
+      <span class="hinweis" id="nBildStand">Auf dem iPhone zeigt die Meldung selbst kein Bild — es steht dann in der App unter Meldungen.</span>
+    </div>
+    <div class="bildvorschau" id="nBildKasten" hidden>
+      <img id="nBildAnsicht" alt="">
+      <button type="button" id="nBildWeg" aria-label="Bild entfernen">&times;</button>
+    </div>
     <div class="marken" id="nMarken" hidden>
       <div class="wozu">Positionen markieren — die Meldung führt dann zur Karte</div>
       <div class="reihen" id="nMarkenReihe"></div>
@@ -937,12 +1005,85 @@
     var ergebnis = document.getElementById("nErgebnis");
     var markenKasten = document.getElementById("nMarken");
     var markenReihe = document.getElementById("nMarkenReihe");
+    var bildFeld = document.getElementById("nBild");
+    var bildKasten = document.getElementById("nBildKasten");
+    var bildAnsicht = document.getElementById("nBildAnsicht");
+    var bildWeg = document.getElementById("nBildWeg");
+    var bildStand = document.getElementById("nBildStand");
+    var bildHinweis = bildStand.textContent;
     var geraete = 0;
     var gewaehlt = [];
+    var bildId = "";
+    var bildDaten = "";
 
     function wieViele(n) {
       return n === 1 ? "1 Gerät" : n + " Geräte";
     }
+
+    /* Ein Foto vom Telefon ist mehrere Megabyte gross. Verschickt wird davon
+       nichts — verkleinert wird hier, auf hoechstens 1280 Pixel lange Kante,
+       und als JPEG. Was danach bleibt, sind ein paar hundert Kilobyte. */
+    function verkleinern(datei) {
+      return new Promise(function (fertig, daneben) {
+        var leser = new FileReader();
+        leser.onerror = function () { daneben(); };
+        leser.onload = function () {
+          var i = new Image();
+          i.onerror = function () { daneben(); };
+          i.onload = function () {
+            var lang = Math.max(i.width, i.height);
+            var f = lang > 1280 ? 1280 / lang : 1;
+            var c = document.createElement("canvas");
+            c.width = Math.round(i.width * f);
+            c.height = Math.round(i.height * f);
+            c.getContext("2d").drawImage(i, 0, 0, c.width, c.height);
+            try { fertig(c.toDataURL("image/jpeg", 0.82)); } catch (e) { daneben(); }
+          };
+          i.src = leser.result;
+        };
+        leser.readAsDataURL(datei);
+      });
+    }
+
+    /* Ohne Text: der Hinweis kommt zurueck. Mit Text: der bleibt stehen —
+       sonst wischt das Aufraeumen die Fehlermeldung gleich wieder weg. */
+    function bildLoesen(sagen) {
+      bildId = "";
+      bildDaten = "";
+      bildFeld.value = "";
+      bildKasten.hidden = true;
+      bildAnsicht.removeAttribute("src");
+      bildStand.textContent = sagen || bildHinweis;
+    }
+
+    bildFeld.addEventListener("change", function () {
+      var datei = bildFeld.files && bildFeld.files[0];
+      if (!datei) return;
+      bildStand.textContent = "wird verkleinert …";
+      verkleinern(datei).then(function (daten) {
+        bildDaten = daten;
+        bildAnsicht.src = daten;
+        bildKasten.hidden = false;
+        bildStand.textContent = "wird hochgeladen …";
+        return fetch("/.netlify/functions/bild", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({ daten: daten })
+        }).then(function (r) { return r.json().catch(function () { return {}; }); });
+      }).then(function (a) {
+        if (!a || !a.ok) {
+          bildLoesen((a && a.fehler) || "Das Bild ließ sich nicht hochladen.");
+          return;
+        }
+        bildId = a.id;
+        bildStand.textContent = "Bild hängt an der Meldung.";
+      }).catch(function () {
+        bildLoesen("Das Bild ließ sich nicht lesen.");
+      });
+    });
+
+    bildWeg.addEventListener("click", function () { bildLoesen(); });
 
     /* Ein Kuerzel je Position, zum Antippen. Die Reihenfolge der Auswahl
        bleibt erhalten — die erste markierte bestimmt, wohin die Meldung
@@ -1011,7 +1152,7 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
-        body: JSON.stringify({ titel: t, text: b, symbole: gewaehlt.slice() })
+        body: JSON.stringify({ titel: t, text: b, symbole: gewaehlt.slice(), bild: bildId })
       })
         .then(function (r) { return r.json().catch(function () { return {}; }); })
         .then(function (a) {
@@ -1030,6 +1171,7 @@
           titel.value = "";
           text.value = "";
           markenLoesen();
+          bildLoesen();
           zaehlen();
         })
         .catch(function () {

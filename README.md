@@ -36,6 +36,7 @@ netlify/functions/positionen-start.js Der Bestand für den allerersten Aufruf
 netlify/functions/konto.js            Registrierung, Anmeldung, Freigabe
 netlify/functions/nachricht.js        Nachricht an alle Geräte (nur Verwaltung)
 netlify/functions/artikel.js          Eigene Beitraege: schreiben, lesen, verlinken
+netlify/functions/bild.js             Bilder zu Meldungen: hochladen und ausliefern
 netlify/functions/meldungen.js        Das Buch hinter der Glocke
 netlify/functions/besuch.js           Wer gerade auf der Seite ist
 netlify/functions/sitzung.js          Unterschrift und Passwort-Hash (kein Endpunkt)
@@ -281,6 +282,31 @@ eine gewöhnliche Nachricht und führt zur Liste.
 
 Die Kürzel kommen beim Zählen der Geräte gleich mit (`GET` auf `nachricht`
 liefert `symbole`) — ein zweiter Gang zum Speicher wäre dafür zu viel.
+
+### Ein Bild dazu
+
+**Bild hinzufügen** nimmt ein Foto oder einen Screenshot. Was die Kamera
+liefert, wird nicht verschickt: der Browser verkleinert es vorher auf höchstens
+1280 Pixel lange Kante und setzt es als JPEG um (Qualität 0,82). Aus mehreren
+Megabyte werden ein paar hundert Kilobyte.
+
+Hochgeladen wird zu `netlify/functions/bild.js`, Store `aktien-bilder`. Zurück
+kommt eine **ID**, und nur die geht mit der Nachricht mit — eine beliebige
+Adresse wäre ein Weg, fremde Bilder in die Glocke zu hängen. Geprüft werden
+Format (`jpeg`, `png`, `webp`, `gif`) und Größe (höchstens ~2 MB). Wer ein Bild
+hochlädt, räumt dabei die weg, die älter als 90 Tage sind — ein eigener Lauf
+dafür wäre ein Dienst mehr, den niemand vermisst.
+
+Ausgeliefert wird mit langer Frist (`private, max-age=31536000, immutable`):
+eine ID zeigt immer auf dasselbe Bild. Hinter dem Tor bleibt es trotzdem — wer
+nicht angemeldet ist, kommt hier so wenig durch wie sonst irgendwo. Hochladen
+darf nur die Verwaltung, ansehen jeder Angemeldete.
+
+**Auf dem iPhone zeigt die Meldung selbst kein Bild.** Apples Web-Push kennt
+das Feld nicht; Android und Chrome zeigen es groß im Banner (`image` in
+`showNotification`). Verlässlich steht es in der App, unter **Meldungen** —
+dort ist es ohnehin am nützlichsten, weil man es dort auch wiederfindet. Der
+Hinweis steht in der Verwaltung neben dem Knopf, damit die Erwartung stimmt.
 
 ## Im Browser statt in der App
 
@@ -717,6 +743,7 @@ Nur die Verwaltung darf nachsehen; melden darf jedes angemeldete Konto.
 | `/.netlify/functions/besuch` | `{"ok":true,"da":1,"leute":[…]}` — nur als Verwaltung |
 | `/.netlify/functions/meldungen` | `{"ok":true,"meldungen":[…]}` — was hinter der Glocke steht |
 | `/.netlify/functions/artikel` | `{"ok":true,"artikel":[…]}` — die eigenen Beiträge, Neuestes vorn |
+| `/.netlify/functions/bild?id=<id>` | das Bild selbst — nur für Angemeldete |
 
 Der Punkt vor `netlify` gehört dazu. Ohne ihn wäre es ein Dateipfad, keine Function.
 

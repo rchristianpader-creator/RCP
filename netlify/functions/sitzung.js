@@ -48,6 +48,8 @@ export async function notieren(eintrag) {
       zeichen: Array.isArray(eintrag.zeichen)
         ? eintrag.zeichen.slice(0, 6).map((z) => String(z).slice(0, 12))
         : [],
+      // Adresse eines Bildes zur Meldung — in der Glocke steht es darunter
+      bild: String(eintrag.bild || "").slice(0, 200),
       // "chef" heisst: nur die Verwaltung bekommt das zu sehen
       nur: eintrag.nur === "chef" ? "chef" : ""
     });

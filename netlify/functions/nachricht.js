@@ -14,6 +14,7 @@
 import { getStore } from "@netlify/blobs";
 import { keys } from "./vapid.js";
 import { lesen as positionenLesen, LADEN as POSITIONEN } from "./positionen.js";
+import { saeubern as bildId } from "./bild.js";
 import { chefLesen, geheimnis, notieren } from "./sitzung.js";
 
 const MAX_TITEL = 60;
@@ -58,6 +59,11 @@ export default async (request) => {
   const gemeint = await marken(body.symbole);
   const kuerzel = gemeint.map((p) => p.badge);
 
+  /* Ein Bild zur Meldung. Uebergeben wird nur die ID, die bild.js beim
+     Hochladen zurueckgegeben hat — eine beliebige Adresse waere ein Weg,
+     fremde Bilder in die Glocke zu haengen. */
+  const bild = bildId(body.bild) ? "/.netlify/functions/bild?id=" + bildId(body.bild) : "";
+
   const liste = await geraete(store);
   if (!liste.length) {
     return json({ ok: false, fehler: "Kein Geraet angemeldet." }, 400);
@@ -84,7 +90,9 @@ export default async (request) => {
     title: titel || "Aktien-Liste",
     body: rumpf,
     tag: "nachricht-" + Date.now().toString(36),
-    url: ziel
+    url: ziel,
+    // Android zeigt das im Banner; iOS nicht. In der Glocke steht es immer.
+    image: bild ? new URL(request.url).origin + bild : ""
   });
 
   await notieren({
@@ -92,7 +100,8 @@ export default async (request) => {
     text: text,
     url: ziel,
     art: "nachricht",
-    zeichen: kuerzel
+    zeichen: kuerzel,
+    bild: bild
   });
 
   let gesendet = 0;
@@ -119,6 +128,7 @@ export default async (request) => {
     gesendet: gesendet,
     weg: weg,
     markiert: kuerzel,
+    bild: bild,
     fehler: fehler.length ? fehler : undefined,
     von: chef.mail
   });
