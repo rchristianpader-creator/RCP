@@ -242,7 +242,8 @@ tragen `content-visibility`, und was uebersprungen wird, meldet alles darin
 als unsichtbar — der Kasten waere ausgerechnet dann "weg", wenn er nur nicht
 gezeichnet wird.
 
-Bewegt wird beim Scrollen alles **ausser** dem Chart. Wer den Vorfahren eines
+Bewegt wird beim Scrollen jedes Stueck der Karte einzeln, der Chart-Kasten
+eingeschlossen — aber nie die Karte selbst. Wer den Vorfahren eines
 fremden `<iframe>` verwandelt, laesst es bei jedem Bild neu zeichnen; gemessen
 ueber einen Scrollstoss kostete das 76 ms Stilberechnung statt 26 ms.
 
@@ -262,17 +263,35 @@ Jetzt ist sie unuebersehbar:
   nicht.
 - **Die Deckkraft kommt frueher als die Bewegung** (bei 55 % der Strecke) — die
   Zeile steht schon lesbar da, waehrend sie ihren letzten Zentimeter noch faehrt.
-- **Die Abschnitte liegen weit auseinander** (0–34 %, 14–50 %, 30–66 %, 46–82 %
-  der Einfahrt) und ueberlappen nur zu einem Drittel. Gemessen bei einer Karte
-  600 Pixel vor dem Bild: Kopf steht, Zielleiste bei 54 Pixel, News bei 103, der
-  Knopf hat noch nicht angefangen. Das ist die Welle.
+- **Fuenf Stuecke, fuenf Abschnitte** (0–30 %, 11–41 %, 22–56 %, 35–70 %,
+  48–84 % der Einfahrt), die nur zu einem Drittel ueberlappen: Kopf,
+  Zielleiste, **Chart**, News, Knopf. So kommt eins nach dem anderen statt der
+  Karte als Block.
 - **Die Haarlinie** faehrt aus `scaleY(5)` bei voller Deckkraft auf eine
   1-Pixel-Linie bei 0,12 — ein breiter Strich, der sich zur Kante beruhigt.
 - **Der Kopf sinkt weg** statt nur zurueckzubleiben: 92 % statt 38 %, dazu
   `scale(0.78)` und Deckkraft 0,12.
 
-Skaliert wird dabei **nie die Karte** — Kopf, Zielleiste, News und Knopf sind
-Geschwister des Charts, nicht seine Vorfahren.
+### Warum der Chart jetzt doch mitfaehrt
+
+Er war lange ausgenommen, und der Grund war gut: in jeder Karte steckt ein
+fremdes `<iframe>`, und als noch die **ganze Karte** verwandelt wurde, kostete
+ein Scrollstoss 76 ms Stilberechnung und 358 ms Hauptfaden statt 25 und 259.
+
+Das gilt fuer den Vorfahren. Den Kasten zu verwandeln, **in dem** das `<iframe>`
+sitzt, ist etwas anderes — `chartkosten.mjs` misst denselben Scrollstoss
+zweimal, einmal mit und einmal ohne Chart-Animation, mit einem absichtlich
+schwer gefuellten `<iframe>`:
+
+| | Stil | Hauptfaden | je Bild |
+|---|---|---|---|
+| Chart faehrt mit | 92 ms | 565 ms | 17 ms |
+| Chart steht still | 82 ms | 507 ms | 17 ms |
+
+Ueber 90 Bilder bei 4-facher Drosselung: 10 ms Stilberechnung, 58 ms
+Hauptfaden, **0 ms je Bild**. Bei 6-facher Drosselung liegt der Unterschied im
+Rauschen. Die Karte selbst bleibt weiterhin unberuehrt — das ist der Punkt, an
+dem es teuer wuerde, und `scroll-test` haelt ihn fest.
 
 ### Der leise Weg war der wichtigere
 
@@ -286,11 +305,11 @@ aufsteigen, waehrend drueben vier Teile nacheinander kamen. Wer die Liste auf
 dem iPhone ansah, bekam von der ganzen Arbeit fast nichts mit — und lauter
 wurde durch jede Aenderung am ersten Weg auch nichts.
 
-Jetzt fahren beide Wege **dieselben vier Teile mit denselben Keyframes**
+Jetzt fahren beide Wege **dieselben fuenf Stuecke mit denselben Keyframes**
 (`teilLauf`), nur die Uhr ist eine andere: dort die Scrollstellung, hier
-0,78 s Lauf mit 0,1 s Versatz je Teil. Nebenbei ist der zweite Weg damit auch
-billiger geworden — die Karte selbst wird gar nicht mehr angefasst, und sie ist
-der Vorfahr des Charts.
+0,78 s Lauf mit 0,09 s Versatz je Stueck. Nebenbei ist der zweite Weg damit
+auch billiger geworden — die Karte selbst wird gar nicht mehr angefasst, und
+sie ist der Vorfahr des Charts.
 
 Die Weiche ist `@supports not (animation-timeline: view())`. Sie **muss** dort
 stehen: die Regeln des zweiten Wegs tragen vier Klassen und wuerden sonst gegen
