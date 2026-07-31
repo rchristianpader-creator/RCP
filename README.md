@@ -328,10 +328,26 @@ Ausschnitt muss dabei nachweislich auf null gehen und wieder aufmachen.
 
 Zwei Dinge, auf die es sonst noch ankam:
 
-Die Karten stehen unter `content-visibility: auto`. Was weit weg ist, ist nicht
-gezeichnet — und dann stimmen die Maße darin nicht. Deshalb wird immer erst zur
-ganzen Karte gescrollt, dann gewartet, bis nichts mehr läuft, und **erst danach**
-der Teil darin gemessen.
+### Ein Zug je Schritt
+
+Zuerst wurde erst die ganze Karte angefahren und der Teil darin danach
+nachgeholt — mit dem Hintergedanken, dass unter `content-visibility: auto` die
+Maße in einer weit entfernten Karte nicht stimmen. Der Preis dafür war
+sichtbar: bei allem, was unten in einer Karte sitzt — Chart, News, Analyse —
+fuhr die Seite erst hoch und gleich wieder herunter.
+
+Nötig war der Umweg nie. Alle Karten-Schritte zeigen auf die **erste** Karte,
+und die ist immer gezeichnet; die Höhen stehen ohnehin fest, der Chart-Kasten
+misst 400 Pixel, ob die Zeichnung schon darin hängt oder nicht. Gemessen wird
+deshalb gleich am Ziel: `offsetTop` des Stücks selbst, ein `scrollTo`, fertig.
+Was in den freien Streifen zwischen Leiste und Erklärkarte passt, wird darin
+mittig gesetzt; was zu groß ist, oben angelegt. Das Nachfassen danach bleibt
+als Notnagel stehen, feuert aber im Regelfall nicht mehr.
+
+Der Test misst den ganzen Übergang mit: über jeden Schritt wird `scrollY`
+abgetastet, und die Richtung darf dabei nicht wechseln. Gegen die alte Fassung
+gehalten fällt er auch — bei „News und Analyse", genau dort, wo es aufgefallen
+war (732 → 497 → 1247).
 
 Und es läuft kein Skript je Bild. Die Größe des Ausschnitts wird einmal je
 Schritt gesetzt, während alles kurz ausgeblendet ist; bewegt wird nur, was der
@@ -436,6 +452,48 @@ nicht verschickt: eine Meldung zum Einzug, die niemanden weckt.
 
 Zugangsanfragen tragen `nur: "chef"` und gehen niemanden sonst etwas an.
 Einträge älter als 60 Tage werden beim Nachsehen weggeräumt.
+
+## Eine Meldung weitergeben
+
+Oben rechts in jedem News-Kasten steht **Teilen**. Was dabei herauskommt, ist
+ein Bild — kein Link.
+
+Der Grund: ein gewöhnliches `navigator.share` mit `url` hängt in WhatsApp die
+Adresse an die Nachricht. Genau das soll nicht passieren. Geteilt wird deshalb
+eine Datei, und der Aufruf trägt **kein** `url`-Feld:
+
+```js
+navigator.share({ files: [datei], title: titel, text: titel })
+```
+
+Das Bild wird an Ort und Stelle gezeichnet, 1080 × 1080, im Zuschnitt der App:
+`#fafafa` als Grund, oben links das Symbol mit denselben runden Ecken wie auf
+dem Telefon, daneben „AKTIEN-LISTE" und der Name der Position. Die Überschrift
+steht groß in der Mitte und bekommt bis zu acht Zeilen; was nicht mehr passt,
+endet mit drei Punkten statt mitten im Wort. Unten ein Haarstrich, der Name und
+das Kürzel. Nirgends eine Adresse.
+
+Gezeichnet, nicht geholt: ein fremdes Vorschaubild würde die Leinwand verderben
+(cross-origin), und dann ließe sie sich nicht mehr ausgeben. Das Symbol ist von
+hier, das geht.
+
+Wo Dateien nicht geteilt werden können — ältere Browser, Schreibtisch — wird
+das Bild heruntergeladen und die Überschrift in die Zwischenablage gelegt. Auch
+dann ohne Adresse.
+
+Der Knopf zeigt sich erst, wenn wirklich Meldungen geladen sind
+(`.news-block[data-live="1"]`); vorher gäbe es nichts zu teilen. Im Browser
+steht er gar nicht erst da, dort ist die Liste ohnehin zu.
+
+**Der Empfänger kann den Artikel damit nicht öffnen.** Das ist der Preis
+dafür, dass keine Adresse zu sehen ist — beides zusammen geht nicht. Soll der
+Link mitkommen, ist es eine Zeile: `url` in den Aufruf, und WhatsApp hängt ihn
+wieder an.
+
+Der Test greift genau darauf ab: der Aufruf darf kein `url`-Feld tragen, und
+**jedes einzelne Wort**, das auf die Leinwand gemalt wird, wird gegen
+`https?:`, `://`, `www.`, `netlify` und Endungen wie `.de`/`.com`/`.app`
+gehalten.
 
 ## Auf dem Laufenden bleiben
 

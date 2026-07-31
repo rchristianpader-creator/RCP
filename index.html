@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="light">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#fafafa">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=40">
-<link rel="apple-touch-icon" href="/icon-180.png?v=40">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=41">
+<link rel="apple-touch-icon" href="/icon-180.png?v=41">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=40">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=41">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=40">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=41">
 
 <script>
 /* Im Browser oder als App?
@@ -1842,6 +1842,7 @@
 
 
   .news-block {
+    position: relative;
     border-top: 1px solid var(--hair);
     background: #f3f3f3;
     padding: 12px 16px 14px;
@@ -1855,6 +1856,38 @@
     color: #666;
     margin-bottom: 8px;
   }
+
+  /* Teilen — oben rechts in der Ecke des News-Kastens, wo sonst nichts steht */
+  .teilen-btn {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font: inherit;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #666;
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 5px 8px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transform: translateZ(0);
+    transition: background 0.18s ease, color 0.18s ease, transform 0.12s var(--ease);
+  }
+  /* Solange keine Meldung geladen ist, gibt es nichts zu teilen —
+     applyItems() setzt data-live, sobald welche da sind. */
+  .news-block .teilen-btn { display: none; }
+  .news-block[data-live="1"] .teilen-btn { display: inline-flex; }
+  .teilen-btn:active { transform: scale(0.94); }
+  .teilen-btn[disabled] { opacity: 0.45; cursor: default; }
+  .teilen-btn.laeuft { background: var(--fg); color: #fff; border-color: var(--fg); }
+  .teilen-btn svg { flex: none; }
   .news-rotator {
     position: relative;
     height: 44px;
@@ -2065,7 +2098,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=40" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=41" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -2183,7 +2216,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=40" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=41" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -2234,7 +2267,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=40" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=41" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -2393,6 +2426,18 @@
       var dots = el("div", "news-dots");
       dots.appendChild(el("span", "on"));
       news.appendChild(dots);
+
+      // Teilen: erzeugt ein Bild mit der Ueberschrift, verschickt keinen Link
+      var teilen = el("button", "teilen-btn");
+      teilen.type = "button";
+      teilen.setAttribute("aria-label", "Meldung als Bild teilen");
+      teilen.innerHTML =
+        '<svg viewBox="0 0 20 20" width="11" height="11" fill="none" stroke="currentColor" ' +
+        'stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+        '<path d="M10 13V3"/><path d="M6.6 6.2 10 2.8l3.4 3.4"/>' +
+        '<path d="M4.5 11.5v4.2a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-4.2"/></svg>Teilen';
+      news.appendChild(teilen);
+
       s.appendChild(news);
     }
 
@@ -4209,6 +4254,203 @@ if ("serviceWorker" in navigator) {
 </script>
 
 <script>
+/* Teilen: die Ueberschrift als Bild, ohne sichtbaren Link.
+
+   Ein normales navigator.share mit url haengt in WhatsApp die Adresse an die
+   Nachricht — genau das soll nicht passieren. Stattdessen wird hier ein Bild
+   gezeichnet und als Datei geteilt: Ueberschrift, Wert und Zeichen der App.
+   Der Empfaenger sieht eine Karte, keinen Link.
+
+   Gezeichnet wird auf einer Leinwand, nicht aus dem Netz geholt. Ein fremdes
+   Vorschaubild wuerde die Leinwand verderben (cross-origin), und dann laesst
+   sie sich nicht mehr ausgeben. Das Symbol ist von hier, das geht.
+
+   Wo Dateien nicht geteilt werden koennen — aeltere Browser, Schreibtisch —
+   wird das Bild heruntergeladen und die Ueberschrift in die Zwischenablage
+   gelegt. Auch dann ohne Adresse. */
+(function () {
+  var SEITE = 1080;
+  var symbolBild = null;
+
+  function symbol() {
+    if (symbolBild) return symbolBild;
+    symbolBild = new Promise(function (fertig) {
+      var i = new Image();
+      i.onload = function () { fertig(i); };
+      i.onerror = function () { fertig(null); };
+      i.src = "/icon-512.png?v=41";
+    });
+    return symbolBild;
+  }
+
+  /* Wortweise umbrechen. Was nicht mehr passt, endet mit drei Punkten —
+     lieber ein sauberer Schluss als eine Zeile, die aus dem Bild laeuft. */
+  function brechen(ctx, text, breite, hoechstens) {
+    var worte = String(text).split(/\s+/);
+    var zeilen = [];
+    var zeile = "";
+    for (var i = 0; i < worte.length; i++) {
+      var probe = zeile ? zeile + " " + worte[i] : worte[i];
+      if (ctx.measureText(probe).width > breite && zeile) {
+        zeilen.push(zeile);
+        zeile = worte[i];
+        if (zeilen.length === hoechstens) break;
+      } else {
+        zeile = probe;
+      }
+    }
+    if (zeilen.length < hoechstens && zeile) zeilen.push(zeile);
+    if (zeilen.length === hoechstens) {
+      var letzte = zeilen[hoechstens - 1];
+      if (i < worte.length) {
+        while (letzte && ctx.measureText(letzte + " …").width > breite) {
+          letzte = letzte.replace(/\s*\S+$/, "");
+        }
+        zeilen[hoechstens - 1] = letzte + " …";
+      }
+    }
+    return zeilen;
+  }
+
+  function malen(titel, name, kuerzel) {
+    return symbol().then(function (bild) {
+      var c = document.createElement("canvas");
+      c.width = SEITE;
+      c.height = SEITE;
+      var ctx = c.getContext("2d");
+      var schrift = 'system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif';
+      var rand = 92;
+
+      ctx.fillStyle = "#fafafa";
+      ctx.fillRect(0, 0, SEITE, SEITE);
+
+      // Symbol oben links, mit denselben runden Ecken wie auf dem Telefon
+      var s = 128;
+      if (bild) {
+        ctx.save();
+        var r = 29;
+        ctx.beginPath();
+        ctx.moveTo(rand + r, rand);
+        ctx.arcTo(rand + s, rand, rand + s, rand + s, r);
+        ctx.arcTo(rand + s, rand + s, rand, rand + s, r);
+        ctx.arcTo(rand, rand + s, rand, rand, r);
+        ctx.arcTo(rand, rand, rand + s, rand, r);
+        ctx.closePath();
+        ctx.clip();
+        ctx.drawImage(bild, rand, rand, s, s);
+        ctx.restore();
+        ctx.strokeStyle = "#e5e5e5";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = "#737373";
+      ctx.font = "600 30px " + schrift;
+      ctx.fillText("AKTIEN-LISTE", rand + s + 28, rand + 52);
+      ctx.fillStyle = "#111111";
+      ctx.font = "700 38px " + schrift;
+      ctx.fillText(name || "News", rand + s + 28, rand + 100);
+
+      // Die Ueberschrift ist die Hauptsache — sie bekommt den meisten Platz
+      var breite = SEITE - rand * 2;
+      ctx.fillStyle = "#111111";
+      ctx.font = "700 62px " + schrift;
+      var zeilen = brechen(ctx, titel, breite, 8);
+      var hoehe = zeilen.length * 84;
+      var y = Math.max(rand + s + 140, (SEITE - hoehe) / 2 + 30);
+      zeilen.forEach(function (z, i) { ctx.fillText(z, rand, y + i * 84); });
+
+      // Fuss: ein Strich und der Name. Keine Adresse — es soll ja keine zu
+      // sehen sein.
+      ctx.strokeStyle = "#e5e5e5";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(rand, SEITE - rand - 62);
+      ctx.lineTo(SEITE - rand, SEITE - rand - 62);
+      ctx.stroke();
+      ctx.fillStyle = "#737373";
+      ctx.font = "500 30px " + schrift;
+      ctx.fillText("Aktien-Liste · Ralph Christian Pader", rand, SEITE - rand - 16);
+      if (kuerzel) {
+        ctx.textAlign = "right";
+        ctx.fillText(kuerzel, SEITE - rand, SEITE - rand - 16);
+        ctx.textAlign = "left";
+      }
+
+      return new Promise(function (fertig) {
+        c.toBlob(function (b) { fertig(b); }, "image/png");
+      });
+    });
+  }
+
+  function sichern(blob, titel) {
+    try {
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "aktien-liste.png";
+      a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+    } catch (e) {}
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(titel).catch(function () {});
+    }
+  }
+
+  function teilen(knopf) {
+    var kasten = knopf.closest(".news-block");
+    var karte = knopf.closest(".card");
+    if (!kasten) return;
+    var a = kasten.querySelector(".news-item.active a") || kasten.querySelector(".news-item a");
+    var titel = a ? a.textContent.trim() : "";
+    if (!titel || a.getAttribute("href") === "#") return;
+
+    var name = karte ? ((karte.querySelector("h2") || {}).textContent || "").trim() : "";
+    // Das Kuerzel steht immer als letztes Zeichen im Kopf — davor kann noch
+    // NEU oder UPDATE stehen.
+    var zeichen = karte ? karte.querySelectorAll(".card-head .badge") : [];
+    var kuerzel = zeichen.length ? zeichen[zeichen.length - 1].textContent.trim() : "";
+
+    var vorher = knopf.innerHTML;
+    knopf.classList.add("laeuft");
+    knopf.disabled = true;
+    knopf.textContent = "…";
+
+    function zurueck() {
+      knopf.innerHTML = vorher;
+      knopf.classList.remove("laeuft");
+      knopf.disabled = false;
+    }
+
+    malen(titel, name, kuerzel).then(function (blob) {
+      if (!blob) { zurueck(); return; }
+      var datei = null;
+      try {
+        datei = new File([blob], "aktien-liste.png", { type: "image/png" });
+      } catch (e) {}
+
+      if (datei && navigator.canShare && navigator.canShare({ files: [datei] }) && navigator.share) {
+        return navigator.share({ files: [datei], title: titel, text: titel })
+          .then(zurueck, zurueck);
+      }
+      if (navigator.share) {
+        // Ohne Datei wenigstens die Ueberschrift — wieder ohne Adresse
+        return navigator.share({ title: titel, text: titel }).then(zurueck, zurueck);
+      }
+      sichern(blob, titel);
+      zurueck();
+    }).catch(zurueck);
+  }
+
+  document.addEventListener("click", function (e) {
+    var knopf = e.target.closest ? e.target.closest(".teilen-btn") : null;
+    if (!knopf) return;
+    e.preventDefault();
+    teilen(knopf);
+  });
+})();
+</script>
+
+<script>
 /* Die Glocke: was passiert ist, seit die App auf diesem Geraet laeuft.
 
    Jede Push-Meldung wird beim Versenden auch in ein Buch geschrieben
@@ -4401,10 +4643,11 @@ if ("serviceWorker" in navigator) {
 
    Zwei Dinge, auf die es ankommt:
 
-   Die Karten stehen unter content-visibility: auto. Was weit weg ist, ist
-   nicht gezeichnet, und dann stimmen die Masse darin nicht. Deshalb wird
-   immer erst zur ganzen Karte gescrollt, dann gewartet, bis nichts mehr
-   laeuft, und erst danach der Teil darin gemessen.
+   Gefahren wird in einem Zug. Frueher wurde erst die ganze Karte angefahren
+   und der Teil darin danach nachgeholt — bei allem, was unten in einer Karte
+   sitzt, sah man die Seite hoch- und gleich wieder herunterfahren. Jetzt wird
+   gleich am Ziel gemessen; das Nachfassen bleibt nur als Notnagel stehen,
+   falls doch etwas dazwischenkommt.
 
    Und es laeuft kein Skript je Bild. Die Groesse des Ausschnitts wird einmal
    je Schritt gesetzt — waehrend alles kurz ausgeblendet ist. Bewegt wird nur,
@@ -4512,16 +4755,29 @@ if ("serviceWorker" in navigator) {
     })();
   }
 
+  /* Ein Zug, nicht zwei. Frueher wurde erst die Karte angefahren und danach
+     das Stueck darin nachgeholt — bei allem, was unten in einer Karte sitzt
+     (Chart, News, Analyse), sah man die Seite hoch- und gleich wieder
+     herunterfahren. Gemessen wird deshalb gleich am Stueck selbst.
+
+     Das geht, weil die Hoehen feststehen: der Chart-Kasten ist 400 Pixel hoch,
+     ob die Zeichnung schon drin haengt oder nicht. Nichts rutscht nach. */
   function hinfahren(el, fertig) {
-    var anker = (el.closest && el.closest(".card")) || el;
-    var abstand = navHoehe() + 100;
-    window.scrollTo({ top: Math.max(0, layoutOben(anker) - abstand), behavior: sanft });
+    var oben = navHoehe() + 22;
+    var streifen = window.innerHeight - oben - 200;   // was zwischen Leiste und Karte frei ist
+    var hoehe = el.offsetHeight;
+    // Was hineinpasst, wird in den Streifen gesetzt; was zu gross ist, oben angelegt
+    var luft = hoehe < streifen ? Math.round((streifen - hoehe) / 2) : 0;
+    var grenze = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    var ziel = Math.max(0, Math.min(layoutOben(el) - oben - luft, grenze));
+
+    if (Math.abs(window.scrollY - ziel) < 2) return fertig();
+    window.scrollTo({ top: ziel, behavior: sanft });
     steht(function () {
-      // Jetzt ist die Karte gezeichnet, jetzt stimmen auch die Masse darin
+      // Nachfassen nur, wenn wirklich etwas dazwischenkam — im Regelfall
+      // steht nach dem einen Zug alles, und es rueckt nichts mehr.
       var r = el.getBoundingClientRect();
-      var oben = navHoehe() + 22;
-      var unten = window.innerHeight - 200;
-      if (r.top < oben || (r.bottom > unten && r.height < unten - oben)) {
+      if (r.top < oben - 2 || (r.bottom > window.innerHeight - 200 && r.height < streifen)) {
         window.scrollBy({ top: r.top - oben, behavior: sanft });
         return steht(fertig);
       }
