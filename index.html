@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="light">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#fafafa">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=35">
-<link rel="apple-touch-icon" href="/icon-180.png?v=35">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=36">
+<link rel="apple-touch-icon" href="/icon-180.png?v=36">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=35">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=36">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=35">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=36">
 
 <script>
 /* Im Browser oder als App?
@@ -1107,94 +1107,124 @@
 
   /* ---------- Im Browser statt in der App ----------
 
-     Der Bestand bleibt stehen: Name, Kuerzel, Branche, Einkaufszone, Ziel.
-     Was laeuft, ist zu — und zwar sichtbar zu, nicht einfach weg. Ein leeres
-     Loch sieht nach Fehler aus, ein verschlossener Kasten nach Absicht. */
+     Auf dem Telefon hat die Seite im Browser nur noch eine Aufgabe: dorthin
+     fuehren, wo die Liste hingehoert. Also faellt alles weg, was zum Lesen
+     einlaedt — Leiste, Karten, Termine, Stimmung, Fuss. Was bleibt, ist der
+     Kopf mit dem Namen und dem Konto, und darunter der Weg zur App.
 
+     Halbe Sachen waeren schlechter als gar keine: eine Liste mit lauter
+     verschlossenen Feldern liest sich wie eine kaputte Seite. Entweder
+     richtig oder eben nicht hier.
+
+     Geladen wird dabei nichts. Der Kartenbau steigt vorher aus, und weil
+     alle anderen Module auf ihn warten, laeuft auch sonst kein Abruf. */
+
+  .nur-web #auftakt,
+  .nur-web nav,
   .nur-web .news-banner,
   .nur-web #wirtschaftBlock,
   .nur-web #setupStrip,
   .nur-web #feargreed,
-  .nur-web .karten > .card > .news-block,
-  .nur-web .karten > .card > .actions,
+  .nur-web #karten,
+  .nur-web .fx-note,
+  .nur-web footer,
+  .nur-web #installBtn,
   .nur-web #pushBtn { display: none !important; }
 
-  /* Der Chart wird zum verschlossenen Feld. Flach statt 400 Pixel hoch —
-     leerer Platz in dieser Groesse sieht nach Fehler aus, nicht nach Absicht. */
-  .nur-web .chart > * { display: none !important; }
-  .nur-web .chart {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 86px;
-    background: var(--soft);
-    border-top: 1px solid var(--hair);
-    border-bottom: 1px solid var(--hair);
+  /* Der laufende Hintergrund, wie auf der Anmeldeseite. Die Kerzen sind
+     nicht noch einmal ins Markup geschrieben, sondern werden aus dem
+     Ladebildschirm hierher gehaengt — das Bild ist gross, einmal genuegt.
+     Kopf und Kasten liegen darueber, der Kopf wird dafuer durchsichtig. */
+  .web-kerzen { display: none; }
+  .nur-web .web-kerzen {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
   }
-  .nur-web .chart::after {
-    content: "Live-Chart in der App";
-    font-size: 10px;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    font-weight: 600;
-    color: var(--muted);
+  .nur-web header {
+    position: relative;
+    z-index: 1;
+    background: transparent;
+    border-bottom: 0;
   }
 
-  /* Die Einladung, gleich unter dem Kopf */
+  /* Es steht nur noch der Kopf und der Kasten auf der Seite — die gehoeren
+     in die Mitte, nicht oben angeklebt mit Leere darunter. */
+  .nur-web #app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
   .web-sperre { display: none; }
   .nur-web .web-sperre {
-    display: flex;
-    align-items: center;
-    gap: 13px;
-    max-width: 640px;
-    margin: 0 auto;
-    padding: 15px 16px;
-    background: var(--card);
-    border-bottom: 1px solid var(--hair);
-    animation: riseIn 0.5s var(--ease) both;
+    display: block;
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    max-width: 372px;
+    margin: 10px auto 0;
+    padding: 34px 26px 34px;
+    /* Durchscheinend, damit die Kerzen dahinter weiterlaufen — dieselbe
+       Machart wie der Anmeldekasten. */
+    background: rgba(255, 255, 255, 0.72);
+    -webkit-backdrop-filter: saturate(130%) blur(16px);
+    backdrop-filter: saturate(130%) blur(16px);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    animation: riseIn 0.55s var(--ease) both;
   }
+  /* Nacheinander, nicht alles auf einmal */
+  .nur-web .web-mark { animation: riseIn 0.5s var(--ease) 0.1s both; }
+  .nur-web .web-text { animation: riseIn 0.5s var(--ease) 0.18s both; }
+  .nur-web .web-go { animation: riseIn 0.5s var(--ease) 0.28s both; }
+
   .web-mark {
-    flex: 0 0 auto;
-    width: 44px;
-    height: 44px;
-    border-radius: 10px;
+    width: 78px;
+    height: 78px;
+    margin: 0 auto 24px;
+    border-radius: 18px;
     overflow: hidden;
     border: 1px solid var(--line);
   }
   .web-mark img { display: block; width: 100%; height: 100%; }
-  .web-text { flex: 1 1 auto; min-width: 0; }
-  .web-text b { display: block; font-size: 14px; font-weight: 700; }
+  .web-text b {
+    display: block;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+    margin-bottom: 9px;
+  }
   .web-text span {
     display: block;
-    font-size: 12px;
+    font-size: 13.5px;
     color: var(--muted);
-    line-height: 1.45;
-    margin-top: 3px;
+    line-height: 1.55;
   }
   .web-go {
-    flex: 0 0 auto;
-    align-self: stretch;
+    width: 100%;
+    max-width: 250px;
+    margin-top: 26px;
     font: inherit;
     font-size: 10px;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     font-weight: 600;
     color: #fff;
     background: var(--fg);
     border: 1px solid var(--fg);
     border-radius: 2px;
-    padding: 10px 14px;
+    padding: 14px 18px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     transform: translateZ(0);
     transition: transform 0.12s var(--ease);
   }
-  .web-go:active { transform: scale(0.96); }
-  @media (max-width: 430px) {
-    .nur-web .web-sperre { flex-wrap: wrap; }
-    .web-text { flex-basis: calc(100% - 57px); }
-    .web-go { width: 100%; align-self: auto; }
-  }
+  .web-go:active { transform: scale(0.97); }
 
   /* Einladung am unteren Rand */
   .install-bar {
@@ -1424,14 +1454,14 @@
 
      Steigende Kerzen bleiben hohl, fallende sind gefuellt: der Unterschied
      ohne eine einzige Farbe. */
-  .auftakt .kerzen {
+  .kerzen {
     position: absolute;
     inset: 0;
     overflow: hidden;
     z-index: 0;
     pointer-events: none;
   }
-  .auftakt .kerzen-band {
+  .kerzen-band {
     position: absolute;
     top: 0;
     left: 0;
@@ -1439,23 +1469,23 @@
     height: 100%;
     will-change: transform;
   }
-  .auftakt .kerzen-band.hinten {
+  .kerzen-band.hinten {
     height: 150%;
     top: -25%;
     animation: kerzenLauf 15s linear infinite;
   }
-  .auftakt .kerzen-band.vorn {
+  .kerzen-band.vorn {
     height: 78%;
     top: 11%;
     animation: kerzenLauf 6s linear infinite;
   }
-  .auftakt .kerzen-feld { display: block; width: 100%; height: 100%; }
-  .auftakt .kerzen-feld .d { fill: #111; opacity: 0.42; }
-  .auftakt .kerzen-feld .f { fill: #111; opacity: 0.46; }
-  .auftakt .kerzen-feld .s { fill: none; stroke: #111; stroke-width: 2.8; opacity: 0.60; }
-  .auftakt .kerzen-band.hinten .d { opacity: 0.16; }
-  .auftakt .kerzen-band.hinten .f { opacity: 0.17; }
-  .auftakt .kerzen-band.hinten .s { opacity: 0.26; }
+  .kerzen-feld { display: block; width: 100%; height: 100%; }
+  .kerzen-feld .d { fill: #111; opacity: 0.42; }
+  .kerzen-feld .f { fill: #111; opacity: 0.46; }
+  .kerzen-feld .s { fill: none; stroke: #111; stroke-width: 2.8; opacity: 0.60; }
+  .kerzen-band.hinten .d { opacity: 0.16; }
+  .kerzen-band.hinten .f { opacity: 0.17; }
+  .kerzen-band.hinten .s { opacity: 0.26; }
 
   @keyframes kerzenLauf {
     from { transform: translate3d(0, 0, 0); }
@@ -1483,7 +1513,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .auftakt .kerzen-band { animation: none; }
+    .kerzen-band { animation: none; }
   }
 
   /* SCROLLEN, WAEHREND MAN SCROLLT
@@ -1910,11 +1940,25 @@
  </div>
 </header>
 
+<div class="web-kerzen" id="webKerzen" aria-hidden="true"></div>
+<script>
+/* Im Browser bekommt die Installationsseite den laufenden Hintergrund.
+   Es sind dieselben Kerzen, die sonst hinter dem Ladebildschirm laufen —
+   verschoben, nicht kopiert: das Bild ist gross, einmal genuegt. Und es
+   geschieht hier oben, damit es schon beim ersten Bild dasteht. */
+(function () {
+  if (!document.documentElement.classList.contains("nur-web")) return;
+  var ziel = document.getElementById("webKerzen");
+  var kerzen = document.querySelector("#auftakt .kerzen");
+  if (ziel && kerzen) ziel.appendChild(kerzen);
+})();
+</script>
+
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=35" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=36" alt=""></div>
   <div class="web-text">
-    <b>Vollständig gibt es die Liste als App</b>
-    <span>Live-Charts, News und Analysen, Wirtschaftstermine, Marktstimmung — und eine Meldung, sobald ein Kurs seine Einkaufszone berührt.</span>
+    <b>Diese Liste läuft als App</b>
+    <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
   </div>
   <button class="web-go" id="webGo" type="button">So geht's</button>
 </div>
@@ -2029,7 +2073,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=35" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=36" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -2068,7 +2112,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=35" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=36" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -2125,6 +2169,11 @@
   var stapel = document.getElementById("karten");
   var sortKnopf = document.getElementById("sortBtn");
   if (!nav || !stapel) return;
+
+  /* Im Browser wird nichts gebaut und nichts geholt. Alle anderen Module
+     warten auf "rcp:karten" — kommt das nie, laeuft auch sonst kein Abruf.
+     Ein einziges return spart die ganze Kette. */
+  if (document.documentElement.classList.contains("nur-web")) return;
 
   var TV = "https://s.tradingview.com/widgetembed/?symbol=$SYM" +
     "&interval=D&hidesidetoolbar=0&theme=light&style=1&locale=de&toolbarbg=ffffff" +
@@ -2622,8 +2671,12 @@
           if (lab) lab.textContent = "Nicht verfügbar";
         });
     }
-    load();
-    setInterval(load, 5 * 60 * 1000);
+    // Im Browser ist die Stimmung nicht zu sehen — dann muss sie auch nicht
+    // geholt werden. Dieses Stueck haengt als einziges nicht am Kartenbau.
+    if (!document.documentElement.classList.contains("nur-web")) {
+      load();
+      setInterval(load, 5 * 60 * 1000);
+    }
   })();
 
   document.addEventListener("visibilitychange", function () {

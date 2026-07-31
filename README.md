@@ -208,25 +208,33 @@ werden beim Senden aussortiert und in der Rückmeldung gezählt.
 ## Im Browser statt in der App
 
 Auf dem Telefon soll die Liste als App laufen — nur dort kommen die Meldungen
-an, nur dort startet sie ohne Adressleiste in einem Zug. Wer sie stattdessen
-im Browser aufmacht, sieht den **Bestand**, aber nicht das **Laufende**:
+an, nur dort startet sie ohne Adressleiste in einem Zug. Wer sie stattdessen im
+Browser aufmacht, sieht deshalb **keine Liste**, sondern nur den Weg dorthin.
 
-| bleibt | ist zu |
-|---|---|
-| Kopf, Leiste mit Kürzeln, Sortieren | Live-Charts |
-| Name, Kürzel, Branche, NEU | News und Analyse-Knöpfe |
-| Einkaufszone, Kursziel, Euro-Umrechnung | Wirtschaftstermine, Setup-Streifen |
-| Verwaltung | Marktstimmung, Benachrichtigungen |
+Es bleiben: der Kopf mit dem Namen, die Kontozeile mit dem Abmelden, für die
+Verwaltung ihr Knopf — und darunter ein Kasten mit dem Symbol, zwei Sätzen und
+**So geht's**, das die bekannte Anleitung öffnet. Dazu der Streifen am unteren
+Rand. Alles andere ist weg: Leiste, Karten, Charts, News, Termine, Setups,
+Marktstimmung, Fuß.
 
-Statt eines leeren Lochs steht dort, wo der Chart wäre, ein flaches
-verschlossenes Feld: „Live-Chart in der App". Leerer Platz in voller Höhe sieht
-nach Fehler aus, ein verschlossener Kasten nach Absicht. Und die Charts werden
-gar nicht erst eingehängt — was zu ist, muss auch nichts laden.
+Der erste Versuch war eine Liste mit verschlossenen Feldern statt der Charts.
+Das war zu viel: halbe Sachen sind schlechter als gar keine, eine Liste voller
+Schlösser liest sich wie eine kaputte Seite. Entweder richtig oder eben nicht
+hier.
 
-Gleich unter dem Kopf steht die Einladung mit dem Symbol und einem Satz dazu,
-was fehlt; **So geht's** öffnet die bekannte Anleitung. Der Rundgang startet
-hier nicht von selbst — er würde durch eine halb verschlossene Liste führen.
-Über den Knopf im Fuß geht er weiterhin.
+Dahinter laufen die Kerzen wie auf der Anmeldeseite, der Kasten ist milchig,
+Symbol, Text und Knopf kommen um 100/180/280 ms versetzt nach. Die Kerzen
+stehen nicht zweimal im Markup, sondern werden aus dem Ladebildschirm hierher
+gehängt — das Bild ist groß, einmal genügt.
+
+**Geladen wird dabei nichts.** Der Kartenbau steigt gleich am Anfang aus, und
+weil alle anderen Module auf sein `rcp:karten` warten, läuft auch sonst kein
+Abruf. Nur Fear & Greed hing nicht am Kartenbau und brauchte eine eigene
+Bremse. Der Test misst das nach: außer Konto und Anwesenheit geht keine einzige
+Anfrage raus.
+
+Der Rundgang startet hier nicht von selbst — es gibt nichts zu zeigen. Über den
+Knopf im Fuß geht er weiterhin, in der App.
 
 **Am Schreibtisch bleibt alles.** Dort gibt es kein „Zum Home-Bildschirm", und
 eine gesperrte Seite wäre schlicht kaputt. Die Sperre greift nur, wenn die
