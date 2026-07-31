@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#fafafa">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=38">
-<link rel="apple-touch-icon" href="/icon-180.png?v=38">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=39">
+<link rel="apple-touch-icon" href="/icon-180.png?v=39">
 <title>Positionen · Aktien-Liste</title>
 <style>
   :root {
@@ -111,7 +111,10 @@
     background: var(--fg);
     border-radius: 2px;
     padding: 2px 5px;
+    white-space: nowrap;
   }
+  /* Ueberarbeitet ist leiser als neu — grau statt schwarz, wie in der Liste */
+  .kopf .neu.update { background: var(--muted); letter-spacing: 0.08em; }
   .kopf .pfeil { color: var(--muted); font-size: 13px; transition: transform 0.2s var(--ease); }
   .pos.offen .kopf .pfeil { transform: rotate(90deg); }
 
@@ -339,6 +342,7 @@
     kopf.appendChild(el("span", "marke", p.badge || "?"));
     kopf.appendChild(el("span", "wie", p.name || "Ohne Namen"));
     if (p.neu) kopf.appendChild(el("span", "neu", "NEU"));
+    else if (p.update) kopf.appendChild(el("span", "neu update", "UPDATE"));
     kopf.appendChild(el("span", "pfeil", "›"));
     kopf.addEventListener("click", function () {
       p._offen = !p._offen;
@@ -350,14 +354,25 @@
 
     FELDER.forEach(function (f) { felder.appendChild(feld(p, f)); });
 
-    var s = el("label", "schalter");
-    var c = document.createElement("input");
-    c.type = "checkbox";
-    c.checked = p.neu === true;
-    c.addEventListener("change", function () { p.neu = c.checked; zeichnen(); });
-    s.appendChild(c);
-    s.appendChild(el("span", null, "Im Menü als NEU markieren"));
-    felder.appendChild(s);
+    /* Zwei Kennzeichen fuers Menue. Beide gleichzeitig ergaeben keinen Sinn —
+       was gerade erst dazugekommen ist, ist nicht auch schon ueberarbeitet.
+       Deshalb schaltet das eine das andere aus. */
+    function schalter(feldName, text) {
+      var s = el("label", "schalter");
+      var c = document.createElement("input");
+      c.type = "checkbox";
+      c.checked = p[feldName] === true;
+      c.addEventListener("change", function () {
+        p[feldName] = c.checked;
+        if (c.checked) p[feldName === "neu" ? "update" : "neu"] = false;
+        zeichnen();
+      });
+      s.appendChild(c);
+      s.appendChild(el("span", null, text));
+      felder.appendChild(s);
+    }
+    schalter("neu", "Im Menü als NEU markieren");
+    schalter("update", "Im Menü als UPDATE markieren — überarbeitet");
 
     var w = el("div", "werkzeug");
 
@@ -412,7 +427,7 @@
 
   document.getElementById("neuKnopf").addEventListener("click", function () {
     daten.push({
-      id: "", name: "", badge: "", chip: "", neu: true, branche: "",
+      id: "", name: "", badge: "", chip: "", neu: true, update: false, branche: "",
       zone: "", ziel: "", tv: "", yahoo: "", frage: "", fn: "", keys: "", fibo: "",
       _offen: true
     });

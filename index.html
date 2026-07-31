@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="light">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#fafafa">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=38">
-<link rel="apple-touch-icon" href="/icon-180.png?v=38">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=39">
+<link rel="apple-touch-icon" href="/icon-180.png?v=39">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=38">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=39">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=38">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=39">
 
 <script>
 /* Im Browser oder als App?
@@ -352,6 +352,13 @@
     background: #111;
     color: #fff;
   }
+  /* Ueberarbeitet ist leiser als neu: grau statt schwarz. Die Rangfolge
+     soll man sehen, ohne sie zu lesen. */
+  .badge.update {
+    border-color: var(--muted);
+    background: var(--muted);
+    color: #fff;
+  }
   .card-head .badges {
     display: flex;
     gap: 6px;
@@ -379,6 +386,15 @@
     padding: 2px 5px;
     border-radius: 2px;
     line-height: 1.15;
+  }
+  /* UPDATE ist doppelt so lang wie NEU — enger gesetzt, damit es dem Chip
+     nicht ueber die Schultern waechst. Und grau statt schwarz, wie auf der
+     Karte. */
+  nav a.nav-new .nav-neu.nav-update {
+    font-size: 6.5px;
+    letter-spacing: 0.04em;
+    padding: 2px 4px;
+    background: var(--muted);
   }
   /* Banner */
   .news-banner {
@@ -1959,7 +1975,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=38" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=39" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -2077,7 +2093,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=38" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=39" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -2116,7 +2132,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=38" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=39" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -2191,10 +2207,19 @@
     return n;
   }
 
+  /* NEU oder UPDATE — nie beides. Was gerade erst dazugekommen ist, ist
+     nicht auch schon ueberarbeitet; NEU geht deshalb vor. */
+  function marke(p) {
+    if (p.neu) return { wort: "NEU", art: "neu" };
+    if (p.update) return { wort: "UPDATE", art: "update" };
+    return null;
+  }
+
   function chip(p) {
-    var a = el("a", p.neu ? "nav-new" : null, p.chip || p.badge);
+    var m = marke(p);
+    var a = el("a", m ? "nav-new" : null, p.chip || p.badge);
     a.href = "#" + p.id;
-    if (p.neu) a.appendChild(el("span", "nav-neu", "NEU"));
+    if (m) a.appendChild(el("span", "nav-neu nav-" + m.art, m.wort));
     return a;
   }
 
@@ -2205,11 +2230,12 @@
     var kopf = el("div", "card-head");
     var reihe = el("div", "row");
     reihe.appendChild(el("h2", null, p.name));
-    if (p.neu) {
-      // Als neu markiert: NEU davor, beide in einer Gruppe — dort setzt auch
-      // die Aktiv-Anzeige ihr Kennzeichen ein
+    var m = marke(p);
+    if (m) {
+      // Markiert: das Kennzeichen davor, beide in einer Gruppe — dort setzt
+      // auch die Aktiv-Anzeige ihr Zeichen ein
       var gruppe = el("div", "badges");
-      gruppe.appendChild(el("span", "badge neu", "NEU"));
+      gruppe.appendChild(el("span", "badge " + m.art, m.wort));
       gruppe.appendChild(el("span", "badge", p.badge));
       reihe.appendChild(gruppe);
     } else {

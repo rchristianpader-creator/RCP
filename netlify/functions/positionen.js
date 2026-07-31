@@ -145,6 +145,10 @@ function pruefen(roh) {
       badge: text(p.badge, GRENZEN.badge),
       chip: text(p.chip, GRENZEN.chip),
       neu: p.neu === true || p.neu === "1",
+      // Ueberarbeitet: dieselbe Machart wie "neu", nur leiser. Beides
+      // gleichzeitig ist erlaubt — angezeigt wird dann NEU, denn was gerade
+      // erst dazugekommen ist, ist nicht auch schon ueberarbeitet.
+      update: p.update === true || p.update === "1",
       branche: text(p.branche, GRENZEN.branche),
       zone: text(zone, GRENZEN.zone),
       ziel: text(p.ziel, GRENZEN.ziel),

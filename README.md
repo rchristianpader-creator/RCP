@@ -97,8 +97,27 @@ und Karten daraus auf; `status.js` und `alerts.js` lesen dieselbe Quelle, es
 gibt also weiterhin nur eine Liste zu pflegen.
 
 Bearbeitet wird sie unter **Verwaltung → Positionen**: hinzufügen, ändern,
-verschieben, entfernen, als NEU markieren. Gespeichert wird immer die ganze
-Liste auf einmal.
+verschieben, entfernen, markieren. Gespeichert wird immer die ganze Liste auf
+einmal.
+
+### Die zwei Markierungen
+
+Zwei Schalter je Position, beide fürs Menü und die Karte:
+
+| Schalter | Zeichen | Aussehen |
+|---|---|---|
+| **NEU** | `NEU` | schwarz |
+| **UPDATE** | `UPDATE` | grau — überarbeitet |
+
+Grau statt schwarz, damit man die Rangfolge sieht, ohne sie zu lesen.
+
+Beide zugleich ergäben keinen Sinn: was gerade erst dazugekommen ist, ist nicht
+auch schon überarbeitet. Im Editor schaltet deshalb das eine das andere aus.
+Kommen trotzdem beide an — von Hand, über die Function —, gewinnt NEU; es wird
+immer nur **ein** Zeichen gezeigt.
+
+Push gibt es nur für wirklich neue Positionen. Ein UPDATE ist eine Notiz an der
+Karte, kein Anlass, jemanden zu wecken.
 
 Je Position:
 
