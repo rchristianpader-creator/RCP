@@ -213,9 +213,11 @@ Browser aufmacht, sieht deshalb **keine Liste**, sondern nur den Weg dorthin.
 
 Es bleiben: der Kopf mit dem Namen, die Kontozeile mit dem Abmelden, für die
 Verwaltung ihr Knopf — und darunter ein Kasten mit dem Symbol, zwei Sätzen und
-**So geht's**, das die bekannte Anleitung öffnet. Dazu der Streifen am unteren
-Rand. Alles andere ist weg: Leiste, Karten, Charts, News, Termine, Setups,
-Marktstimmung, Fuß.
+**So geht's**, das die bekannte Anleitung öffnet. Alles andere ist weg: Leiste,
+Karten, Charts, News, Termine, Setups, Marktstimmung, Fuß — und der Streifen am
+unteren Rand, der sich sonst genau über den Knopf im Kasten legte. Der Test
+misst das jetzt direkt nach: an der Mitte des Knopfes muss auch der Knopf
+liegen, nicht etwas anderes.
 
 Der erste Versuch war eine Liste mit verschlossenen Feldern statt der Charts.
 Das war zu viel: halbe Sachen sind schlechter als gar keine, eine Liste voller
