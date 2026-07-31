@@ -250,6 +250,32 @@ Abseitige Karten zeichnet der Browser wegen `content-visibility: auto` gar
 nicht erst. Die Kopf-Parallaxe und die Fortschrittslinie haengen an
 CSS-Zeitachsen — beim Scrollen laeuft kein rechnendes Skript.
 
+### Wie laut das Scrollen ist
+
+Die Bewegung war lange bewusst zurueckhaltend und wirkte dadurch beliebig.
+Jetzt ist sie deutlich:
+
+- **Der Weg** eines Kartenteils betraegt 54 statt 26 Pixel, und der Teil kommt
+  aus `scale(0.955)` herein.
+- **Die Deckkraft kommt frueher als die Bewegung** (bei 62 % der Strecke) — die
+  Zeile steht schon lesbar da, waehrend sie ihren letzten Zentimeter noch faehrt.
+- **Die Abschnitte liegen weit auseinander** (0–30 %, 10–41 %, 21–52 %, 31–62 %
+  der Einfahrt) und ueberlappen nur zur Haelfte. Vorher deckten sie sich fast,
+  und die Karte kam als Block.
+- **Die Haarlinie** faehrt aus `scaleY(2.5)` bei 0,9 Deckkraft auf eine
+  1-Pixel-Linie bei 0,12 — ein Strich, der sich zur Kante beruhigt.
+- **Der Kopf sinkt weg** statt nur zurueckzubleiben: 62 % statt 38 %, dazu
+  `scale(0.9)` und Deckkraft 0,32.
+
+Skaliert wird dabei **nie die Karte** — Kopf, Zielleiste, News und Knopf sind
+Geschwister des Charts, nicht seine Vorfahren. Der Rueckfall fuer Browser ohne
+scrollgebundene Animation (`cardIn`) faehrt weiter (42 statt 16 Pixel), aber
+ohne Skalierung: dort bewegt sich die ganze Karte.
+
+`scroll-test` misst die Lautstaerke nach — Weg, Groesse, Abstand zwischen
+erstem und letztem Teil, und dass der Chart weiterhin unberuehrt bleibt.
+`fluss-test` prueft, dass das Scrollen fluessig bleibt.
+
 ## Nachricht an alle
 
 In der Verwaltung steht oben **Nachricht an alle**: Titel, Text, senden. Sie
@@ -766,6 +792,50 @@ Einträge älter als 60 Tage werden beim Nachsehen weggeräumt.
 Eine Meldung kann **Zeichen** tragen (`zeichen: ["UAA", "DOW"]`) — die Kürzel
 der Positionen, um die es geht. Sie stehen als kleine Marken unter dem Text.
 Gesetzt werden sie beim Markieren einer Nachricht (siehe „Nachricht an alle").
+
+### Meldungen verwalten und löschen
+
+Geschrieben wird das Buch von den Stellen, die auch den Push verschicken.
+**Weggeräumt wird nur an einer Stelle** — in `meldungen.js`, per POST, und nur
+von der Verwaltung:
+
+```
+GET  ?seit=<ms>          das, was die Glocke dieses Geräts zeigt
+GET  ?alle=1             das ganze Buch, ohne Stichtag       nur Verwaltung
+POST { tat: "weg", id }  eine wegräumen                      nur Verwaltung
+POST { tat: "leeren" }   alle wegräumen                      nur Verwaltung
+```
+
+`?alle=1` ist nicht bloß bequem, sondern nötig: die Glocke jedes Geräts zeigt
+nur, was seit seinem Einzug dazukam, und **wer nur sieht, was sein Gerät sieht,
+räumt weg, was er nicht sieht.** Für einen Gast ist der Parameter wirkungslos —
+er bekommt seinen Stichtag und keine Zugangsanfragen, egal was er fragt.
+
+In der **Verwaltung** steht das Buch als eigener Kasten: je Zeile die Art als
+kleines Zeichen (Nachricht, Einkaufszone, Position, Beitrag, Zugang), die
+Überschrift, darunter Zeitpunkt, markierte Kürzel, „mit Bild" und „nur
+Verwaltung". Dazu ein **Löschen** je Zeile und ein **Alle löschen**. Was gerade
+verschickt oder veröffentlicht wurde, steht sofort im Kasten — die beiden
+anderen Module rufen dafür `window.rcpBuchFrisch()`.
+
+In der **Glocke** steht derselbe Knopf an der aufgeschlagenen Meldung — dort,
+wo man die missratene Meldung bemerkt. Er ist der leiseste Knopf im Blatt und
+nur für die Verwaltung da; ob wirklich gelöscht werden darf, entscheidet
+`chefLesen()` am Konto, nicht das lesbare Zeichen im Keks. Am
+Willkommensgruß steht er nicht: der wird in der App erzeugt und hat keine
+Kennung.
+
+**Eine Meldung ist für alle dieselbe.** Was hier weggeht, ist auf jedem Gerät
+weg — deshalb wird vorher gefragt, und deshalb steht es auch im Kasten.
+
+**Das Bild geht mit.** Zeigt keine bleibende Meldung mehr darauf, wird es aus
+`aktien-bilder` gelöscht; zeigt noch eine darauf, bleibt es liegen. Sonst wäre
+es entweder Müll, der für immer bezahlt wird, oder ein Loch in einer Meldung,
+die noch steht.
+
+`buch-test` prüft die Function (wer darf, wer nicht, was mit dem Bild
+passiert), `buchweg-test` die beiden Oberflächen — bis hin zu dem Fall, dass
+ein Gast den Aufruf von Hand absetzt.
 
 ## Beiträge
 

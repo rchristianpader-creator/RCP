@@ -7,9 +7,10 @@
 
    Abgelegt wird im Store "aktien-bilder", als JSON mit Typ und Base64. Das
    ist nicht die sparsamste Form — ein Drittel mehr als die reinen Bytes —,
-   aber es kommt mit demselben Speicher aus wie alles andere hier, und die
-   Bilder sind klein: die App verkleinert sie vor dem Hochladen auf hoechstens
-   1280 Pixel.
+   aber es kommt mit demselben Speicher aus wie alles andere hier. Verkleinert
+   wird beim Hochladen nichts: ein Bild geht so raus, wie es hereinkam,
+   solange es unter die Grenze passt. Erst darueber rechnet die Verwaltung es
+   herunter (siehe vorbereiten() in verwaltung.html).
 
    Der Schluessel traegt die Zeit rueckwaerts, wie beim Meldungsbuch. Beim
    Hochladen wird weggeraeumt, was aelter als 90 Tage ist.
@@ -107,6 +108,27 @@ async function aufraeumen(store) {
 
 export function saeubern(id) {
   return String(id || "").replace(/[^0-9a-z-]/gi, "").slice(0, 40);
+}
+
+/* Die Kennung aus einer fertigen Adresse zurueckholen. Im Meldungsbuch steht
+   nicht die blosse ID, sondern der ganze Weg — wer die Meldung wegraeumt,
+   soll ihr Bild mitnehmen koennen, ohne die Adresse selbst zu zerlegen. */
+export function ausAdresse(url) {
+  const t = String(url || "").match(/[?&]id=([^&]+)/);
+  return t ? saeubern(t[1]) : "";
+}
+
+/* Ein Bild wegraeumen. Wirft nie: es haengt immer an etwas anderem, und
+   dessen Loeschen ist wichtiger als das Aufraeumen dahinter. */
+export async function loeschen(id) {
+  const k = saeubern(id);
+  if (!k) return false;
+  try {
+    await getStore(LADEN).delete("b/" + k);
+    return true;
+  } catch (e) {
+    return false;
+  }
 }
 
 function json(obj, status) {

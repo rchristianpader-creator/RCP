@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="light">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#fafafa">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=54">
-<link rel="apple-touch-icon" href="/icon-180.png?v=54">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=55">
+<link rel="apple-touch-icon" href="/icon-180.png?v=55">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=54">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=55">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=54">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=55">
 
 <script>
 /* Im Browser oder als App?
@@ -852,6 +852,31 @@
   }
   .m-zeichen-gross .kuerzel-taste.aktiv { background: var(--fg); }
   #meldungEine .btn { margin-top: 18px; }
+
+  /* Wegraeumen steht nur der Verwaltung offen und ist der leiseste Knopf im
+     Blatt: eine Meldung ist fuer alle dieselbe, und wer sie hier loescht,
+     loescht sie auf jedem Geraet. */
+  .m-weg {
+    display: block;
+    width: 100%;
+    margin-top: 14px;
+    font: inherit;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--muted);
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 12px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.18s ease, border-color 0.18s ease, transform 0.12s var(--ease);
+  }
+  .m-weg:hover { color: var(--fg); border-color: var(--fg); }
+  .m-weg:active { transform: scale(0.985); }
+  .m-weg[disabled] { opacity: 0.45; cursor: default; }
 
   /* Die Lupe: das Bild im Ganzen, auf schwarzem Grund — zum Ziehen und
      Zoomen. Der Grund blendet auf, das Bild waechst aus seinem Platz in der
@@ -1737,8 +1762,11 @@
     from { opacity: 0; transform: translate3d(0, 10px, 0); }
     to { opacity: 1; transform: translate3d(0, 0, 0); }
   }
+  /* Der Rueckfall fuer Browser ohne scrollgebundene Animation. Weiter Weg
+     wie beim Original, aber ohne Skalierung: hier faehrt die ganze Karte,
+     und die ist Vorfahr des Charts. */
   @keyframes cardIn {
-    from { opacity: 0; transform: translate3d(0, 16px, 0); }
+    from { opacity: 0; transform: translate3d(0, 42px, 0); }
     to { opacity: 1; transform: translate3d(0, 0, 0); }
   }
   @keyframes lineIn {
@@ -1936,9 +1964,11 @@
         animation-timeline: scroll(root block);
         animation-range: 0 var(--kopf-hoehe, 380px);
       }
+      /* Der Kopf bleibt nicht nur zurueck — er sinkt weg: weiter, kleiner,
+         blasser. Im Kopf steckt kein Chart, deshalb ist das hier frei. */
       @keyframes kopfLauf {
-        from { transform: translate3d(0, 0, 0); }
-        to   { transform: translate3d(0, 38%, 0); }
+        from { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
+        to   { transform: translate3d(0, 62%, 0) scale(0.9); opacity: 0.32; }
       }
     }
   }
@@ -2006,7 +2036,7 @@
      ohne Javascript nichts unsichtbar bleibt. */
   .karten.animiert > .card { opacity: 0; }
   .karten.animiert > .card.sichtbar {
-    animation: cardIn 0.5s var(--ease) both;
+    animation: cardIn 0.62s var(--ease) both;
   }
 
   /* DIE KARTE FOLGT DEM FINGER — ABER NICHT DER CHART
@@ -2039,15 +2069,29 @@
         animation-timeline: --karte;
       }
 
-      /* Zeitversetzt: jeder Teil hat seinen eigenen Abschnitt der Strecke */
-      .karten > .card > .card-head { animation-range: entry 2% entry 26%; }
-      .karten > .card > .ziel-bar  { animation-range: entry 8% entry 32%; }
-      .karten > .card > .news-block { animation-range: entry 14% entry 38%; }
-      .karten > .card > .actions   { animation-range: entry 20% entry 44%; }
+      /* Zeitversetzt: jeder Teil hat seinen eigenen Abschnitt der Strecke.
 
+         Die Abschnitte liegen weit auseinander und ueberlappen nur zur
+         Haelfte — so kommt eine Zeile nach der anderen und nicht alles
+         beinahe zugleich. Der letzte Teil ist erst bei 62 % der Einfahrt
+         fertig: die Karte baut sich auf, waehrend man sie schon ansieht. */
+      .karten > .card > .card-head { animation-range: entry 0% entry 30%; }
+      .karten > .card > .ziel-bar  { animation-range: entry 10% entry 41%; }
+      .karten > .card > .news-block { animation-range: entry 21% entry 52%; }
+      .karten > .card > .actions   { animation-range: entry 31% entry 62%; }
+
+      /* Weiter Weg, ein Hauch kleiner am Anfang, und die Deckkraft kommt
+         frueher als die Bewegung — dann steht die Zeile schon lesbar da,
+         waehrend sie ihren letzten Zentimeter noch faehrt.
+
+         Skaliert wird nur der Teil, nie die Karte: im Chart steckt ein
+         fremdes <iframe>, und wer dessen Vorfahren verwandelt, laesst es
+         bei jedem Bild neu zeichnen. Kopf, Zielleiste, News und Knopf sind
+         Geschwister des Charts, nicht seine Vorfahren. */
       @keyframes teilLauf {
-        from { opacity: 0; transform: translate3d(0, 26px, 0); }
-        to   { opacity: 1; transform: none; }
+        from { opacity: 0; transform: translate3d(0, 54px, 0) scale(0.955); }
+        62%  { opacity: 1; }
+        to   { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
       }
 
       /* Und eine Haarlinie, die sich ueber den Kartenkopf zieht.
@@ -2065,11 +2109,13 @@
         transform-origin: 0 50%;
         animation: kanteLauf linear both;
         animation-timeline: --karte;
-        animation-range: entry 4% entry 34%;
+        animation-range: entry 2% entry 44%;
       }
+      /* Sie faehrt aus dem Nichts auf die volle Breite und wird dabei von
+         einem deutlichen Strich zur Haarlinie, die stehen bleibt. */
       @keyframes kanteLauf {
-        from { transform: scaleX(0); opacity: 0.55; }
-        to   { transform: scaleX(1); opacity: 0.12; }
+        from { transform: scaleX(0) scaleY(2.5); opacity: 0.9; }
+        to   { transform: scaleX(1) scaleY(1); opacity: 0.12; }
       }
     }
   }
@@ -2427,7 +2473,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=54" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=55" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -2545,7 +2591,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=54" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=55" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -2584,6 +2630,7 @@
       <img class="m-gross" id="meldungBild" alt="" hidden>
       <p class="m-text" id="meldungText"></p>
       <a class="btn" id="meldungHin" hidden></a>
+      <button class="m-weg" id="meldungWeg" type="button" hidden>Meldung löschen</button>
     </div>
   </div>
 </div>
@@ -2639,7 +2686,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=54" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=55" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -4657,7 +4704,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=54";
+      i.src = "/icon-512.png?v=55";
     });
     return symbolBild;
   }
@@ -5168,8 +5215,15 @@ if ("serviceWorker" in navigator) {
   var bildEl = document.getElementById("meldungBild");
   var zeichenEl = document.getElementById("meldungZeichen");
   var hinBtn = document.getElementById("meldungHin");
+  var wegBtn = document.getElementById("meldungWeg");
   var offen = null;
   var hinWeg = "";
+
+  /* Wegraeumen kann nur die Verwaltung. Das Zeichen dafuer legt das Tor
+     daneben, nachdem es die Unterschrift geprueft hat — es steuert nur, ob
+     der Knopf dasteht. Ob wirklich geloescht werden darf, entscheidet die
+     Function, und zwar am Konto. */
+  var chef = /(?:^|;\s*)rcp_frei=1(?:;|$)/.test(document.cookie || "");
   if (!knopf || !blatt || !liste) return;
   if (document.documentElement.classList.contains("nur-web")) return;
 
@@ -5395,7 +5449,43 @@ if ("serviceWorker" in navigator) {
       hinBtn.hidden = true;
     }
     hinWeg = weiter;
+    /* Der Willkommensgruss steht in keinem Buch — er wird hier erzeugt und
+       hat keine Kennung. Also gibt es an ihm auch nichts wegzuraeumen. */
+    wegBtn.hidden = !(chef && m.id);
+    wegBtn.disabled = false;
+    wegBtn.textContent = "Meldung löschen";
     blatt.querySelector(".sheet-card").scrollTop = 0;
+  }
+
+  /* Wegraeumen. Danach zurueck zur Liste — die Meldung, auf der man gerade
+     stand, gibt es ja nicht mehr. */
+  function wegraeumen(m) {
+    if (!m || !m.id) return;
+    if (!confirm("„" + m.titel + "“ löschen? Die Meldung ist dann auf jedem Gerät weg.")) return;
+    wegBtn.disabled = true;
+    wegBtn.textContent = "…";
+    fetch("/.netlify/functions/meldungen", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ tat: "weg", id: m.id })
+    })
+      .then(function (r) { return r.json().catch(function () { return {}; }); })
+      .then(function (a) {
+        if (!a || !a.ok) {
+          wegBtn.disabled = false;
+          wegBtn.textContent = "Ging nicht — nochmal?";
+          return;
+        }
+        stand = stand.filter(function (x) { return x.id !== m.id; });
+        offen = null;
+        zaehlen();
+        window.rcpBlatt.blaettern(einzelnEl, uebersicht, true, zeichnen);
+      })
+      .catch(function () {
+        wegBtn.disabled = false;
+        wegBtn.textContent = "Ging nicht — nochmal?";
+      });
   }
 
   var laeuft = false;
@@ -5469,6 +5559,7 @@ if ("serviceWorker" in navigator) {
     e.preventDefault();
     if (hinWeg) hingehen(hinWeg);
   });
+  wegBtn.addEventListener("click", function () { wegraeumen(offen); });
   bildEl.addEventListener("click", function () {
     if (bildEl.getAttribute("src") && window.rcpLupe) window.rcpLupe(bildEl.getAttribute("src"), bildEl);
   });

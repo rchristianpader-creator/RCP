@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#fafafa">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=54">
-<link rel="apple-touch-icon" href="/icon-180.png?v=54">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=55">
+<link rel="apple-touch-icon" href="/icon-180.png?v=55">
 <title>Verwaltung · Aktien-Liste</title>
 <style>
   :root {
@@ -281,7 +281,8 @@
   /* Beitrag veroeffentlichen — dieselbe Bauweise wie die Nachricht, nur mit
      mehr Platz zum Schreiben und einer Liste dessen, was schon steht. */
   .beitrag textarea.lang { min-height: 200px; line-height: 1.55; }
-  .beitrag .hinweis {
+  .beitrag .hinweis,
+  .buch .hinweis {
     font-size: 12px;
     color: var(--muted);
     line-height: 1.5;
@@ -361,38 +362,41 @@
     border: 1px solid var(--line);
   }
 
-  .beitrag .stand {
+  .senden .stand {
     border-top: 1px solid var(--line);
     margin-top: 16px;
     padding-top: 4px;
   }
-  .beitrag .stand .leer {
+  .senden .stand .leer {
     font-size: 12px;
     color: var(--muted);
     padding: 10px 0 2px;
   }
-  .beitrag .stueck {
+  .senden .stueck {
     display: flex;
     align-items: baseline;
     gap: 10px;
     padding: 11px 0;
     border-bottom: 1px solid var(--hair, #ebebeb);
   }
-  .beitrag .stueck:last-child { border-bottom: 0; }
-  .beitrag .stueck .was { flex: 1; min-width: 0; }
-  .beitrag .stueck .was b {
+  .senden .stueck:last-child { border-bottom: 0; }
+  .senden .stueck .was { flex: 1; min-width: 0; }
+  .senden .stueck .was b {
     display: block;
     font-size: 14px;
     font-weight: 600;
     line-height: 1.35;
   }
-  .beitrag .stueck .was span {
+  /* Nur die zweite Zeile, nicht jedes span darin: im Meldungsbuch steckt
+     das Zeichen der Art in der Ueberschrift, und ohne ">" machte diese
+     Regel daraus einen Block ueber die ganze Breite. */
+  .senden .stueck .was > span {
     display: block;
     font-size: 11px;
     color: var(--muted);
     margin-top: 2px;
   }
-  .beitrag .stueck button {
+  .senden .stueck button {
     flex: none;
     font-size: 10px;
     padding: 7px 12px;
@@ -400,7 +404,31 @@
     background: none;
     border: 1px solid var(--line);
   }
-  .beitrag .stueck button:hover { border-color: var(--fg); }
+  .senden .stueck button:hover { border-color: var(--fg); }
+
+  /* Das Meldungsbuch. Woher eine Meldung kommt, steht als kleines Zeichen
+     vor ihrer Ueberschrift — sonst sieht eine Zeile aus wie die andere. */
+  .buch .art {
+    display: inline-block;
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--muted);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 2px 5px;
+    margin-right: 7px;
+    vertical-align: 1px;
+  }
+  .buch .stueck.nurchef .art { border-color: var(--fg); color: var(--fg); }
+  /* Wegraeumen soll nicht der lauteste Knopf der Seite sein */
+  .buch > .reihe button {
+    color: var(--fg);
+    background: none;
+    border-color: var(--line);
+  }
+  .buch > .reihe button:hover { border-color: var(--fg); }
 
   /* Wer gerade da ist */
   .jetzt {
@@ -648,6 +676,20 @@
     </div>
     <div class="ergebnis" id="bErgebnis"></div>
     <div class="stand" id="bListe"><div class="leer">wird geladen …</div></div>
+  </section>
+
+  <section class="senden buch" id="buchKasten" hidden>
+    <div class="titel">Meldungen</div>
+    <p class="hinweis">Alles, was in der Glocke steht — verschickte Nachrichten,
+      Kurse in ihrer Zone, Änderungen an Positionen, Beiträge, Zugangsanfragen.
+      Eine Meldung ist für alle dieselbe: was hier weggeht, ist auf jedem Gerät
+      weg. Nach 60 Tagen räumt sie sich von selbst.</p>
+    <div class="reihe">
+      <span class="zahl" id="buchZahl">wird geladen …</span>
+      <button type="button" id="buchLeeren" hidden>Alle löschen</button>
+    </div>
+    <div class="ergebnis" id="buchErgebnis"></div>
+    <div class="stand" id="buchListe"><div class="leer">wird geladen …</div></div>
   </section>
 
   <div id="inhalt"></div>
@@ -1221,6 +1263,7 @@
           markenLoesen();
           bildLoesen();
           zaehlen();
+          if (window.rcpBuchFrisch) window.rcpBuchFrisch();
         })
         .catch(function () {
           knopf.disabled = false;
@@ -1396,8 +1439,157 @@
         linkEl.value = "";
         karteZeigen(null);
         stellen(a.artikel);
+        if (window.rcpBuchFrisch) window.rcpBuchFrisch();
       });
     });
+
+    holen();
+  })();
+
+  /* ---------- Das Meldungsbuch ----------
+
+     Was in der Glocke steht, steht hier zum Nachsehen und Wegraeumen. Die
+     Glocke jedes Geraets zeigt nur, was seit seinem Einzug dazukam — hier
+     steht das ganze Buch, sonst raeumte man weg, was man nicht sieht.
+
+     Eine Meldung ist fuer alle dieselbe: was hier weggeht, ist auf jedem
+     Geraet weg. Deshalb wird vorher gefragt. */
+
+  (function () {
+    var API4 = "/.netlify/functions/meldungen";
+    var kasten = document.getElementById("buchKasten");
+    var liste = document.getElementById("buchListe");
+    var zahl = document.getElementById("buchZahl");
+    var leerenBtn = document.getElementById("buchLeeren");
+    var ergebnis = document.getElementById("buchErgebnis");
+
+    /* Woher eine Meldung kommt. Die Namen stehen so in notieren(): "zone"
+       kommt aus alerts.js, "position" aus positionen.js, und so fort. */
+    var ARTEN = {
+      nachricht: "Nachricht",
+      zone: "Einkaufszone",
+      position: "Position",
+      beitrag: "Beitrag",
+      zugang: "Zugang",
+      meldung: "Meldung"
+    };
+
+    function zeigen(was, gut) {
+      ergebnis.textContent = was || "";
+      ergebnis.className = "ergebnis " + (was ? (gut ? "gut" : "schlecht") : "");
+    }
+
+    function wann(iso) {
+      var d = new Date(iso);
+      if (isNaN(d)) return "";
+      return d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" }) +
+        " · " + d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+    }
+
+    /* Die zweite Zeile: wann, an wen, woran haengt was. Nur was zutrifft —
+       eine Zeile voller Leerstellen sagt weniger als eine kurze. */
+    function dazu(m) {
+      var teile = [wann(m.zeit)];
+      if (m.nur === "chef") teile.push("nur Verwaltung");
+      if ((m.zeichen || []).length) teile.push(m.zeichen.join(" · "));
+      if (m.bild) teile.push("mit Bild");
+      return teile.filter(Boolean).join(" · ");
+    }
+
+    function stellen(alle) {
+      liste.textContent = "";
+      alle = alle || [];
+      leerenBtn.hidden = !alle.length;
+      if (!alle.length) {
+        var leer = document.createElement("div");
+        leer.className = "leer";
+        leer.textContent = "Das Buch ist leer.";
+        liste.appendChild(leer);
+        zahl.textContent = "Keine Meldung";
+        return;
+      }
+      zahl.textContent = alle.length === 1 ? "1 Meldung steht" : alle.length + " Meldungen stehen";
+
+      alle.forEach(function (m) {
+        var reihe = document.createElement("div");
+        reihe.className = "stueck" + (m.nur === "chef" ? " nurchef" : "");
+
+        var was = document.createElement("div");
+        was.className = "was";
+        var b = document.createElement("b");
+        var art = document.createElement("span");
+        art.className = "art";
+        art.textContent = ARTEN[m.art] || ARTEN.meldung;
+        b.appendChild(art);
+        b.appendChild(document.createTextNode(m.titel || "Ohne Titel"));
+        var s = document.createElement("span");
+        s.textContent = dazu(m);
+        was.appendChild(b);
+        was.appendChild(s);
+
+        var weg = document.createElement("button");
+        weg.type = "button";
+        weg.textContent = "Löschen";
+        weg.addEventListener("click", function () {
+          if (!confirm("„" + (m.titel || "Ohne Titel") + "“ löschen? Die Meldung ist dann auf jedem Gerät weg.")) return;
+          weg.disabled = true;
+          weg.textContent = "…";
+          schicken({ tat: "weg", id: m.id }, function (a) {
+            if (a && a.ok) { zeigen("Gelöscht.", true); stellen(a.meldungen); }
+            else {
+              weg.disabled = false;
+              weg.textContent = "Löschen";
+              zeigen((a && a.fehler) || "Das hat nicht geklappt.", false);
+            }
+          });
+        });
+
+        reihe.appendChild(was);
+        reihe.appendChild(weg);
+        liste.appendChild(reihe);
+      });
+    }
+
+    function schicken(daten, fertig) {
+      fetch(API4, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify(daten)
+      })
+        .then(function (r) { return r.json().catch(function () { return {}; }); })
+        .then(fertig)
+        .catch(function () { fertig(null); });
+    }
+
+    leerenBtn.addEventListener("click", function () {
+      if (!confirm("Alle Meldungen löschen? Die Glocke ist danach auf jedem Gerät leer.")) return;
+      var vorher = leerenBtn.textContent;
+      leerenBtn.disabled = true;
+      leerenBtn.textContent = "…";
+      schicken({ tat: "leeren" }, function (a) {
+        leerenBtn.disabled = false;
+        leerenBtn.textContent = vorher;
+        if (a && a.ok) { zeigen(a.geloescht === 1 ? "1 Meldung gelöscht." : a.geloescht + " Meldungen gelöscht.", true); stellen([]); }
+        else zeigen((a && a.fehler) || "Das hat nicht geklappt.", false);
+      });
+    });
+
+    function holen() {
+      fetch(API4 + "?alle=1", { credentials: "same-origin", cache: "no-store" })
+        .then(function (r) { return r.json(); })
+        .then(function (a) {
+          if (!a || !a.ok) return;
+          kasten.hidden = false;
+          stellen(a.meldungen);
+        })
+        .catch(function () {});
+    }
+
+    /* Wer gerade etwas verschickt oder veroeffentlicht hat, sieht es hier
+       sofort stehen — sonst muesste er die Seite neu laden, um zu sehen,
+       was er eben ausgeloest hat. */
+    window.rcpBuchFrisch = holen;
 
     holen();
   })();
