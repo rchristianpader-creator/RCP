@@ -214,10 +214,38 @@ Setups, Marktstimmung, dann eine Karte von oben nach unten, zuletzt
 Benachrichtigungen und Verwaltung.
 
 Weiter geht es mit dem Knopf, mit einem Tipp irgendwo daneben, mit Pfeiltaste
-oder Leertaste. Zurück geht auch. Danach kommt er nicht mehr von selbst; über
-**Rundgang noch einmal** im Fuß aber jederzeit wieder.
+oder Leertaste. Zurück geht auch, Escape bricht ab. Danach kommt er nicht mehr
+von selbst; über **Rundgang noch einmal** im Fuß aber jederzeit wieder.
 
-Zwei Dinge, auf die es beim Bauen ankam:
+### Der Schleier bleibt liegen
+
+Zuerst war es anders gebaut, und es sah schlecht aus: beim Wechsel wurde der
+ganze Schleier ausgeblendet. Die Seite blitzte hell auf, scrollte sichtbar, und
+wurde wieder dunkel — bei jedem Schritt.
+
+Jetzt ist es ein einziges Element: der Schatten ringsum **ist** der Schleier
+(`box-shadow: 0 0 0 9999px`). Fällt der Ausschnitt auf Größe null zusammen,
+deckt der Schatten weiter alles. Der Ablauf ist deshalb:
+
+1. Der Ausschnitt fällt an seiner eigenen Mitte zu (240 ms).
+2. Die Seite scrollt — der Schleier hält still.
+3. Der Ausschnitt springt lautlos an den neuen Platz (`transition: none`,
+   Umbruch erzwingen, wieder an).
+4. Er geht dort von null auf volle Größe auf (440 ms).
+
+Zugehen ist schneller als Aufgehen; das wirkt entschlossen statt zäh. Titel,
+Text und Fuß kommen um 50/100/150 ms versetzt nach, beim Hinausgehen ohne
+Versatz. Der laufende Punkt wird zum Strich, statt nur größer zu werden — das
+zeigt Fortschritt, ohne dass etwas hüpft.
+
+Gemessen mit sechsfach gedrosseltem Prozessor: mittlerer Bildabstand **17 ms**
+über den ganzen Wechsel, ein einzelnes Bild über 32 ms (das ist der Scroll).
+
+Der Test greift genau den alten Fehler ab: über den ganzen Wechsel wird die
+Deckkraft des Schleiers abgetastet, sie muss durchgehend auf 1 stehen — und der
+Ausschnitt muss dabei nachweislich auf null gehen und wieder aufmachen.
+
+Zwei Dinge, auf die es sonst noch ankam:
 
 Die Karten stehen unter `content-visibility: auto`. Was weit weg ist, ist nicht
 gezeichnet — und dann stimmen die Maße darin nicht. Deshalb wird immer erst zur
