@@ -290,9 +290,14 @@ Anmeldung holen und prüfen, dass es ein PNG unter 600 KB ist.
 
 Beim allerersten Start legt sich eine Führung über die Liste: ein Ausschnitt
 wandert von Stelle zu Stelle, ein Ring schlägt darum, daneben steht in zwei
-Sätzen, was man gerade sieht. Zehn Schritte — Leiste, Sortieren, Termine,
-Setups, Marktstimmung, dann eine Karte von oben nach unten, zuletzt
-Benachrichtigungen und Verwaltung.
+Sätzen, was man gerade sieht. Zwölf Schritte — Leiste, Sortieren, Termine,
+Setups, Marktstimmung, dann eine Karte von oben nach unten (Kopf, Zone und
+Ziel, Chart, Nachrichten, Analyse), zuletzt Benachrichtigungen und Verwaltung.
+
+Ein Schritt hieß „News und Analyse" und saß auf dem Analyse-Knopf allein — die
+Nachrichten stehen aber im Kasten darüber. Zwei Namen auf einer Stelle, und die
+gemeinte war nicht dabei. Jetzt ist es je ein Schritt: **Nachrichten** auf dem
+News-Kasten (samt Teilen), **Die Analyse** auf dem Knopf.
 
 Weiter geht es mit dem Knopf, mit einem Tipp irgendwo daneben, mit Pfeiltaste
 oder Leertaste. Zurück geht auch, Escape bricht ab. Danach kommt er nicht mehr
