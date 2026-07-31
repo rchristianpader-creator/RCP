@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="light">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#fafafa">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=34">
-<link rel="apple-touch-icon" href="/icon-180.png?v=34">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=35">
+<link rel="apple-touch-icon" href="/icon-180.png?v=35">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,38 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=34">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=35">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=34">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=35">
+
+<script>
+/* Im Browser oder als App?
+
+   Auf dem Telefon soll die Liste als App laufen — nur dort kommen die
+   Meldungen an, nur dort ist sie ohne Adressleiste und startet in einem Zug.
+   Wer sie im Browser aufmacht, sieht deshalb den Bestand, aber nicht das
+   Laufende: keine Charts, keine News, keine Termine, keine Stimmung.
+
+   Am Schreibtisch bleibt alles wie es war. Dort gibt es kein "Zum
+   Home-Bildschirm", und eine gesperrte Seite waere schlicht kaputt. Deshalb
+   greift die Sperre nur auf Telefonen und Tabletts.
+
+   Das steht hier oben und nicht weiter unten: die Entscheidung muss vor dem
+   ersten Bild stehen, sonst blitzt kurz alles auf und verschwindet dann. */
+(function () {
+  var ua = navigator.userAgent;
+  var handy = /iPhone|iPad|iPod|Android/i.test(ua) ||
+              (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  var alsApp = (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+               window.navigator.standalone === true;
+  if (handy && !alsApp) document.documentElement.className += " nur-web";
+})();
+</script>
 
 <style>
   :root {
@@ -1081,6 +1105,97 @@
     .rundgang-punkte i { transition: none; }
   }
 
+  /* ---------- Im Browser statt in der App ----------
+
+     Der Bestand bleibt stehen: Name, Kuerzel, Branche, Einkaufszone, Ziel.
+     Was laeuft, ist zu — und zwar sichtbar zu, nicht einfach weg. Ein leeres
+     Loch sieht nach Fehler aus, ein verschlossener Kasten nach Absicht. */
+
+  .nur-web .news-banner,
+  .nur-web #wirtschaftBlock,
+  .nur-web #setupStrip,
+  .nur-web #feargreed,
+  .nur-web .karten > .card > .news-block,
+  .nur-web .karten > .card > .actions,
+  .nur-web #pushBtn { display: none !important; }
+
+  /* Der Chart wird zum verschlossenen Feld. Flach statt 400 Pixel hoch —
+     leerer Platz in dieser Groesse sieht nach Fehler aus, nicht nach Absicht. */
+  .nur-web .chart > * { display: none !important; }
+  .nur-web .chart {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 86px;
+    background: var(--soft);
+    border-top: 1px solid var(--hair);
+    border-bottom: 1px solid var(--hair);
+  }
+  .nur-web .chart::after {
+    content: "Live-Chart in der App";
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--muted);
+  }
+
+  /* Die Einladung, gleich unter dem Kopf */
+  .web-sperre { display: none; }
+  .nur-web .web-sperre {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 15px 16px;
+    background: var(--card);
+    border-bottom: 1px solid var(--hair);
+    animation: riseIn 0.5s var(--ease) both;
+  }
+  .web-mark {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+  }
+  .web-mark img { display: block; width: 100%; height: 100%; }
+  .web-text { flex: 1 1 auto; min-width: 0; }
+  .web-text b { display: block; font-size: 14px; font-weight: 700; }
+  .web-text span {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.45;
+    margin-top: 3px;
+  }
+  .web-go {
+    flex: 0 0 auto;
+    align-self: stretch;
+    font: inherit;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: #fff;
+    background: var(--fg);
+    border: 1px solid var(--fg);
+    border-radius: 2px;
+    padding: 10px 14px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transform: translateZ(0);
+    transition: transform 0.12s var(--ease);
+  }
+  .web-go:active { transform: scale(0.96); }
+  @media (max-width: 430px) {
+    .nur-web .web-sperre { flex-wrap: wrap; }
+    .web-text { flex-basis: calc(100% - 57px); }
+    .web-go { width: 100%; align-self: auto; }
+  }
+
   /* Einladung am unteren Rand */
   .install-bar {
     position: fixed;
@@ -1795,6 +1910,15 @@
  </div>
 </header>
 
+<div class="web-sperre" id="webSperre">
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=35" alt=""></div>
+  <div class="web-text">
+    <b>Vollständig gibt es die Liste als App</b>
+    <span>Live-Charts, News und Analysen, Wirtschaftstermine, Marktstimmung — und eine Meldung, sobald ein Kurs seine Einkaufszone berührt.</span>
+  </div>
+  <button class="web-go" id="webGo" type="button">So geht's</button>
+</div>
+
 <nav>
   <i class="nav-fortschritt" id="navFortschritt" aria-hidden="true"></i>
   <button class="sort-chip" id="sortBtn" type="button" aria-pressed="false"
@@ -1905,7 +2029,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=34" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=35" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -1944,7 +2068,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=34" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=35" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -2144,6 +2268,8 @@
      Platzhalter mit dem Kuerzel. Ein leerer weisser Kasten sieht aus wie ein
      Fehler; ein beschrifteter sieht aus wie Warten. */
   function charts() {
+    // Im Browser bleiben die Felder zu — dann muss auch nichts geladen werden
+    if (document.documentElement.classList.contains("nur-web")) return;
     var kaesten = [].slice.call(stapel.querySelectorAll(".chart[data-chart]"));
     if (!kaesten.length) return;
 
@@ -2612,6 +2738,8 @@
 
   if (barGo) barGo.addEventListener("click", function () { openSheet(); });
   if (barX) barX.addEventListener("click", function () { hideBar(true); });
+  var webGo = document.getElementById("webGo");
+  if (webGo) webGo.addEventListener("click", function () { openSheet(); });
 
   closeBtn.addEventListener("click", closeSheet);
   sheet.addEventListener("click", function (e) {
@@ -4146,6 +4274,9 @@ if ("serviceWorker" in navigator) {
   /* Beim ersten Start — aber nicht mitten in den Auftakt oder ein offenes
      Blatt hinein. Erst wenn der Weg frei ist. */
   function vielleicht() {
+    // Im Browser ist die halbe Liste zu — dann fuehrt der Rundgang ins Leere.
+    // Ueber den Knopf im Fuss geht er weiterhin.
+    if (document.documentElement.classList.contains("nur-web")) return;
     var schon = true;
     try { schon = localStorage.getItem(MERK) === "1"; } catch (e) { schon = true; }
     if (schon) return;

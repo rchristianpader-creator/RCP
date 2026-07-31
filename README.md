@@ -205,6 +205,40 @@ Jede Nachricht bekommt einen eigenen Tag, überschreibt die vorige also nicht.
 Antippen öffnet die Liste. Geräte, die der Push-Dienst nicht mehr kennt,
 werden beim Senden aussortiert und in der Rückmeldung gezählt.
 
+## Im Browser statt in der App
+
+Auf dem Telefon soll die Liste als App laufen — nur dort kommen die Meldungen
+an, nur dort startet sie ohne Adressleiste in einem Zug. Wer sie stattdessen
+im Browser aufmacht, sieht den **Bestand**, aber nicht das **Laufende**:
+
+| bleibt | ist zu |
+|---|---|
+| Kopf, Leiste mit Kürzeln, Sortieren | Live-Charts |
+| Name, Kürzel, Branche, NEU | News und Analyse-Knöpfe |
+| Einkaufszone, Kursziel, Euro-Umrechnung | Wirtschaftstermine, Setup-Streifen |
+| Verwaltung | Marktstimmung, Benachrichtigungen |
+
+Statt eines leeren Lochs steht dort, wo der Chart wäre, ein flaches
+verschlossenes Feld: „Live-Chart in der App". Leerer Platz in voller Höhe sieht
+nach Fehler aus, ein verschlossener Kasten nach Absicht. Und die Charts werden
+gar nicht erst eingehängt — was zu ist, muss auch nichts laden.
+
+Gleich unter dem Kopf steht die Einladung mit dem Symbol und einem Satz dazu,
+was fehlt; **So geht's** öffnet die bekannte Anleitung. Der Rundgang startet
+hier nicht von selbst — er würde durch eine halb verschlossene Liste führen.
+Über den Knopf im Fuß geht er weiterhin.
+
+**Am Schreibtisch bleibt alles.** Dort gibt es kein „Zum Home-Bildschirm", und
+eine gesperrte Seite wäre schlicht kaputt. Die Sperre greift nur, wenn die
+Geräte-Kennung nach iPhone, iPad oder Android aussieht.
+
+Entschieden wird das in einem winzigen Skript **im Kopf der Seite**, vor dem
+Stylesheet: die Klasse `nur-web` muss vor dem ersten Bild stehen, sonst blitzt
+alles kurz auf und verschwindet dann wieder.
+
+`web-test` prüft alle drei Fälle: im Browser zu, als App offen, am Schreibtisch
+offen.
+
 ## Die Vorschau beim Verschicken
 
 Wer die Adresse in WhatsApp oder iMessage schickt, schickt einen Roboter los,
