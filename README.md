@@ -257,8 +257,30 @@ Empfänger wie bei den Kursalarmen, unabhängig davon, wem das Gerät gehört.
 Vor dem Absenden fragt die Seite nach und nennt die Zahl der Geräte.
 
 Jede Nachricht bekommt einen eigenen Tag, überschreibt die vorige also nicht.
-Antippen öffnet die Liste. Geräte, die der Push-Dienst nicht mehr kennt,
-werden beim Senden aussortiert und in der Rückmeldung gezählt.
+Geräte, die der Push-Dienst nicht mehr kennt, werden beim Senden aussortiert
+und in der Rückmeldung gezählt.
+
+### Positionen markieren
+
+Unter dem Textfeld steht ein Kürzel je Position zum Antippen. Was markiert ist,
+hängt an der Nachricht — und dann führt sie nicht mehr nur zur Liste, sondern
+zur **Karte** der ersten markierten Position (`/#uaa`).
+
+Zwei Orte, zwei Darstellungen, weil sie verschieden viel können:
+
+- **Im Push** gibt es nur Text. Die Kürzel stehen deshalb vorn:
+  `UAA · DOW · Auf die Zone achten.` — auf dem Sperrbildschirm sieht man ohne
+  Öffnen, worum es geht.
+- **In der Glocke** stehen sie als eigene Zeichen unter dem Text, in derselben
+  Machart wie die Kürzel im Menü. Der Text bleibt dort, wie er getippt wurde.
+
+Geprüft wird gegen die echte Liste: was es nicht gibt, fällt weg — sonst stünde
+in der Meldung ein Kürzel, hinter dem keine Karte liegt. Doppelte werden
+verworfen, höchstens sechs werden genommen. Bleibt danach nichts übrig, ist es
+eine gewöhnliche Nachricht und führt zur Liste.
+
+Die Kürzel kommen beim Zählen der Geräte gleich mit (`GET` auf `nachricht`
+liefert `symbole`) — ein zweiter Gang zum Speicher wäre dafür zu viel.
 
 ## Im Browser statt in der App
 
@@ -493,6 +515,10 @@ nicht verschickt: eine Meldung zum Einzug, die niemanden weckt.
 
 Zugangsanfragen tragen `nur: "chef"` und gehen niemanden sonst etwas an.
 Einträge älter als 60 Tage werden beim Nachsehen weggeräumt.
+
+Eine Meldung kann **Zeichen** tragen (`zeichen: ["UAA", "DOW"]`) — die Kürzel
+der Positionen, um die es geht. Sie stehen als kleine Marken unter dem Text.
+Gesetzt werden sie beim Markieren einer Nachricht (siehe „Nachricht an alle").
 
 ## Beiträge
 

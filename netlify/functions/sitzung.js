@@ -42,6 +42,12 @@ export async function notieren(eintrag) {
       text: String(eintrag.text || "").slice(0, 300),
       url: String(eintrag.url || "/").slice(0, 200),
       art: String(eintrag.art || "meldung").slice(0, 20),
+      /* Kuerzel der Positionen, um die es geht. In der Glocke stehen sie als
+         Zeichen an der Meldung; im Push geht das nicht, dort muessen sie im
+         Text stehen. */
+      zeichen: Array.isArray(eintrag.zeichen)
+        ? eintrag.zeichen.slice(0, 6).map((z) => String(z).slice(0, 12))
+        : [],
       // "chef" heisst: nur die Verwaltung bekommt das zu sehen
       nur: eintrag.nur === "chef" ? "chef" : ""
     });

@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#fafafa">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=46">
-<link rel="apple-touch-icon" href="/icon-180.png?v=46">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=47">
+<link rel="apple-touch-icon" href="/icon-180.png?v=47">
 <title>Verwaltung · Aktien-Liste</title>
 <style>
   :root {
@@ -184,6 +184,37 @@
   }
   .senden .ergebnis.gut { color: #15803d; }
   .senden .ergebnis.schlecht { color: #b91c1c; }
+
+  /* Positionen markieren — dieselben Kuerzel wie im Menue der Liste */
+  .marken { margin: 2px 0 12px; }
+  .marken .wozu {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 7px;
+  }
+  .marken .reihen { display: flex; flex-wrap: wrap; gap: 6px; }
+  .marken button {
+    font: inherit;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--fg);
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 6px 9px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transform: translateZ(0);
+    transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease, transform 0.12s var(--ease);
+  }
+  .marken button:active { transform: scale(0.95); }
+  .marken button[aria-pressed="true"] {
+    color: #fff;
+    background: var(--fg);
+    border-color: var(--fg);
+  }
 
   /* Beitrag veroeffentlichen — dieselbe Bauweise wie die Nachricht, nur mit
      mehr Platz zum Schreiben und einer Liste dessen, was schon steht. */
@@ -509,6 +540,10 @@
     <div class="titel">Nachricht an alle</div>
     <input type="text" id="nTitel" maxlength="60" placeholder="Titel" autocomplete="off">
     <textarea id="nText" maxlength="300" rows="3" placeholder="Text"></textarea>
+    <div class="marken" id="nMarken" hidden>
+      <div class="wozu">Positionen markieren — die Meldung führt dann zur Karte</div>
+      <div class="reihen" id="nMarkenReihe"></div>
+    </div>
     <div class="reihe">
       <span class="zahl" id="nZahl">Geräte werden gezählt …</span>
       <button type="button" id="nSenden" disabled>Senden</button>
@@ -900,10 +935,42 @@
     var zahl = document.getElementById("nZahl");
     var knopf = document.getElementById("nSenden");
     var ergebnis = document.getElementById("nErgebnis");
+    var markenKasten = document.getElementById("nMarken");
+    var markenReihe = document.getElementById("nMarkenReihe");
     var geraete = 0;
+    var gewaehlt = [];
 
     function wieViele(n) {
       return n === 1 ? "1 Gerät" : n + " Geräte";
+    }
+
+    /* Ein Kuerzel je Position, zum Antippen. Die Reihenfolge der Auswahl
+       bleibt erhalten — die erste markierte bestimmt, wohin die Meldung
+       fuehrt. */
+    function markenBauen(liste) {
+      markenReihe.textContent = "";
+      if (!liste || !liste.length) { markenKasten.hidden = true; return; }
+      markenKasten.hidden = false;
+      liste.forEach(function (p) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.textContent = p.badge;
+        b.title = p.name || p.badge;
+        b.setAttribute("aria-pressed", "false");
+        b.addEventListener("click", function () {
+          var i = gewaehlt.indexOf(p.id);
+          if (i < 0) gewaehlt.push(p.id); else gewaehlt.splice(i, 1);
+          b.setAttribute("aria-pressed", i < 0 ? "true" : "false");
+        });
+        markenReihe.appendChild(b);
+      });
+    }
+
+    function markenLoesen() {
+      gewaehlt = [];
+      [].slice.call(markenReihe.querySelectorAll("button")).forEach(function (b) {
+        b.setAttribute("aria-pressed", "false");
+      });
     }
 
     function zeigen(text2, gut) {
@@ -917,6 +984,7 @@
         .then(function (a) {
           if (!a || !a.ok) return;
           kasten.hidden = false;
+          if (!markenReihe.children.length) markenBauen(a.symbole);
           geraete = a.geraete || 0;
           zahl.textContent = geraete
             ? "Geht an " + wieViele(geraete)
@@ -943,7 +1011,7 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
-        body: JSON.stringify({ titel: t, text: b })
+        body: JSON.stringify({ titel: t, text: b, symbole: gewaehlt.slice() })
       })
         .then(function (r) { return r.json().catch(function () { return {}; }); })
         .then(function (a) {
@@ -955,11 +1023,13 @@
           }
           zeigen(
             "An " + wieViele(a.gesendet) + " gesendet." +
+              (a.markiert && a.markiert.length ? " Markiert: " + a.markiert.join(" · ") + "." : "") +
               (a.weg ? " " + a.weg + " abgemeldete entfernt." : ""),
             true
           );
           titel.value = "";
           text.value = "";
+          markenLoesen();
           zaehlen();
         })
         .catch(function () {

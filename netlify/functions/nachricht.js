@@ -13,10 +13,12 @@
 
 import { getStore } from "@netlify/blobs";
 import { keys } from "./vapid.js";
+import { lesen as positionenLesen, LADEN as POSITIONEN } from "./positionen.js";
 import { chefLesen, geheimnis, notieren } from "./sitzung.js";
 
 const MAX_TITEL = 60;
 const MAX_TEXT = 300;
+const MAX_MARKEN = 6;
 
 export default async (request) => {
   if (!geheimnis()) {
@@ -28,8 +30,12 @@ export default async (request) => {
 
   const store = getStore("aktien-push");
 
+  /* Beim Zaehlen kommt gleich die Liste der Positionen mit: die Verwaltung
+     braucht sie, um Kuerzel anbieten zu koennen, und ein zweiter Gang zum
+     Speicher waere dafuer zu viel. */
   if (request.method !== "POST") {
-    return json({ ok: true, geraete: (await geraete(store)).length });
+    const [wieViele, welche] = await Promise.all([geraete(store), symbole()]);
+    return json({ ok: true, geraete: wieViele.length, symbole: welche });
   }
 
   let body = {};
@@ -46,6 +52,12 @@ export default async (request) => {
     return json({ ok: false, fehler: "Titel oder Text muss ausgefuellt sein." }, 400);
   }
 
+  /* Markierte Positionen. Geprueft wird gegen die echte Liste — was es nicht
+     gibt, faellt weg; sonst stuende in der Meldung ein Kuerzel, hinter dem
+     keine Karte liegt. */
+  const gemeint = await marken(body.symbole);
+  const kuerzel = gemeint.map((p) => p.badge);
+
   const liste = await geraete(store);
   if (!liste.length) {
     return json({ ok: false, fehler: "Kein Geraet angemeldet." }, 400);
@@ -61,15 +73,27 @@ export default async (request) => {
     k.privateKey
   );
 
+  /* Im Push gibt es keine Zeichen, nur Text — deshalb stehen die Kuerzel
+     dort vorn. In der Glocke stehen sie als eigene Zeichen an der Meldung,
+     der Text bleibt dort, wie er getippt wurde. */
+  const ziel = gemeint.length ? "/#" + gemeint[0].id : "/";
+  const rumpf = kuerzel.length ? kuerzel.join(" · ") + (text ? " · " + text : "") : text;
+
   // Eigener Tag je Nachricht, damit eine neue die vorige nicht ueberschreibt
   const nutzlast = JSON.stringify({
     title: titel || "Aktien-Liste",
-    body: text,
+    body: rumpf,
     tag: "nachricht-" + Date.now().toString(36),
-    url: "/"
+    url: ziel
   });
 
-  await notieren({ titel: titel || "Aktien-Liste", text: text, url: "/", art: "nachricht" });
+  await notieren({
+    titel: titel || "Aktien-Liste",
+    text: text,
+    url: ziel,
+    art: "nachricht",
+    zeichen: kuerzel
+  });
 
   let gesendet = 0;
   let weg = 0;
@@ -94,10 +118,34 @@ export default async (request) => {
     ok: gesendet > 0,
     gesendet: gesendet,
     weg: weg,
+    markiert: kuerzel,
     fehler: fehler.length ? fehler : undefined,
     von: chef.mail
   });
 };
+
+/* Die Positionen, so knapp wie die Verwaltung sie zum Anbieten braucht. */
+async function symbole() {
+  try {
+    return (await positionenLesen(getStore(POSITIONEN)))
+      .map((p) => ({ id: p.id, badge: p.badge, name: p.name }));
+  } catch (e) {
+    return [];
+  }
+}
+
+async function marken(roh) {
+  if (!Array.isArray(roh) || !roh.length) return [];
+  const gewollt = roh.slice(0, MAX_MARKEN).map((x) => String(x || "").trim().toLowerCase());
+  const alle = await symbole();
+  // Reihenfolge der Auswahl beibehalten, Doppelte wegwerfen
+  const raus = [];
+  for (const id of gewollt) {
+    const p = alle.find((x) => x.id === id);
+    if (p && !raus.some((r) => r.id === p.id)) raus.push(p);
+  }
+  return raus;
+}
 
 /* Jeder Eintrag ist eine eigene Anfrage an den Speicher. Nacheinander
    gelesen wartet die Verwaltung beim Oeffnen auf eine Anfrage nach der

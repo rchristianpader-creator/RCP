@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="light">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#fafafa">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=46">
-<link rel="apple-touch-icon" href="/icon-180.png?v=46">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=47">
+<link rel="apple-touch-icon" href="/icon-180.png?v=47">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=46">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=47">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=46">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=47">
 
 <script>
 /* Im Browser oder als App?
@@ -791,6 +791,24 @@
     color: var(--muted);
     line-height: 1.45;
     margin-top: 3px;
+  }
+  /* Markierte Positionen — dieselben Kuerzel wie im Menue oben */
+  .m-eintrag .zeichen {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 8px;
+  }
+  .m-eintrag .zeichen span {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg);
+    background: var(--soft);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 3px 6px;
   }
   /* Ungelesen: ein Strich am Rand, kein Farbtupfer */
   .m-eintrag.neu { position: relative; padding-left: 12px; }
@@ -2203,7 +2221,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=46" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=47" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -2321,7 +2339,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=46" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=47" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -2397,7 +2415,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=46" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=47" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -4411,7 +4429,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=46";
+      i.src = "/icon-512.png?v=47";
     });
     return symbolBild;
   }
@@ -4983,6 +5001,18 @@ if ("serviceWorker" in navigator) {
         x.className = "text";
         x.textContent = m.text;
         b.appendChild(x);
+      }
+
+      // Markierte Positionen: die Kuerzel als Zeichen darunter
+      if (m.zeichen && m.zeichen.length) {
+        var z = document.createElement("div");
+        z.className = "zeichen";
+        m.zeichen.forEach(function (k) {
+          var s = document.createElement("span");
+          s.textContent = k;
+          z.appendChild(s);
+        });
+        b.appendChild(z);
       }
 
       if (m.url) {
