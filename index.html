@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="light">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#fafafa">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=52">
-<link rel="apple-touch-icon" href="/icon-180.png?v=52">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=53">
+<link rel="apple-touch-icon" href="/icon-180.png?v=53">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=52">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=53">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=52">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=53">
 
 <script>
 /* Im Browser oder als App?
@@ -800,13 +800,18 @@
     margin-top: 3px;
   }
   /* Der Platz steht fest, bevor das Bild da ist — sonst springt die Liste,
-     sobald es ankommt. */
+     sobald es ankommt. Das Verhaeltnis kommt vom Bild selbst (inline
+     gesetzt); 16:9 ist nur der Rueckfall, wenn die Masse fehlen.
+
+     contain, nicht cover: ein Chart, dem oben und unten etwas fehlt, ist
+     kein Chart mehr. */
   .m-eintrag .m-bild {
     display: block;
     width: 100%;
     aspect-ratio: 16 / 9;
-    max-height: 200px;
-    object-fit: cover;
+    max-height: 220px;
+    object-fit: contain;
+    object-position: left center;
     background: var(--soft);
     border: 1px solid var(--line);
     border-radius: 2px;
@@ -818,8 +823,8 @@
     display: block;
     width: 100%;
     aspect-ratio: 16 / 9;
-    max-height: 260px;
-    object-fit: cover;
+    max-height: 52vh;
+    object-fit: contain;
     background: var(--soft);
     border: 1px solid var(--line);
     border-radius: 2px;
@@ -993,6 +998,9 @@
   @media (prefers-reduced-motion: reduce) {
     .verwaltung-btn .wartend { animation: none; }
   }
+  /* Ein Blatt faehrt vom unteren Rand herauf und dorthin zurueck — nicht
+     ein Stueck weit, sondern ganz. Der Schleier blendet dazu auf. Vorher
+     war es ein Ruck um vierzehn Pixel; das sah man kaum. */
   .sheet {
     position: fixed;
     inset: 0;
@@ -1019,8 +1027,31 @@
     from { transform: translate3d(0, 14px, 0); opacity: 0; }
     to { transform: translate3d(0, 0, 0); opacity: 1; }
   }
+
+  /* Blaetter, die selbst auf- und zufahren, tragen "faehrt". Die anderen
+     bleiben, wie sie waren — eine Regel auf .sheet allein haette auch die
+     unsichtbar gemacht, die niemand umgestellt hat. */
+  .sheet.faehrt { opacity: 0; transition: opacity 0.26s var(--ease); }
+  .sheet.faehrt.da { opacity: 1; }
+  .sheet.faehrt .sheet-card {
+    animation: none;
+    transform: translate3d(0, 100%, 0);
+    transition: transform 0.36s var(--weich, cubic-bezier(0.32, 0.72, 0, 1));
+  }
+  .sheet.faehrt.da .sheet-card { transform: none; }
+
+  /* Zwischen Liste und Aufgeschlagenem wird geblaettert: das eine geht zur
+     Seite hinaus, das andere kommt von der anderen Seite herein. */
+  .blatt-seite { transition: transform 0.24s var(--weich, cubic-bezier(0.32,0.72,0,1)), opacity 0.18s ease; }
+  .blatt-seite.weg-links { transform: translate3d(-26px, 0, 0); opacity: 0; }
+  .blatt-seite.weg-rechts { transform: translate3d(26px, 0, 0); opacity: 0; }
+  .blatt-seite.von-rechts { transform: translate3d(26px, 0, 0); opacity: 0; transition: none; }
+  .blatt-seite.von-links { transform: translate3d(-26px, 0, 0); opacity: 0; transition: none; }
   @media (prefers-reduced-motion: reduce) {
     .sheet-card { animation: none; }
+    .sheet.faehrt .sheet-card { transform: none; }
+    .blatt-seite.weg-links, .blatt-seite.weg-rechts,
+    .blatt-seite.von-links, .blatt-seite.von-rechts { transform: none; opacity: 1; }
   }
   .sheet-top {
     display: flex;
@@ -1130,13 +1161,16 @@
     text-transform: uppercase;
     color: var(--muted);
   }
+  /* Auch hier nichts beschneiden — ein fremdes Vorschaubild bringt keine
+     Masse mit, deshalb bleibt 16:9 als reservierter Platz und das Bild
+     legt sich hinein. */
   #beitragEiner .beitrag-bild {
     display: block;
     width: 100%;
     aspect-ratio: 16 / 9;
-    max-height: 220px;
+    max-height: 260px;
     cursor: zoom-in;
-    object-fit: cover;
+    object-fit: contain;
     background: var(--soft);
     border: 1px solid var(--line);
     border-radius: 2px;
@@ -2356,7 +2390,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=52" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=53" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -2474,7 +2508,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=52" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=53" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -2568,7 +2602,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=52" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=53" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -2663,6 +2697,10 @@
   function karte(p) {
     var s = el("section", "card");
     s.id = p.id;
+    /* Das Kuerzel gehoert an die Karte, nicht an ihr Aussehen. Wer es aus
+       den Zeichen im Kopf herauslesen will, greift daneben, sobald dort
+       noch NEU, UPDATE oder AKTIV steht. */
+    s.setAttribute("data-kuerzel", p.badge || "");
 
     var kopf = el("div", "card-head");
     var reihe = el("div", "row");
@@ -4582,7 +4620,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=52";
+      i.src = "/icon-512.png?v=53";
     });
     return symbolBild;
   }
@@ -4936,7 +4974,7 @@ if ("serviceWorker" in navigator) {
     });
   }
 
-  function zeigen(a) {
+  function fuellen(a) {
     offen = a;
     kopf.textContent = a.titel;
     wannEl.textContent = wann(a.zeit) + (a.quelle ? " · " + a.quelle : (a.von ? " · " + a.von : ""));
@@ -4945,20 +4983,27 @@ if ("serviceWorker" in navigator) {
     absaetze(a.text);
     if (a.link) { aufBtn.href = a.link; aufBtn.hidden = false; }
     else { aufBtn.removeAttribute("href"); aufBtn.hidden = true; }
-    uebersicht.hidden = true;
-    einer.hidden = false;
     blatt.querySelector(".sheet-card").scrollTop = 0;
   }
 
-  function lesen(id) {
-    if (voll[id]) return zeigen(voll[id]);
-    kopf.textContent = "…";
-    wannEl.textContent = "";
-    koerper.textContent = "";
-    bildEl.hidden = true;
-    aufBtn.hidden = true;
-    uebersicht.hidden = true;
-    einer.hidden = false;
+  function lesen(id, sofort) {
+    // Beim Aufmachen des Blattes steht die Seite gleich da; von der Liste
+    // aus wird geblaettert.
+    var vonDerListe = !sofort && !uebersicht.hidden;
+    var hin = function (tun) {
+      if (vonDerListe) return window.rcpBlatt.blaettern(uebersicht, einer, false, tun);
+      uebersicht.hidden = true;
+      einer.hidden = false;
+      tun();
+    };
+    if (voll[id]) { hin(function () { fuellen(voll[id]); }); return; }
+    hin(function () {
+      kopf.textContent = "…";
+      wannEl.textContent = "";
+      koerper.textContent = "";
+      bildEl.hidden = true;
+      aufBtn.hidden = true;
+    });
     fetch(API + "?id=" + encodeURIComponent(id), { credentials: "same-origin", cache: "no-store" })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (antwort) {
@@ -4968,7 +5013,7 @@ if ("serviceWorker" in navigator) {
           return;
         }
         voll[id] = antwort.artikel;
-        zeigen(antwort.artikel);
+        fuellen(antwort.artikel);
       })
       .catch(function () {
         kopf.textContent = "Keine Verbindung";
@@ -4979,26 +5024,25 @@ if ("serviceWorker" in navigator) {
   var vorher = null;
   function oeffnen(id) {
     vorher = document.activeElement;
-    if (id) lesen(id);
+    if (id) lesen(id, true);
     else { uebersicht.hidden = false; einer.hidden = true; offen = null; zeichnen(); }
-    blatt.hidden = false;
+    window.rcpBlatt.auf(blatt);
     document.body.style.overflow = "hidden";
     zuBtn.focus();
   }
 
   function schliessen() {
-    blatt.hidden = true;
-    document.body.style.overflow = "";
-    if (vorher && vorher.focus) vorher.focus();
+    window.rcpBlatt.zu(blatt, function () {
+      document.body.style.overflow = "";
+      if (vorher && vorher.focus) vorher.focus();
+    });
   }
 
   zuBtn.addEventListener("click", schliessen);
   blatt.addEventListener("click", function (e) { if (e.target === blatt) schliessen(); });
   zurueckBtn.addEventListener("click", function () {
-    uebersicht.hidden = false;
-    einer.hidden = true;
     offen = null;
-    zeichnen();
+    window.rcpBlatt.blaettern(einer, uebersicht, true, zeichnen);
   });
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape" && !blatt.hidden) schliessen();
@@ -5185,6 +5229,8 @@ if ("serviceWorker" in navigator) {
       if (m.bild) {
         var bild = document.createElement("img");
         bild.className = "m-bild";
+        // Der Platz im echten Verhaeltnis, bevor das Bild da ist
+        if (m.bildB && m.bildH) bild.style.aspectRatio = m.bildB + " / " + m.bildH;
         bild.src = m.bild;
         bild.alt = "";
         bild.loading = "lazy";
@@ -5245,28 +5291,53 @@ if ("serviceWorker" in navigator) {
     }
   }
 
-  /* Zu welcher Karte gehoert ein Kuerzel? Die Karten tragen es als letztes
-     Zeichen im Kopf — davor kann NEU oder UPDATE stehen. */
+  /* Zu welcher Karte gehoert ein Kuerzel? Die Karte traegt es selbst.
+
+     Frueher wurde das letzte Zeichen im Kopf genommen — das ging so lange
+     gut, bis eine Position in ihre Zone eintrat: dann haengt dort AKTIV
+     hinter dem Kuerzel, und die Marke verschwand ausgerechnet bei der
+     Position, um die es ging. */
   function karteZu(kuerzel) {
+    var k = String(kuerzel || "").trim();
+    if (!k) return "";
     var karten = document.querySelectorAll(".karten > .card");
     for (var i = 0; i < karten.length; i++) {
-      var zeichen = karten[i].querySelectorAll(".card-head .badge");
-      if (zeichen.length && zeichen[zeichen.length - 1].textContent.trim() === kuerzel) {
-        return karten[i].id;
-      }
+      if (karten[i].getAttribute("data-kuerzel") === k) return karten[i].id;
+    }
+    // Rueckfall fuer den Fall, dass die Karten noch nicht neu gebaut sind
+    var liste = window.rcpPositionen || [];
+    for (var j = 0; j < liste.length; j++) {
+      if (liste[j].badge === k && document.getElementById(liste[j].id)) return liste[j].id;
     }
     return "";
   }
 
-  function einzeln(m) {
+  function einzeln(m, sofort) {
+    if (!sofort && !einzelnEl.hidden) { fuellen(m); return; }
+    if (!sofort) {
+      return window.rcpBlatt.blaettern(uebersicht, einzelnEl, false, function () { fuellen(m); });
+    }
+    uebersicht.hidden = true;
+    einzelnEl.hidden = false;
+    fuellen(m);
+  }
+
+  function fuellen(m) {
     offen = m;
     kopfEl.textContent = m.titel;
     wannEl.textContent = her(m.zeit);
     textEl.textContent = m.text || "";
     textEl.hidden = !m.text;
 
-    if (m.bild) { bildEl.src = m.bild; bildEl.hidden = false; }
-    else { bildEl.removeAttribute("src"); bildEl.hidden = true; }
+    if (m.bild) {
+      bildEl.style.aspectRatio = m.bildB && m.bildH ? m.bildB + " / " + m.bildH : "";
+      bildEl.src = m.bild;
+      bildEl.hidden = false;
+    } else {
+      bildEl.removeAttribute("src");
+      bildEl.style.aspectRatio = "";
+      bildEl.hidden = true;
+    }
 
     zeichenEl.textContent = "";
     var marken = tasten(m, "");
@@ -5287,9 +5358,6 @@ if ("serviceWorker" in navigator) {
       hinBtn.hidden = true;
     }
     hinWeg = weiter;
-
-    uebersicht.hidden = true;
-    einzelnEl.hidden = false;
     blatt.querySelector(".sheet-card").scrollTop = 0;
   }
 
@@ -5322,9 +5390,9 @@ if ("serviceWorker" in navigator) {
   function oeffnen(welche) {
     vorher = document.activeElement;
     zeichnen();
-    if (welche) einzeln(welche);
+    if (welche) einzeln(welche, true);
     else { uebersicht.hidden = false; einzelnEl.hidden = true; offen = null; }
-    blatt.hidden = false;
+    window.rcpBlatt.auf(blatt);
     document.body.style.overflow = "hidden";
     zu.focus();
     // Gesehen ist gesehen — aber erst, nachdem gezeichnet wurde, sonst
@@ -5335,9 +5403,10 @@ if ("serviceWorker" in navigator) {
   }
 
   function schliessen() {
-    blatt.hidden = true;
-    document.body.style.overflow = "";
-    if (vorher && vorher.focus) vorher.focus();
+    window.rcpBlatt.zu(blatt, function () {
+      document.body.style.overflow = "";
+      if (vorher && vorher.focus) vorher.focus();
+    });
   }
 
   knopf.addEventListener("click", function () { oeffnen(null); });
@@ -5356,10 +5425,8 @@ if ("serviceWorker" in navigator) {
   };
 
   zurueckBtn.addEventListener("click", function () {
-    uebersicht.hidden = false;
-    einzelnEl.hidden = true;
     offen = null;
-    zeichnen();
+    window.rcpBlatt.blaettern(einzelnEl, uebersicht, true, zeichnen);
   });
   hinBtn.addEventListener("click", function (e) {
     e.preventDefault();
@@ -5406,6 +5473,64 @@ if ("serviceWorker" in navigator) {
       else oeffnen(null);
     }, 400);
   })();
+})();
+</script>
+
+<script>
+/* Blaetter: auffahren, zufahren, umblaettern.
+
+   Dreierlei an einer Stelle, weil es in der Glocke und bei den Beitraegen
+   gleich aussehen soll:
+
+     auf(blatt)              vom unteren Rand herauf, Schleier blendet auf
+     zu(blatt, danach)       denselben Weg zurueck, erst dann weg
+     blaettern(raus, rein)   das eine zur Seite hinaus, das andere herein
+
+   Geblaettert wird nacheinander, nicht uebereinander: erst geht die eine
+   Seite hinaus, dann kommt die andere. Uebereinander muessten beide
+   absolut liegen, und dann stimmt die Hoehe des Blattes nicht mehr.
+
+   Wer weniger Bewegung eingestellt hat, bekommt kein Warten aufgetischt:
+   dann wird nur umgeschaltet. */
+(function () {
+  var ruhig = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var HERAUF = ruhig ? 0 : 360;
+  var SEITE = ruhig ? 0 : 200;
+
+  function auf(blatt) {
+    blatt.classList.add("faehrt");
+    blatt.hidden = false;
+    void blatt.offsetWidth;          // Umbruch erzwingen, sonst springt es
+    blatt.classList.add("da");
+  }
+
+  function zu(blatt, danach) {
+    blatt.classList.remove("da");
+    setTimeout(function () {
+      blatt.hidden = true;
+      blatt.classList.remove("faehrt");
+      if (danach) danach();
+    }, HERAUF);
+  }
+
+  function blaettern(raus, rein, zurueck, dazwischen) {
+    var hin = zurueck ? "weg-rechts" : "weg-links";
+    var her = zurueck ? "von-links" : "von-rechts";
+    raus.classList.add("blatt-seite", hin);
+    setTimeout(function () {
+      raus.hidden = true;
+      raus.classList.remove(hin);
+      if (dazwischen) dazwischen();
+      rein.hidden = false;
+      rein.classList.add("blatt-seite", her);
+      // Zwei Bilder warten: eines setzt den Anfang, das naechste loest aus
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () { rein.classList.remove(her); });
+      });
+    }, SEITE);
+  }
+
+  window.rcpBlatt = { auf: auf, zu: zu, blaettern: blaettern, ruhig: ruhig };
 })();
 </script>
 

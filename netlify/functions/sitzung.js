@@ -51,8 +51,12 @@ export async function notieren(eintrag) {
       zeichen: Array.isArray(eintrag.zeichen)
         ? eintrag.zeichen.slice(0, 6).map((z) => String(z).slice(0, 12))
         : [],
-      // Adresse eines Bildes zur Meldung — in der Glocke steht es darunter
+      /* Adresse eines Bildes zur Meldung — in der Glocke steht es darunter.
+         Mit seinen Massen: damit die App den Platz im richtigen
+         Seitenverhaeltnis freihalten kann und nichts beschneiden muss. */
       bild: String(eintrag.bild || "").slice(0, 200),
+      bildB: Math.max(0, Math.min(20000, Math.round(Number(eintrag.bildB) || 0))),
+      bildH: Math.max(0, Math.min(20000, Math.round(Number(eintrag.bildH) || 0))),
       // "chef" heisst: nur die Verwaltung bekommt das zu sehen
       nur: eintrag.nur === "chef" ? "chef" : ""
     });

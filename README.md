@@ -302,6 +302,20 @@ eine ID zeigt immer auf dasselbe Bild. Hinter dem Tor bleibt es trotzdem — wer
 nicht angemeldet ist, kommt hier so wenig durch wie sonst irgendwo. Hochladen
 darf nur die Verwaltung, ansehen jeder Angemeldete.
 
+Das Bild geht **so hinaus, wie es hereinkam**. Vorher wurde jedes auf 1280
+Pixel heruntergerechnet — ein Chart in 4K war danach in der Lupe verwaschen,
+und genau dort will man ja hineinsehen. Angefasst wird nur, was sonst nicht
+durchpasst: eine Function nimmt rund sechs Megabyte an, und Base64 macht aus
+drei Megabyte vier. Muss doch umgerechnet werden, dann auf 2560 statt 1280 und
+mit Güte 0,92. Die Verwaltung schreibt dazu, was passiert ist: „3840 × 2160
+Pixel · unverändert".
+
+Die **Maße gehen mit** (`breite`, `hoehe` in `bild.js`, `bildB`/`bildH` an der
+Meldung). Damit hält die App den Platz im **echten Seitenverhältnis** frei,
+bevor das Bild da ist. Vorher stand dort 16:9 mit `object-fit: cover` — ein
+Chart, dem oben und unten etwas fehlt, ist kein Chart mehr. Jetzt `contain`,
+überall: in der Liste, im Aufgeschlagenen, in der Vorschau der Verwaltung.
+
 **Auf dem iPhone zeigt die Meldung selbst kein Bild.** Apples Web-Push kennt
 das Feld nicht; Android und Chrome zeigen es groß im Banner (`image` in
 `showNotification`). Verlässlich steht es in der App, unter **Meldungen** —
@@ -630,6 +644,12 @@ Taste** — dieselbe `beat-badge`-Animation im selben Takt wie das Zeichen auf
 der Karte und der Chip im Menü. Woran das erkannt wird: die Karte trägt dann
 `card-live`.
 
+Welche Karte zu einem Kürzel gehört, steht an der Karte selbst
+(`data-kuerzel`). Zuerst wurde dafür das **letzte Zeichen im Kopf** gelesen —
+das ging so lange gut, bis eine Position in ihre Zone eintrat: dann hängt dort
+`AKTIV` hinter dem Kürzel, die Suche fand nichts, und die Marke verschwand
+ausgerechnet bei der Position, um die es ging.
+
 Tasten erscheinen nur für Kürzel, zu denen es auch wirklich eine Karte gibt —
 sonst zeigte eine Taste ins Leere. Trägt die Meldung einen eigenen Weg (ein
 Beitrag, eine Karte), steht der als Knopf darunter; bei markierten Positionen
@@ -638,6 +658,32 @@ entfällt er, die Tasten sagen dasselbe genauer.
 Der Eintrag ist deshalb kein `<button>` mehr, sondern ein Kasten mit
 `role="button"`: Knopf im Knopf gibt es nicht. Angetippt wird er trotzdem wie
 einer, mit Tastatur auch.
+
+### Auffahren, umblättern, zufahren
+
+Ein Blatt fährt **vom unteren Rand herauf** und dorthin zurück — nicht ein
+Stück weit, sondern ganz; der Schleier blendet dazu auf. Vorher war es ein Ruck
+um vierzehn Pixel, den man kaum sah, und beim Schließen verschwand es
+übergangslos.
+
+Zwischen Liste und Aufgeschlagenem wird **geblättert**: das eine geht zur Seite
+hinaus, das andere kommt von der anderen Seite herein — vorwärts nach links,
+zurück nach rechts. Nacheinander, nicht übereinander: übereinander müssten
+beide Seiten absolut liegen, und dann stimmt die Höhe des Blattes nicht mehr.
+
+Das steht in einem gemeinsamen `rcpBlatt` (`auf`, `zu`, `blaettern`), damit es
+in der Glocke und bei den Beiträgen gleich aussieht. Wer weniger Bewegung
+eingestellt hat, bekommt kein Warten aufgetischt — dann wird nur umgeschaltet.
+
+Blätter, die selbst auf- und zufahren, tragen dafür die Klasse `faehrt`. Eine
+Regel auf `.sheet` allein hätte auch die unsichtbar gemacht, die niemand
+umgestellt hat (Installation, Benachrichtigungen) — die öffnen weiterhin nur
+mit `hidden = false` und behalten ihr altes Auffahren.
+
+Der Test misst das nach: über den ganzen Übergang wird abgetastet, ob der
+Schleier wirklich aufblendet, wie weit die Karte fährt, dass beim Umblättern
+**nie beide Seiten zugleich** dastehen, und dass ein fremdes Blatt weiter
+sichtbar ist.
 
 ### Die Lupe
 

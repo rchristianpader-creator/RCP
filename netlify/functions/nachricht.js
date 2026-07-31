@@ -98,7 +98,9 @@ export default async (request) => {
     url: ziel,
     art: "nachricht",
     zeichen: kuerzel,
-    bild: bild
+    bild: bild,
+    bildB: body.bildB,
+    bildH: body.bildH
   });
 
   // Eigener Tag je Nachricht, damit eine neue die vorige nicht ueberschreibt

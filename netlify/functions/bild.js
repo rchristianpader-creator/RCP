@@ -23,7 +23,10 @@ import { chefLesen, kontoLesen, geheimnis } from "./sitzung.js";
 
 const LADEN = "aktien-bilder";
 const VERFALL = 90 * 24 * 60 * 60 * 1000;
-const HOECHSTENS = 3 * 1024 * 1024;          // Base64, also rund 2 MB Bild
+/* Base64 macht aus drei Megabyte vier. Sechs Megabyte sind das, was eine
+   Function als Anfrage entgegennimmt — darunter bleibt Luft fuer den Rest.
+   Die App schickt nichts Groesseres: sie rechnet erst dann um. */
+const HOECHSTENS = 6 * 1024 * 1024;
 const TYPEN = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
 export default async (request) => {
@@ -71,11 +74,20 @@ export default async (request) => {
 
     const zeit = Date.now();
     const id = String(1e15 - zeit) + "-" + Math.random().toString(36).slice(2, 8);
-    await store.setJSON("b/" + id, { zeit: new Date(zeit).toISOString(), typ: typ, daten: daten });
+    /* Die Masse kommen mit: damit die App den Platz im richtigen
+       Seitenverhaeltnis freihalten kann, bevor das Bild da ist — und
+       nichts beschneiden muss. */
+    const breite = Math.max(0, Math.min(20000, Math.round(Number(body.breite) || 0)));
+    const hoehe = Math.max(0, Math.min(20000, Math.round(Number(body.hoehe) || 0)));
+    await store.setJSON("b/" + id, {
+      zeit: new Date(zeit).toISOString(), typ: typ, daten: daten,
+      breite: breite, hoehe: hoehe
+    });
 
     aufraeumen(store).catch(() => {});
 
-    return json({ ok: true, id: id, url: "/.netlify/functions/bild?id=" + id });
+    return json({ ok: true, id: id, breite: breite, hoehe: hoehe,
+                  url: "/.netlify/functions/bild?id=" + id });
   } catch (e) {
     return json({ ok: false, fehler: String((e && e.message) || e) }, 500);
   }

@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#fafafa">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=52">
-<link rel="apple-touch-icon" href="/icon-180.png?v=52">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=53">
+<link rel="apple-touch-icon" href="/icon-180.png?v=53">
 <title>Verwaltung · Aktien-Liste</title>
 <style>
   :root {
@@ -218,11 +218,14 @@
     margin-bottom: 10px;
     animation: riseIn 0.3s var(--ease) both;
   }
+  /* Die Vorschau zeigt das Bild, wie es ist: nichts beschnitten, nichts
+     verzerrt. Das Seitenverhaeltnis kommt vom Bild selbst. */
   .bildvorschau img {
     display: block;
     width: 100%;
-    max-height: 220px;
-    object-fit: cover;
+    max-height: 260px;
+    object-fit: contain;
+    object-position: left center;
     background: var(--soft);
     border: 1px solid var(--line);
     border-radius: 2px;
@@ -1015,6 +1018,8 @@
     var gewaehlt = [];
     var bildId = "";
     var bildDaten = "";
+    var bildBreite = 0;
+    var bildHoehe = 0;
 
     function wieViele(n) {
       return n === 1 ? "1 Gerät" : n + " Geräte";
@@ -1023,25 +1028,57 @@
     /* Ein Foto vom Telefon ist mehrere Megabyte gross. Verschickt wird davon
        nichts — verkleinert wird hier, auf hoechstens 1280 Pixel lange Kante,
        und als JPEG. Was danach bleibt, sind ein paar hundert Kilobyte. */
-    function verkleinern(datei) {
+    /* Das Bild geht so hinaus, wie es hereinkam.
+
+       Vorher wurde jedes auf 1280 Pixel heruntergerechnet — ein Chart in 4K
+       war danach in der Lupe verwaschen, und genau dort will man ja
+       hineinsehen. Jetzt wird nur angefasst, was sonst nicht durchpasst:
+       eine Function nimmt hoechstens rund sechs Megabyte an, und Base64
+       macht aus drei Megabyte vier.
+
+       Muss doch verkleinert werden, dann auf 2560 statt 1280 und mit
+       Guete 0,92 — und die Seitenverhaeltnisse bleiben, wie sie sind. */
+    var GRENZE = 5 * 1024 * 1024;      // so lang darf die Base64-Zeichenkette werden
+
+    function lesen(datei) {
       return new Promise(function (fertig, daneben) {
         var leser = new FileReader();
         leser.onerror = function () { daneben(); };
-        leser.onload = function () {
-          var i = new Image();
-          i.onerror = function () { daneben(); };
-          i.onload = function () {
-            var lang = Math.max(i.width, i.height);
-            var f = lang > 1280 ? 1280 / lang : 1;
-            var c = document.createElement("canvas");
-            c.width = Math.round(i.width * f);
-            c.height = Math.round(i.height * f);
-            c.getContext("2d").drawImage(i, 0, 0, c.width, c.height);
-            try { fertig(c.toDataURL("image/jpeg", 0.82)); } catch (e) { daneben(); }
-          };
-          i.src = leser.result;
-        };
+        leser.onload = function () { fertig(String(leser.result || "")); };
         leser.readAsDataURL(datei);
+      });
+    }
+
+    function masse(daten) {
+      return new Promise(function (fertig, daneben) {
+        var i = new Image();
+        i.onerror = function () { daneben(); };
+        i.onload = function () { fertig({ bild: i, breite: i.naturalWidth, hoehe: i.naturalHeight }); };
+        i.src = daten;
+      });
+    }
+
+    function umrechnen(bild, lang, guete) {
+      var groesste = Math.max(bild.naturalWidth, bild.naturalHeight);
+      var f = groesste > lang ? lang / groesste : 1;
+      var c = document.createElement("canvas");
+      c.width = Math.round(bild.naturalWidth * f);
+      c.height = Math.round(bild.naturalHeight * f);
+      c.getContext("2d").drawImage(bild, 0, 0, c.width, c.height);
+      return { daten: c.toDataURL("image/jpeg", guete), breite: c.width, hoehe: c.height };
+    }
+
+    function vorbereiten(datei) {
+      return lesen(datei).then(function (roh) {
+        return masse(roh).then(function (m) {
+          if (roh.length <= GRENZE) {
+            return { daten: roh, breite: m.breite, hoehe: m.hoehe, original: true };
+          }
+          var a = umrechnen(m.bild, 2560, 0.92);
+          if (a.daten.length <= GRENZE) return Object.assign(a, { original: false });
+          var b = umrechnen(m.bild, 1600, 0.85);
+          return Object.assign(b, { original: false });
+        });
       });
     }
 
@@ -1050,26 +1087,35 @@
     function bildLoesen(sagen) {
       bildId = "";
       bildDaten = "";
+      bildBreite = 0;
+      bildHoehe = 0;
       bildFeld.value = "";
       bildKasten.hidden = true;
       bildAnsicht.removeAttribute("src");
+      bildAnsicht.style.aspectRatio = "";
       bildStand.textContent = sagen || bildHinweis;
     }
 
     bildFeld.addEventListener("change", function () {
       var datei = bildFeld.files && bildFeld.files[0];
       if (!datei) return;
-      bildStand.textContent = "wird verkleinert …";
-      verkleinern(datei).then(function (daten) {
-        bildDaten = daten;
-        bildAnsicht.src = daten;
+      bildStand.textContent = "wird gelesen …";
+      var wie = null;
+      vorbereiten(datei).then(function (fertig) {
+        wie = fertig;
+        bildDaten = fertig.daten;
+        bildBreite = fertig.breite;
+        bildHoehe = fertig.hoehe;
+        // Die Vorschau im echten Seitenverhaeltnis, nichts beschnitten
+        bildAnsicht.style.aspectRatio = fertig.breite + " / " + fertig.hoehe;
+        bildAnsicht.src = fertig.daten;
         bildKasten.hidden = false;
         bildStand.textContent = "wird hochgeladen …";
         return fetch("/.netlify/functions/bild", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "same-origin",
-          body: JSON.stringify({ daten: daten })
+          body: JSON.stringify({ daten: fertig.daten, breite: fertig.breite, hoehe: fertig.hoehe })
         }).then(function (r) { return r.json().catch(function () { return {}; }); });
       }).then(function (a) {
         if (!a || !a.ok) {
@@ -1077,7 +1123,8 @@
           return;
         }
         bildId = a.id;
-        bildStand.textContent = "Bild hängt an der Meldung.";
+        bildStand.textContent = wie.breite + " × " + wie.hoehe + " Pixel · " +
+          (wie.original ? "unverändert" : "für den Versand verkleinert") + " · hängt an der Meldung.";
       }).catch(function () {
         bildLoesen("Das Bild ließ sich nicht lesen.");
       });
@@ -1152,7 +1199,8 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
-        body: JSON.stringify({ titel: t, text: b, symbole: gewaehlt.slice(), bild: bildId })
+        body: JSON.stringify({ titel: t, text: b, symbole: gewaehlt.slice(),
+                               bild: bildId, bildB: bildBreite, bildH: bildHoehe })
       })
         .then(function (r) { return r.json().catch(function () { return {}; }); })
         .then(function (a) {
