@@ -256,8 +256,8 @@ CSS-Zeitachsen — beim Scrollen laeuft kein rechnendes Skript.
 Die Bewegung war lange bewusst zurueckhaltend und wirkte dadurch beliebig.
 Jetzt ist sie unuebersehbar:
 
-- **Der Weg** eines Kartenteils betraegt 110 statt 26 Pixel.
-- Er kommt aus **`scale(0.86)`** und **um 18 Grad nach hinten gekippt** herein.
+- **Der Weg** eines Kartenteils betraegt 140 statt 26 Pixel.
+- Er kommt aus **`scale(0.80)`** und **um 22 Grad nach hinten gekippt** herein.
   Die Perspektive steht im `transform` selbst (`perspective(900px)`), nicht am
   Vorfahren — sonst zoege sie den Chart in einen 3D-Raum, und genau das soll er
   nicht.
@@ -292,6 +292,41 @@ Ueber 90 Bilder bei 4-facher Drosselung: 10 ms Stilberechnung, 58 ms
 Hauptfaden, **0 ms je Bild**. Bei 6-facher Drosselung liegt der Unterschied im
 Rauschen. Die Karte selbst bleibt weiterhin unberuehrt — das ist der Punkt, an
 dem es teuer wuerde, und `scroll-test` haelt ihn fest.
+
+### Was sonst noch stillstand
+
+Ausserhalb der Karten bewegte sich gar nichts. Jetzt fahren mit:
+
+| | Bewegung |
+|---|---|
+| Stimmungskasten, Fuss | `teilLauf` — wie ein Kartenstueck |
+| Laufband, Setup-Streifen, Termine | `bandLauf` — 56 Pixel, `scale(0.94)`, kein Kippen |
+| Name und Zeile im Kartenkopf | `teilKlein` — 26 Pixel, nacheinander |
+
+Die Baender bekommen absichtlich die kuerzere Fassung: sie laufen ueber die
+ganze Breite und liegen dicht aufeinander. 140 Pixel liessen sie
+durcheinanderfahren, und ein Kippen saehe an einem randlosen Streifen aus wie
+ein Fehler. Jeder Block liest seine **eigene** Uhr (`view()` ohne Namen) — nur
+die fuenf Kartenstuecke teilen sich die Uhr ihrer Karte, damit ihre
+Reihenfolge stimmt.
+
+**Auf dem iPhone wiederholt sich die Bewegung jetzt.** Der Beobachter meldete
+eine Karte nach ihrem ersten Auftauchen ab — wer hoch und wieder herunter
+ging, sah nichts mehr. Jetzt schaltet er in beide Richtungen: was oben
+hinausfaehrt, verliert `sichtbar` und faehrt beim Zurueckscrollen erneut
+herein. Zurueckgesetzt wird ausserhalb des Bildes, das sieht niemand. Am
+Finger war das ohnehin so — eine scrollgebundene Animation laeuft rueckwaerts,
+wenn man rueckwaerts scrollt.
+
+### Warum es keine Ausfahrt gibt
+
+Naheliegend waere, jedes Stueck beim Verlassen oben auch wieder hinausfahren
+zu lassen. Das geht nicht: **zwei scrollgebundene Animationen auf demselben
+Element setzen sich in Chromium nicht zusammen.** Die zweite meldet auch weit
+ausserhalb ihres Abschnitts noch `running` bei Fortschritt 0 und legt damit
+ihr Anfangsbild — voll da, unverwandelt — ueber die erste; von der Einfahrt
+saehe man nichts. Weder `forwards` noch `none` als Fuellart aendert daran
+etwas. Nachgemessen in `probe.mjs`.
 
 ### Der leise Weg war der wichtigere
 

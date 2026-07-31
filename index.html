@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="light">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#fafafa">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=57">
-<link rel="apple-touch-icon" href="/icon-180.png?v=57">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=58">
+<link rel="apple-touch-icon" href="/icon-180.png?v=58">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=57">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=58">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=57">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=58">
 
 <script>
 /* Im Browser oder als App?
@@ -2046,8 +2046,8 @@
      jedes Stueck faehrt nur seinen Abschnitt weit. Was das kostet, misst
      fluss-test bei jedem Lauf nach.
 
-     Die Bewegung selbst ist gross: 110 Pixel Weg, aus 0,86 Groesse und um
-     18 Grad nach hinten gekippt. Die Perspektive steht im transform selbst
+     Die Bewegung selbst ist gross: 140 Pixel Weg, aus 0,80 Groesse und um
+     22 Grad nach hinten gekippt. Die Perspektive steht im transform selbst
      und nicht am Vorfahren — als Eigenschaft am Vorfahren zoege sie alles
      darunter dauerhaft in einen 3D-Raum, auch im Stillstand.
 
@@ -2056,13 +2056,31 @@
   @keyframes teilLauf {
     from {
       opacity: 0;
-      transform: perspective(900px) translate3d(0, 110px, 0) rotateX(18deg) scale(0.86);
+      transform: perspective(900px) translate3d(0, 140px, 0) rotateX(22deg) scale(0.80);
     }
     55% { opacity: 1; }
     to {
       opacity: 1;
       transform: perspective(900px) translate3d(0, 0, 0) rotateX(0deg) scale(1);
     }
+  }
+
+  /* Die Baender laufen ueber die ganze Breite und liegen dicht aufeinander.
+     Ein Weg von 140 Pixeln liesse sie durcheinanderfahren, und ein Kippen
+     saehe an einem randlosen Streifen aus wie ein Fehler. Also derselbe
+     Gedanke, nur kuerzer. */
+  @keyframes bandLauf {
+    from { opacity: 0; transform: translate3d(0, 56px, 0) scale(0.94); }
+    60%  { opacity: 1; }
+    to   { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+  }
+
+  /* Im Kartenkopf ruecken Name und Zeile darunter noch einmal einzeln nach.
+     Klein und ohne Kippen: der Kopf selbst faehrt ja schon, und zwei starke
+     Bewegungen uebereinander lesen sich als Wackeln. */
+  @keyframes teilKlein {
+    from { opacity: 0; transform: translate3d(0, 26px, 0); }
+    to   { opacity: 1; transform: translate3d(0, 0, 0); }
   }
 
   /* Eine Haarlinie, die sich ueber den Kartenkopf zieht: erst ein breiter
@@ -2098,6 +2116,15 @@
         view-timeline-axis: block;
       }
 
+      /* Eine Bewegung je Stueck, auf der Uhr der Karte.
+
+         Eine zweite fuer die Ausfahrt liess sich nicht danebenstellen: zwei
+         scrollgebundene Animationen auf demselben Element setzen sich in
+         Chromium nicht zusammen. Die zweite meldet auch weit ausserhalb
+         ihres Abschnitts noch "running" bei Fortschritt 0 und legt damit ihr
+         Anfangsbild — voll da, unverwandelt — ueber die erste; von der
+         Einfahrt saehe man nichts. Weder "forwards" noch "none" als Fuellart
+         aendert daran etwas. Nachgemessen in probe.mjs. */
       .karten > .card > .card-head,
       .karten > .card > .ziel-bar,
       .karten > .card > .chart,
@@ -2112,17 +2139,50 @@
          Die Abschnitte ueberlappen nur zu einem Drittel — so kommt ein Stueck
          nach dem anderen und nicht alles beinahe zugleich. Das letzte ist
          erst bei 84 % der Einfahrt fertig: die Karte baut sich auf, waehrend
-         man sie schon ansieht. */
+         man sie schon ansieht.
+
+         Der zweite Abschnitt ist immer derselbe: die ganze Ausfahrt des
+         Stueckes selbst. */
       .karten > .card > .card-head { animation-range: entry 0% entry 30%; }
       .karten > .card > .ziel-bar  { animation-range: entry 11% entry 41%; }
       .karten > .card > .chart     { animation-range: entry 22% entry 56%; }
       .karten > .card > .news-block { animation-range: entry 35% entry 70%; }
       .karten > .card > .actions   { animation-range: entry 48% entry 84%; }
 
+      /* Und im Kopf noch einmal einzeln: erst der Name mit dem Kuerzel,
+         dann die Zeile mit Branche und Einkaufszone. */
+      .karten > .card > .card-head > .row,
+      .karten > .card > .card-head > .info {
+        animation: teilKlein linear both;
+        animation-timeline: --karte;
+      }
+      .karten > .card > .card-head > .row  { animation-range: entry 6% entry 26%; }
+      .karten > .card > .card-head > .info { animation-range: entry 13% entry 33%; }
+
       .karten > .card > .card-head::after {
         animation: kanteLauf linear both;
         animation-timeline: --karte;
         animation-range: entry 2% entry 52%;
+      }
+
+      /* ---- Und alles andere, was bisher stillstand ----
+
+         Der Stimmungskasten ist ein Kasten wie eine Karte und faehrt wie
+         eines ihrer Stuecke. Die Baender bekommen die kuerzere Fassung.
+         Jeder Block liest seine eigene Uhr — view() ohne Namen. */
+      .fg-box,
+      footer {
+        animation: teilLauf linear both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 58%;
+      }
+
+      .news-banner,
+      .setup-strip,
+      .wirtschaft-block {
+        animation: bandLauf linear both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 50%;
       }
     }
   }
@@ -2161,6 +2221,30 @@
       .karten.animiert > .card.sichtbar > .card-head::after {
         animation: kanteLauf 0.9s var(--weich, cubic-bezier(0.32, 0.72, 0, 1)) both;
       }
+
+      /* Und im Kopf noch einmal einzeln */
+      .karten.animiert > .card > .card-head > .row,
+      .karten.animiert > .card > .card-head > .info { opacity: 0; }
+      .karten.animiert > .card.sichtbar > .card-head > .row,
+      .karten.animiert > .card.sichtbar > .card-head > .info {
+        animation: teilKlein 0.5s var(--weich, cubic-bezier(0.32, 0.72, 0, 1)) both;
+      }
+      .karten.animiert > .card.sichtbar > .card-head > .row  { animation-delay: 0.07s; }
+      .karten.animiert > .card.sichtbar > .card-head > .info { animation-delay: 0.15s; }
+
+      /* Alles andere, was bisher stillstand. Der Beobachter haengt "zieht"
+         an diese Bloecke und schaltet "sichtbar" — anders als bei den Karten
+         auch wieder ab, sodass die Bewegung beim Zurueckscrollen erneut
+         laeuft. Eine Ausfahrt gibt es hier nicht: ohne Uhr am Finger liefe
+         sie ab, wenn der Block laengst aus dem Bild ist. */
+      .zieht { opacity: 0; }
+      .zieht.sichtbar {
+        animation: bandLauf 0.7s var(--weich, cubic-bezier(0.32, 0.72, 0, 1)) both;
+      }
+      .fg-box.zieht.sichtbar,
+      footer.zieht.sichtbar {
+        animation: teilLauf 0.78s var(--weich, cubic-bezier(0.32, 0.72, 0, 1)) both;
+      }
     }
   }
 
@@ -2179,7 +2263,10 @@
     .karten.animiert > .card > .ziel-bar,
     .karten.animiert > .card > .chart,
     .karten.animiert > .card > .news-block,
-    .karten.animiert > .card > .actions { opacity: 1; animation: none; }
+    .karten.animiert > .card > .actions,
+    .karten.animiert > .card > .card-head > .row,
+    .karten.animiert > .card > .card-head > .info,
+    .zieht, .zieht.sichtbar { opacity: 1; animation: none; }
     /* Die Kante steht dann einfach da, statt sich aufzuziehen */
     .karten > .card > .card-head::after { transform: scaleX(1); opacity: 0.12; }
     .card, .card.angesprungen { transition: none; }
@@ -2523,7 +2610,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=57" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=58" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -2641,7 +2728,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=57" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=58" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -2736,7 +2823,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=57" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=58" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -4375,24 +4462,39 @@ if ("serviceWorker" in navigator) {
     var selbst = window.CSS && CSS.supports && CSS.supports("animation-timeline: view()");
     if (!ruhig && !selbst) {
       stapel.classList.add("animiert");
+
+      /* Nicht nur die Karten: der Stimmungskasten, die Baender und der Fuss
+         standen bisher still. Sie tragen "zieht" und werden mitbeobachtet. */
+      var bloecke = [].slice.call(document.querySelectorAll(
+        "#feargreed, #wirtschaftBlock, #setupStrip, .news-banner, footer"));
+      bloecke.forEach(function (b) { b.classList.add("zieht"); });
+
+      /* Beobachtet wird in beide Richtungen: was oben hinausfaehrt, verliert
+         "sichtbar" wieder und faehrt beim Zurueckscrollen erneut herein.
+         Frueher wurde nach dem ersten Auftauchen abgemeldet — die Seite
+         bewegte sich danach kein zweites Mal, egal wie oft man hin und her
+         ging. Ausserhalb des Bildes sieht das Zuruecksetzen niemand. */
+      var alles = karten.concat(bloecke);
       var auftritt = new IntersectionObserver(function (eintraege) {
         eintraege.forEach(function (e) {
-          if (!e.isIntersecting) return;
-          e.target.classList.add("sichtbar");
-          auftritt.unobserve(e.target);
+          e.target.classList.toggle("sichtbar", e.isIntersecting);
         });
-      }, { rootMargin: "0px 0px -10% 0px", threshold: 0.01 });
-      karten.forEach(function (k) { auftritt.observe(k); });
+      }, { rootMargin: "0px 0px -8% 0px", threshold: 0 });
+      alles.forEach(function (k) { auftritt.observe(k); });
 
       // Beim Sortieren wandern Karten an neue Plaetze; dann ist das
       // Auftauchen erledigt und darf nicht dazwischenfunken.
       var sortBtn = document.getElementById("sortBtn");
       if (sortBtn) {
         sortBtn.addEventListener("click", function () {
-          karten.forEach(function (k) { k.classList.add("sichtbar"); });
-          // Lang genug, dass der letzte Teil (0,3 s Vorlauf, 0,78 s Lauf)
+          auftritt.disconnect();
+          alles.forEach(function (k) { k.classList.add("sichtbar"); });
+          // Lang genug, dass der letzte Teil (0,36 s Vorlauf, 0,78 s Lauf)
           // ausfaehrt, statt mitten in der Bewegung anzuspringen
-          setTimeout(function () { stapel.classList.remove("animiert"); }, 1300);
+          setTimeout(function () {
+            stapel.classList.remove("animiert");
+            bloecke.forEach(function (b) { b.classList.remove("zieht"); });
+          }, 1300);
         }, { once: true });
       }
     }
@@ -4756,7 +4858,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=57";
+      i.src = "/icon-512.png?v=58";
     });
     return symbolBild;
   }
