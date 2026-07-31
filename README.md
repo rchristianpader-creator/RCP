@@ -676,6 +676,45 @@ und `beitrag-test`, dass beim selbst geschriebenen Beitrag eine Datei geht,
 kein `url`, und dass **jedes einzelne Wort** auf der Leinwand gegen `https?:`,
 `://`, `www.`, `netlify` und Endungen wie `.de`/`.app` gehalten wird.
 
+## Antippen einer Meldung
+
+Jede Meldung trägt einen Weg, und der führt dorthin, wovon sie handelt:
+
+| Meldung | Wohin |
+|---|---|
+| Kurs in seiner Einkaufszone | `/#uaa` — zur Karte |
+| Neue, geänderte, überarbeitete Position | `/#uaa` — zur Karte |
+| Nachricht mit markierten Positionen | `/#uaa` — zur ersten davon |
+| Nachricht ohne Markierung | `/?meldungen=1` — die Glocke geht auf |
+| Beitrag | `/?beitrag=<id>` — das Blatt geht auf |
+| Zugangsanfrage | `/verwaltung.html` |
+
+### Warum das nicht `client.navigate()` ist
+
+Zuerst stand im Service Worker nur: das offene Fenster nach vorn holen und
+`client.navigate(ziel)`. Auf dem Schreibtisch geht das. Auf dem iPhone gibt es
+`navigate()` in `WindowClient` **nicht** — man landete in der App und dann
+nirgendwo. Und wer die Nachricht ohne Markierung antippte, kam auf die bloße
+Liste; hatte er sie vom Sperrbildschirm weggewischt, fand er sie nirgends
+wieder.
+
+Jetzt schickt der Service Worker den Weg als Nachricht an die Seite
+(`postMessage({art:"hin", url})`) und die Seite geht ihn selbst: Sprungmarke
+anfahren, Blatt öffnen, Glocke öffnen — alles ohne Neuladen. Meldet sich die
+Seite innerhalb von 400 ms über einen `MessagePort` zurück, ist die Sache
+erledigt. Meldet sie sich nicht — weil der Weg woanders hinführt, etwa in die
+Verwaltung —, greift `navigate()` doch noch, und wo es das nicht gibt,
+`openWindow()`. Ist gar kein Fenster offen, macht er eines auf.
+
+Die Seite nimmt nur an, was sie auch einlösen kann: nichts Fremdes, keine
+andere Seite, keine Sprungmarke, die es nicht gibt. Ein offenes Blatt macht
+sie vorher zu, sonst führe man hinter dem Schleier.
+
+**Was der Test kann und was nicht:** den Klick auf eine Benachrichtigung löst
+das Betriebssystem aus, der lässt sich von außen nicht nachstellen. Geprüft
+wird deshalb die Stelle, an der es hakte — was die Seite mit dem geschickten
+Weg macht — und dass die Functions Ziele setzen, die irgendwohin führen.
+
 ## Auf dem Laufenden bleiben
 
 Der Zähler am Verwaltungsknopf stand früher **nur einmal**, beim Laden. Kam

@@ -5,16 +5,16 @@
    - everything else (TradingView, /.netlify/functions/*): straight to network, never cached
    Bump CACHE on every deploy so old shells are dropped. */
 
-const CACHE = "aktien-liste-v48";
+const CACHE = "aktien-liste-v49";
 
 /* Ohne Sitzung liefert das Tor statt der Seite eine Weiterleitung zur
    Anmeldung — deshalb wird das Dokument hier nicht vorgeladen, sondern
    erst abgelegt, wenn eine echte Antwort durchkommt. */
 const PRECACHE = [
   "/manifest.webmanifest",
-  "/icon-180.png?v=48",
-  "/icon-192.png?v=48",
-  "/icon-512.png?v=48"
+  "/icon-180.png?v=49",
+  "/icon-192.png?v=49",
+  "/icon-512.png?v=49"
 ];
 
 const STATIC = /\.(?:png|jpg|jpeg|svg|webp|ico|pdf|webmanifest)$/i;
@@ -119,20 +119,47 @@ self.addEventListener("push", (event) => {
   );
 });
 
+/* Antippen fuehrt dorthin, wovon die Meldung handelt.
+
+   Laeuft die App schon, wird sie nach vorn geholt — und dann bekommt sie den
+   Weg als Nachricht. Frueher stand hier nur client.navigate(), und wo das
+   fehlt oder nichts tut (Safari), kam man zwar in die App, aber nirgendwo
+   an. Die Seite selbst weiss besser, was zu tun ist: eine Sprungmarke
+   anfahren, ein Blatt oeffnen, die Meldungen zeigen.
+
+   navigate() bleibt als zweiter Weg stehen, aber nur, wenn die Seite sich
+   nicht meldet — sonst wuerde sie sich mitten im Aufmachen neu laden. */
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const target = (event.notification.data && event.notification.data.url) || "/";
 
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
-      for (const client of list) {
-        if (client.url.includes(self.location.origin)) {
-          client.focus();
-          if ("navigate" in client) client.navigate(target);
-          return;
-        }
+      const offen = list.filter((c) => c.url.includes(self.location.origin));
+      if (!offen.length) return self.clients.openWindow(target);
+
+      const client = offen[0];
+      if (client.focus) client.focus();
+
+      // Ein anderes Blatt (die Verwaltung) kann den Weg nicht gehen
+      const eigenes = new URL(client.url).pathname === "/" ||
+        new URL(client.url).pathname === "/index.html";
+      if (!eigenes) {
+        if ("navigate" in client) return client.navigate(target);
+        return self.clients.openWindow(target);
       }
-      return self.clients.openWindow(target);
+
+      let angekommen = false;
+      const kanal = new MessageChannel();
+      kanal.port1.onmessage = () => { angekommen = true; };
+      client.postMessage({ art: "hin", url: target }, [kanal.port2]);
+
+      return new Promise((fertig) => {
+        setTimeout(() => {
+          if (!angekommen && "navigate" in client) client.navigate(target);
+          fertig();
+        }, 400);
+      });
     })
   );
 });

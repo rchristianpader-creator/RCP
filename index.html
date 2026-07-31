@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="light">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#fafafa">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=48">
-<link rel="apple-touch-icon" href="/icon-180.png?v=48">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=49">
+<link rel="apple-touch-icon" href="/icon-180.png?v=49">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=48">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=49">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=48">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=49">
 
 <script>
 /* Im Browser oder als App?
@@ -2231,7 +2231,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=48" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=49" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -2349,7 +2349,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=48" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=49" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -2425,7 +2425,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=48" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=49" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -4439,7 +4439,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=48";
+      i.src = "/icon-512.png?v=49";
     });
     return symbolBild;
   }
@@ -5101,6 +5101,7 @@ if ("serviceWorker" in navigator) {
   }
 
   knopf.addEventListener("click", oeffnen);
+  window.rcpMeldungenOeffnen = function () { if (blatt.hidden) oeffnen(); };
   zu.addEventListener("click", schliessen);
   blatt.addEventListener("click", function (e) { if (e.target === blatt) schliessen(); });
   document.addEventListener("keydown", function (e) {
@@ -5119,6 +5120,66 @@ if ("serviceWorker" in navigator) {
       if (e.data && e.data.art === "push") holen();
     });
   }
+
+  /* Beim Start: kommt man aus einer Nachricht ohne Ziel, gehen die Meldungen
+     auf. Die Adresse wird danach wieder sauber gemacht — beim naechsten Start
+     soll nicht dasselbe Blatt aufgehen. */
+  (function () {
+    if (!new URLSearchParams(location.search).get("meldungen")) return;
+    try { history.replaceState(null, "", location.pathname); } catch (e) {}
+    setTimeout(function () { oeffnen(); }, 400);
+  })();
+})();
+</script>
+
+<script>
+/* Antippen einer Meldung: dorthin, wovon sie handelt.
+
+   Laeuft die App schon, holt der Service Worker sie nach vorn und schickt den
+   Weg als Nachricht herueber — statt die Seite neu zu laden. Das ist auch der
+   einzige Weg, der auf dem iPhone verlaesslich funktioniert: client.navigate()
+   gibt es dort nicht.
+
+   Drei Ziele, drei Wege:
+     /#uaa            zur Karte, ohne Neuladen
+     /?beitrag=<id>   das Blatt mit dem Beitrag
+     /?meldungen=1    die Glocke
+
+   Was hier nicht behandelt wird — die Verwaltung zum Beispiel —, faellt an
+   den Service Worker zurueck: der laedt dann doch. */
+(function () {
+  if (!navigator.serviceWorker) return;
+
+  function hin(roh) {
+    var url;
+    try { url = new URL(roh, location.href); } catch (e) { return false; }
+    if (url.pathname !== "/" && url.pathname !== "/index.html") return false;
+
+    var beitrag = url.searchParams.get("beitrag");
+    if (beitrag && window.rcpBeitragOeffnen) { window.rcpBeitragOeffnen(beitrag); return true; }
+    if (url.searchParams.get("meldungen") && window.rcpMeldungenOeffnen) {
+      window.rcpMeldungenOeffnen();
+      return true;
+    }
+    if (url.hash && url.hash.length > 1) {
+      var ziel = document.getElementById(url.hash.slice(1));
+      if (!ziel) return false;
+      // Offene Blaetter zuerst weg, sonst faehrt man hinter dem Schleier
+      document.querySelectorAll(".sheet:not([hidden])").forEach(function (s) { s.hidden = true; });
+      document.body.style.overflow = "";
+      if (location.hash !== url.hash) location.hash = url.hash;
+      else ziel.scrollIntoView({ behavior: "smooth", block: "start" });
+      return true;
+    }
+    return url.search === "" && url.hash === "";   // "/" heisst: schon da
+  }
+
+  navigator.serviceWorker.addEventListener("message", function (e) {
+    if (!e.data || e.data.art !== "hin") return;
+    var geschafft = hin(e.data.url || "/");
+    // Dem Service Worker Bescheid sagen, damit er nicht zusaetzlich neu laedt
+    if (geschafft && e.ports && e.ports[0]) e.ports[0].postMessage({ ok: true });
+  });
 })();
 </script>
 

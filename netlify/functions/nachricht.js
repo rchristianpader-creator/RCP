@@ -82,7 +82,10 @@ export default async (request) => {
   /* Im Push gibt es keine Zeichen, nur Text — deshalb stehen die Kuerzel
      dort vorn. In der Glocke stehen sie als eigene Zeichen an der Meldung,
      der Text bleibt dort, wie er getippt wurde. */
-  const ziel = gemeint.length ? "/#" + gemeint[0].id : "/";
+  /* Ohne Markierung fuehrt sie zu den Meldungen — dort steht sie zum
+     Nachlesen. Frueher ging es auf die blosse Liste, und wer die Meldung
+     vom Sperrbildschirm weggewischt hatte, fand sie nirgends wieder. */
+  const ziel = gemeint.length ? "/#" + gemeint[0].id : "/?meldungen=1";
   const rumpf = kuerzel.length ? kuerzel.join(" · ") + (text ? " · " + text : "") : text;
 
   // Eigener Tag je Nachricht, damit eine neue die vorige nicht ueberschreibt
