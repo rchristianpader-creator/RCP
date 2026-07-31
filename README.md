@@ -616,6 +616,27 @@ Function, die filtert schon dort.
 Ganz unten steht immer der **Willkommensgruß**. Er wird in der App erzeugt,
 nicht verschickt: eine Meldung zum Einzug, die niemanden weckt.
 
+### Eine Meldung im Ganzen
+
+Ein Tipp auf einen Eintrag schlägt ihn auf, statt gleich woandershin zu führen:
+Überschrift, Zeitpunkt, der **ganze Text** in Lesegröße, das **Bild groß** —
+und darunter die markierten Kürzel als **Tasten**. Jede führt zu ihrer Karte,
+nicht nur die erste. Ein Tipp aufs Bild zeigt es formatfüllend auf schwarzem
+Grund; noch ein Tipp oder Escape macht es wieder zu.
+
+Tasten erscheinen nur für Kürzel, zu denen es auch wirklich eine Karte gibt —
+sonst zeigte eine Taste ins Leere. Trägt die Meldung einen eigenen Weg (ein
+Beitrag, eine Karte), steht der als Knopf darunter; bei markierten Positionen
+entfällt er, die Tasten sagen dasselbe genauer.
+
+**Alle Meldungen** führt zurück auf die Liste. `Schließen` schließt das ganze
+Blatt.
+
+Jede Meldung trägt dafür eine eigene Kennung (`id`, dieselbe wie ihr Schlüssel
+im Speicher). Kommt man aus einer Benachrichtigung und ist sie noch nicht
+geladen, wird sie geholt und dann aufgeschlagen; findet sie sich nicht, geht
+die ganze Liste auf statt ins Leere zu zeigen.
+
 Zugangsanfragen tragen `nur: "chef"` und gehen niemanden sonst etwas an.
 Einträge älter als 60 Tage werden beim Nachsehen weggeräumt.
 
@@ -761,10 +782,14 @@ Jede Meldung trägt einen Weg, und der führt dorthin, wovon sie handelt:
 |---|---|
 | Kurs in seiner Einkaufszone | `/#uaa` — zur Karte |
 | Neue, geänderte, überarbeitete Position | `/#uaa` — zur Karte |
-| Nachricht mit markierten Positionen | `/#uaa` — zur ersten davon |
-| Nachricht ohne Markierung | `/?meldungen=1` — die Glocke geht auf |
+| Nachricht an alle | `/?meldung=<id>` — **diese eine Meldung**, aufgeschlagen |
 | Beitrag | `/?beitrag=<id>` — das Blatt geht auf |
 | Zugangsanfrage | `/verwaltung.html` |
+
+Ein Kursalarm führt geradewegs zur Karte — da gibt es nichts zu lesen, was
+nicht schon im Banner stünde. Eine **Nachricht** dagegen hat einen Text, oft
+ein Bild und markierte Positionen; die führt deshalb auf sich selbst. Vorher
+landete man gleich auf einer Karte und hatte den Text nicht mehr.
 
 ### Warum das nicht `client.navigate()` ist
 

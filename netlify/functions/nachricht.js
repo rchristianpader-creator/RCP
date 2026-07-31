@@ -88,23 +88,27 @@ export default async (request) => {
   const ziel = gemeint.length ? "/#" + gemeint[0].id : "/?meldungen=1";
   const rumpf = kuerzel.length ? kuerzel.join(" · ") + (text ? " · " + text : "") : text;
 
-  // Eigener Tag je Nachricht, damit eine neue die vorige nicht ueberschreibt
-  const nutzlast = JSON.stringify({
-    title: titel || "Aktien-Liste",
-    body: rumpf,
-    tag: "nachricht-" + Date.now().toString(36),
-    url: ziel,
-    // Android zeigt das im Banner; iOS nicht. In der Glocke steht es immer.
-    image: bild ? new URL(request.url).origin + bild : ""
-  });
-
-  await notieren({
+  /* Erst ins Buch, dann der Push: die Kennung von dort wird das Ziel.
+     Antippen fuehrt damit auf die Meldung selbst — mit ihrem ganzen Text,
+     ihrem Bild und den Kuerzeln zum Weitergehen. Frueher landete man
+     gleich auf einer Karte und hatte den Text nicht mehr. */
+  const meldung = await notieren({
     titel: titel || "Aktien-Liste",
     text: text,
     url: ziel,
     art: "nachricht",
     zeichen: kuerzel,
     bild: bild
+  });
+
+  // Eigener Tag je Nachricht, damit eine neue die vorige nicht ueberschreibt
+  const nutzlast = JSON.stringify({
+    title: titel || "Aktien-Liste",
+    body: rumpf,
+    tag: "nachricht-" + Date.now().toString(36),
+    url: meldung ? "/?meldung=" + meldung : ziel,
+    // Android zeigt das im Banner; iOS nicht. In der Glocke steht es immer.
+    image: bild ? new URL(request.url).origin + bild : ""
   });
 
   let gesendet = 0;

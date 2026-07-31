@@ -35,8 +35,11 @@ export async function notieren(eintrag) {
     const { getStore } = await import("@netlify/blobs");
     const store = getStore(MELDUNGEN);
     const zeit = Date.now();
-    const key = "m/" + String(1e15 - zeit) + "-" + Math.random().toString(36).slice(2, 8);
+    const id = String(1e15 - zeit) + "-" + Math.random().toString(36).slice(2, 8);
+    const key = "m/" + id;
     await store.setJSON(key, {
+      // Die Kennung, damit eine Meldung einzeln aufgeschlagen werden kann
+      id: id,
       zeit: new Date(zeit).toISOString(),
       titel: String(eintrag.titel || "").slice(0, 80),
       text: String(eintrag.text || "").slice(0, 300),
@@ -53,8 +56,10 @@ export async function notieren(eintrag) {
       // "chef" heisst: nur die Verwaltung bekommt das zu sehen
       nur: eintrag.nur === "chef" ? "chef" : ""
     });
+    return id;
   } catch (e) {
     // Das Buch ist Beiwerk
+    return "";
   }
 }
 

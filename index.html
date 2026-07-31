@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="light">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#fafafa">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=50">
-<link rel="apple-touch-icon" href="/icon-180.png?v=50">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=51">
+<link rel="apple-touch-icon" href="/icon-180.png?v=51">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=50">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=51">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=50">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=51">
 
 <script>
 /* Im Browser oder als App?
@@ -812,6 +812,90 @@
     border-radius: 2px;
     margin-top: 10px;
   }
+  /* Eine Meldung im Ganzen: mehr Luft, groessere Schrift, das Bild gross */
+  #meldungEine h3 { margin-top: 8px; }
+  .m-gross {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    max-height: 260px;
+    object-fit: cover;
+    background: var(--soft);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    margin-top: 16px;
+    cursor: zoom-in;
+  }
+  .m-text {
+    margin-top: 16px;
+    font-size: 15px;
+    line-height: 1.62;
+    white-space: pre-wrap;
+  }
+  .m-zeichen-gross {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 20px;
+  }
+  .m-zeichen-gross button {
+    font: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg);
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 9px 13px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transform: translateZ(0);
+    transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease, transform 0.12s var(--ease);
+  }
+  .m-zeichen-gross button:active { transform: scale(0.96); }
+  .m-zeichen-gross button:hover { border-color: var(--fg); }
+  #meldungEine .btn { margin-top: 18px; }
+
+  /* Die Lupe: das Bild im Ganzen, auf schwarzem Grund */
+  .lupe {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(17, 17, 17, 0.94);
+    cursor: zoom-out;
+    animation: lupeAuf 0.2s var(--ease) both;
+  }
+  .lupe[hidden] { display: none; }
+  @keyframes lupeAuf { from { opacity: 0; } to { opacity: 1; } }
+  .lupe img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 2px;
+  }
+  .lupe-zu {
+    position: absolute;
+    top: calc(14px + env(safe-area-inset-top, 0px));
+    right: 14px;
+    width: 38px;
+    height: 38px;
+    font: inherit;
+    font-size: 22px;
+    line-height: 1;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.14);
+    border: 0;
+    border-radius: 2px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
   /* Markierte Positionen — dieselben Kuerzel wie im Menue oben */
   .m-eintrag .zeichen {
     display: flex;
@@ -2246,7 +2330,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=50" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=51" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -2364,7 +2448,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=50" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=51" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -2389,10 +2473,28 @@
       <div class="sheet-label">Meldungen</div>
       <button class="sheet-close" id="meldungClose" type="button">Schließen</button>
     </div>
-    <h3 id="meldungTitle">Was passiert ist</h3>
-    <p class="sheet-sub">Seit die App auf diesem Gerät läuft. Ältere Meldungen bleiben draußen.</p>
-    <div class="meldungen" id="meldungListe"></div>
+    <div id="meldungUebersicht">
+      <h3 id="meldungTitle">Was passiert ist</h3>
+      <p class="sheet-sub">Seit die App auf diesem Gerät läuft. Ältere Meldungen bleiben draußen.</p>
+      <div class="meldungen" id="meldungListe"></div>
+    </div>
+
+    <div id="meldungEine" hidden>
+      <button class="beitrag-zurueck" id="meldungZurueck" type="button">Alle Meldungen</button>
+      <h3 id="meldungKopf">&nbsp;</h3>
+      <p class="sheet-sub" id="meldungWann">&nbsp;</p>
+      <img class="m-gross" id="meldungBild" alt="" hidden>
+      <p class="m-text" id="meldungText"></p>
+      <div class="m-zeichen-gross" id="meldungZeichen" hidden></div>
+      <a class="btn" id="meldungHin" hidden></a>
+    </div>
   </div>
+</div>
+
+<!-- Ein Bild im Ganzen. Antippen macht wieder zu. -->
+<div class="lupe" id="lupe" role="dialog" aria-modal="true" aria-label="Bild" hidden>
+  <img id="lupeBild" alt="">
+  <button class="lupe-zu" id="lupeZu" type="button" aria-label="Bild schließen">&times;</button>
 </div>
 
 <div class="sheet" id="beitragSheet" role="dialog" aria-modal="true" aria-labelledby="beitragTitle" hidden>
@@ -2440,7 +2542,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=50" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=51" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -4454,7 +4556,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=50";
+      i.src = "/icon-512.png?v=51";
     });
     return symbolBild;
   }
@@ -4945,6 +5047,20 @@ if ("serviceWorker" in navigator) {
   var blatt = document.getElementById("meldungSheet");
   var zu = document.getElementById("meldungClose");
   var liste = document.getElementById("meldungListe");
+  var uebersicht = document.getElementById("meldungUebersicht");
+  var einzelnEl = document.getElementById("meldungEine");
+  var zurueckBtn = document.getElementById("meldungZurueck");
+  var kopfEl = document.getElementById("meldungKopf");
+  var wannEl = document.getElementById("meldungWann");
+  var textEl = document.getElementById("meldungText");
+  var bildEl = document.getElementById("meldungBild");
+  var zeichenEl = document.getElementById("meldungZeichen");
+  var hinBtn = document.getElementById("meldungHin");
+  var lupe = document.getElementById("lupe");
+  var lupeBild = document.getElementById("lupeBild");
+  var lupeZu = document.getElementById("lupeZu");
+  var offen = null;
+  var hinWeg = "";
   if (!knopf || !blatt || !liste) return;
   if (document.documentElement.classList.contains("nur-web")) return;
 
@@ -5052,53 +5168,112 @@ if ("serviceWorker" in navigator) {
         b.appendChild(z);
       }
 
-      if (m.url) {
-        b.addEventListener("click", function () {
-          schliessen();
-          // Ein eigener Beitrag steht schon in dieser App — dafuer muss die
-          // Seite nicht neu geladen werden.
-          var beitrag = m.url.match(/[?&]beitrag=([^&]+)/);
-          if (beitrag && window.rcpBeitragOeffnen) {
-            window.rcpBeitragOeffnen(decodeURIComponent(beitrag[1]));
-          } else if (m.url.charAt(0) === "#" || m.url.indexOf("/#") === 0) {
-            location.hash = m.url.replace(/^\//, "");
-          } else {
-            location.href = m.url;
-          }
-        });
-      } else {
-        b.disabled = true;
-      }
+      /* Antippen schlaegt die Meldung auf — mit ihrem ganzen Text, dem Bild
+         in gross und den Kuerzeln zum Weitergehen. Frueher fuehrte der Tipp
+         gleich woandershin, und der Text war weg. */
+      b.addEventListener("click", function () { einzeln(m); });
       liste.appendChild(b);
     });
   }
 
+  /* ---------- Eine Meldung im Ganzen ---------- */
+
+  function hingehen(url) {
+    schliessen();
+    var beitrag = url.match(/[?&]beitrag=([^&]+)/);
+    if (beitrag && window.rcpBeitragOeffnen) {
+      window.rcpBeitragOeffnen(decodeURIComponent(beitrag[1]));
+    } else if (url.charAt(0) === "#" || url.indexOf("/#") === 0) {
+      location.hash = url.replace(/^\//, "");
+    } else if (url.indexOf("meldungen=") < 0) {
+      location.href = url;
+    }
+  }
+
+  /* Zu welcher Karte gehoert ein Kuerzel? Die Karten tragen es als letztes
+     Zeichen im Kopf — davor kann NEU oder UPDATE stehen. */
+  function karteZu(kuerzel) {
+    var karten = document.querySelectorAll(".karten > .card");
+    for (var i = 0; i < karten.length; i++) {
+      var zeichen = karten[i].querySelectorAll(".card-head .badge");
+      if (zeichen.length && zeichen[zeichen.length - 1].textContent.trim() === kuerzel) {
+        return karten[i].id;
+      }
+    }
+    return "";
+  }
+
+  function einzeln(m) {
+    offen = m;
+    kopfEl.textContent = m.titel;
+    wannEl.textContent = her(m.zeit);
+    textEl.textContent = m.text || "";
+    textEl.hidden = !m.text;
+
+    if (m.bild) { bildEl.src = m.bild; bildEl.hidden = false; }
+    else { bildEl.removeAttribute("src"); bildEl.hidden = true; }
+
+    zeichenEl.textContent = "";
+    var welche = (m.zeichen || []).filter(function (k) { return !!karteZu(k); });
+    welche.forEach(function (k) {
+      var t = document.createElement("button");
+      t.type = "button";
+      t.textContent = k;
+      t.addEventListener("click", function () {
+        schliessen();
+        location.hash = "#" + karteZu(k);
+      });
+      zeichenEl.appendChild(t);
+    });
+    zeichenEl.hidden = welche.length === 0;
+
+    // Der Weg, den die Meldung selbst mitbringt — aber nicht zurueck hierher
+    var weiter = m.url && m.url.indexOf("meldungen=") < 0 && m.url !== "/" ? m.url : "";
+    if (weiter && (m.zeichen || []).length && weiter.indexOf("/#") === 0) weiter = "";
+    if (weiter) {
+      hinBtn.textContent = /beitrag=/.test(weiter) ? "Beitrag öffnen" : "Zur Karte";
+      hinBtn.hidden = false;
+    } else {
+      hinBtn.hidden = true;
+    }
+    hinWeg = weiter;
+
+    uebersicht.hidden = true;
+    einzelnEl.hidden = false;
+    blatt.querySelector(".sheet-card").scrollTop = 0;
+  }
+
   var laeuft = false;
-  function holen() {
+  function holen(fertig) {
     if (laeuft) return;
     laeuft = true;
+    var danach = typeof fertig === "function" ? fertig : function () {};
     fetch("/.netlify/functions/meldungen?seit=" + seit, {
       credentials: "same-origin", cache: "no-store"
     })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (a) {
         laeuft = false;
-        if (!a || !a.ok) { stand = [willkommen()]; zaehlen(); return; }
+        if (!a || !a.ok) { stand = [willkommen()]; zaehlen(); danach(); return; }
         bezug = Date.parse(a.jetzt) || Date.now();
         stand = (a.meldungen || []).concat([willkommen()]);
         zaehlen();
-        if (!blatt.hidden) zeichnen();
+        if (!blatt.hidden && !offen) zeichnen();
+        danach();
       })
       .catch(function () {
         laeuft = false;
         if (!stand.length) { stand = [willkommen()]; zaehlen(); }
+        danach();
       });
   }
 
   var vorher = null;
-  function oeffnen() {
+  function oeffnen(welche) {
     vorher = document.activeElement;
     zeichnen();
+    if (welche) einzeln(welche);
+    else { uebersicht.hidden = false; einzelnEl.hidden = true; offen = null; }
     blatt.hidden = false;
     document.body.style.overflow = "hidden";
     zu.focus();
@@ -5115,12 +5290,53 @@ if ("serviceWorker" in navigator) {
     if (vorher && vorher.focus) vorher.focus();
   }
 
-  knopf.addEventListener("click", oeffnen);
-  window.rcpMeldungenOeffnen = function () { if (blatt.hidden) oeffnen(); };
+  function lupeAuf(quelle) {
+    lupeBild.src = quelle;
+    lupe.hidden = false;
+  }
+  function lupeDicht() {
+    lupe.hidden = true;
+    lupeBild.removeAttribute("src");
+  }
+
+  knopf.addEventListener("click", function () { oeffnen(null); });
+  window.rcpMeldungenOeffnen = function () { if (blatt.hidden) oeffnen(null); };
+
+  /* Eine bestimmte Meldung aufschlagen — so kommt man aus einer
+     Benachrichtigung genau dort an, wovon sie handelt. Ist sie noch nicht
+     geladen, wird sie geholt und dann aufgeschlagen. */
+  window.rcpMeldungOeffnen = function (id) {
+    var da = stand.filter(function (m) { return m.id === id; })[0];
+    if (da) { oeffnen(da); return; }
+    holen(function () {
+      var jetzt = stand.filter(function (m) { return m.id === id; })[0];
+      oeffnen(jetzt || null);
+    });
+  };
+
+  zurueckBtn.addEventListener("click", function () {
+    uebersicht.hidden = false;
+    einzelnEl.hidden = true;
+    offen = null;
+    zeichnen();
+  });
+  hinBtn.addEventListener("click", function (e) {
+    e.preventDefault();
+    if (hinWeg) hingehen(hinWeg);
+  });
+  bildEl.addEventListener("click", function () {
+    if (bildEl.getAttribute("src")) lupeAuf(bildEl.getAttribute("src"));
+  });
+  bildEl.addEventListener("error", function () { bildEl.hidden = true; });
+  lupe.addEventListener("click", lupeDicht);
+  lupeZu.addEventListener("click", lupeDicht);
+
   zu.addEventListener("click", schliessen);
   blatt.addEventListener("click", function (e) { if (e.target === blatt) schliessen(); });
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && !blatt.hidden) schliessen();
+    if (e.key !== "Escape") return;
+    if (!lupe.hidden) return lupeDicht();
+    if (!blatt.hidden) schliessen();
   });
 
   holen();
@@ -5136,13 +5352,19 @@ if ("serviceWorker" in navigator) {
     });
   }
 
-  /* Beim Start: kommt man aus einer Nachricht ohne Ziel, gehen die Meldungen
-     auf. Die Adresse wird danach wieder sauber gemacht — beim naechsten Start
-     soll nicht dasselbe Blatt aufgehen. */
+  /* Beim Start: kommt man aus einer Benachrichtigung, geht auf, wovon sie
+     handelt — die eine Meldung oder sonst die ganze Liste. Die Adresse wird
+     danach wieder sauber gemacht, sonst ginge beim naechsten Start dasselbe
+     Blatt noch einmal auf. */
   (function () {
-    if (!new URLSearchParams(location.search).get("meldungen")) return;
+    var suche = new URLSearchParams(location.search);
+    var eine = suche.get("meldung");
+    if (!eine && !suche.get("meldungen")) return;
     try { history.replaceState(null, "", location.pathname); } catch (e) {}
-    setTimeout(function () { oeffnen(); }, 400);
+    setTimeout(function () {
+      if (eine) window.rcpMeldungOeffnen(eine);
+      else oeffnen(null);
+    }, 400);
   })();
 })();
 </script>
@@ -5155,10 +5377,11 @@ if ("serviceWorker" in navigator) {
    einzige Weg, der auf dem iPhone verlaesslich funktioniert: client.navigate()
    gibt es dort nicht.
 
-   Drei Ziele, drei Wege:
+   Vier Ziele, vier Wege:
      /#uaa            zur Karte, ohne Neuladen
      /?beitrag=<id>   das Blatt mit dem Beitrag
-     /?meldungen=1    die Glocke
+     /?meldung=<id>   genau diese eine Meldung, aufgeschlagen
+     /?meldungen=1    die Glocke, die ganze Liste
 
    Was hier nicht behandelt wird — die Verwaltung zum Beispiel —, faellt an
    den Service Worker zurueck: der laedt dann doch. */
@@ -5170,8 +5393,15 @@ if ("serviceWorker" in navigator) {
     try { url = new URL(roh, location.href); } catch (e) { return false; }
     if (url.pathname !== "/" && url.pathname !== "/index.html") return false;
 
+    // Offene Blaetter zuerst weg — sonst laegen zwei uebereinander
+    document.querySelectorAll(".sheet:not([hidden]), .lupe:not([hidden])")
+      .forEach(function (s) { s.hidden = true; });
+    document.body.style.overflow = "";
+
     var beitrag = url.searchParams.get("beitrag");
     if (beitrag && window.rcpBeitragOeffnen) { window.rcpBeitragOeffnen(beitrag); return true; }
+    var meldung = url.searchParams.get("meldung");
+    if (meldung && window.rcpMeldungOeffnen) { window.rcpMeldungOeffnen(meldung); return true; }
     if (url.searchParams.get("meldungen") && window.rcpMeldungenOeffnen) {
       window.rcpMeldungenOeffnen();
       return true;
@@ -5179,9 +5409,6 @@ if ("serviceWorker" in navigator) {
     if (url.hash && url.hash.length > 1) {
       var ziel = document.getElementById(url.hash.slice(1));
       if (!ziel) return false;
-      // Offene Blaetter zuerst weg, sonst faehrt man hinter dem Schleier
-      document.querySelectorAll(".sheet:not([hidden])").forEach(function (s) { s.hidden = true; });
-      document.body.style.overflow = "";
       if (location.hash !== url.hash) location.hash = url.hash;
       else ziel.scrollIntoView({ behavior: "smooth", block: "start" });
       return true;
