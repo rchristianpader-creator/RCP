@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="light">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#fafafa">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=32">
-<link rel="apple-touch-icon" href="/icon-180.png?v=32">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=33">
+<link rel="apple-touch-icon" href="/icon-180.png?v=33">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -843,13 +843,198 @@
     color: var(--fg);
   }
   .mock text { font-family: inherit; }
-  .mock .ring { animation: ring-pulse 1.9s var(--ease) infinite; transform-origin: center; }
-  @keyframes ring-pulse {
-    0%, 70%, 100% { opacity: 0.9; }
-    35% { opacity: 0.25; }
+
+  /* Die vier Schritte laufen als kleine Vorfuehrung durch: jeder leuchtet
+     der Reihe nach auf. Ein Umlauf, vier gleiche Viertel, jedes Bild um ein
+     Viertel versetzt gestartet — deshalb dieselbe Dauer bei allen. */
+  .mock .ring {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: schrittRing 7.2s var(--ease) infinite;
   }
+  /* Negativ, nicht positiv: eine positive Verzoegerung liesse den Ring bis
+     zu seinem Einsatz in seiner Grundgestalt stehen — also sichtbar. Alle
+     vier waeren gleichzeitig zu sehen. Negativ startet jeder mitten im
+     Umlauf, dort, wo er unsichtbar ist. */
+  .steps li:nth-child(1) .ring { animation-delay: 0s; }
+  .steps li:nth-child(2) .ring { animation-delay: -5.4s; }
+  .steps li:nth-child(3) .ring { animation-delay: -3.6s; }
+  .steps li:nth-child(4) .ring { animation-delay: -1.8s; }
+  @keyframes schrittRing {
+    0%           { opacity: 0;    transform: scale(0.88); }
+    3%           { opacity: 1;    transform: scale(1.07); }
+    9%           { opacity: 0.8;  transform: scale(1); }
+    17%          { opacity: 1;    transform: scale(1.05); }
+    25%          { opacity: 0;    transform: scale(1.13); }
+    100%         { opacity: 0;    transform: scale(1.13); }
+  }
+
+  /* Dazu die Nummer und der Rahmen des Bildes — damit klar ist, welcher
+     Schritt gerade dran ist, auch ohne den Ring zu suchen. */
+  .steps .n { animation: schrittNummer 7.2s var(--ease) infinite; }
+  .mock { animation: schrittRahmen 7.2s var(--ease) infinite; }
+  .steps li:nth-child(1) .n, .steps li:nth-child(1) .mock { animation-delay: 0s; }
+  .steps li:nth-child(2) .n, .steps li:nth-child(2) .mock { animation-delay: -5.4s; }
+  .steps li:nth-child(3) .n, .steps li:nth-child(3) .mock { animation-delay: -3.6s; }
+  .steps li:nth-child(4) .n, .steps li:nth-child(4) .mock { animation-delay: -1.8s; }
+  @keyframes schrittNummer {
+    0%, 26%, 100% { color: var(--muted); }
+    3%, 20%       { color: var(--fg); }
+  }
+  @keyframes schrittRahmen {
+    0%, 26%, 100% { border-color: var(--line); }
+    3%, 20%       { border-color: var(--fg); }
+  }
+
+  /* Schritt 2: die Liste wandert hoch, bis die Zeile auftaucht */
+  .mock .wisch { animation: schrittWisch 7.2s var(--ease) infinite; animation-delay: -5.4s; }
+  @keyframes schrittWisch {
+    0%, 100%  { transform: translateY(0);     opacity: 0.25; }
+    4%        { transform: translateY(-7px);  opacity: 0.1; }
+    20%       { transform: translateY(-7px);  opacity: 0.1; }
+    26%       { transform: translateY(0);     opacity: 0.25; }
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .mock .ring { animation: none; }
+    .mock .ring, .mock .wisch, .steps .n, .mock { animation: none; }
+    .mock .ring { opacity: 0.9; }
+  }
+
+  /* ---------- Rundgang: die Fuehrung beim ersten Start ----------
+
+     Ein Loch im Dunkeln wandert von Stelle zu Stelle, ein Ring schlaegt
+     darum, daneben steht, was man sieht. Bewegt werden nur transform und
+     opacity — die Groesse des Lochs wird zwischen den Schritten gesetzt,
+     waehrend alles kurz ausgeblendet ist. So laeuft nie ein Layout je Bild. */
+
+  .rundgang {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .rundgang[hidden] { display: none; }
+
+  /* Der Schatten ringsum verdunkelt alles ausser dem Ausschnitt */
+  .rundgang-loch {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 0;
+    border-radius: 6px;
+    box-shadow: 0 0 0 9999px rgba(17, 17, 17, 0.62);
+    opacity: 0;
+    transition: opacity 0.24s var(--ease);
+  }
+  .rundgang.da .rundgang-loch { opacity: 1; }
+  .rundgang.wechselt .rundgang-loch { opacity: 0; }
+
+  .rundgang-ring {
+    position: absolute;
+    inset: -3px;
+    border: 2px solid #ffffff;
+    border-radius: 9px;
+    animation: rundgangPuls 1.9s var(--ease) infinite;
+  }
+  @keyframes rundgangPuls {
+    0%        { transform: scale(1);    opacity: 0.95; }
+    70%, 100% { transform: scale(1.07); opacity: 0; }
+  }
+
+  .rundgang-karte {
+    position: fixed;
+    left: 14px;
+    right: 14px;
+    max-width: 430px;
+    margin: 0 auto;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 15px 16px 13px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+    transition: opacity 0.28s var(--ease), transform 0.28s var(--ease);
+  }
+  .rundgang.da .rundgang-karte { opacity: 1; transform: none; }
+  .rundgang.wechselt .rundgang-karte { opacity: 0; transform: translate3d(0, 10px, 0); }
+
+  .rundgang-kopf {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 9px;
+  }
+  .rundgang-zahl {
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .rundgang-karte h3 {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+    margin-bottom: 5px;
+  }
+  .rundgang-karte p {
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+
+  .rundgang-fuss {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 14px;
+  }
+  .rundgang-punkte { display: flex; gap: 5px; }
+  .rundgang-punkte i {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--line);
+    transition: background 0.24s var(--ease), transform 0.24s var(--ease);
+  }
+  .rundgang-punkte i.jetzt { background: var(--fg); transform: scale(1.35); }
+  .rundgang-punkte i.war { background: #c8c8c8; }
+
+  .rundgang-knoepfe { display: flex; gap: 8px; }
+  .rundgang button {
+    font: inherit;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 600;
+    border-radius: 2px;
+    padding: 9px 14px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transform: translateZ(0);
+    transition: transform 0.12s var(--ease), opacity 0.18s ease;
+  }
+  .rundgang button:active { transform: scale(0.96); }
+  .rundgang-weiter { color: #fff; background: var(--fg); border: 1px solid var(--fg); }
+  .rundgang-zurueck { color: var(--fg); background: var(--card); border: 1px solid var(--line); }
+  .rundgang-zurueck[disabled] { opacity: 0.35; cursor: default; }
+  .rundgang-weg {
+    color: var(--muted);
+    background: none;
+    border: 0;
+    padding: 2px 0;
+    letter-spacing: 0.12em;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rundgang-ring { animation: none; opacity: 0.9; }
+    .rundgang-loch, .rundgang-karte { transition: none; }
   }
 
   /* Einladung am unteren Rand */
@@ -951,6 +1136,18 @@
     height: 1px;
     background: var(--line);
     margin: 0 auto 16px;
+  }
+  .fuss-knopf {
+    font: inherit;
+    font-size: 11px;
+    color: var(--fg);
+    background: none;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    padding: 2px 0;
+    margin-top: 8px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
   }
 
   @keyframes riseIn {
@@ -1633,8 +1830,9 @@
         <div class="step-body">
           <div class="step-text">In der Liste nach unten wischen bis <b>Zum Home-Bildschirm</b></div>
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
-            <rect x="10" y="8" width="280" height="20" rx="4" opacity=".25"/>
+            <rect class="wisch" x="10" y="8" width="280" height="20" rx="4" opacity=".25"/>
             <rect x="10" y="34" width="280" height="24" rx="4"/>
+            <rect class="ring" x="6" y="30" width="288" height="32" rx="6"/>
             <rect x="24" y="39" width="14" height="14" rx="3" stroke-width="1.2"/>
             <path d="M31 42v8M27 46h8" stroke-width="1.2" stroke-linecap="round"/>
             <text x="50" y="51" font-size="11" font-weight="600" fill="currentColor" stroke="none">Zum Home-Bildschirm</text>
@@ -1649,6 +1847,7 @@
             <text x="14" y="25" font-size="10" fill="currentColor" stroke="none" opacity=".4">Abbrechen</text>
             <rect x="212" y="10" width="76" height="20" rx="3" fill="currentColor" stroke="none"/>
             <text x="250" y="24" font-size="10" font-weight="700" fill="#fff" stroke="none" text-anchor="middle">Hinzufügen</text>
+            <rect class="ring" x="207" y="5" width="86" height="30" rx="5"/>
             <line x1="0" y1="40" x2="300" y2="40" stroke="var(--line)"/>
             <rect x="14" y="48" width="90" height="7" rx="2" fill="currentColor" stroke="none" opacity=".16"/>
           </svg>
@@ -1662,8 +1861,9 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=32" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=33" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
+            <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
           </svg>
         </div>
@@ -1700,13 +1900,32 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=32" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=33" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
   </div>
   <button class="install-go" id="installBarGo" type="button">So geht's</button>
   <button class="install-x" id="installBarX" type="button" aria-label="Hinweis ausblenden">&times;</button>
+</div>
+
+<div class="rundgang" id="rundgang" role="dialog" aria-modal="true" aria-labelledby="rundgangTitel" hidden>
+  <div class="rundgang-loch" id="rundgangLoch" aria-hidden="true"><i class="rundgang-ring"></i></div>
+  <div class="rundgang-karte" id="rundgangKarte">
+    <div class="rundgang-kopf">
+      <span class="rundgang-zahl" id="rundgangZahl">&nbsp;</span>
+      <button class="rundgang-weg" id="rundgangWeg" type="button">Überspringen</button>
+    </div>
+    <h3 id="rundgangTitel">&nbsp;</h3>
+    <p id="rundgangText">&nbsp;</p>
+    <div class="rundgang-fuss">
+      <div class="rundgang-punkte" id="rundgangPunkte" aria-hidden="true"></div>
+      <div class="rundgang-knoepfe">
+        <button class="rundgang-zurueck" id="rundgangZurueck" type="button">Zurück</button>
+        <button class="rundgang-weiter" id="rundgangWeiter" type="button">Weiter</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 
@@ -1716,7 +1935,8 @@
 <footer>
   <div class="line"></div>
   Live-Charts · TradingView · Fibos über den Button<br>
-  Ralph Christian Pader · Juli 2026
+  Ralph Christian Pader · Juli 2026<br>
+  <button class="fuss-knopf" id="rundgangNochmal" type="button">Rundgang noch einmal</button>
 </footer>
 </div>
 
@@ -3586,6 +3806,275 @@ if ("serviceWorker" in navigator) {
     .catch(function () {
       // Offline: nichts anzeigen, nichts umleiten
     });
+})();
+</script>
+
+<script>
+/* Der Rundgang beim ersten Start.
+
+   Ein Ausschnitt wandert von Stelle zu Stelle, ein Ring schlaegt darum,
+   daneben steht in zwei Saetzen, was man gerade sieht. Danach kommt er nicht
+   mehr von selbst — ueber den Knopf im Fuss aber jederzeit wieder.
+
+   Zwei Dinge, auf die es ankommt:
+
+   Die Karten stehen unter content-visibility: auto. Was weit weg ist, ist
+   nicht gezeichnet, und dann stimmen die Masse darin nicht. Deshalb wird
+   immer erst zur ganzen Karte gescrollt, dann gewartet, bis nichts mehr
+   laeuft, und erst danach der Teil darin gemessen.
+
+   Und es laeuft kein Skript je Bild. Die Groesse des Ausschnitts wird einmal
+   je Schritt gesetzt — waehrend alles kurz ausgeblendet ist. Bewegt wird nur,
+   was der Compositor allein kann. */
+(function () {
+  var MERK = "rcp:rundgang";
+  var stand = document.getElementById("rundgang");
+  if (!stand) return;
+
+  var loch = document.getElementById("rundgangLoch");
+  var karte = document.getElementById("rundgangKarte");
+  var zahlEl = document.getElementById("rundgangZahl");
+  var titelEl = document.getElementById("rundgangTitel");
+  var textEl = document.getElementById("rundgangText");
+  var punkteEl = document.getElementById("rundgangPunkte");
+  var zurueckBtn = document.getElementById("rundgangZurueck");
+  var weiterBtn = document.getElementById("rundgangWeiter");
+  var wegBtn = document.getElementById("rundgangWeg");
+  var nochmalBtn = document.getElementById("rundgangNochmal");
+  if (!loch || !karte || !weiterBtn) return;
+
+  var ruhig = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var sanft = ruhig ? "auto" : "smooth";
+
+  /* Nur zeigen, was es hier wirklich gibt: ein Gast hat keine Verwaltung,
+     ohne Push gibt es keinen Knopf dafuer. */
+  function da(el) {
+    if (!el || el.hidden) return null;
+    var r = el.getBoundingClientRect();
+    return (r.width > 0 && r.height > 0) ? el : null;
+  }
+  function wahl(s) { return da(document.querySelector(s)); }
+
+  var SCHRITTE = [
+    { wo: function () { return wahl("nav"); },
+      titel: "Die Leiste",
+      text: "Jedes Kürzel springt zu seiner Karte. Beim Scrollen wandert die Markierung mit — du siehst immer, wo du gerade bist." },
+
+    { wo: function () { return da(document.getElementById("sortBtn")); },
+      titel: "Nach Nähe sortieren",
+      text: "Ein Tipp, und die Liste steht nach Abstand zur Einkaufszone. Was am nächsten dran ist, kommt nach oben." },
+
+    { wo: function () { return da(document.getElementById("wirtschaftBlock")); },
+      titel: "Wirtschaftstermine",
+      text: "Die nächsten Termine aus den USA mit Prognose und Vorwert. Wischen blättert weiter, es wechselt auch von selbst." },
+
+    { wo: function () { return da(document.getElementById("setupStrip")); },
+      titel: "Was gerade läuft",
+      text: "Hier steht, welche Position ihre Einkaufszone berührt hat — der Grund, überhaupt hinzusehen." },
+
+    { wo: function () { return da(document.getElementById("feargreed")); },
+      titel: "Marktstimmung",
+      text: "Der Fear-and-Greed-Index von CNN, live. Null ist Angst, hundert ist Gier." },
+
+    { wo: function () { return wahl(".karten > .card .card-head"); },
+      titel: "Eine Position",
+      text: "Name, Kürzel und Branche. Steht NEU daneben, ist sie frisch in der Liste." },
+
+    { wo: function () { return wahl(".karten > .card .ziel-bar"); },
+      titel: "Zone und Ziel",
+      text: "Die Einkaufszone und das Kursziel — in Dollar und gleich daneben in Euro, zum Tageskurs." },
+
+    { wo: function () { return wahl(".karten > .card .chart"); },
+      titel: "Der Chart",
+      text: "Live von TradingView. Er hängt sich erst ein, wenn die Karte in die Nähe kommt — sonst würden zehn davon die App ausbremsen." },
+
+    { wo: function () { return wahl(".karten > .card .actions"); },
+      titel: "News und Analyse",
+      text: "Nachrichten zum Wert und die hinterlegte Chart-Analyse, jeweils einen Tipp entfernt." },
+
+    { wo: function () { return da(document.getElementById("pushBtn")); },
+      titel: "Benachrichtigungen",
+      text: "Dieses Gerät meldet sich, sobald ein Kurs neu in seine Einkaufszone eintritt. Geprüft wird alle 30 Minuten, nachts ist Ruhe." },
+
+    { wo: function () { return da(document.getElementById("verwaltungBtn")); },
+      titel: "Verwaltung",
+      text: "Positionen anlegen und sortieren, Zugänge freigeben, eine Nachricht an alle senden — und sehen, wer gerade da ist." }
+  ];
+
+  var liste = [];
+  var wo = 0;
+  var laeuft = false;
+
+  /* ---------- Hinfahren ---------- */
+
+  function layoutOben(el) {
+    // offsetTop, nicht getBoundingClientRect: der verwandelte Kasten waere falsch
+    var y = 0;
+    for (var n = el; n; n = n.offsetParent) y += n.offsetTop;
+    return y;
+  }
+
+  function navHoehe() {
+    var n = document.querySelector("nav");
+    return n ? n.offsetHeight : 0;
+  }
+
+  /* Warten, bis das Scrollen wirklich steht — sonst wird daneben gemessen. */
+  function steht(fertig) {
+    var letzte = -1, ruhen = 0, runden = 0;
+    (function pruefe() {
+      var y = Math.round(window.scrollY);
+      if (y === letzte) ruhen++; else { ruhen = 0; letzte = y; }
+      if (ruhen >= 2 || ++runden > 24) return fertig();
+      setTimeout(pruefe, 55);
+    })();
+  }
+
+  function hinfahren(el, fertig) {
+    var anker = (el.closest && el.closest(".card")) || el;
+    var abstand = navHoehe() + 100;
+    window.scrollTo({ top: Math.max(0, layoutOben(anker) - abstand), behavior: sanft });
+    steht(function () {
+      // Jetzt ist die Karte gezeichnet, jetzt stimmen auch die Masse darin
+      var r = el.getBoundingClientRect();
+      var oben = navHoehe() + 22;
+      var unten = window.innerHeight - 200;
+      if (r.top < oben || (r.bottom > unten && r.height < unten - oben)) {
+        window.scrollBy({ top: r.top - oben, behavior: sanft });
+        return steht(fertig);
+      }
+      fertig();
+    });
+  }
+
+  /* ---------- Hinstellen ---------- */
+
+  function stellen(el) {
+    var r = el.getBoundingClientRect();
+    var luft = 8;
+    var x = Math.max(6, r.left - luft);
+    var y = Math.max(6, r.top - luft);
+    loch.style.left = x + "px";
+    loch.style.top = y + "px";
+    loch.style.width = Math.min(window.innerWidth - x - 6, r.width + luft * 2) + "px";
+    loch.style.height = Math.min(window.innerHeight - y - 6, r.height + luft * 2) + "px";
+
+    var h = loch.offsetHeight;
+    var kh = karte.offsetHeight;
+    var drunter = y + h + 14;
+    karte.style.top = (drunter + kh <= window.innerHeight - 12)
+      ? drunter + "px"
+      : Math.max(12, y - kh - 14) + "px";
+  }
+
+  /* ---------- Ablauf ---------- */
+
+  function punkteBauen() {
+    punkteEl.textContent = "";
+    for (var i = 0; i < liste.length; i++) punkteEl.appendChild(document.createElement("i"));
+  }
+
+  function zeigen(i, sofort) {
+    var s = liste[i];
+    var el = s && s.wo();
+    if (!el) {
+      // Inzwischen verschwunden — Schritt fallen lassen, nicht daran haengen
+      liste.splice(i, 1);
+      punkteBauen();
+      if (!liste.length) return schliessen();
+      return zeigen(Math.min(i, liste.length - 1), sofort);
+    }
+
+    wo = i;
+    stand.classList.add("wechselt");
+    setTimeout(function () {
+      hinfahren(el, function () {
+        zahlEl.textContent = (i + 1) + " von " + liste.length;
+        titelEl.textContent = s.titel;
+        textEl.textContent = s.text;
+        zurueckBtn.disabled = i === 0;
+        weiterBtn.textContent = (i === liste.length - 1) ? "Fertig" : "Weiter";
+        var k = punkteEl.children;
+        for (var j = 0; j < k.length; j++) k[j].className = j === i ? "jetzt" : (j < i ? "war" : "");
+        stellen(el);
+        stand.classList.remove("wechselt");
+      });
+    }, sofort ? 0 : 150);
+  }
+
+  function weiter() {
+    if (wo + 1 >= liste.length) schliessen();
+    else zeigen(wo + 1);
+  }
+
+  function starten() {
+    if (laeuft) return;
+    liste = SCHRITTE.filter(function (s) { return !!s.wo(); });
+    if (!liste.length) return;
+    laeuft = true;
+    gesehen();
+    stand.hidden = false;
+    punkteBauen();
+    stand.classList.add("wechselt");
+    requestAnimationFrame(function () {
+      stand.classList.add("da");
+      zeigen(0, true);
+      weiterBtn.focus();
+    });
+  }
+
+  function schliessen() {
+    if (!laeuft) return;
+    laeuft = false;
+    gesehen();
+    stand.classList.remove("da");
+    setTimeout(function () { stand.hidden = true; }, 280);
+  }
+
+  function gesehen() {
+    try { localStorage.setItem(MERK, "1"); } catch (e) {}
+  }
+
+  weiterBtn.addEventListener("click", function (e) { e.stopPropagation(); weiter(); });
+  zurueckBtn.addEventListener("click", function (e) { e.stopPropagation(); if (wo > 0) zeigen(wo - 1); });
+  wegBtn.addEventListener("click", function (e) { e.stopPropagation(); schliessen(); });
+  stand.addEventListener("click", function (e) { if (!karte.contains(e.target)) weiter(); });
+
+  document.addEventListener("keydown", function (e) {
+    if (!laeuft) return;
+    if (e.key === "Escape") schliessen();
+    else if (e.key === "ArrowRight" || e.key === "Enter" || e.key === " ") { e.preventDefault(); weiter(); }
+    else if (e.key === "ArrowLeft" && wo > 0) zeigen(wo - 1);
+  });
+
+  window.addEventListener("resize", function () {
+    if (!laeuft) return;
+    var el = liste[wo] && liste[wo].wo();
+    if (el) stellen(el);
+  });
+
+  if (nochmalBtn) nochmalBtn.addEventListener("click", function () { starten(); });
+
+  /* Beim ersten Start — aber nicht mitten in den Auftakt oder ein offenes
+     Blatt hinein. Erst wenn der Weg frei ist. */
+  function vielleicht() {
+    var schon = true;
+    try { schon = localStorage.getItem(MERK) === "1"; } catch (e) { schon = true; }
+    if (schon) return;
+
+    var runden = 0;
+    (function warte() {
+      var frei = !document.getElementById("auftakt") &&
+                 !document.querySelector(".sheet:not([hidden])") &&
+                 document.querySelector(".karten > .card");
+      if (frei) return setTimeout(starten, 500);
+      if (++runden > 120) return;      // nach einer Minute nicht mehr
+      setTimeout(warte, 500);
+    })();
+  }
+
+  if (window.rcpPositionen) vielleicht();
+  else document.addEventListener("rcp:karten", vielleicht);
 })();
 </script>
 

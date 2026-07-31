@@ -205,6 +205,49 @@ Jede Nachricht bekommt einen eigenen Tag, überschreibt die vorige also nicht.
 Antippen öffnet die Liste. Geräte, die der Push-Dienst nicht mehr kennt,
 werden beim Senden aussortiert und in der Rückmeldung gezählt.
 
+## Der Rundgang
+
+Beim allerersten Start legt sich eine Führung über die Liste: ein Ausschnitt
+wandert von Stelle zu Stelle, ein Ring schlägt darum, daneben steht in zwei
+Sätzen, was man gerade sieht. Zehn Schritte — Leiste, Sortieren, Termine,
+Setups, Marktstimmung, dann eine Karte von oben nach unten, zuletzt
+Benachrichtigungen und Verwaltung.
+
+Weiter geht es mit dem Knopf, mit einem Tipp irgendwo daneben, mit Pfeiltaste
+oder Leertaste. Zurück geht auch. Danach kommt er nicht mehr von selbst; über
+**Rundgang noch einmal** im Fuß aber jederzeit wieder.
+
+Zwei Dinge, auf die es beim Bauen ankam:
+
+Die Karten stehen unter `content-visibility: auto`. Was weit weg ist, ist nicht
+gezeichnet — und dann stimmen die Maße darin nicht. Deshalb wird immer erst zur
+ganzen Karte gescrollt, dann gewartet, bis nichts mehr läuft, und **erst danach**
+der Teil darin gemessen.
+
+Und es läuft kein Skript je Bild. Die Größe des Ausschnitts wird einmal je
+Schritt gesetzt, während alles kurz ausgeblendet ist; bewegt wird nur, was der
+Compositor allein kann. Der Test misst das nach: während der Rundgang steht,
+wird beim Scrollen **kein einziges Mal** nachgemessen.
+
+Schritte, deren Ziel es nicht gibt, fallen weg — ein Gast hat keine Verwaltung,
+ohne Push gibt es keinen Knopf dafür. Der Zähler richtet sich danach.
+
+Gestartet wird nicht mitten in den Auftakt oder ein offenes Blatt hinein,
+sondern erst, wenn der Weg frei ist.
+
+### Die Installations-Anleitung
+
+Die vier Schritte darin führen sich selbst vor: ein Umlauf von 7,2 Sekunden,
+vier gleiche Viertel, in jedem leuchtet ein Schritt auf — Ring, Nummer und
+Rahmen zusammen.
+
+Die Versätze sind **negativ** (`0s, -5.4s, -3.6s, -1.8s`). Mit positiven
+Verzögerungen stünde jeder Ring bis zu seinem Einsatz in seiner Grundgestalt
+da, also sichtbar, und alle vier wären gleichzeitig zu sehen. Negativ startet
+jeder mitten im Umlauf, dort, wo er unsichtbar ist. Der Test greift genau das
+ab: über vierzehn Proben darf nie mehr als einer leuchten, und jeder muss
+einmal drankommen.
+
 ## Das App-Symbol
 
 Vorher stand da ein schwarzes Quadrat mit „RCP" — auf einem schwarzen
