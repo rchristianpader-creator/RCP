@@ -19,6 +19,7 @@ export const KEKS = "rcp_sitz";
 export const LADEN = "aktien-konten";
 export const BESUCH = "aktien-besuch";
 export const MELDUNGEN = "aktien-meldungen";
+export const ARTIKEL = "aktien-artikel";
 
 /* Eine Meldung ins Buch schreiben, damit sie in der Glocke auftaucht.
 

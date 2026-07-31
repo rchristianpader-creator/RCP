@@ -458,6 +458,47 @@ nicht verschickt: eine Meldung zum Einzug, die niemanden weckt.
 Zugangsanfragen tragen `nur: "chef"` und gehen niemanden sonst etwas an.
 Einträge älter als 60 Tage werden beim Nachsehen weggeräumt.
 
+## Beiträge
+
+Bis hierher kam alles, was in der Liste „News" hieß, von außen: die
+Schlagzeilen in den Karten von Yahoo, das Laufband ganz oben stand als Text
+in `index.html`. Etwas Eigenes zu veröffentlichen ging nur über den Code.
+
+Jetzt gibt es in der Verwaltung **Beitrag veröffentlichen**: Überschrift, Text,
+ein Haken für „Alle benachrichtigen". Was dabei entsteht, geht drei Wege in die
+App:
+
+1. Das **Band ganz oben** zeigt den neuesten Beitrag und führt zu ihm. Steht
+   noch keiner, bleibt der fest eingebaute Text stehen.
+2. Der Knopf **Beiträge** im Fuß öffnet die Liste. Er zeigt sich nur, wenn es
+   etwas zu lesen gibt.
+3. Eine **Push-Meldung** mit `?beitrag=<id>`, und derselbe Eintrag in der
+   Glocke. Ein Tipp darauf öffnet den Beitrag im Blatt, ohne die Seite neu zu
+   laden — die App ist ja schon offen.
+
+Gelesen wird in einem Blatt: Überschrift, Datum, Verfasser, Text. Leerzeilen
+trennen Absätze, mehr Auszeichnung gibt es nicht. Gesetzt wird über
+`textContent`, nie über `innerHTML` — was in der Verwaltung getippt wird, ist
+Text und kein Markup. Unten steht **Als Bild teilen**, dasselbe Bild wie bei
+den Nachrichten, wieder ohne Adresse.
+
+### Was wo liegt
+
+`netlify/functions/artikel.js`, Store `aktien-artikel`. Der Schlüssel trägt die
+Zeit rückwärts (`1e15` minus Zeitstempel) — dieselbe Bauweise wie beim
+Meldungsbuch, dann steht das Neueste ohne Sortieren vorn.
+
+Die **Liste** bringt nur den Vorspann mit, die ersten 180 Zeichen. Den ganzen
+Text holt erst, wer ihn liest, und die App behält ihn dann — sonst zöge jeder
+Start alles mit, was je geschrieben wurde.
+
+Lesen darf jeder Angemeldete, schreiben nur die Verwaltung (`chefLesen`). Der
+Test schickt einen Gast gegen die Function: er bekommt **403**, und danach ist
+auch wirklich nichts entstanden.
+
+**Zurücknehmen** löscht den Beitrag. Der Eintrag in der Glocke bleibt stehen —
+ein Tipp darauf sagt dann „Dieser Beitrag wurde zurückgenommen".
+
 ## Eine Meldung weitergeben
 
 Oben rechts in jedem News-Kasten steht **Teilen**. Was dabei herauskommt, ist
@@ -566,6 +607,7 @@ Nur die Verwaltung darf nachsehen; melden darf jedes angemeldete Konto.
 | `/.netlify/functions/positionen` | `{"ok":true,"anzahl":10,"positionen":[…]}` |
 | `/.netlify/functions/besuch` | `{"ok":true,"da":1,"leute":[…]}` — nur als Verwaltung |
 | `/.netlify/functions/meldungen` | `{"ok":true,"meldungen":[…]}` — was hinter der Glocke steht |
+| `/.netlify/functions/artikel` | `{"ok":true,"artikel":[…]}` — die eigenen Beiträge, Neuestes vorn |
 
 Der Punkt vor `netlify` gehört dazu. Ohne ihn wäre es ein Dateipfad, keine Function.
 

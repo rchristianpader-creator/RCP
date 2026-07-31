@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#fafafa">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=42">
-<link rel="apple-touch-icon" href="/icon-180.png?v=42">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=43">
+<link rel="apple-touch-icon" href="/icon-180.png?v=43">
 <title>Verwaltung · Aktien-Liste</title>
 <style>
   :root {
@@ -184,6 +184,67 @@
   }
   .senden .ergebnis.gut { color: #15803d; }
   .senden .ergebnis.schlecht { color: #b91c1c; }
+
+  /* Beitrag veroeffentlichen — dieselbe Bauweise wie die Nachricht, nur mit
+     mehr Platz zum Schreiben und einer Liste dessen, was schon steht. */
+  .beitrag textarea.lang { min-height: 200px; line-height: 1.55; }
+  .beitrag .hinweis {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin: -4px 0 12px;
+  }
+  .beitrag .wahl {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--fg);
+    margin: 2px 0 10px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .beitrag .wahl input { width: 17px; height: 17px; margin: 0; accent-color: #111; }
+  .beitrag .stand {
+    border-top: 1px solid var(--line);
+    margin-top: 16px;
+    padding-top: 4px;
+  }
+  .beitrag .stand .leer {
+    font-size: 12px;
+    color: var(--muted);
+    padding: 10px 0 2px;
+  }
+  .beitrag .stueck {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--hair, #ebebeb);
+  }
+  .beitrag .stueck:last-child { border-bottom: 0; }
+  .beitrag .stueck .was { flex: 1; min-width: 0; }
+  .beitrag .stueck .was b {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+  .beitrag .stueck .was span {
+    display: block;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .beitrag .stueck button {
+    flex: none;
+    font-size: 10px;
+    padding: 7px 12px;
+    color: var(--fg);
+    background: none;
+    border: 1px solid var(--line);
+  }
+  .beitrag .stueck button:hover { border-color: var(--fg); }
 
   /* Wer gerade da ist */
   .jetzt {
@@ -390,6 +451,21 @@
       <button type="button" id="nSenden" disabled>Senden</button>
     </div>
     <div class="ergebnis" id="nErgebnis"></div>
+  </section>
+
+  <section class="senden beitrag" id="beitragKasten" hidden>
+    <div class="titel">Beitrag veröffentlichen</div>
+    <p class="hinweis">Erscheint in der Liste zum Nachlesen, läuft oben im Band
+      und steht in der Glocke. Leerzeilen trennen Absätze.</p>
+    <input type="text" id="bTitel" maxlength="120" placeholder="Überschrift" autocomplete="off">
+    <textarea id="bText" class="lang" maxlength="20000" placeholder="Text"></textarea>
+    <label class="wahl"><input type="checkbox" id="bPush" checked> Alle benachrichtigen</label>
+    <div class="reihe">
+      <span class="zahl" id="bZahl"></span>
+      <button type="button" id="bSenden">Veröffentlichen</button>
+    </div>
+    <div class="ergebnis" id="bErgebnis"></div>
+    <div class="stand" id="bListe"><div class="leer">wird geladen …</div></div>
   </section>
 
   <div id="inhalt"></div>
@@ -818,6 +894,120 @@
     });
 
     zaehlen();
+  })();
+
+  /* ---------- Beitrag veroeffentlichen ---------- */
+
+  (function () {
+    var API3 = "/.netlify/functions/artikel";
+    var kasten = document.getElementById("beitragKasten");
+    var titel = document.getElementById("bTitel");
+    var text = document.getElementById("bText");
+    var push = document.getElementById("bPush");
+    var zahl = document.getElementById("bZahl");
+    var knopf = document.getElementById("bSenden");
+    var ergebnis = document.getElementById("bErgebnis");
+    var liste = document.getElementById("bListe");
+
+    function zeigen(was, gut) {
+      ergebnis.textContent = was || "";
+      ergebnis.className = "ergebnis " + (was ? (gut ? "gut" : "schlecht") : "");
+    }
+
+    function wann(iso) {
+      var d = new Date(iso);
+      if (isNaN(d)) return "";
+      return d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" }) +
+        " · " + d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function stellen(alle) {
+      liste.textContent = "";
+      if (!alle || !alle.length) {
+        var leer = document.createElement("div");
+        leer.className = "leer";
+        leer.textContent = "Noch kein Beitrag veröffentlicht.";
+        liste.appendChild(leer);
+        zahl.textContent = "";
+        return;
+      }
+      zahl.textContent = alle.length === 1 ? "1 Beitrag steht" : alle.length + " Beiträge stehen";
+      alle.forEach(function (a) {
+        var reihe = document.createElement("div");
+        reihe.className = "stueck";
+        var was = document.createElement("div");
+        was.className = "was";
+        var b = document.createElement("b");
+        b.textContent = a.titel;
+        var s = document.createElement("span");
+        s.textContent = wann(a.zeit);
+        was.appendChild(b);
+        was.appendChild(s);
+        var weg = document.createElement("button");
+        weg.type = "button";
+        weg.textContent = "Zurücknehmen";
+        weg.addEventListener("click", function () {
+          if (!confirm("„" + a.titel + "“ zurücknehmen?")) return;
+          weg.disabled = true;
+          weg.textContent = "…";
+          schicken({ tat: "weg", id: a.id }, function (antwort) {
+            if (antwort && antwort.ok) { zeigen("Zurückgenommen.", true); stellen(antwort.artikel); }
+            else { weg.disabled = false; weg.textContent = "Zurücknehmen"; zeigen("Das hat nicht geklappt.", false); }
+          });
+        });
+        reihe.appendChild(was);
+        reihe.appendChild(weg);
+        liste.appendChild(reihe);
+      });
+    }
+
+    function schicken(daten, fertig) {
+      fetch(API3, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify(daten)
+      })
+        .then(function (r) { return r.json().catch(function () { return {}; }); })
+        .then(fertig)
+        .catch(function () { fertig(null); });
+    }
+
+    function holen() {
+      fetch(API3, { credentials: "same-origin", cache: "no-store" })
+        .then(function (r) { return r.json(); })
+        .then(function (a) {
+          if (!a || !a.ok) return;
+          kasten.hidden = false;
+          stellen(a.artikel);
+        })
+        .catch(function () {});
+    }
+
+    knopf.addEventListener("click", function () {
+      zeigen("", true);
+      var t = titel.value.trim();
+      var b = text.value.trim();
+      if (!t) { zeigen("Die Überschrift fehlt.", false); titel.focus(); return; }
+      if (!b) { zeigen("Der Text fehlt.", false); text.focus(); return; }
+      if (!confirm("„" + t + "“ veröffentlichen?" + (push.checked ? " Alle Geräte werden benachrichtigt." : ""))) return;
+
+      knopf.disabled = true;
+      var vorher = knopf.textContent;
+      knopf.textContent = "Stellt ein …";
+
+      schicken({ titel: t, text: b, push: push.checked }, function (a) {
+        knopf.disabled = false;
+        knopf.textContent = vorher;
+        if (!a || !a.ok) { zeigen((a && a.fehler) || "Das hat nicht geklappt.", false); return; }
+        zeigen("Steht." + (a.gesendet ? " An " + a.gesendet + (a.gesendet === 1 ? " Gerät" : " Geräte") + " gemeldet." : ""), true);
+        titel.value = "";
+        text.value = "";
+        stellen(a.artikel);
+      });
+    });
+
+    holen();
   })();
 
   document.getElementById("abmelden").addEventListener("click", function (e) {
