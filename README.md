@@ -619,15 +619,55 @@ nicht verschickt: eine Meldung zum Einzug, die niemanden weckt.
 ### Eine Meldung im Ganzen
 
 Ein Tipp auf einen Eintrag schlägt ihn auf, statt gleich woandershin zu führen:
-Überschrift, Zeitpunkt, der **ganze Text** in Lesegröße, das **Bild groß** —
-und darunter die markierten Kürzel als **Tasten**. Jede führt zu ihrer Karte,
-nicht nur die erste. Ein Tipp aufs Bild zeigt es formatfüllend auf schwarzem
-Grund; noch ein Tipp oder Escape macht es wieder zu.
+Überschrift, Zeitpunkt, der **ganze Text** in Lesegröße, das **Bild groß**.
+
+Die markierten Kürzel stehen **vor der Überschrift** — man sieht zuerst, worum
+es geht, dann was los ist — und sind **Tasten**: jede führt zu ihrer Karte,
+nicht nur die erste. Sie stehen in der Liste genauso wie im Aufgeschlagenen.
+
+Steht eine dieser Positionen gerade in ihrer Einkaufszone, **schlägt ihre
+Taste** — dieselbe `beat-badge`-Animation im selben Takt wie das Zeichen auf
+der Karte und der Chip im Menü. Woran das erkannt wird: die Karte trägt dann
+`card-live`.
 
 Tasten erscheinen nur für Kürzel, zu denen es auch wirklich eine Karte gibt —
 sonst zeigte eine Taste ins Leere. Trägt die Meldung einen eigenen Weg (ein
 Beitrag, eine Karte), steht der als Knopf darunter; bei markierten Positionen
 entfällt er, die Tasten sagen dasselbe genauer.
+
+Der Eintrag ist deshalb kein `<button>` mehr, sondern ein Kasten mit
+`role="button"`: Knopf im Knopf gibt es nicht. Angetippt wird er trotzdem wie
+einer, mit Tastatur auch.
+
+### Die Lupe
+
+Ein Tipp aufs Bild zeigt es formatfüllend auf schwarzem Grund — und dort lässt
+es sich **hineinzoomen**. Ein Chart im Hochformat ist sonst klein; auf die
+Breite gerechnet bleibt vom Kursverlauf wenig übrig.
+
+- **Zwei Finger** ziehen den Maßstab auf, der Punkt darunter bleibt, wo er ist.
+- **Doppeltipp** geht auf einen Schlag so weit hinein, dass das Bild die Höhe
+  füllt — und noch einer wieder heraus.
+- **Ein Finger** zieht im Vergrößerten das Bild; über den Rand hinaus geht es
+  nicht.
+- **Nach unten wischen** schließt, das Bild geht mit dem Finger.
+- **Ein einzelner Tipp**, Escape oder das × schließen ebenfalls.
+- Am Schreibtisch zoomt auch das **Mausrad**.
+
+Die Gesten werden selbst geführt (`touch-action: none`). Überließe man sie dem
+Browser, zoomte iOS die ganze Seite mit — samt Kopfleiste und Meldung
+dahinter.
+
+Beim Öffnen wächst das Bild **aus seinem Platz in der Meldung heraus**, der
+Grund blendet auf; beim Schließen geht beides denselben Weg zurück. Das ist
+mehr als ein Einblenden: man sieht, woher es kommt und wohin es geht.
+
+Einen eigenen `dblclick`-Lauscher gibt es **nicht**. Die Maus löst dieselben
+Zeiger-Ereignisse aus wie der Finger, und der Doppeltipp fängt sie schon ab —
+mit beidem hob sich die Geste selbst auf: erst hinein, dann durch das
+nachlaufende `dblclick` gleich wieder heraus.
+
+Dasselbe Fenster dient dem Bild in einem **Beitrag**.
 
 **Alle Meldungen** führt zurück auf die Liste. `Schließen` schließt das ganze
 Blatt.

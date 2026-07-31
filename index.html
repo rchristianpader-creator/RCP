@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="light">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#fafafa">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=51">
-<link rel="apple-touch-icon" href="/icon-180.png?v=51">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=52">
+<link rel="apple-touch-icon" href="/icon-180.png?v=52">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=51">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=52">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=51">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=52">
 
 <script>
 /* Im Browser oder als App?
@@ -832,33 +832,28 @@
     line-height: 1.62;
     white-space: pre-wrap;
   }
+  /* Im Aufgeschlagenen stehen sie ebenfalls vorn, nur groesser */
   .m-zeichen-gross {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    margin-top: 20px;
+    margin-top: 16px;
   }
-  .m-zeichen-gross button {
-    font: inherit;
+  .m-zeichen-gross .kuerzel-taste {
     font-size: 11px;
-    font-weight: 700;
     letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--fg);
     background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: 2px;
-    padding: 9px 13px;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    transform: translateZ(0);
-    transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease, transform 0.12s var(--ease);
+    padding: 8px 12px;
   }
-  .m-zeichen-gross button:active { transform: scale(0.96); }
-  .m-zeichen-gross button:hover { border-color: var(--fg); }
+  .m-zeichen-gross .kuerzel-taste.aktiv { background: var(--fg); }
   #meldungEine .btn { margin-top: 18px; }
 
-  /* Die Lupe: das Bild im Ganzen, auf schwarzem Grund */
+  /* Die Lupe: das Bild im Ganzen, auf schwarzem Grund — zum Ziehen und
+     Zoomen. Der Grund blendet auf, das Bild waechst aus seinem Platz in der
+     Meldung heraus; beim Schliessen geht beides denselben Weg zurueck.
+
+     touch-action: none, weil die Gesten hier selbst gefuehrt werden — sonst
+     zoomte iOS die ganze Seite mit. */
   .lupe {
     position: fixed;
     inset: 0;
@@ -866,18 +861,25 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 12px;
     background: rgba(17, 17, 17, 0.94);
-    cursor: zoom-out;
-    animation: lupeAuf 0.2s var(--ease) both;
+    touch-action: none;
+    overflow: hidden;
+    -webkit-user-select: none;
+    user-select: none;
+    opacity: 0;
+    transition: opacity 0.26s var(--ease);
   }
   .lupe[hidden] { display: none; }
-  @keyframes lupeAuf { from { opacity: 0; } to { opacity: 1; } }
+  .lupe.da { opacity: 1; }
   .lupe img {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
     border-radius: 2px;
+    transform-origin: 50% 50%;
+    will-change: transform;
+    -webkit-user-drag: none;
   }
   .lupe-zu {
     position: absolute;
@@ -894,16 +896,22 @@
     border-radius: 2px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.2s ease;
   }
+  /* Beim Ziehen und Zoomen stoert er nur */
+  .lupe.zieht .lupe-zu { opacity: 0; pointer-events: none; }
 
-  /* Markierte Positionen — dieselben Kuerzel wie im Menue oben */
+  /* Markierte Positionen — dieselben Kuerzel wie im Menue oben, und sie
+     stehen vor der Ueberschrift: man sieht zuerst, worum es geht, dann was
+     los ist. Antippen fuehrt zur Karte. */
   .m-eintrag .zeichen {
     display: flex;
     flex-wrap: wrap;
     gap: 5px;
-    margin-top: 8px;
+    margin-bottom: 8px;
   }
-  .m-eintrag .zeichen span {
+  .kuerzel-taste {
+    font: inherit;
     font-size: 9px;
     font-weight: 700;
     letter-spacing: 0.12em;
@@ -912,7 +920,24 @@
     background: var(--soft);
     border: 1px solid var(--line);
     border-radius: 2px;
-    padding: 3px 6px;
+    padding: 4px 7px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transform: translateZ(0);
+    transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease, transform 0.12s var(--ease);
+  }
+  .kuerzel-taste:active { transform: scale(0.94); }
+  .kuerzel-taste:hover { border-color: var(--fg); }
+  /* Steht die Position gerade in ihrer Zone, schlaegt ihr Kuerzel — im
+     selben Takt wie das Zeichen auf der Karte und der Chip im Menue. */
+  .kuerzel-taste.aktiv {
+    color: #fff;
+    background: var(--fg);
+    border-color: var(--fg);
+    animation: beat-badge 2s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .kuerzel-taste.aktiv { animation: none; }
   }
   /* Ungelesen: ein Strich am Rand, kein Farbtupfer */
   .m-eintrag.neu { position: relative; padding-left: 12px; }
@@ -1110,6 +1135,7 @@
     width: 100%;
     aspect-ratio: 16 / 9;
     max-height: 220px;
+    cursor: zoom-in;
     object-fit: cover;
     background: var(--soft);
     border: 1px solid var(--line);
@@ -2330,7 +2356,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=51" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=52" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -2448,7 +2474,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=51" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=52" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -2481,19 +2507,19 @@
 
     <div id="meldungEine" hidden>
       <button class="beitrag-zurueck" id="meldungZurueck" type="button">Alle Meldungen</button>
+      <div class="m-zeichen-gross" id="meldungZeichen" hidden></div>
       <h3 id="meldungKopf">&nbsp;</h3>
       <p class="sheet-sub" id="meldungWann">&nbsp;</p>
       <img class="m-gross" id="meldungBild" alt="" hidden>
       <p class="m-text" id="meldungText"></p>
-      <div class="m-zeichen-gross" id="meldungZeichen" hidden></div>
       <a class="btn" id="meldungHin" hidden></a>
     </div>
   </div>
 </div>
 
-<!-- Ein Bild im Ganzen. Antippen macht wieder zu. -->
+<!-- Ein Bild im Ganzen: ziehen, zoomen, mit einem Tipp wieder zu. -->
 <div class="lupe" id="lupe" role="dialog" aria-modal="true" aria-label="Bild" hidden>
-  <img id="lupeBild" alt="">
+  <img id="lupeBild" alt="" draggable="false">
   <button class="lupe-zu" id="lupeZu" type="button" aria-label="Bild schließen">&times;</button>
 </div>
 
@@ -2542,7 +2568,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=51" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=52" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -4556,7 +4582,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=51";
+      i.src = "/icon-512.png?v=52";
     });
     return symbolBild;
   }
@@ -4988,6 +5014,11 @@ if ("serviceWorker" in navigator) {
     if (window.rcpBildTeilen) window.rcpBildTeilen(teilenBtn, offen.titel, "Beitrag");
   });
 
+  // Auch hier laesst sich das Bild im Ganzen ansehen
+  bildEl.addEventListener("click", function () {
+    if (bildEl.getAttribute("src") && window.rcpLupe) window.rcpLupe(bildEl.getAttribute("src"), bildEl);
+  });
+
   // Aus dem Band heraus
   document.addEventListener("click", function (e) {
     var a = e.target.closest ? e.target.closest("[data-beitrag]") : null;
@@ -5056,9 +5087,6 @@ if ("serviceWorker" in navigator) {
   var bildEl = document.getElementById("meldungBild");
   var zeichenEl = document.getElementById("meldungZeichen");
   var hinBtn = document.getElementById("meldungHin");
-  var lupe = document.getElementById("lupe");
-  var lupeBild = document.getElementById("lupeBild");
-  var lupeZu = document.getElementById("lupeZu");
   var offen = null;
   var hinWeg = "";
   if (!knopf || !blatt || !liste) return;
@@ -5121,9 +5149,17 @@ if ("serviceWorker" in navigator) {
   function zeichnen() {
     liste.textContent = "";
     stand.forEach(function (m) {
-      var b = document.createElement("button");
-      b.type = "button";
+      /* Ein Kasten, kein Knopf: die Kuerzel darin sind selbst Knoepfe, und
+         Knopf im Knopf gibt es nicht. Angetippt wird er trotzdem wie einer,
+         mit Tastatur auch. */
+      var b = document.createElement("div");
       b.className = "m-eintrag" + (Date.parse(m.zeit) > gelesen ? " neu" : "");
+      b.setAttribute("role", "button");
+      b.setAttribute("tabindex", "0");
+
+      // Die Kuerzel stehen vor der Ueberschrift
+      var marken = tasten(m, "zeichen");
+      if (marken) b.appendChild(marken);
 
       var kopf = document.createElement("div");
       kopf.className = "kopf";
@@ -5156,24 +5192,43 @@ if ("serviceWorker" in navigator) {
         b.appendChild(bild);
       }
 
-      // Markierte Positionen: die Kuerzel als Zeichen darunter
-      if (m.zeichen && m.zeichen.length) {
-        var z = document.createElement("div");
-        z.className = "zeichen";
-        m.zeichen.forEach(function (k) {
-          var s = document.createElement("span");
-          s.textContent = k;
-          z.appendChild(s);
-        });
-        b.appendChild(z);
-      }
-
       /* Antippen schlaegt die Meldung auf — mit ihrem ganzen Text, dem Bild
          in gross und den Kuerzeln zum Weitergehen. Frueher fuehrte der Tipp
          gleich woandershin, und der Text war weg. */
       b.addEventListener("click", function () { einzeln(m); });
+      b.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); einzeln(m); }
+      });
       liste.appendChild(b);
     });
+  }
+
+  /* ---------- Die Kuerzel als Tasten ----------
+
+     Nur fuer Kuerzel, hinter denen auch wirklich eine Karte liegt — sonst
+     fuehrte eine Taste ins Leere. Steht die Position gerade in ihrer Zone
+     (die Karte traegt dann card-live), schlaegt ihre Taste im selben Takt
+     wie das Zeichen auf der Karte. */
+  function tasten(m, klasse) {
+    var welche = (m.zeichen || []).filter(function (k) { return !!karteZu(k); });
+    if (!welche.length) return null;
+    var kasten = document.createElement("div");
+    kasten.className = klasse;
+    welche.forEach(function (k) {
+      var karte = document.getElementById(karteZu(k));
+      var t = document.createElement("button");
+      t.type = "button";
+      t.className = "kuerzel-taste" + (karte && karte.classList.contains("card-live") ? " aktiv" : "");
+      t.textContent = k;
+      t.setAttribute("aria-label", k + " — zur Karte");
+      t.addEventListener("click", function (e) {
+        e.stopPropagation();
+        schliessen();
+        location.hash = "#" + karteZu(k);
+      });
+      kasten.appendChild(t);
+    });
+    return kasten;
   }
 
   /* ---------- Eine Meldung im Ganzen ---------- */
@@ -5214,18 +5269,13 @@ if ("serviceWorker" in navigator) {
     else { bildEl.removeAttribute("src"); bildEl.hidden = true; }
 
     zeichenEl.textContent = "";
-    var welche = (m.zeichen || []).filter(function (k) { return !!karteZu(k); });
-    welche.forEach(function (k) {
-      var t = document.createElement("button");
-      t.type = "button";
-      t.textContent = k;
-      t.addEventListener("click", function () {
-        schliessen();
-        location.hash = "#" + karteZu(k);
-      });
-      zeichenEl.appendChild(t);
-    });
-    zeichenEl.hidden = welche.length === 0;
+    var marken = tasten(m, "");
+    if (marken) {
+      while (marken.firstChild) zeichenEl.appendChild(marken.firstChild);
+      zeichenEl.hidden = false;
+    } else {
+      zeichenEl.hidden = true;
+    }
 
     // Der Weg, den die Meldung selbst mitbringt — aber nicht zurueck hierher
     var weiter = m.url && m.url.indexOf("meldungen=") < 0 && m.url !== "/" ? m.url : "";
@@ -5290,15 +5340,6 @@ if ("serviceWorker" in navigator) {
     if (vorher && vorher.focus) vorher.focus();
   }
 
-  function lupeAuf(quelle) {
-    lupeBild.src = quelle;
-    lupe.hidden = false;
-  }
-  function lupeDicht() {
-    lupe.hidden = true;
-    lupeBild.removeAttribute("src");
-  }
-
   knopf.addEventListener("click", function () { oeffnen(null); });
   window.rcpMeldungenOeffnen = function () { if (blatt.hidden) oeffnen(null); };
 
@@ -5325,17 +5366,16 @@ if ("serviceWorker" in navigator) {
     if (hinWeg) hingehen(hinWeg);
   });
   bildEl.addEventListener("click", function () {
-    if (bildEl.getAttribute("src")) lupeAuf(bildEl.getAttribute("src"));
+    if (bildEl.getAttribute("src") && window.rcpLupe) window.rcpLupe(bildEl.getAttribute("src"), bildEl);
   });
   bildEl.addEventListener("error", function () { bildEl.hidden = true; });
-  lupe.addEventListener("click", lupeDicht);
-  lupeZu.addEventListener("click", lupeDicht);
 
   zu.addEventListener("click", schliessen);
   blatt.addEventListener("click", function (e) { if (e.target === blatt) schliessen(); });
   document.addEventListener("keydown", function (e) {
     if (e.key !== "Escape") return;
-    if (!lupe.hidden) return lupeDicht();
+    // Die Lupe liegt darueber und macht sich selbst zu
+    if (window.rcpLupeOffen && window.rcpLupeOffen()) return;
     if (!blatt.hidden) schliessen();
   });
 
@@ -5366,6 +5406,249 @@ if ("serviceWorker" in navigator) {
       else oeffnen(null);
     }, 400);
   })();
+})();
+</script>
+
+<script>
+/* Die Lupe: ein Bild im Ganzen, zum Ziehen und Zoomen.
+
+   Ein Chart im Hochformat ist klein — auf die Breite gerechnet bleibt vom
+   Kursverlauf wenig uebrig. Deshalb laesst sich hier hineingehen: mit zwei
+   Fingern, mit einem Doppeltipp, und im Vergroesserten mit einem Finger
+   ziehen.
+
+   Die Gesten werden selbst gefuehrt (touch-action: none) — ueberliesse man
+   sie dem Browser, zoomte iOS die ganze Seite mit, samt Kopfleiste und
+   Meldung dahinter.
+
+   Das Auf- und Zugehen nimmt den Weg vom Bild in der Meldung: es waechst
+   aus seinem Platz heraus und faehrt beim Schliessen dorthin zurueck. Das
+   ist mehr als ein Einblenden — man sieht, woher es kommt. */
+(function () {
+  var lupe = document.getElementById("lupe");
+  var bild = document.getElementById("lupeBild");
+  var zuKnopf = document.getElementById("lupeZu");
+  if (!lupe || !bild) return;
+
+  var GROSS = 3.2;              // was ein Doppeltipp mindestens hermacht
+  var HOECHSTENS = 6;
+  var s = 1, x = 0, y = 0;      // Massstab und Verschiebung
+  var woher = null;             // das Bild in der Meldung, zu dem es zurueckgeht
+  var offen = false;
+  var zeiger = new Map();
+  var start = null;
+  var letzterTipp = 0;
+  var letzterOrt = { x: 0, y: 0 };
+
+  function setzen(weich) {
+    bild.style.transition = weich ? "transform 0.3s var(--weich, cubic-bezier(0.32,0.72,0,1))" : "none";
+    bild.style.transform = "translate3d(" + x + "px," + y + "px,0) scale(" + s + ")";
+  }
+
+  /* Wie weit darf es geschoben werden? So weit, dass kein Rand ins Bild
+     rutscht — passt die Seite ganz hinein, bleibt sie mittig. */
+  function halten() {
+    var r = bild.getBoundingClientRect();
+    var b = (bild.offsetWidth * s - window.innerWidth) / 2;
+    var h = (bild.offsetHeight * s - window.innerHeight) / 2;
+    if (!r.width) return;
+    x = b > 0 ? Math.max(-b, Math.min(b, x)) : 0;
+    y = h > 0 ? Math.max(-h, Math.min(h, y)) : 0;
+  }
+
+  // Was noetig ist, damit das Bild die Hoehe fuellt — bei einem breiten
+  // Chart ist das der Unterschied zwischen ahnen und lesen.
+  function fuellt() {
+    if (!bild.offsetHeight) return GROSS;
+    return Math.min(HOECHSTENS, Math.max(GROSS, window.innerHeight / bild.offsetHeight));
+  }
+
+  function auf(quelle, von) {
+    woher = von || null;
+    bild.src = quelle;
+    lupe.hidden = false;
+    s = 1; x = 0; y = 0;
+
+    var los = function () {
+      var ziel = bild.getBoundingClientRect();
+      if (!ziel.width || !woher) { setzen(false); lupe.classList.add("da"); return; }
+      // Vom Platz in der Meldung aus aufgehen
+      var her = woher.getBoundingClientRect();
+      var f = Math.max(0.05, her.width / ziel.width);
+      x = (her.left + her.width / 2) - (ziel.left + ziel.width / 2);
+      y = (her.top + her.height / 2) - (ziel.top + ziel.height / 2);
+      s = f;
+      setzen(false);
+      void bild.offsetWidth;
+      s = 1; x = 0; y = 0;
+      lupe.classList.add("da");
+      setzen(true);
+    };
+
+    if (bild.complete && bild.naturalWidth) los();
+    else bild.addEventListener("load", los, { once: true });
+    offen = true;
+    document.body.style.overflow = "hidden";
+    zuKnopf.focus();
+  }
+
+  function zu() {
+    if (!offen) return;
+    offen = false;
+    lupe.classList.remove("da", "zieht");
+    var ziel = bild.getBoundingClientRect();
+    if (woher && ziel.width) {
+      var her = woher.getBoundingClientRect();
+      // Wieder in seinen Platz zurueck — denselben Weg, nur andersherum
+      s = Math.max(0.05, her.width / (bild.offsetWidth || ziel.width));
+      x = (her.left + her.width / 2) - (window.innerWidth / 2);
+      y = (her.top + her.height / 2) - (window.innerHeight / 2);
+      setzen(true);
+    }
+    setTimeout(function () {
+      lupe.hidden = true;
+      bild.removeAttribute("src");
+      bild.style.transition = "none";
+      bild.style.transform = "";
+      document.body.style.overflow = document.querySelector(".sheet:not([hidden])") ? "hidden" : "";
+      if (woher && woher.focus) woher.focus();
+    }, 300);
+  }
+
+  /* ---------- Gesten ---------- */
+
+  function mitte() {
+    var alle = [...zeiger.values()];
+    var sx = 0, sy = 0;
+    alle.forEach(function (p) { sx += p.x; sy += p.y; });
+    return { x: sx / alle.length, y: sy / alle.length };
+  }
+
+  function abstand() {
+    var a = [...zeiger.values()];
+    if (a.length < 2) return 0;
+    return Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y);
+  }
+
+  function zoomen(neu, um) {
+    neu = Math.max(1, Math.min(HOECHSTENS, neu));
+    // Der Punkt unter den Fingern soll bleiben, wo er ist
+    var mx = um.x - window.innerWidth / 2;
+    var my = um.y - window.innerHeight / 2;
+    x = mx - (mx - x) * (neu / s);
+    y = my - (my - y) * (neu / s);
+    s = neu;
+    halten();
+  }
+
+  lupe.addEventListener("pointerdown", function (e) {
+    if (e.target === zuKnopf) return;
+    lupe.setPointerCapture(e.pointerId);
+    zeiger.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    start = { x: x, y: y, s: s, d: abstand(), m: mitte(),
+              ex: e.clientX, ey: e.clientY, bewegt: false, zeit: Date.now() };
+    if (zeiger.size > 1) lupe.classList.add("zieht");
+  });
+
+  lupe.addEventListener("pointermove", function (e) {
+    if (!zeiger.has(e.pointerId) || !start) return;
+    zeiger.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (zeiger.size >= 2) {
+      var d = abstand();
+      if (start.d > 0 && d > 0) {
+        var m = mitte();
+        s = start.s;
+        x = start.x; y = start.y;
+        zoomen(start.s * (d / start.d), m);
+        setzen(false);
+      }
+      start.bewegt = true;
+      return;
+    }
+
+    var dx = e.clientX - start.ex;
+    var dy = e.clientY - start.ey;
+    if (Math.hypot(dx, dy) > 8) { start.bewegt = true; lupe.classList.add("zieht"); }
+
+    if (s > 1) {
+      x = start.x + dx;
+      y = start.y + dy;
+      halten();
+      setzen(false);
+    } else if (dy > 0) {
+      // Nach unten wischen schliesst — das Bild geht mit dem Finger
+      y = dy;
+      bild.style.transition = "none";
+      bild.style.transform = "translate3d(0," + dy + "px,0) scale(" + Math.max(0.7, 1 - dy / 900) + ")";
+      lupe.style.opacity = String(Math.max(0.2, 1 - dy / 500));
+    }
+  });
+
+  function loslassen(e) {
+    if (!zeiger.has(e.pointerId)) return;
+    zeiger.delete(e.pointerId);
+    if (zeiger.size > 0) { start = null; return; }
+    lupe.classList.remove("zieht");
+    lupe.style.opacity = "";
+    if (!start) { halten(); setzen(true); return; }
+
+    var dy = e.clientY - start.ey;
+    var dx = e.clientX - start.ex;
+
+    // Weit genug nach unten gezogen: zu
+    if (s === 1 && start.bewegt && dy > 110 && Math.abs(dx) < 140) { start = null; return zu(); }
+
+    if (!start.bewegt && Date.now() - start.zeit < 400) {
+      var jetzt = Date.now();
+      var nah = Math.hypot(e.clientX - letzterOrt.x, e.clientY - letzterOrt.y) < 40;
+      if (jetzt - letzterTipp < 320 && nah) {
+        // Doppeltipp: hinein und wieder heraus
+        letzterTipp = 0;
+        if (s > 1.02) { s = 1; x = 0; y = 0; }
+        else zoomen(fuellt(), { x: e.clientX, y: e.clientY });
+        setzen(true);
+        start = null;
+        return;
+      }
+      letzterTipp = jetzt;
+      letzterOrt = { x: e.clientX, y: e.clientY };
+      // Ein einzelner Tipp macht zu — aber erst, wenn kein zweiter folgt
+      var merk = jetzt;
+      setTimeout(function () {
+        if (letzterTipp === merk && s <= 1.02 && offen) zu();
+      }, 330);
+      start = null;
+      return;
+    }
+
+    halten();
+    setzen(true);
+    start = null;
+  }
+
+  lupe.addEventListener("pointerup", loslassen);
+  lupe.addEventListener("pointercancel", loslassen);
+  /* Kein eigener dblclick-Lauscher: die Maus loest dieselben Zeiger-
+     Ereignisse aus wie der Finger, und der Doppeltipp oben faengt sie
+     schon ab. Mit beidem hob sich die Geste selbst auf — erst hinein,
+     dann durch das nachlaufende dblclick gleich wieder heraus. */
+  lupe.addEventListener("wheel", function (e) {
+    e.preventDefault();
+    zoomen(s * (e.deltaY < 0 ? 1.12 : 0.89), { x: e.clientX, y: e.clientY });
+    setzen(false);
+  }, { passive: false });
+
+  zuKnopf.addEventListener("click", function (e) { e.stopPropagation(); zu(); });
+  document.addEventListener("keydown", function (e) {
+    if (!offen) return;
+    if (e.key === "Escape") { e.stopPropagation(); zu(); }
+  }, true);
+  window.addEventListener("resize", function () { if (offen) { halten(); setzen(false); } });
+
+  window.rcpLupe = auf;
+  window.rcpLupeZu = zu;
+  window.rcpLupeOffen = function () { return offen; };
 })();
 </script>
 
