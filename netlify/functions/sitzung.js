@@ -18,6 +18,36 @@ import crypto from "node:crypto";
 export const KEKS = "rcp_sitz";
 export const LADEN = "aktien-konten";
 export const BESUCH = "aktien-besuch";
+export const MELDUNGEN = "aktien-meldungen";
+
+/* Eine Meldung ins Buch schreiben, damit sie in der Glocke auftaucht.
+
+   Der Schluessel traegt die Zeit rueckwaerts (1e15 minus Zeitstempel) — dann
+   steht in der Liste des Speichers das Neueste vorn, ohne dass irgendwer
+   sortieren muss.
+
+   Schlaegt das Schreiben fehl, ist das kein Grund, den Push zu verhindern:
+   die Meldung selbst ist wichtiger als ihr Eintrag im Buch. Deshalb wirft
+   diese Funktion nie. */
+export async function notieren(eintrag) {
+  try {
+    const { getStore } = await import("@netlify/blobs");
+    const store = getStore(MELDUNGEN);
+    const zeit = Date.now();
+    const key = "m/" + String(1e15 - zeit) + "-" + Math.random().toString(36).slice(2, 8);
+    await store.setJSON(key, {
+      zeit: new Date(zeit).toISOString(),
+      titel: String(eintrag.titel || "").slice(0, 80),
+      text: String(eintrag.text || "").slice(0, 300),
+      url: String(eintrag.url || "/").slice(0, 200),
+      art: String(eintrag.art || "meldung").slice(0, 20),
+      // "chef" heisst: nur die Verwaltung bekommt das zu sehen
+      nur: eintrag.nur === "chef" ? "chef" : ""
+    });
+  } catch (e) {
+    // Das Buch ist Beiwerk
+  }
+}
 
 // Wie lange eine Sitzung gilt
 export const DAUER_KURZ = 12 * 60 * 60;        // ohne "merken": ein halber Tag

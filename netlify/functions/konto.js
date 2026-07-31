@@ -39,6 +39,7 @@ import {
   mailNormal,
   mailGueltig,
   schluessel,
+  notieren,
   KEKS
 } from "./sitzung.js";
 
@@ -188,6 +189,15 @@ async function registrieren(request, store) {
    Schlaegt das fehl, ist die Anfrage trotzdem gespeichert — sie steht dann
    eben nur in der Verwaltung und meldet sich nicht von selbst. */
 async function meldeAnfrage(konto) {
+  const titel = "Neue Zugangsanfrage";
+  const text = (konto.name ? konto.name + " · " : "") + konto.mail;
+
+  // Zuerst ins Buch, dann der Push. Ob gerade ein Geraet angemeldet ist,
+  // aendert nichts daran, dass die Anfrage passiert ist — in der Glocke
+  // muss sie auch dann stehen.
+  await notieren({ titel: titel, text: text, url: "/verwaltung.html",
+                   art: "zugang", nur: "chef" });
+
   try {
     const push = getStore("aktien-push");
     const l = await push.list({ prefix: "sub-" });
@@ -211,10 +221,7 @@ async function meldeAnfrage(konto) {
     );
 
     const nutzlast = JSON.stringify({
-      title: "Neue Zugangsanfrage",
-      body: (konto.name ? konto.name + " · " : "") + konto.mail,
-      tag: "zugang",
-      url: "/verwaltung.html"
+      title: titel, body: text, tag: "zugang", url: "/verwaltung.html"
     });
 
     await Promise.all(ziele.map(async (z) => {

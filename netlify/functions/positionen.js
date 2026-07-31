@@ -19,7 +19,7 @@
 import { getStore } from "@netlify/blobs";
 import { START } from "./positionen-start.js";
 import { keys } from "./vapid.js";
-import { kontoLesen, chefLesen, geheimnis } from "./sitzung.js";
+import { kontoLesen, chefLesen, geheimnis, notieren } from "./sitzung.js";
 
 export const LADEN = "aktien-positionen";
 export const EINTRAG = "liste";
@@ -195,6 +195,13 @@ function zahl(s) {
 /* ---------- Meldung bei neuen Positionen ---------- */
 
 async function melden(neu) {
+  const namen = neu.map((p) => p.badge).join(" · ");
+
+  // Erst ins Buch. Ob gerade ein Geraet angemeldet ist, aendert nichts
+  // daran, dass die Position neu ist.
+  await notieren({ titel: "Neu in der Liste", text: namen,
+                   url: "/#" + neu[0].id, art: "position" });
+
   try {
     const push = getStore("aktien-push");
     const l = await push.list({ prefix: "sub-" });
@@ -215,9 +222,8 @@ async function melden(neu) {
       k.privateKey
     );
 
-    const namen = neu.map((p) => p.badge).join(" · ");
     const nutzlast = JSON.stringify({
-      title: neu.length === 1 ? "Neu in der Liste" : "Neu in der Liste",
+      title: "Neu in der Liste",
       body: namen,
       tag: "neu-" + Date.now().toString(36),
       url: "/#" + neu[0].id

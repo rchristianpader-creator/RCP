@@ -12,6 +12,7 @@
    VAPID_PUBLIC / VAPID_PRIVATE, VAPID_SUBJECT. */
 
 import webpush from "web-push";
+import { notieren } from "./sitzung.js";
 import { getStore } from "@netlify/blobs";
 import { keys } from "./vapid.js";
 import { lesen, zonenZahlen, LADEN } from "./positionen.js";
@@ -79,6 +80,12 @@ export default async () => {
         text = fmt(price) + " " + cur + " — Zone " + fmt(item.high) + " bis " + fmt(item.low) + " " + cur;
       }
 
+      await notieren({
+        titel: item.label + " in der Zone",
+        text: text,
+        url: "/#" + item.anchor,
+        art: "zone"
+      });
       await senden(store, subs, {
         title: item.label + " in der Zone",
         body: text,

@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="light">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#fafafa">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=39">
-<link rel="apple-touch-icon" href="/icon-180.png?v=39">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=40">
+<link rel="apple-touch-icon" href="/icon-180.png?v=40">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=39">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=40">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=39">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=40">
 
 <script>
 /* Im Browser oder als App?
@@ -724,6 +724,87 @@
     gap: 7px;
     text-decoration: none;
   }
+  /* Die Glocke traegt denselben Zaehler wie die Verwaltung — dasselbe
+     Aussehen, damit man beide Zahlen gleich liest. */
+  .glocke-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .glocke-btn svg { flex: none; }
+  .glocke-btn .wartend {
+    min-width: 17px;
+    padding: 0 5px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0;
+    font-variant-numeric: tabular-nums;
+    line-height: 17px;
+    text-align: center;
+    color: #fff;
+    background: var(--fg);
+    border-radius: 9px;
+    animation: beat-badge 2s ease-in-out infinite;
+  }
+  .glocke-btn.offen { background: var(--fg); color: #fff; }
+  .glocke-btn.offen .wartend,
+  .glocke-btn:active .wartend { background: #fff; color: var(--fg); }
+
+  /* Die Liste hinter der Glocke */
+  .meldungen { margin-top: 18px; }
+  .meldungen .leer {
+    font-size: 13px;
+    color: var(--muted);
+    padding: 10px 0;
+  }
+  .m-eintrag {
+    display: block;
+    width: 100%;
+    text-align: left;
+    font: inherit;
+    background: none;
+    border: 0;
+    border-top: 1px solid var(--hair);
+    padding: 13px 0 12px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .m-eintrag:first-child { border-top: 0; padding-top: 4px; }
+  .m-eintrag[disabled] { cursor: default; }
+  .m-eintrag .kopf {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .m-eintrag .titel { font-size: 14px; font-weight: 600; color: var(--fg); }
+  .m-eintrag .wann {
+    flex: none;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .m-eintrag .text {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.45;
+    margin-top: 3px;
+  }
+  /* Ungelesen: ein Strich am Rand, kein Farbtupfer */
+  .m-eintrag.neu { position: relative; padding-left: 12px; }
+  .m-eintrag.neu::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 15px;
+    width: 3px;
+    height: 14px;
+    background: var(--fg);
+    border-radius: 2px;
+  }
+  .m-eintrag:first-child.neu::before { top: 6px; }
   .verwaltung-btn .wartend {
     min-width: 17px;
     padding: 0 5px;
@@ -1145,6 +1226,7 @@
   .nur-web .fx-note,
   .nur-web footer,
   .nur-web #installBtn,
+  .nur-web #glockeBtn,
   .nur-web #pushBtn,
   /* Der Streifen legt sich sonst genau ueber den Knopf im Kasten — und er
      sagt ohnehin dasselbe. Auf der Installationsseite ist er zu viel. */
@@ -1954,6 +2036,14 @@
   <div class="header-actions">
     <button class="install-btn" id="installBtn" type="button" hidden>App installieren</button>
     <button class="install-btn" id="pushBtn" type="button" hidden>Benachrichtigungen</button>
+    <button class="install-btn glocke-btn" id="glockeBtn" type="button" hidden>
+      <svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor"
+           stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M10 2.6a4.6 4.6 0 0 0-4.6 4.6c0 3.1-1 4.1-1.6 4.8h12.4c-.6-.7-1.6-1.7-1.6-4.8A4.6 4.6 0 0 0 10 2.6z"/>
+        <path d="M8.3 15a1.8 1.8 0 0 0 3.4 0"/>
+      </svg>
+      Meldungen
+    </button>
     <a class="install-btn verwaltung-btn" id="verwaltungBtn" href="/verwaltung.html" hidden>Verwaltung</a>
   </div>
   <div class="konto-zeile" id="kontoZeile" hidden></div>
@@ -1975,7 +2065,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=39" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=40" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -2093,7 +2183,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=39" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=40" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -2109,6 +2199,18 @@
     </ol>
 
     <div class="sheet-note" id="installNote" hidden></div>
+  </div>
+</div>
+
+<div class="sheet" id="meldungSheet" role="dialog" aria-modal="true" aria-labelledby="meldungTitle" hidden>
+  <div class="sheet-card">
+    <div class="sheet-top">
+      <div class="sheet-label">Meldungen</div>
+      <button class="sheet-close" id="meldungClose" type="button">Schließen</button>
+    </div>
+    <h3 id="meldungTitle">Was passiert ist</h3>
+    <p class="sheet-sub">Seit die App auf diesem Gerät läuft. Ältere Meldungen bleiben draußen.</p>
+    <div class="meldungen" id="meldungListe"></div>
   </div>
 </div>
 
@@ -2132,7 +2234,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=39" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=40" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -4101,6 +4203,190 @@ if ("serviceWorker" in navigator) {
   if (navigator.serviceWorker) {
     navigator.serviceWorker.addEventListener("message", function (e) {
       if (e.data && e.data.art === "push") nachsehen(false);
+    });
+  }
+})();
+</script>
+
+<script>
+/* Die Glocke: was passiert ist, seit die App auf diesem Geraet laeuft.
+
+   Jede Push-Meldung wird beim Versenden auch in ein Buch geschrieben
+   (notieren() in sitzung.js). Hier wird es zurueckgelesen.
+
+   Der Stichtag ist der Moment, in dem dieses Geraet die App zum ersten Mal
+   geoeffnet hat. Aelteres bleibt draussen: wer sich heute die App holt, soll
+   nicht die Meldungen von vorletzter Woche vorfinden, zu denen er nie gefragt
+   wurde. Auf dem Home-Bildschirm hat die App ihren eigenen Speicher — der
+   erste Start dort ist also wirklich der Einzug.
+
+   Ganz unten steht immer der Willkommensgruss. Er wird hier erzeugt, nicht
+   verschickt: eine Meldung zum Einzug, die niemanden weckt. */
+(function () {
+  var SEIT = "rcp:seit";
+  var GELESEN = "rcp:gelesen";
+  var knopf = document.getElementById("glockeBtn");
+  var blatt = document.getElementById("meldungSheet");
+  var zu = document.getElementById("meldungClose");
+  var liste = document.getElementById("meldungListe");
+  if (!knopf || !blatt || !liste) return;
+  if (document.documentElement.classList.contains("nur-web")) return;
+
+  function merk(name, wert) {
+    try { if (wert === undefined) return localStorage.getItem(name); localStorage.setItem(name, wert); }
+    catch (e) { return null; }
+  }
+
+  // Der Einzug: einmal gesetzt, nie wieder
+  var seit = Number(merk(SEIT));
+  if (!seit) { seit = Date.now(); merk(SEIT, String(seit)); }
+  var gelesen = Number(merk(GELESEN)) || 0;
+
+  var stand = [];
+  var bezug = Date.now();
+
+  function her(iso) {
+    var t = Date.parse(iso || "");
+    if (!t) return "";
+    var s = Math.max(0, Math.round((bezug - t) / 1000));
+    if (s < 90) return "gerade eben";
+    var m = Math.round(s / 60);
+    if (m < 60) return "vor " + m + " Min.";
+    var h = Math.round(m / 60);
+    if (h < 24) return "vor " + h + (h === 1 ? " Stunde" : " Std.");
+    var d = Math.round(h / 24);
+    if (d < 8) return "vor " + d + (d === 1 ? " Tag" : " Tagen");
+    var dat = new Date(t);
+    return dat.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" });
+  }
+
+  function willkommen() {
+    return {
+      zeit: new Date(seit).toISOString(),
+      titel: "Willkommen",
+      text: "Dieses Gerät ist eingerichtet. Hier stehen künftig alle Meldungen: Kurse in ihrer Einkaufszone, neue Positionen, Nachrichten.",
+      url: "",
+      art: "willkommen"
+    };
+  }
+
+  function zaehlen() {
+    var offen = stand.filter(function (m) { return Date.parse(m.zeit) > gelesen; }).length;
+    var alt = knopf.querySelector(".wartend");
+    if (alt) alt.parentNode.removeChild(alt);
+    knopf.classList.toggle("offen", offen > 0);
+    if (offen > 0) {
+      var w = document.createElement("span");
+      w.className = "wartend";
+      w.textContent = offen > 9 ? "9+" : offen;
+      knopf.appendChild(w);
+    }
+    knopf.setAttribute("aria-label",
+      offen ? "Meldungen, " + offen + (offen === 1 ? " neue" : " neue") : "Meldungen");
+    knopf.hidden = false;
+  }
+
+  function zeichnen() {
+    liste.textContent = "";
+    stand.forEach(function (m) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "m-eintrag" + (Date.parse(m.zeit) > gelesen ? " neu" : "");
+
+      var kopf = document.createElement("div");
+      kopf.className = "kopf";
+      var t = document.createElement("span");
+      t.className = "titel";
+      t.textContent = m.titel;
+      kopf.appendChild(t);
+      var w = document.createElement("span");
+      w.className = "wann";
+      w.textContent = her(m.zeit);
+      kopf.appendChild(w);
+      b.appendChild(kopf);
+
+      if (m.text) {
+        var x = document.createElement("div");
+        x.className = "text";
+        x.textContent = m.text;
+        b.appendChild(x);
+      }
+
+      if (m.url) {
+        b.addEventListener("click", function () {
+          schliessen();
+          if (m.url.charAt(0) === "#" || m.url.indexOf("/#") === 0) {
+            location.hash = m.url.replace(/^\//, "");
+          } else {
+            location.href = m.url;
+          }
+        });
+      } else {
+        b.disabled = true;
+      }
+      liste.appendChild(b);
+    });
+  }
+
+  var laeuft = false;
+  function holen() {
+    if (laeuft) return;
+    laeuft = true;
+    fetch("/.netlify/functions/meldungen?seit=" + seit, {
+      credentials: "same-origin", cache: "no-store"
+    })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (a) {
+        laeuft = false;
+        if (!a || !a.ok) { stand = [willkommen()]; zaehlen(); return; }
+        bezug = Date.parse(a.jetzt) || Date.now();
+        stand = (a.meldungen || []).concat([willkommen()]);
+        zaehlen();
+        if (!blatt.hidden) zeichnen();
+      })
+      .catch(function () {
+        laeuft = false;
+        if (!stand.length) { stand = [willkommen()]; zaehlen(); }
+      });
+  }
+
+  var vorher = null;
+  function oeffnen() {
+    vorher = document.activeElement;
+    zeichnen();
+    blatt.hidden = false;
+    document.body.style.overflow = "hidden";
+    zu.focus();
+    // Gesehen ist gesehen — aber erst, nachdem gezeichnet wurde, sonst
+    // waere der Strich am Rand schon weg, bevor man ihn sieht.
+    gelesen = Date.now();
+    merk(GELESEN, String(gelesen));
+    zaehlen();
+  }
+
+  function schliessen() {
+    blatt.hidden = true;
+    document.body.style.overflow = "";
+    if (vorher && vorher.focus) vorher.focus();
+  }
+
+  knopf.addEventListener("click", oeffnen);
+  zu.addEventListener("click", schliessen);
+  blatt.addEventListener("click", function (e) { if (e.target === blatt) schliessen(); });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !blatt.hidden) schliessen();
+  });
+
+  holen();
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible") holen();
+  });
+  setInterval(function () {
+    if (document.visibilityState === "visible") holen();
+  }, 60000);
+  if (navigator.serviceWorker) {
+    navigator.serviceWorker.addEventListener("message", function (e) {
+      if (e.data && e.data.art === "push") holen();
     });
   }
 })();

@@ -406,6 +406,37 @@ wieder nach. Es gibt keinen Weg, das von der Seite aus zu ändern — die App mu
 vom Startbildschirm gelöscht und neu angelegt werden. Android macht es von
 selbst: Chrome liest das Manifest erneut und tauscht das Bild aus.
 
+## Die Glocke
+
+Im Kopf steht **Meldungen** mit einem Zähler für Ungelesenes. Dahinter liegt,
+was passiert ist: Kurse in ihrer Einkaufszone, neue Positionen, Nachrichten an
+alle — und für die Verwaltung die Zugangsanfragen.
+
+Jede Push-Meldung wird beim Versenden auch ins Buch geschrieben
+(`notieren()` in `sitzung.js`, Store `aktien-meldungen`). Der Schlüssel trägt
+die Zeit **rückwärts** (`1e15` minus Zeitstempel) — dann steht in der Liste des
+Speichers das Neueste vorn, ohne dass irgendwer sortieren muss.
+
+Geschrieben wird **vor** dem Push, nicht danach: ob gerade ein Gerät angemeldet
+ist, ändert nichts daran, dass die Sache passiert ist. Schlägt das Schreiben
+fehl, wird der Push trotzdem verschickt — das Buch ist Beiwerk.
+
+### Was vor dem Einzug war, bleibt draußen
+
+Der Stichtag ist der Moment, in dem dieses Gerät die App zum ersten Mal
+geöffnet hat (`rcp:seit` im `localStorage`). Auf dem Home-Bildschirm hat die
+App ihren eigenen Speicher — der erste Start dort ist also wirklich der Einzug.
+
+Wer sich heute die App holt, soll nicht die Meldungen von vorletzter Woche
+vorfinden, zu denen er nie gefragt wurde. Der Stichtag geht als `?seit=` an die
+Function, die filtert schon dort.
+
+Ganz unten steht immer der **Willkommensgruß**. Er wird in der App erzeugt,
+nicht verschickt: eine Meldung zum Einzug, die niemanden weckt.
+
+Zugangsanfragen tragen `nur: "chef"` und gehen niemanden sonst etwas an.
+Einträge älter als 60 Tage werden beim Nachsehen weggeräumt.
+
 ## Auf dem Laufenden bleiben
 
 Der Zähler am Verwaltungsknopf stand früher **nur einmal**, beim Laden. Kam
@@ -471,6 +502,7 @@ Nur die Verwaltung darf nachsehen; melden darf jedes angemeldete Konto.
 | `/.netlify/functions/nachricht` | `{"ok":true,"geraete":3}` — nur als Verwaltung |
 | `/.netlify/functions/positionen` | `{"ok":true,"anzahl":10,"positionen":[…]}` |
 | `/.netlify/functions/besuch` | `{"ok":true,"da":1,"leute":[…]}` — nur als Verwaltung |
+| `/.netlify/functions/meldungen` | `{"ok":true,"meldungen":[…]}` — was hinter der Glocke steht |
 
 Der Punkt vor `netlify` gehört dazu. Ohne ihn wäre es ein Dateipfad, keine Function.
 

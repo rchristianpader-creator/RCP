@@ -13,7 +13,7 @@
 
 import { getStore } from "@netlify/blobs";
 import { keys } from "./vapid.js";
-import { chefLesen, geheimnis } from "./sitzung.js";
+import { chefLesen, geheimnis, notieren } from "./sitzung.js";
 
 const MAX_TITEL = 60;
 const MAX_TEXT = 300;
@@ -68,6 +68,8 @@ export default async (request) => {
     tag: "nachricht-" + Date.now().toString(36),
     url: "/"
   });
+
+  await notieren({ titel: titel || "Aktien-Liste", text: text, url: "/", art: "nachricht" });
 
   let gesendet = 0;
   let weg = 0;
