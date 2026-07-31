@@ -64,6 +64,25 @@ Danach läuft es allein: `alerts.js` liest Symbole und Einkaufszonen aus der
 gespeicherten Watchlist, prüft alle 30 Minuten und meldet sich nur, wenn ein
 Kurs **neu** in seine Zone eintritt. Zwischen 23 und 7 Uhr ist Ruhe.
 
+**Und der Knopf verschwindet.** Er ist eine Aufforderung, kein Schalter — eine
+erledigte Aufforderung gehört weg. Vorher stand er weiter in der Kopfzeile und
+trug nur einen anderen Text („Benachrichtigungen aktiv"), nahm also bei jedem
+Start Platz ein, ohne noch etwas zu tun.
+
+Er kommt zurück, sobald es wieder etwas zu tun gibt: geprüft wird **beides** —
+Erlaubnis erteilt *und* eine Anmeldung vorhanden. Wer die Anmeldung löscht oder
+die Erlaubnis in den iOS-Einstellungen entzieht, sieht ihn beim nächsten Start
+wieder. Ohne diese zweite Bedingung gäbe es keinen Weg zurück.
+
+Er beginnt **versteckt** und kommt erst, wenn feststeht, dass er gebraucht
+wird. Umgekehrt — erst zeigen, dann bei Bedarf zurückziehen — blitzte er bei
+jedem Start kurz auf, und die Kopfzeile zuckte dabei. `pushknopf-test` misst
+genau das nach: von Bild zu Bild, ob er je sichtbar war.
+
+Im Rundgang fällt der Schritt dazu von selbst weg — die Schritte fragen über
+`da()`, und `da()` gibt für Verstecktes nichts zurück. Was längst läuft, muss
+nicht erklärt werden.
+
 Änderst du eine Zone unter **Verwaltung → Positionen**, zieht der Alarm
 automatisch mit — es gibt keine zweite Liste zu pflegen.
 

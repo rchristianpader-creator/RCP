@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="light">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#fafafa">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=58">
-<link rel="apple-touch-icon" href="/icon-180.png?v=58">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=59">
+<link rel="apple-touch-icon" href="/icon-180.png?v=59">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=58">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=59">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=58">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=59">
 
 <script>
 /* Im Browser oder als App?
@@ -2610,7 +2610,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=58" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=59" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -2728,7 +2728,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=58" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=59" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -2823,7 +2823,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=58" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=59" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -3560,16 +3560,26 @@
   var standalone = window.matchMedia("(display-mode: standalone)").matches ||
                    navigator.standalone === true;
 
-  btn.hidden = false;
+  /* Der Knopf ist eine Aufforderung, kein Schalter — und eine erledigte
+     Aufforderung gehoert weg. Ist dieses Geraet angemeldet, verschwindet er.
+
+     Er beginnt versteckt und kommt erst, wenn feststeht, dass er gebraucht
+     wird. Umgekehrt — erst zeigen, dann bei Bedarf zurueckziehen — blitzte
+     er bei jedem Start kurz auf, und der Kopf haette dabei gezuckt. */
   markState();
 
   function markState() {
-    if (Notification.permission !== "granted") return;
-    navigator.serviceWorker.getRegistration().then(function (reg) {
-      if (!reg) return;
-      reg.pushManager.getSubscription().then(function (sub) {
-        if (!sub) return;
-        btn.textContent = "Benachrichtigungen aktiv";
+    if (Notification.permission !== "granted" || !navigator.serviceWorker) {
+      btn.hidden = false;
+      return;
+    }
+    navigator.serviceWorker.getRegistration()
+      .then(function (reg) {
+        return reg ? reg.pushManager.getSubscription() : null;
+      })
+      .then(function (sub) {
+        if (!sub) { btn.hidden = false; return; }
+        btn.hidden = true;
         // Noch einmal melden, damit am Geraet steht, wer gerade angemeldet ist.
         // Nur so weiss der Server, welche Geraete zur Verwaltung gehoeren.
         fetch("/.netlify/functions/subscribe", {
@@ -3578,8 +3588,8 @@
           credentials: "same-origin",
           body: JSON.stringify(sub)
         }).catch(function () {});
-      });
-    });
+      })
+      .catch(function () { btn.hidden = false; });
   }
 
   function showNote(text) {
@@ -3695,9 +3705,12 @@
             body: JSON.stringify(sub)
           }).then(function (r) {
             if (!r.ok) throw new Error("Schritt 4 — Server hat die Anmeldung nicht angenommen (" + r.status + ")");
-            btn.textContent = "Benachrichtigungen aktiv";
+            /* Erst das Blatt, dann der Knopf weg: die Bestaetigung steht im
+               Blatt, und ohne sie saehe es aus, als waere der Knopf einfach
+               verschwunden. */
             showKey();
             openSheet();
+            btn.hidden = true;
           });
         });
     }).catch(function (e) {
@@ -4858,7 +4871,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=58";
+      i.src = "/icon-512.png?v=59";
     });
     return symbolBild;
   }
