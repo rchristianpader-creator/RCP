@@ -252,11 +252,22 @@ Gepflegt wird das Feld **nur vom Server**. Der Editor schickt es zwar mit,
 aber `pruefen()` wirft es weg und der POST setzt es aus dem vorigen Stand neu
 — es lässt sich also nicht von außen setzen.
 
-Positionen aus der Zeit vor diesem Feld haben keines. `lesen()` setzt dafür
-den Speicherstand der Liste ein, statt sie als „schon immer da" zu behandeln
-— das ist die vorsichtige Richtung: lieber einmal ein `AKTIV` zu wenig als
-eines, das nie ausgelöst wurde. Geschrieben wird beim Lesen nichts; beim
-nächsten Speichern fällt der Wert von selbst an seinen Platz.
+**Rückwirkend wird nichts gesetzt.** Der erste Anlauf tat das: Positionen ohne
+Feld bekamen „seit dem Speicherstand der Liste", also seit heute. Das war
+falsch, und zwar sofort sichtbar — DOW war vor Kurzem wirklich in seiner Zone,
+und genau dieses `AKTIV` wäre weggefallen. Ein Kennzeichen zu entfernen, das
+zu Recht dasteht, ist schlimmer als eines stehenzulassen, das zu früh kam.
+
+Positionen aus der Zeit vor dem Feld behalten deshalb den vollen Rückblick —
+auch über beliebig viele Speichervorgänge hinweg, solange ihre Zone
+unangetastet bleibt.
+
+Eine Ausnahme gibt es: **die NEU-Markierung**. Sie sagt selbst, dass die
+Position gerade erst dazugekommen ist — dann fängt auch ihre Zone jetzt an.
+Damit sortiert sich der Altbestand beim nächsten Speichern von allein, ohne
+dass jemand entscheiden müsste, was alt ist und was nicht: OXY trägt NEU und
+bekommt seinen Zeitpunkt, DOW trägt keins und bleibt, wie es war. Und weil die
+Ausnahme nur für Positionen **ohne** Feld greift, feuert sie genau einmal.
 
 Verglichen wird **auf den Tag**, nicht auf die Sekunde: eine Tageskerze trägt
 den Zeitpunkt der Eröffnung, die Zone kann am selben Tag später erreicht
@@ -266,10 +277,11 @@ läuft, bekommt das mitgezählt.
 `aktiv-test` stellt Yahoo mit festen Kerzen — ein Tief bei 48,00 vor drei
 Wochen, sonst 56,00 — und lässt nur den Zeitpunkt wandern: eben angelegt →
 nicht aktiv; einen Monat dabei → aktiv; Zone geändert → wieder von vorne; nur
-den Namen geändert → bleibt; heute in die Zone gelaufen → sofort aktiv; ohne
-`seit` → der Stand der Liste greift. Gegen den alten Stand fallen sieben der
-fünfzehn Prüfungen durch, mit genau der Ausgabe vom Screenshot
-(`abstand: 7.66`, `beruehrt_am: "2026-07-11"`, `aktiv: true`).
+den Namen geändert → bleibt stehen; heute in die Zone gelaufen → zählt sofort;
+ohne `seit` und ohne NEU → voller Rückblick, auch nach dem Speichern; ohne
+`seit`, aber mit NEU → Zeitpunkt fällt an. Gegen den alten Stand fallen sieben
+Prüfungen durch, mit genau der Ausgabe vom Screenshot (`abstand: 7.66`,
+`beruehrt_am: "2026-07-11"`, `aktiv: true`).
 
 ## Der Auftakt
 

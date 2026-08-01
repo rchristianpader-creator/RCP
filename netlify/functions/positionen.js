@@ -78,11 +78,22 @@ export default async (request) => {
 
      Eine geaenderte Zone ist ein neues Setup und faengt deshalb von vorne
      an. Alles andere — Name, Reihenfolge, Ziel — laesst den Zeitpunkt
-     stehen. */
+     stehen.
+
+     Rueckwirkend wird nichts gesetzt. Positionen aus der Zeit vor diesem
+     Feld behalten den vollen Rueckblick, sonst faellt bei ihnen ein AKTIV
+     weg, das zu Recht dasteht — der Kurs war vor Kurzem wirklich in ihrer
+     Zone. Die einzige Ausnahme ist die NEU-Markierung: sie sagt selbst,
+     dass die Position gerade erst dazugekommen ist. Damit sortiert sich der
+     Altbestand beim naechsten Speichern von allein, ohne dass jemand
+     entscheiden muesste, was alt ist und was nicht. */
   const jetzt = new Date().toISOString();
   for (const p of gepruft.liste) {
     const v = alt.get(p.id);
-    p.seit = v && v.zone === p.zone && v.seit ? v.seit : jetzt;
+    if (!v || v.zone !== p.zone) p.seit = jetzt;   // dazugekommen oder neue Zone
+    else if (v.seit) p.seit = v.seit;              // bleibt stehen
+    else if (p.neu) p.seit = jetzt;                // Altbestand, aber als NEU markiert
+    // sonst: ohne Zeitpunkt, also weiter mit vollem Rueckblick
   }
 
   await store.setJSON(EINTRAG, { zeit: jetzt, von: chef.mail, liste: gepruft.liste });
@@ -151,30 +162,17 @@ export async function lesen(store) {
   } catch (e) {
     da = null;
   }
-  if (da && Array.isArray(da.liste)) return mitSeit(da.liste, da.zeit);
+  if (da && Array.isArray(da.liste)) return da.liste;
 
   // Erster Aufruf: Bestand uebernehmen
   const zeit = new Date().toISOString();
-  const start = mitSeit(pruefen(START).liste || [], zeit);
+  const start = (pruefen(START).liste || []).map((p) => Object.assign({}, p, { seit: zeit }));
   try {
     await store.setJSON(EINTRAG, { zeit: zeit, von: "start", liste: start });
   } catch (e) {
     // nicht schreiben zu koennen ist kein Grund, nichts zu liefern
   }
   return start;
-}
-
-/* Positionen aus der Zeit vor diesem Feld haben keinen Zeitpunkt. Statt sie
-   als "schon immer da" zu behandeln — womit status.js wieder Kerzen von
-   frueher faende — gilt der Stand der Liste selbst. Mehr laesst sich
-   rueckwirkend nicht sagen, und es ist die vorsichtige Richtung: lieber
-   einmal ein AKTIV zu wenig als eines, das nie ausgeloest wurde.
-
-   Geschrieben wird beim Lesen nichts. Beim naechsten Speichern faellt der
-   Wert von selbst an seinen Platz. */
-function mitSeit(liste, zeit) {
-  const stand = zeit || new Date().toISOString();
-  return liste.map((p) => (p.seit ? p : Object.assign({}, p, { seit: stand })));
 }
 
 /* ---------- Pruefen ---------- */
