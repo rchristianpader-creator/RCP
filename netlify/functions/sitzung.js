@@ -21,6 +21,64 @@ export const BESUCH = "aktien-besuch";
 export const MELDUNGEN = "aktien-meldungen";
 export const ARTIKEL = "aktien-artikel";
 
+/* ---------- Ein Verzeichnis neben den Eintraegen ----------
+
+   Der Speicher ist beim Auflisten nicht sofort auf dem Stand. Ein eben
+   geschriebener Eintrag steht unter seinem Schluessel sofort da — in der
+   Liste des Speichers taucht er aber erst nach einer Weile auf. Fuer eine
+   Zugangsanfrage heisst das: die Meldung ist beim Empfaenger, die Anfrage
+   selbst aber noch nicht in der Verwaltung zu sehen.
+
+   Deshalb fuehrt jeder betroffene Speicher ein eigenes Verzeichnis: ein
+   einziger Eintrag, in dem die Schluessel stehen. Er wird beim Schreiben
+   mitgepflegt und beim Lesen ausdruecklich frisch geholt.
+
+   Gelesen wird beides und vereinigt. Das Verzeichnis ist der schnelle Weg,
+   die Liste des Speichers der verlaessliche: geht eine Pflege daneben — zwei
+   Anmeldungen in derselben Sekunde koennen sich ueberschreiben —, holt die
+   Liste den Eintrag nach. Geloeschtes faellt hinten heraus, weil der Eintrag
+   dazu ohnehin nicht mehr da ist. */
+const VERZEICHNIS = "verzeichnis";
+
+async function verzeichnis(store) {
+  try {
+    // Ausdruecklich frisch: sonst waere auch dieser Eintrag von gestern
+    const v = await store.get(VERZEICHNIS, { type: "json", consistency: "strong" });
+    return v && Array.isArray(v.keys) ? v.keys : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+export async function merken(store, key) {
+  try {
+    const keys = await verzeichnis(store);
+    if (keys.indexOf(key) >= 0) return;
+    keys.push(key);
+    // Ein Deckel, damit das Verzeichnis nicht unbegrenzt waechst
+    await store.setJSON(VERZEICHNIS, { keys: keys.slice(-3000) });
+  } catch (e) { /* das Verzeichnis ist Beiwerk, die Liste bleibt */ }
+}
+
+export async function vergessen(store, keys) {
+  try {
+    const weg = new Set([].concat(keys));
+    const bleibt = (await verzeichnis(store)).filter((k) => !weg.has(k));
+    await store.setJSON(VERZEICHNIS, { keys: bleibt });
+  } catch (e) {}
+}
+
+/* Alle Schluessel unter einem Praefix — aus beiden Quellen. */
+export async function schluesselListe(store, praefix) {
+  const [ausListe, ausVerzeichnis] = await Promise.all([
+    store.list({ prefix: praefix })
+      .then((l) => (l.blobs || []).map((b) => b.key))
+      .catch(() => []),
+    verzeichnis(store).then((k) => k.filter((x) => x.indexOf(praefix) === 0))
+  ]);
+  return [...new Set(ausListe.concat(ausVerzeichnis))];
+}
+
 /* Eine Meldung ins Buch schreiben, damit sie in der Glocke auftaucht.
 
    Der Schluessel traegt die Zeit rueckwaerts (1e15 minus Zeitstempel) — dann
@@ -60,6 +118,9 @@ export async function notieren(eintrag) {
       // "chef" heisst: nur die Verwaltung bekommt das zu sehen
       nur: eintrag.nur === "chef" ? "chef" : ""
     });
+    // Damit die Glocke sie sofort sieht und nicht erst, wenn der Speicher
+    // sie auch auflistet
+    await merken(store, key);
     return id;
   } catch (e) {
     // Das Buch ist Beiwerk

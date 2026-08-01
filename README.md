@@ -1253,6 +1253,49 @@ Nur die Verwaltung darf nachsehen; melden darf jedes angemeldete Konto.
 
 Der Punkt vor `netlify` gehört dazu. Ohne ihn wäre es ein Dateipfad, keine Function.
 
+## Wenn der Speicher seine Liste verschläft
+
+Eine Zugangsanfrage kam als Meldung sofort an — in der Verwaltung stand sie
+aber erst **zwei Minuten später**, und so lange ließ sie sich auch nicht
+freigeben. Dahinter steckten zwei Ursachen.
+
+### 1. Die Verwaltung sah nur einmal nach
+
+Die Liste der Zugänge wurde beim Öffnen der Seite geladen und dann nie wieder.
+Wer die Verwaltung offen liegen hatte, bekam eine neue Anfrage gar nicht zu
+sehen. Jetzt sieht sie nach wie die Anwesenheitsliste daneben: **alle 20
+Sekunden**, beim Zurückkommen in den Vordergrund, und **sofort**, wenn der
+Service Worker eine Meldung durchreicht.
+
+### 2. Die Liste des Speichers hinkt hinterher
+
+Netlify Blobs ist beim **Auflisten** nur nachträglich auf dem Stand. Ein eben
+geschriebener Eintrag steht unter seinem Schlüssel sofort da — in
+`store.list()` taucht er erst nach einer Weile auf. Genau die Lücke, in der
+die Meldung schon beim Empfänger ist und die Anfrage noch nirgends steht.
+
+Deshalb führt jeder betroffene Speicher jetzt ein **Verzeichnis**: einen
+einzigen Eintrag unter dem Schlüssel `verzeichnis`, in dem die Schlüssel
+stehen. Er wird beim Schreiben mitgepflegt und beim Lesen ausdrücklich frisch
+geholt (`consistency: "strong"`).
+
+**Gelesen wird beides und vereinigt** (`schluesselListe()` in `sitzung.js`).
+Das Verzeichnis ist der schnelle Weg, `store.list()` der verlässliche: geht
+eine Pflege daneben — zwei Anmeldungen in derselben Sekunde können sich
+überschreiben —, holt die Liste den Eintrag nach. Ein Verzeichnis, das man
+blind glaubt, wäre schlimmer als gar keins.
+
+Umgestellt sind `aktien-konten` (Zugänge) und `aktien-meldungen` (Glocke).
+**Nicht** umgestellt ist die Geräteliste für Push (`sub-`): dieselbe Klasse,
+aber sieben Lesestellen in sieben Functions, und praktisch folgenlos — Alarme
+laufen ohnehin nur alle 30 Minuten.
+
+`traege-test` stellt einen Speicher, dessen `list()` alles Neue verschweigt,
+und prüft darin den ganzen Weg: Anfrage anlegen, sofort sehen, sofort
+freigeben, Meldung in der Glocke, Löschen. Gegen den alten Stand fällt die
+Reihe durch — die Anfrage ist dort unsichtbar. `anfrage-test` prüft dasselbe
+im Browser, ohne ein einziges Neuladen.
+
 ## Anmeldung
 
 Die Seite ist serverseitig geschlossen. `netlify/edge-functions/tor.js` läuft

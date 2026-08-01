@@ -22,7 +22,7 @@
    auf jedem Geraet weg. */
 
 import { getStore } from "@netlify/blobs";
-import { MELDUNGEN, kontoLesen, chefLesen } from "./sitzung.js";
+import { MELDUNGEN, kontoLesen, chefLesen, vergessen, schluesselListe } from "./sitzung.js";
 import { ausAdresse, loeschen as bildLoeschen } from "./bild.js";
 
 const VERFALL = 60 * 24 * 60 * 60 * 1000;   // aelter wird beim Nachsehen weggeraeumt
@@ -96,8 +96,11 @@ async function schreiben(request, store) {
    Der Schluessel traegt die Zeit rueckwaerts — aufsteigend sortiert steht
    damit das Neueste vorn. */
 async function buch(store) {
-  const liste = await store.list({ prefix: "m/" }).catch(() => ({ blobs: [] }));
-  const schluessel = (liste.blobs || []).map((b) => b.key).sort().slice(0, GELESEN);
+  /* Ueber schluesselListe, nicht ueber store.list allein: der Speicher nimmt
+     eine eben geschriebene Meldung erst nach einer Weile in seine Liste auf.
+     Die Glocke zeigte sie deshalb minutenlang nicht, obwohl der Push laengst
+     angekommen war. */
+  const schluessel = (await schluesselListe(store, "m/")).sort().slice(0, GELESEN);
   const alle = await Promise.all(
     schluessel.map((k) =>
       store.get(k, { type: "json" }).catch(() => null).then((e) => ({ key: k, e: e }))
@@ -146,6 +149,7 @@ async function entsorgen(store, schluessel, bleiben) {
     weg.map((k) => store.delete(k).catch(() => {}))
       .concat([...bilder].map((b) => bildLoeschen(b)))
   );
+  await vergessen(store, weg);
 }
 
 function json(obj, status) {

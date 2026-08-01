@@ -40,6 +40,9 @@ import {
   mailGueltig,
   schluessel,
   notieren,
+  merken,
+  vergessen,
+  schluesselListe,
   KEKS
 } from "./sitzung.js";
 
@@ -122,9 +125,13 @@ async function wer(request, store) {
    nicht erst eine Kette davon abwarten. */
 async function alleKonten(store) {
   try {
-    const l = await store.list({ prefix: "nutzer/" });
+    /* Ueber schluesselListe, nicht ueber store.list allein: der Speicher
+       nimmt ein frisch angelegtes Konto erst nach einer Weile in seine
+       Liste auf. Eine Zugangsanfrage stand deshalb minutenlang nicht in der
+       Verwaltung, obwohl die Meldung dazu laengst angekommen war. */
+    const keys = await schluesselListe(store, "nutzer/");
     const alle = await Promise.all(
-      (l.blobs || []).map((b) => store.get(b.key, { type: "json" }).catch(() => null))
+      keys.map((k) => store.get(k, { type: "json" }).catch(() => null))
     );
     return alle.filter(Boolean);
   } catch (e) {
@@ -173,6 +180,8 @@ async function registrieren(request, store) {
     sperre_bis: 0
   };
   await store.setJSON(key, konto);
+  // Ins Verzeichnis, damit die Anfrage sofort in der Verwaltung steht
+  await merken(store, key);
 
   if (!chef) await meldeAnfrage(konto);
 
@@ -241,8 +250,10 @@ async function meldeAnfrage(konto) {
 
 async function esGibtKonten(store) {
   try {
-    const l = await store.list({ prefix: "nutzer/" });
-    return (l.blobs || []).length > 0;
+    /* Hier haengt mehr dran als eine Anzeige: das erste Konto wird die
+       Verwaltung. Verschlaeft die Liste ein eben angelegtes Konto, waere
+       das zweite ebenfalls Chef. */
+    return (await schluesselListe(store, "nutzer/")).length > 0;
   } catch (e) {
     return false;
   }
@@ -413,6 +424,7 @@ async function loeschen(request, store) {
   }
 
   await store.delete(schluessel(mail));
+  await vergessen(store, schluessel(mail));
   await besuchWeg(mail);
   return json({ ok: true, mail: mail });
 }

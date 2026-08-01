@@ -5,16 +5,16 @@
    - everything else (TradingView, /.netlify/functions/*): straight to network, never cached
    Bump CACHE on every deploy so old shells are dropped. */
 
-const CACHE = "aktien-liste-v61";
+const CACHE = "aktien-liste-v62";
 
 /* Ohne Sitzung liefert das Tor statt der Seite eine Weiterleitung zur
    Anmeldung — deshalb wird das Dokument hier nicht vorgeladen, sondern
    erst abgelegt, wenn eine echte Antwort durchkommt. */
 const PRECACHE = [
   "/manifest.webmanifest",
-  "/icon-180.png?v=61",
-  "/icon-192.png?v=61",
-  "/icon-512.png?v=61"
+  "/icon-180.png?v=62",
+  "/icon-192.png?v=62",
+  "/icon-512.png?v=62"
 ];
 
 const STATIC = /\.(?:png|jpg|jpeg|svg|webp|ico|pdf|webmanifest)$/i;
