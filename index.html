@@ -5973,8 +5973,18 @@ if ("serviceWorker" in navigator) {
     if (!neuheit || neuOffen) return;
     if (document.documentElement.classList.contains("nur-web")) return;
 
-    // Erster Start: nur den Stand setzen, nichts zeigen
-    if (!neuStand()) { merk(NEUHEIT, String(Date.now())); return; }
+    /* Kein Stand da: entweder ein frisches Geraet oder das erste Mal mit
+       dieser Fassung. Beides darf nicht dasselbe bedeuten.
+
+       Ein frisches Geraet kennt nichts — dort wird der Stand nur gesetzt.
+       Wer die App aber schon hatte, hat einen Lesestand in der Glocke; von
+       dort an gilt alles als ungesehen. Sonst verschluckte ausgerechnet der
+       erste Start nach der Aktualisierung das, was schon dastand. */
+    if (!neuStand()) {
+      var alt = Number(merk(GELESEN));
+      merk(NEUHEIT, String(isFinite(alt) && alt > 0 ? alt : Date.now()));
+      if (!(isFinite(alt) && alt > 0)) return;
+    }
 
     var welche = wasNeu();
     if (!welche.length) return;

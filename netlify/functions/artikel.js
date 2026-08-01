@@ -46,7 +46,7 @@ export default async (request) => {
 
       const id = new URL(request.url).searchParams.get("id");
       if (id) {
-        const a = await store.get(schluessel(id), { type: "json" }).catch(() => null);
+        const a = await store.get(schluessel(id), { type: "json", consistency: "strong" }).catch(() => null);
         if (!a) return json({ ok: false, fehler: "nicht gefunden" }, 404);
         return json({ ok: true, artikel: a });
       }

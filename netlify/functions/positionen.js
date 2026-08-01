@@ -95,14 +95,17 @@ export default async (request) => {
   let gemeldet = 0;
   if (body.melden !== false) {
     if (neu.length) {
-      gemeldet += await melden("Neu in der Liste", kuerzel(neu), neu[0].id, "neu");
+      gemeldet += await melden("Neu in der Liste", kuerzel(neu), neu[0].id, "neu",
+                               zeichen(neu));
     }
     if (geaendert.length) {
       gemeldet += await melden(titelAenderung(geaendert), textAenderung(geaendert),
-                               geaendert[0].p.id, "aenderung");
+                               geaendert[0].p.id, "aenderung",
+                               zeichen(geaendert.map((x) => x.p)));
     }
     if (ueberarbeitet.length) {
-      gemeldet += await melden("Überarbeitet", kuerzel(ueberarbeitet), ueberarbeitet[0].id, "update");
+      gemeldet += await melden("Überarbeitet", kuerzel(ueberarbeitet), ueberarbeitet[0].id, "update",
+                               zeichen(ueberarbeitet));
     }
   }
 
@@ -119,7 +122,12 @@ export default async (request) => {
 export async function lesen(store) {
   let da = null;
   try {
-    da = await store.get(EINTRAG, { type: "json" });
+    /* Ausdruecklich frisch. Der Speicher antwortet sonst nachtraeglich
+       konsistent: eine eben gespeicherte Liste kommt eine Weile lang noch
+       in ihrem alten Stand zurueck. Wer eine Position anlegt, sieht sie
+       dann weder als Knopf im Menue noch als Karte — und wundert sich, weil
+       das Speichern doch geklappt hat. */
+    da = await store.get(EINTRAG, { type: "json", consistency: "strong" });
   } catch (e) {
     da = null;
   }
@@ -241,6 +249,12 @@ function kuerzel(welche) {
   return welche.map((p) => p.badge).join(" · ");
 }
 
+/* Dieselben Kuerzel, nur einzeln: in der Glocke werden daraus Tasten. Der
+   Deckel liegt bei sechs, weiter unten schneidet notieren() ohnehin ab. */
+function zeichen(welche) {
+  return welche.map((p) => p.badge).filter(Boolean).slice(0, 6);
+}
+
 /* Die Ueberschrift sagt, was sich geaendert hat — auf dem Sperrbildschirm
    ist das der Unterschied zwischen "irgendwas" und "die Zone". */
 function titelAenderung(paare) {
@@ -264,10 +278,15 @@ function textAenderung(paare) {
   return paare.map((x) => x.p.badge).join(" · ");
 }
 
-async function melden(titel, namen, id, anhaenger) {
-  // Erst ins Buch. Ob gerade ein Geraet angemeldet ist, aendert nichts
-  // daran, dass es passiert ist.
-  await notieren({ titel: titel, text: namen,
+async function melden(titel, namen, id, anhaenger, zeichen) {
+  /* Erst ins Buch. Ob gerade ein Geraet angemeldet ist, aendert nichts
+     daran, dass es passiert ist.
+
+     Die Kuerzel gehen als Zeichen mit, nicht nur im Text: in der Glocke
+     werden daraus Tasten, die zur Karte fuehren. Bisher stand dort nur
+     "OXY" als Wort — dasselbe Kuerzel, das oben im Menue tippbar ist, war
+     in der Meldung tote Schrift. */
+  await notieren({ titel: titel, text: namen, zeichen: zeichen || [],
                    url: "/#" + id, art: "position" });
 
   try {

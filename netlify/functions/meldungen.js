@@ -103,7 +103,12 @@ async function buch(store) {
   const schluessel = (await schluesselListe(store, "m/")).sort().slice(0, GELESEN);
   const alle = await Promise.all(
     schluessel.map((k) =>
-      store.get(k, { type: "json" }).catch(() => null).then((e) => ({ key: k, e: e }))
+      /* Ausdruecklich frisch. Das Verzeichnis nennt den Schluessel sofort —
+         antwortet der Speicher darauf mit dem Stand von vorhin, kommt null
+         zurueck, und die Meldung gilt als verfallen und wird geloescht.
+         Der halbe Weg waere hier schlimmer als gar keiner. */
+      store.get(k, { type: "json", consistency: "strong" }).catch(() => null)
+        .then((e) => ({ key: k, e: e }))
     )
   );
 

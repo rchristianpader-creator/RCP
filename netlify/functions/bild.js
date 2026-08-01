@@ -44,7 +44,7 @@ export default async (request) => {
 
       const id = saeubern(new URL(request.url).searchParams.get("id"));
       if (!id) return json({ ok: false, fehler: "welches denn" }, 400);
-      const b = await store.get("b/" + id, { type: "json" }).catch(() => null);
+      const b = await store.get("b/" + id, { type: "json", consistency: "strong" }).catch(() => null);
       if (!b || !b.daten) return json({ ok: false, fehler: "nicht gefunden" }, 404);
 
       return new Response(Buffer.from(b.daten, "base64"), {
@@ -100,7 +100,10 @@ async function aufraeumen(store) {
   const l = await store.list({ prefix: "b/" }).catch(() => ({ blobs: [] }));
   const jetzt = Date.now();
   await Promise.all((l.blobs || []).map(async (b) => {
-    const e = await store.get(b.key, { type: "json" }).catch(() => null);
+    /* Frisch lesen, weil hier geloescht wird: antwortet der Speicher mit dem
+       Stand von vorhin, kaeme fuer ein eben hochgeladenes Bild null zurueck
+       — und es fiele dem Aufraeumen zum Opfer. */
+    const e = await store.get(b.key, { type: "json", consistency: "strong" }).catch(() => null);
     const t = e && e.zeit ? Date.parse(e.zeit) : 0;
     if (!t || jetzt - t > VERFALL) await store.delete(b.key).catch(() => {});
   }));

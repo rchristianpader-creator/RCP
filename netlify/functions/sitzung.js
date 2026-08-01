@@ -239,7 +239,10 @@ export async function kontoLesen(request) {
   if (!s || !s.m) return null;
   try {
     const { getStore } = await import("@netlify/blobs");
-    const k = await getStore(LADEN).get(schluessel(s.m), { type: "json" });
+    /* Frisch: die Rolle und der Status entscheiden ueber den Zugang, und ein
+       Konto, das gerade freigegeben wurde, darf nicht noch eine Weile als
+       wartend gelten. */
+    const k = await getStore(LADEN).get(schluessel(s.m), { type: "json", consistency: "strong" });
     if (!k || k.status !== "frei") return null;
     return k;
   } catch (e) {

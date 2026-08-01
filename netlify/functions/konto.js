@@ -130,8 +130,12 @@ async function alleKonten(store) {
        Liste auf. Eine Zugangsanfrage stand deshalb minutenlang nicht in der
        Verwaltung, obwohl die Meldung dazu laengst angekommen war. */
     const keys = await schluesselListe(store, "nutzer/");
+    /* Und ausdruecklich frisch lesen. Das Verzeichnis nennt den Schluessel
+       sofort — der Speicher antwortet darauf sonst trotzdem mit dem Stand
+       von vorhin, also mit null, und das Konto faellt gleich wieder heraus.
+       Der halbe Weg haette nichts gebracht. */
     const alle = await Promise.all(
-      keys.map((k) => store.get(k, { type: "json" }).catch(() => null))
+      keys.map((k) => store.get(k, { type: "json", consistency: "strong" }).catch(() => null))
     );
     return alle.filter(Boolean);
   } catch (e) {
@@ -157,7 +161,7 @@ async function registrieren(request, store) {
   }
 
   const key = schluessel(mail);
-  const da = await store.get(key, { type: "json" }).catch(() => null);
+  const da = await store.get(key, { type: "json", consistency: "strong" }).catch(() => null);
 
   // Vorhandene Adressen werden nicht verraten: dieselbe Antwort wie bei neu
   if (da) return json({ ok: true, status: "wartet", hinweis: "Anfrage ist eingegangen." });
@@ -268,7 +272,7 @@ async function anmelden(request, store) {
   const merken = body.merken === true || body.merken === "1";
 
   const key = schluessel(mail);
-  const konto = await store.get(key, { type: "json" }).catch(() => null);
+  const konto = await store.get(key, { type: "json", consistency: "strong" }).catch(() => null);
 
   // Kein Konto: gleiche Antwort wie falsches Passwort
   if (!konto) return json({ ok: false, fehler: "E-Mail oder Passwort stimmt nicht." }, 401);
@@ -342,7 +346,7 @@ async function passwortAendern(request, store) {
   }
 
   const key = schluessel(s.m);
-  const konto = await store.get(key, { type: "json" }).catch(() => null);
+  const konto = await store.get(key, { type: "json", consistency: "strong" }).catch(() => null);
   if (!konto) return json({ ok: false, fehler: "nicht angemeldet" }, 401);
   if (!passtPasswort(alt, konto.salz, konto.hash)) {
     return json({ ok: false, fehler: "Das alte Passwort stimmt nicht." }, 401);
@@ -403,7 +407,7 @@ async function entscheiden(request, store) {
   }
 
   const key = schluessel(mail);
-  const konto = await store.get(key, { type: "json" }).catch(() => null);
+  const konto = await store.get(key, { type: "json", consistency: "strong" }).catch(() => null);
   if (!konto) return json({ ok: false, fehler: "Konto nicht gefunden" }, 404);
 
   konto.status = status;

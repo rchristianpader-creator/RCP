@@ -175,6 +175,34 @@ Anhänger, damit eine die andere auf dem Sperrbildschirm nicht überschreibt.
 Der Editor sagt nach dem Speichern, was gemeldet wurde: „Gespeichert. Neu: …
 Geändert: … Überarbeitet: … · an 3 Geräte gemeldet".
 
+**Die Kürzel sind antippbar.** Eine Meldung trägt die Kürzel der Positionen,
+um die es geht, als eigene Zeichen mit (`zeichen` im Buch) — in der Glocke
+stehen sie als Knöpfe darunter und führen direkt zur Karte, genau wie das
+Menü ganz oben. Vorher standen sie nur als Text in der Meldung: da war
+„Neu in der Liste — OXY" zu lesen, aber nicht zu erreichen. Im Push geht das
+nicht, dort müssen sie im Text stehen; beides zugleich schadet nichts.
+
+### Stumm speichern
+
+Nicht jede Änderung ist eine Nachricht wert — ein Tippfehler in der Branche,
+eine andere Reihenfolge, ein nachgetragenes Yahoo-Symbol. Unten in der Leiste
+steht deshalb neben *Speichern* ein Haken **Melden**.
+
+Er ist **gesetzt**; abwählen muss man ausdrücklich. Andersherum gingen Zonen
+und Ziele irgendwann unbemerkt heraus, und das ist der eine Fall, in dem eine
+Meldung wirklich zählt. Ist er weg, geht die Änderung ganz normal in den
+Bestand, aber ohne Push und ohne Eintrag im Buch; die Statuszeile sagt es
+dazu: „Gespeichert. Geändert: OXY · still".
+
+Technisch schickt die Seite `melden: false` mit, und `positionen.js`
+überspringt den ganzen Meldeblock — nicht einzelne Meldungen, sondern alle
+drei Anlässe. Der Vergleich läuft trotzdem: was sich geändert hat, steht
+weiterhin in der Antwort und damit in der Statuszeile.
+
+`stumm-test` legt eine Position mit Haken an (eine Meldung mehr im Buch),
+ändert dann ohne Haken die Zone und prüft beides: keine Meldung mehr, die
+Zone aber gespeichert.
+
 Je Position:
 
 | Feld | Wofür |
@@ -824,7 +852,11 @@ ihn beim nächsten Mal wieder.
 
 - beim **allerersten** Start — da gibt es kein „seit dem letzten Mal", und
   eine Liste von Dingen, die man noch gar nicht kennen kann, wäre nur Lärm.
-  Der Stand wird dann still gesetzt.
+  Der Stand wird dann still gesetzt. **Aber nur auf einem wirklich frischen
+  Gerät**: wer die App schon hatte, hat einen Lesestand in der Glocke, und
+  der wird übernommen. Ohne das verschluckte ausgerechnet der erste Start
+  nach der Aktualisierung genau das, wofür der Schirm gebaut ist — und der
+  Schirm blieb aus, obwohl gerade etwas veröffentlicht worden war.
 - wenn der Rundgang läuft, die Installations-Anleitung offen ist oder die
   Glocke schon aufgeschlagen — nichts stapelt sich übereinander.
 - im Browser (`nur-web`).
@@ -1325,16 +1357,41 @@ eine Pflege daneben — zwei Anmeldungen in derselben Sekunde können sich
 überschreiben —, holt die Liste den Eintrag nach. Ein Verzeichnis, das man
 blind glaubt, wäre schlimmer als gar keins.
 
-Umgestellt sind `aktien-konten` (Zugänge) und `aktien-meldungen` (Glocke).
-**Nicht** umgestellt ist die Geräteliste für Push (`sub-`): dieselbe Klasse,
-aber sieben Lesestellen in sieben Functions, und praktisch folgenlos — Alarme
-laufen ohnehin nur alle 30 Minuten.
+### 3. Auch `get()` antwortet mit dem Stand von vorhin
 
-`traege-test` stellt einen Speicher, dessen `list()` alles Neue verschweigt,
-und prüft darin den ganzen Weg: Anfrage anlegen, sofort sehen, sofort
-freigeben, Meldung in der Glocke, Löschen. Gegen den alten Stand fällt die
-Reihe durch — die Anfrage ist dort unsichtbar. `anfrage-test` prüft dasselbe
-im Browser, ohne ein einziges Neuladen.
+Das Verzeichnis allein reichte nicht. Es liefert den **Schlüssel** sofort —
+das anschließende `store.get(key)` aber immer noch den alten Stand, und ohne
+Vorgänger heißt das: `null`. Aufgefallen ist es an einer eben
+veröffentlichten Position (OXY), zu der weder Knopf noch Meldung kamen.
+
+Wo eine Antwort über Zugang, Anzeige oder **Löschen** entscheidet, steht
+deshalb jetzt überall `{ consistency: "strong" }`:
+
+| Stelle | warum es sonst schiefgeht |
+| --- | --- |
+| `positionen.js` `lesen()` | eine frisch gespeicherte Position fehlt in der App |
+| `sitzung.js` `kontoLesen()` | wer gerade freigegeben wurde, gilt noch als wartend |
+| `konto.js` (4 Stellen, `alleKonten()`) | die Verwaltung sieht die Anfrage nicht |
+| `meldungen.js` `buch()` | eine neue Meldung liest sich als `null` — und `buch()` **löscht** sie dann |
+| `bild.js` (GET und `aufraeumen()`) | dasselbe, nur mit Bildern: das Aufräumen frisst frisch Hochgeladenes |
+| `artikel.js` | ein eben gespeicherter Beitrag ist nicht da |
+
+Die letzten drei sind die gefährlichen: dort führt ein veraltetes `null` nicht
+zu "kommt gleich", sondern zu "weg für immer".
+
+Umgestellt sind `aktien-konten` (Zugänge), `aktien-meldungen` (Glocke),
+`aktien-positionen`, `aktien-bilder` und `aktien-artikel`. **Nicht** umgestellt
+ist die Geräteliste für Push (`sub-`): dieselbe Klasse, aber sieben Lesestellen
+in sieben Functions, und praktisch folgenlos — Alarme laufen ohnehin nur alle
+30 Minuten.
+
+`traege-test` stellt einen Speicher, der beides nachstellt: `list()`
+verschweigt alles Neue, `get()` antwortet mit dem Stand von damals, solange
+nicht ausdrücklich frisch verlangt wird. Darin läuft der ganze Weg — Anfrage
+anlegen, sofort sehen, sofort freigeben, Meldung in der Glocke, Löschen — und
+eine neue Position, die sofort in der Liste stehen muss. Gegen den alten Stand
+fällt die Reihe durch. `anfrage-test` prüft dasselbe im Browser, ohne ein
+einziges Neuladen.
 
 ## Anmeldung
 
