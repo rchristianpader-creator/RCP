@@ -808,6 +808,46 @@ wieder nach. Es gibt keinen Weg, das von der Seite aus zu ändern — die App mu
 vom Startbildschirm gelöscht und neu angelegt werden. Android macht es von
 selbst: Chrome liest das Manifest erneut und tauscht das Bild aus.
 
+## Was dazugekommen ist
+
+Beim Start, **über die ganze Seite, einmal**: was seit dem letzten Besuch neu
+ist. Kein Blatt — ein Blatt lässt sich wegwischen und wirkt beiläufig; hier
+soll es einmal richtig dastehen.
+
+**Wann es kommt.** Nur wenn es wirklich etwas gibt, und nur beim Start.
+Maßgeblich ist ein eigener Stand (`rcp:neuseit`), nicht der der Glocke: die
+Glocke gilt als gelesen, sobald man sie aufmacht — der Schirm erst, wenn man
+ihn weggeklickt hat. Wer die App wegdreht, ohne hingesehen zu haben, bekommt
+ihn beim nächsten Mal wieder.
+
+**Wann es nicht kommt:**
+
+- beim **allerersten** Start — da gibt es kein „seit dem letzten Mal", und
+  eine Liste von Dingen, die man noch gar nicht kennen kann, wäre nur Lärm.
+  Der Stand wird dann still gesetzt.
+- wenn der Rundgang läuft, die Installations-Anleitung offen ist oder die
+  Glocke schon aufgeschlagen — nichts stapelt sich übereinander.
+- im Browser (`nur-web`).
+- wenn man die Glocke schon aufgemacht hat: dann ist es gesehen.
+
+**Wie es sich bewegt.** Dahinter laufen dieselben Kerzen wie hinter dem
+Ladebildschirm — verschoben, nicht kopiert, das Bild ist groß. Sie werden
+**gesichert, bevor der Ladebildschirm aus dem Dokument genommen wird** (600 ms
+nach dem Ausblenden), sonst wäre es ein Wettlauf. Zeile, Überschrift, jeder
+Eintrag und der Knopf kommen nacheinander herein, gekippt und aus 0,94
+Größe; der Vorlauf je Eintrag kommt aus dem Skript, das weiß, wie viele es
+sind. Hinaus geht es wie bei den Blättern: länger, weiter, mit eigener Kurve.
+
+Ein Tipp auf einen Eintrag fährt den Schirm weg und schlägt die Meldung in
+der Glocke auf.
+
+**Eine Falle, in die ich prompt gelaufen bin:** `.neuheit { display: flex }`
+schlägt das `hidden`-Attribut. Ohne ein ausdrückliches
+`.neuheit[hidden] { display: none }` lag der Schirm unsichtbar über der ganzen
+Seite, fing jeden Tipp ab, und die Kerzen dahinter liefen durchgehend mit —
+dieselbe Falle wie beim Dateifeld in der Verwaltung. `neuheit-test` prüft das
+jetzt mit `elementFromPoint` nach.
+
 ## Die Glocke
 
 Im Kopf steht **Meldungen** mit einem Zähler für Ungelesenes. Dahinter liegt,

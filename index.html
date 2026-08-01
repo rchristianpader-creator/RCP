@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="light">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#fafafa">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=62">
-<link rel="apple-touch-icon" href="/icon-180.png?v=62">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=63">
+<link rel="apple-touch-icon" href="/icon-180.png?v=63">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=62">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=63">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=62">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=63">
 
 <script>
 /* Im Browser oder als App?
@@ -877,6 +877,171 @@
   .m-weg:hover { color: var(--fg); border-color: var(--fg); }
   .m-weg:active { transform: scale(0.985); }
   .m-weg[disabled] { opacity: 0.45; cursor: default; }
+
+  /* ================= Was dazugekommen ist =================
+
+     Ueber die ganze Seite, einmal beim Start, und nur wenn es wirklich
+     etwas Neues gibt. Kein Blatt: ein Blatt laesst sich wegwischen und
+     wirkt beilaeufig — hier soll es einmal richtig dastehen.
+
+     Dahinter laufen dieselben Kerzen wie hinter dem Ladebildschirm. Sie
+     werden verschoben, nicht kopiert: das Bild ist gross, einmal genuegt. */
+  /* Zugeklappt heisst weg. Ohne diese Zeile schlaegt "display: flex" das
+     hidden-Attribut — der Schirm laege dann unsichtbar ueber der ganzen
+     Seite, finge jeden Tipp ab, und die Kerzen dahinter liefen durchgehend
+     mit. Dieselbe Falle wie beim Dateifeld in der Verwaltung. */
+  .neuheit[hidden] { display: none; }
+  .neuheit {
+    position: fixed;
+    inset: 0;
+    z-index: 290;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: var(--bg);
+    padding: 30px 22px;
+    opacity: 0;
+    transition: opacity 0.54s var(--ease);
+  }
+  .neuheit.da { opacity: 1; }
+  /* Zufahren wie bei den Blaettern: laenger, weiter, mit eigener Kurve */
+  .neuheit.zufahrt {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.68s cubic-bezier(0.62, 0, 0.9, 0.45);
+  }
+  .neuheit.zufahrt .neuheit-mitte {
+    transform: perspective(1200px) translate3d(0, -8%, 0) rotateX(-7deg) scale(0.9);
+    transition: transform 0.76s cubic-bezier(0.45, 0, 0.55, 1);
+  }
+
+  .neuheit-kerzen {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .neuheit-mitte {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 420px;
+    max-height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    text-align: center;
+    padding: 30px 22px;
+    /* Milchig, damit die Kerzen dahinter weiterlaufen und trotzdem alles
+       lesbar bleibt — dieselbe Machart wie beim Anmeldekasten. */
+    background: rgba(255, 255, 255, 0.76);
+    -webkit-backdrop-filter: saturate(130%) blur(16px);
+    backdrop-filter: saturate(130%) blur(16px);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    transition: transform 0.54s var(--weich, cubic-bezier(0.32, 0.72, 0, 1));
+  }
+
+  /* Nacheinander herein, nicht alles auf einmal: erst die Zeile, dann die
+     Ueberschrift, dann die Eintraege, zuletzt der Knopf. Die Eintraege
+     bekommen ihren Vorlauf vom Skript — es weiss, wie viele es sind. */
+  .neuheit .label {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 12px;
+    animation: neuheitRein 0.72s var(--weich, cubic-bezier(0.32, 0.72, 0, 1)) 0.1s both;
+  }
+  .neuheit h2 {
+    font-size: 25px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    line-height: 1.2;
+    margin-bottom: 22px;
+    animation: neuheitRein 0.72s var(--weich, cubic-bezier(0.32, 0.72, 0, 1)) 0.2s both;
+  }
+  .neuheit-liste { text-align: left; }
+  .neuheit-eintrag {
+    display: block;
+    width: 100%;
+    font: inherit;
+    text-align: left;
+    color: var(--fg);
+    background: var(--card);
+    border: 1px solid var(--hair);
+    border-radius: 2px;
+    padding: 13px 14px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    animation: neuheitRein 0.72s var(--weich, cubic-bezier(0.32, 0.72, 0, 1)) both;
+    transition: border-color 0.24s ease, transform 0.16s var(--ease);
+  }
+  .neuheit-eintrag:hover { border-color: var(--line); }
+  .neuheit-eintrag:active { transform: scale(0.985); }
+  .neuheit-eintrag .kopf {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .neuheit-eintrag .titel { font-size: 14px; font-weight: 600; line-height: 1.35; }
+  .neuheit-eintrag .wann {
+    flex: none;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .neuheit-eintrag .text {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin-top: 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .neuheit-eintrag .zeichen {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 7px;
+  }
+  .neuheit-go {
+    display: block;
+    width: 100%;
+    margin-top: 18px;
+    font: inherit;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: #fff;
+    background: var(--fg);
+    border: 1px solid var(--fg);
+    border-radius: 2px;
+    padding: 15px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.16s var(--ease), opacity 0.27s ease;
+  }
+  .neuheit-go:active { transform: scale(0.985); }
+
+  @keyframes neuheitRein {
+    from { opacity: 0; transform: perspective(900px) translate3d(0, 34px, 0) rotateX(12deg) scale(0.94); }
+    60%  { opacity: 1; }
+    to   { opacity: 1; transform: perspective(900px) translate3d(0, 0, 0) rotateX(0deg) scale(1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .neuheit, .neuheit-mitte { transition: none; }
+    .neuheit .label, .neuheit h2, .neuheit-eintrag, .neuheit-go { animation: none; }
+    .neuheit.zufahrt .neuheit-mitte { transform: none; }
+  }
 
   /* Die Lupe: das Bild im Ganzen, auf schwarzem Grund — zum Ziehen und
      Zoomen. Der Grund blendet auf, das Bild waechst aus seinem Platz in der
@@ -2644,7 +2809,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=62" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=63" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -2762,7 +2927,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=62" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=63" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -2778,6 +2943,19 @@
     </ol>
 
     <div class="sheet-note" id="installNote" hidden></div>
+  </div>
+</div>
+
+<!-- Was seit dem letzten Mal dazugekommen ist. Ueber die ganze Seite, einmal,
+     und nur wenn es wirklich etwas gibt. Die Kerzen darin kommen vom
+     Ladebildschirm — verschoben, nicht kopiert. -->
+<div class="neuheit" id="neuheit" role="dialog" aria-modal="true" aria-labelledby="neuheitTitel" hidden>
+  <div class="neuheit-kerzen" id="neuheitKerzen" aria-hidden="true"></div>
+  <div class="neuheit-mitte">
+    <div class="label" id="neuheitLabel">Neu seit deinem letzten Besuch</div>
+    <h2 id="neuheitTitel">Was dazugekommen ist</h2>
+    <div class="neuheit-liste" id="neuheitListe"></div>
+    <button class="neuheit-go" id="neuheitGo" type="button">Alles gesehen</button>
   </div>
 </div>
 
@@ -2857,7 +3035,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=62" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=63" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -4709,6 +4887,13 @@ if ("serviceWorker" in navigator) {
     setTimeout(function () {
       kasten.classList.add("weg");
       setTimeout(function () {
+        /* Die Kerzen ueberleben den Auftakt: der Schirm mit dem, was
+           dazugekommen ist, laesst sie hinter sich weiterlaufen. Verschoben,
+           nicht kopiert — das Bild ist gross, einmal genuegt. Er ist dabei
+           noch zugeklappt, und in Zugeklapptem bewegt sich nichts. */
+        var kerzen = kasten.querySelector(".kerzen");
+        var ziel = document.getElementById("neuheitKerzen");
+        if (kerzen && ziel && !ziel.firstChild) ziel.appendChild(kerzen);
         if (kasten.parentNode) kasten.parentNode.removeChild(kasten);
       }, 600);
     }, warten);
@@ -4905,7 +5090,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=62";
+      i.src = "/icon-512.png?v=63";
     });
     return symbolBild;
   }
@@ -5407,7 +5592,17 @@ if ("serviceWorker" in navigator) {
 (function () {
   var SEIT = "rcp:seit";
   var GELESEN = "rcp:gelesen";
+  /* Bis hierher hat der Besitzer gesehen, was dazugekommen ist. Ein eigener
+     Stand, nicht der der Glocke: die Glocke gilt als gelesen, sobald man sie
+     aufmacht — der Willkommensschirm gilt erst als gesehen, wenn man ihn
+     weggeklickt hat. */
+  var NEUHEIT = "rcp:neuseit";
   var knopf = document.getElementById("glockeBtn");
+  var neuheit = document.getElementById("neuheit");
+  var neuheitListe = document.getElementById("neuheitListe");
+  var neuheitTitel = document.getElementById("neuheitTitel");
+  var neuheitLabel = document.getElementById("neuheitLabel");
+  var neuheitGo = document.getElementById("neuheitGo");
   var blatt = document.getElementById("meldungSheet");
   var zu = document.getElementById("meldungClose");
   var liste = document.getElementById("meldungListe");
@@ -5731,6 +5926,9 @@ if ("serviceWorker" in navigator) {
     // waere der Strich am Rand schon weg, bevor man ihn sieht.
     gelesen = Date.now();
     merk(GELESEN, String(gelesen));
+    /* Wer die Glocke aufmacht, hat gesehen, was drinsteht — der Schirm beim
+       naechsten Start braucht es dann nicht noch einmal zu erzaehlen. */
+    merk(NEUHEIT, String(Date.now()));
     zaehlen();
   }
 
@@ -5744,6 +5942,129 @@ if ("serviceWorker" in navigator) {
       if (vorher && vorher.focus) vorher.focus();
     });
   }
+
+  /* ---------- Was seit dem letzten Mal dazugekommen ist ----------
+
+     Einmal beim Start, ueber die ganze Seite, und nur wenn es wirklich
+     etwas gibt. Der Stand wird erst beim Wegklicken gesetzt: wer die App
+     wegdreht, ohne hingesehen zu haben, bekommt es beim naechsten Mal
+     wieder.
+
+     Beim allerersten Start gibt es nichts "seit dem letzten Mal" — dann
+     wird der Stand nur gesetzt, ohne etwas zu zeigen. Sonst begruesste
+     die App jeden Neuling mit einer Liste von Dingen, die er noch gar
+     nicht kennen kann. */
+  var neuOffen = false;
+
+  function neuStand() {
+    var v = Number(merk(NEUHEIT));
+    return isFinite(v) && v > 0 ? v : 0;
+  }
+
+  function wasNeu() {
+    var seitWann = neuStand();
+    return stand.filter(function (m) {
+      // Der Willkommensgruss hat keine Kennung — er kommt nicht aus dem Buch
+      return m.id && Date.parse(m.zeit) > seitWann;
+    });
+  }
+
+  function neuheitZeigen() {
+    if (!neuheit || neuOffen) return;
+    if (document.documentElement.classList.contains("nur-web")) return;
+
+    // Erster Start: nur den Stand setzen, nichts zeigen
+    if (!neuStand()) { merk(NEUHEIT, String(Date.now())); return; }
+
+    var welche = wasNeu();
+    if (!welche.length) return;
+    // Ein Rundgang oder ein offenes Blatt hat Vorrang — nicht uebereinander
+    if (!blatt.hidden) return;
+    if (document.querySelector(".rundgang:not([hidden])")) return;
+    var install = document.getElementById("installSheet");
+    if (install && !install.hidden) return;
+
+    neuOffen = true;
+    neuheitListe.textContent = "";
+    neuheitLabel.textContent = "Neu seit deinem letzten Besuch";
+    neuheitTitel.textContent = welche.length === 1
+      ? "Eine Meldung ist dazugekommen"
+      : welche.length + " Meldungen sind dazugekommen";
+
+    welche.slice(0, 8).forEach(function (m, i) {
+      var e = document.createElement("button");
+      e.type = "button";
+      e.className = "neuheit-eintrag";
+      // Nacheinander herein, gestaffelt nach Platz in der Liste
+      e.style.animationDelay = (0.3 + i * 0.09) + "s";
+
+      var marken = tasten(m, "zeichen");
+      if (marken) e.appendChild(marken);
+
+      var kopf = document.createElement("div");
+      kopf.className = "kopf";
+      var t = document.createElement("span");
+      t.className = "titel";
+      t.textContent = m.titel;
+      kopf.appendChild(t);
+      var w = document.createElement("span");
+      w.className = "wann";
+      w.textContent = her(m.zeit);
+      kopf.appendChild(w);
+      e.appendChild(kopf);
+
+      if (m.text) {
+        var x = document.createElement("div");
+        x.className = "text";
+        x.textContent = m.text;
+        e.appendChild(x);
+      }
+
+      // Antippen schlaegt die Meldung auf — der Schirm geht dabei weg
+      e.addEventListener("click", function () { neuheitWeg(function () { oeffnen(m); }); });
+      neuheitListe.appendChild(e);
+    });
+
+    // Der Knopf kommt nach den Eintraegen
+    neuheitGo.style.animation = "neuheitRein 0.72s var(--weich, cubic-bezier(0.32, 0.72, 0, 1)) " +
+      (0.3 + Math.min(welche.length, 8) * 0.09 + 0.08) + "s both";
+
+    neuheit.hidden = false;
+    void neuheit.offsetWidth;          // Umbruch erzwingen, sonst springt es
+    neuheit.classList.add("da");
+    document.body.style.overflow = "hidden";
+    kerzenHolen();
+    neuheitGo.focus();
+  }
+
+  /* Die Kerzen vom Ladebildschirm herholen — verschoben, nicht kopiert:
+     das Bild ist gross, einmal genuegt. Es steht erst zur Verfuegung, wenn
+     der Ladebildschirm weg ist. */
+  function kerzenHolen() {
+    var ziel = document.getElementById("neuheitKerzen");
+    var kerzen = document.querySelector("#auftakt .kerzen") ||
+                 document.querySelector("#webKerzen .kerzen");
+    if (ziel && kerzen && !ziel.firstChild) ziel.appendChild(kerzen);
+  }
+
+  function neuheitWeg(danach) {
+    if (!neuOffen) { if (danach) danach(); return; }
+    neuOffen = false;
+    merk(NEUHEIT, String(Date.now()));
+    document.body.style.overflow = "";
+    neuheit.classList.add("zufahrt");
+    neuheit.classList.remove("da");
+    setTimeout(function () {
+      neuheit.hidden = true;
+      neuheit.classList.remove("zufahrt");
+      if (danach) danach();
+    }, window.rcpBlatt && window.rcpBlatt.ruhig ? 0 : 780);
+  }
+
+  if (neuheitGo) neuheitGo.addEventListener("click", function () { neuheitWeg(); });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && neuOffen) neuheitWeg();
+  });
 
   knopf.addEventListener("click", function () { oeffnen(null); });
   window.rcpMeldungenOeffnen = function () { if (blatt.hidden) oeffnen(null); };
@@ -5783,7 +6104,11 @@ if ("serviceWorker" in navigator) {
     if (!blatt.hidden) schliessen();
   });
 
-  holen();
+  /* Beim Start einmal holen — und danach zeigen, was dazugekommen ist.
+     Erst dann: vorher weiss niemand, ob es ueberhaupt etwas gibt. */
+  holen(function () {
+    setTimeout(neuheitZeigen, 400);
+  });
   document.addEventListener("visibilitychange", function () {
     if (document.visibilityState === "visible") holen();
   });
