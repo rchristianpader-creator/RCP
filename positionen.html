@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#fafafa">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=60">
-<link rel="apple-touch-icon" href="/icon-180.png?v=60">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=61">
+<link rel="apple-touch-icon" href="/icon-180.png?v=61">
 <title>Positionen · Aktien-Liste</title>
 <style>
   :root {
@@ -74,7 +74,7 @@
     border: 1px solid var(--line);
     border-radius: 2px;
     margin-bottom: 10px;
-    animation: riseIn 0.35s var(--ease) both;
+    animation: riseIn 0.47s var(--ease) both;
   }
   .pos.offen { border-color: var(--fg); }
 
@@ -115,7 +115,7 @@
   }
   /* Ueberarbeitet ist leiser als neu — grau statt schwarz, wie in der Liste */
   .kopf .neu.update { background: var(--muted); letter-spacing: 0.08em; }
-  .kopf .pfeil { color: var(--muted); font-size: 13px; transition: transform 0.2s var(--ease); }
+  .kopf .pfeil { color: var(--muted); font-size: 13px; transition: transform 0.27s var(--ease); }
   .pos.offen .kopf .pfeil { transform: rotate(90deg); }
 
   .felder { display: none; padding: 0 14px 14px; border-top: 1px solid var(--hair); }
@@ -140,7 +140,7 @@
     border: 1px solid var(--line);
     border-radius: 2px;
     padding: 9px 11px;
-    transition: border-color 0.2s ease;
+    transition: border-color 0.27s ease;
   }
   label.f input:focus { outline: none; border-color: var(--fg); }
   label.f .hilfe { font-size: 11px; color: var(--muted); margin-top: 4px; text-transform: none; letter-spacing: 0; font-weight: 400; }
@@ -176,7 +176,7 @@
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     transform: translateZ(0);
-    transition: background 0.18s ease, border-color 0.18s ease, transform 0.12s var(--ease);
+    transition: background 0.24s ease, border-color 0.24s ease, transform 0.16s var(--ease);
   }
   .werkzeug button:active, .knopf:active { transform: scale(0.96); }
   .werkzeug button.rot { color: #b91c1c; border-color: #f0d0d0; }
@@ -235,7 +235,7 @@
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     transform: translateZ(0);
-    transition: opacity 0.2s ease, transform 0.12s var(--ease);
+    transition: opacity 0.27s ease, transform 0.16s var(--ease);
   }
   .leiste button:active { transform: scale(0.98); }
   .leiste button[disabled] { opacity: 0.35; cursor: default; }

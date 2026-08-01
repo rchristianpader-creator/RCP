@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#fafafa">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=60">
-<link rel="apple-touch-icon" href="/icon-180.png?v=60">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=61">
+<link rel="apple-touch-icon" href="/icon-180.png?v=61">
 <title>Anmelden · Aktien-Liste</title>
 
 <!-- Die Vorschau beim Verschicken entsteht hier, nicht auf der Liste.
@@ -23,7 +23,7 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Geschützt, Zugang auf Anfrage">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=60">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=61">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -32,7 +32,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Geschützt, Zugang auf Anfrage">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=60">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=61">
 <style>
   :root {
     color-scheme: light;
@@ -94,12 +94,12 @@
   .kerzen-band.hinten {
     height: 150%;
     top: -25%;
-    animation: kerzenLauf 15s linear infinite;
+    animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
     height: 78%;
     top: 11%;
-    animation: kerzenLauf 6s linear infinite;
+    animation: kerzenLauf 8.1s linear infinite;
   }
   .kerzen-band.hinten .d { opacity: 0.16; }
   .kerzen-band.hinten .f { opacity: 0.17; }
@@ -132,7 +132,7 @@
     border: 1px solid var(--line);
     border-radius: 2px;
     padding: 32px 24px 26px;
-    animation: riseIn 0.55s var(--ease) both;
+    animation: riseIn 0.74s var(--ease) both;
   }
 
   .marke { text-align: center; margin-bottom: 26px; }
@@ -175,7 +175,7 @@
     padding: 11px 6px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    transition: background 0.2s ease, color 0.2s ease;
+    transition: background 0.27s ease, color 0.27s ease;
   }
   .reiter button + button { border-left: 1px solid var(--line); }
   .reiter button[aria-selected="true"] {
@@ -209,7 +209,7 @@
     border: 1px solid var(--line);
     border-radius: 2px;
     padding: 11px 12px;
-    transition: border-color 0.2s ease;
+    transition: border-color 0.27s ease;
   }
   input:focus {
     outline: none;
@@ -244,7 +244,7 @@
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     transform: translateZ(0);
-    transition: opacity 0.2s ease, transform 0.12s var(--ease);
+    transition: opacity 0.27s ease, transform 0.16s var(--ease);
   }
   button.senden:active { transform: scale(0.985); }
   button.senden[disabled] { opacity: 0.45; cursor: default; }
@@ -255,7 +255,7 @@
     min-height: 18px;
     opacity: 0;
     transform: translate3d(0, 4px, 0);
-    transition: opacity 0.2s ease, transform 0.2s ease;
+    transition: opacity 0.27s ease, transform 0.27s ease;
   }
   .meldung.zeig { opacity: 1; transform: translate3d(0, 0, 0); }
   .meldung.schlecht { color: #b91c1c; }
@@ -278,7 +278,7 @@
     60% { transform: translate3d(-3px, 0, 0); }
     80% { transform: translate3d(2px, 0, 0); }
   }
-  .ruettel { animation: shakeX 0.4s ease; }
+  .ruettel { animation: shakeX 0.54s ease; }
 
   @media (prefers-reduced-motion: reduce) {
     .kasten, .ruettel { animation: none; }
@@ -369,7 +369,7 @@
       kasten.classList.remove("ruettel");
       void kasten.offsetWidth;
       kasten.classList.add("ruettel");
-      setTimeout(function () { kasten.classList.remove("ruettel"); }, 450);
+      setTimeout(function () { kasten.classList.remove("ruettel"); }, 610);
     }
   }
 

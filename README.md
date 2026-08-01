@@ -242,6 +242,51 @@ weicher Lichthof, sonst waere "Charts werden geladen" nicht zu lesen.
 
 ## Fluessigkeit
 
+### Alles um ein Drittel langsamer
+
+**Jede Dauer und jeder Vorlauf in allen vier Stylesheets ist mit 1,35
+multipliziert** — in einem Zug, mit einem Skript, damit kein Verhaeltnis
+zerreisst. Genau darauf kam es an: die vier Ringe im Rundgang laufen in
+Vierteln einer Runde, die fuenf Kartenstuecke in gleichen Stufen. Wer
+einzelne Werte von Hand anfasst, verschiebt solche Muster, ohne es zu
+merken.
+
+Warum das fluessiger ist und nicht nur langsamer: dieselbe Strecke auf mehr
+Bilder verteilt heisst weniger Weg je Bild. Was vorher in acht Bildern
+durchlief, hat jetzt elf — Ruckler fallen weniger auf, weil weniger dazwischen
+passiert.
+
+| | vorher | jetzt |
+|---|---|---|
+| Antippen (Rueckmeldung) | 0,12 s | 0,16 s |
+| Uebergaenge an Knoepfen | 0,18 s | 0,24 s |
+| Blatt auffahren | 0,36 s | 0,49 s |
+| Blatt zufahren | 0,56 s | 0,76 s |
+| Kartenstueck (an der Uhr) | 0,78 s | 1,05 s |
+| Puls an aktiven Symbolen | 2 s | 2,7 s |
+| Rundgang-Ringe (eine Runde) | 7,2 s | 9,72 s |
+| Kerzen im Hintergrund | 15 s | 20,25 s |
+| Laufband | 28 s | 37,8 s |
+
+Nicht angefasst: `0.01ms` und `0ms` in der Regel fuer **weniger Bewegung** —
+das sind keine Dauern, sondern der Schalter, der die Animationen abwuergt.
+Ebenso wenig der Takt der Wirtschaftstermine (6 s je Eintrag): das ist eine
+Lesezeit, keine Bewegung.
+
+Was im Skript an einer CSS-Dauer haengt, ist mitgewandert: `HERAUF` 486 ms,
+`HINUNTER` 756 ms, `SEITE` 270 ms, das Abraeumen nach dem Sortieren 1760 ms,
+der Ring nach einem Sprung 880 ms, das Ruetteln der Anmeldung 610 ms.
+
+Zwei Reihen haben dabei feste Sekunden erwartet und mussten umgestellt
+werden — sie pruefen jetzt **Verhaeltnisse statt Betraege**: ob die vier
+Ringe gleiche Viertel Vorlauf haben, ob die fuenf Stuecke in gleichen Stufen
+kommen. Das ueberlebt auch die naechste Umstellung.
+
+`fluss-test` misst nach, dass Scrollen, Glocke und Rundgang dabei im Rahmen
+bleiben.
+
+### Zehn Charts
+
 Zehn TradingView-Einbettungen sind zehn vollstaendige Anwendungen mit eigenen
 Zeitgebern und Verbindungen. Deshalb haengt die Seite nur die Charts ein, die
 in die Naehe kommen: zweieinhalb Bildschirme im Voraus, damit sie auch beim

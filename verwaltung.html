@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#fafafa">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=60">
-<link rel="apple-touch-icon" href="/icon-180.png?v=60">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=61">
+<link rel="apple-touch-icon" href="/icon-180.png?v=61">
 <title>Verwaltung · Aktien-Liste</title>
 <style>
   :root {
@@ -105,7 +105,7 @@
     text-decoration: none;
     color: var(--fg);
     -webkit-tap-highlight-color: transparent;
-    transition: background 0.18s ease;
+    transition: background 0.24s ease;
   }
   .weiter:active { background: var(--soft); }
   .weiter .was { font-size: 14px; font-weight: 600; }
@@ -124,7 +124,7 @@
     border-radius: 2px;
     padding: 16px;
     margin-bottom: 30px;
-    animation: riseIn 0.4s var(--ease) both;
+    animation: riseIn 0.54s var(--ease) both;
   }
   .senden .titel {
     font-size: 10px;
@@ -147,7 +147,7 @@
     padding: 10px 12px;
     margin-bottom: 10px;
     resize: none;
-    transition: border-color 0.2s ease;
+    transition: border-color 0.27s ease;
   }
   .senden input:focus,
   .senden textarea:focus { outline: none; border-color: var(--fg); }
@@ -173,7 +173,7 @@
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     transform: translateZ(0);
-    transition: opacity 0.2s ease, transform 0.12s var(--ease);
+    transition: opacity 0.27s ease, transform 0.16s var(--ease);
   }
   .senden button:active { transform: scale(0.97); }
   .senden button[disabled] { opacity: 0.4; cursor: default; }
@@ -206,7 +206,7 @@
     padding: 8px 12px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    transition: border-color 0.18s ease;
+    transition: border-color 0.24s ease;
   }
   .bildwahl .knopf:hover { border-color: var(--fg); }
   .bildwahl .hinweis { flex: 1; min-width: 200px; font-size: 11px; color: var(--muted); line-height: 1.45; }
@@ -216,7 +216,7 @@
   .bildvorschau {
     position: relative;
     margin-bottom: 10px;
-    animation: riseIn 0.3s var(--ease) both;
+    animation: riseIn 0.41s var(--ease) both;
   }
   /* Die Vorschau zeigt das Bild, wie es ist: nichts beschnitten, nichts
      verzerrt. Das Seitenverhaeltnis kommt vom Bild selbst. */
@@ -269,7 +269,7 @@
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     transform: translateZ(0);
-    transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease, transform 0.12s var(--ease);
+    transition: background 0.22s ease, color 0.22s ease, border-color 0.22s ease, transform 0.16s var(--ease);
   }
   .marken button:active { transform: scale(0.95); }
   .marken button[aria-pressed="true"] {
@@ -321,7 +321,7 @@
     border-radius: 2px;
     overflow: hidden;
     margin-bottom: 10px;
-    animation: riseIn 0.3s var(--ease) both;
+    animation: riseIn 0.41s var(--ease) both;
   }
   .beitrag .karte img {
     flex: none;
@@ -437,7 +437,7 @@
     border-radius: 2px;
     padding: 16px;
     margin-bottom: 30px;
-    animation: riseIn 0.4s var(--ease) both;
+    animation: riseIn 0.54s var(--ease) both;
   }
   .jetzt > .titel {
     display: flex;
@@ -468,7 +468,7 @@
     height: 7px;
     border-radius: 50%;
     background: var(--fg);
-    animation: pulsen 2.4s ease-in-out infinite;
+    animation: pulsen 3.24s ease-in-out infinite;
   }
   @keyframes pulsen {
     0%, 100% { opacity: 1; }
@@ -501,7 +501,7 @@
     border-radius: 2px;
     padding: 14px 16px;
     margin-bottom: 10px;
-    animation: riseIn 0.4s var(--ease) both;
+    animation: riseIn 0.54s var(--ease) both;
   }
   .konto .zeile .punkt { margin-right: 6px; }
   /* Die Besuchszeile wird alle 20 Sekunden neu geschrieben. Waere sie mal
@@ -561,7 +561,7 @@
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     transform: translateZ(0);
-    transition: background 0.18s ease, border-color 0.18s ease, transform 0.12s var(--ease);
+    transition: background 0.24s ease, border-color 0.24s ease, transform 0.16s var(--ease);
   }
   .konto button:active { transform: scale(0.96); }
   .konto button.stark { background: var(--fg); color: #fff; border-color: var(--fg); }

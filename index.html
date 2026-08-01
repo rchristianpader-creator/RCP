@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="light">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#fafafa">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=60">
-<link rel="apple-touch-icon" href="/icon-180.png?v=60">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=61">
+<link rel="apple-touch-icon" href="/icon-180.png?v=61">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=60">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=61">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=60">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=61">
 
 <script>
 /* Im Browser oder als App?
@@ -155,7 +155,7 @@
     color: var(--fg);
     background: transparent;
     -webkit-tap-highlight-color: transparent;
-    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.15s var(--ease);
+    transition: background 0.24s ease, color 0.24s ease, border-color 0.24s ease, transform 0.2s var(--ease);
   }
   nav a:active {
     background: var(--fg);
@@ -196,7 +196,7 @@
     background: transparent;
     color: var(--fg);
     border: 1px solid var(--fg);
-    animation: beat-nav 2s ease-in-out infinite;
+    animation: beat-nav 2.7s ease-in-out infinite;
   }
   @keyframes beat-nav {
     0%   { box-shadow: 0 0 0 0 rgba(17, 17, 17, 0.30); }
@@ -207,7 +207,7 @@
   .card.card-live {
     border-color: var(--fg);
     border-width: 2px;
-    animation: beat-card 2s ease-in-out infinite;
+    animation: beat-card 2.7s ease-in-out infinite;
   }
   @keyframes beat-card {
     0%   { box-shadow: 0 0 0 0 rgba(17, 17, 17, 0.30); }
@@ -234,7 +234,7 @@
     border-color: var(--fg);
     background: var(--fg);
     color: #fff;
-    animation: beat-badge 2s ease-in-out infinite;
+    animation: beat-badge 2.7s ease-in-out infinite;
   }
   /* Gleiche Dauer und gleiche Kurve wie beat-nav und beat-card: alle drei
      Zeichen einer aktiven Position schlagen im Gleichtakt. Der Ring ist
@@ -297,7 +297,7 @@
     color: var(--fg);
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.15s var(--ease);
+    transition: background 0.24s ease, color 0.24s ease, border-color 0.24s ease, transform 0.2s var(--ease);
   }
   nav .sort-chip:active { transform: scale(0.95); }
   nav .sort-chip[aria-pressed="true"] {
@@ -309,7 +309,7 @@
      was genau das ist, was mit der Liste passiert. */
   nav .sort-chip .zeichen {
     display: block;
-    transition: transform 0.3s var(--ease);
+    transition: transform 0.41s var(--ease);
   }
   nav .sort-chip.gekippt .zeichen { transform: rotate(180deg); }
 
@@ -413,7 +413,7 @@
   .news-banner-track {
     display: flex;
     width: max-content;
-    animation: marquee 28s linear infinite;
+    animation: marquee 37.8s linear infinite;
     padding: 10px 0;
   }
   .news-banner-track:hover {
@@ -526,10 +526,10 @@
      schon. Gilt fuer alle drei Auslöser gleich: automatischer Wechsel,
      Antippen und Wischen. */
   .wirtschaft-block .news-rotator .news-item {
-    transition: opacity 0.16s ease, transform 0.16s ease;
+    transition: opacity 0.22s ease, transform 0.22s ease;
   }
   .wirtschaft-block .news-rotator .news-item.active {
-    transition: opacity 0.24s ease 0.16s, transform 0.24s ease 0.16s;
+    transition: opacity 0.32s ease 0.22s, transform 0.32s ease 0.22s;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -620,7 +620,7 @@
     /* Erst zeigen, wenn wirklich etwas gezeichnet ist — sonst blitzt
        ein weisser Kasten auf, waehrend TradingView noch aufbaut. */
     opacity: 0;
-    transition: opacity 0.35s ease;
+    transition: opacity 0.47s ease;
   }
   .chart.chart-da iframe { opacity: 1; }
 
@@ -659,7 +659,7 @@
     width: 100%;
     background: #e2e2e2;
     transform-origin: 0 50%;
-    animation: wartelinie 1.6s var(--ease) infinite;
+    animation: wartelinie 2.16s var(--ease) infinite;
   }
   @keyframes wartelinie {
     0%   { transform: scaleX(0); opacity: 0; }
@@ -686,7 +686,7 @@
     background: var(--fg);
     color: #fff;
     -webkit-tap-highlight-color: transparent;
-    transition: transform 0.15s var(--ease), opacity 0.15s ease;
+    transition: transform 0.2s var(--ease), opacity 0.2s ease;
   }
   .btn:active {
     transform: scale(0.98);
@@ -716,7 +716,7 @@
     padding: 9px 16px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    transition: transform 0.15s var(--ease), background 0.15s ease, color 0.15s ease;
+    transition: transform 0.2s var(--ease), background 0.2s ease, color 0.2s ease;
   }
   .install-btn:active {
     transform: scale(0.98);
@@ -751,7 +751,7 @@
     color: #fff;
     background: var(--fg);
     border-radius: 9px;
-    animation: beat-badge 2s ease-in-out infinite;
+    animation: beat-badge 2.7s ease-in-out infinite;
   }
   .glocke-btn.offen { background: var(--fg); color: #fff; }
   .glocke-btn.offen .wartend,
@@ -872,7 +872,7 @@
     padding: 12px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    transition: color 0.18s ease, border-color 0.18s ease, transform 0.12s var(--ease);
+    transition: color 0.24s ease, border-color 0.24s ease, transform 0.16s var(--ease);
   }
   .m-weg:hover { color: var(--fg); border-color: var(--fg); }
   .m-weg:active { transform: scale(0.985); }
@@ -898,7 +898,7 @@
     -webkit-user-select: none;
     user-select: none;
     opacity: 0;
-    transition: opacity 0.26s var(--ease);
+    transition: opacity 0.35s var(--ease);
   }
   .lupe[hidden] { display: none; }
   .lupe.da { opacity: 1; }
@@ -926,7 +926,7 @@
     border-radius: 2px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    transition: opacity 0.2s ease;
+    transition: opacity 0.27s ease;
   }
   /* Beim Ziehen und Zoomen stoert er nur */
   .lupe.zieht .lupe-zu { opacity: 0; pointer-events: none; }
@@ -954,7 +954,7 @@
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     transform: translateZ(0);
-    transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease, transform 0.12s var(--ease);
+    transition: background 0.22s ease, color 0.22s ease, border-color 0.22s ease, transform 0.16s var(--ease);
   }
   .kuerzel-taste:active { transform: scale(0.94); }
   .kuerzel-taste:hover { border-color: var(--fg); }
@@ -964,7 +964,7 @@
     color: #fff;
     background: var(--fg);
     border-color: var(--fg);
-    animation: beat-badge 2s ease-in-out infinite;
+    animation: beat-badge 2.7s ease-in-out infinite;
   }
   @media (prefers-reduced-motion: reduce) {
     .kuerzel-taste.aktiv { animation: none; }
@@ -994,7 +994,7 @@
     color: #fff;
     background: var(--fg);
     border-radius: 9px;
-    animation: beat-badge 2s ease-in-out infinite;
+    animation: beat-badge 2.7s ease-in-out infinite;
   }
   /* Offene Anfragen: der Knopf faellt von selbst auf */
   .verwaltung-btn.offen {
@@ -1046,7 +1046,7 @@
     padding: 22px 22px 28px;
     max-height: 88vh;
     overflow-y: auto;
-    animation: sheet-up 0.28s var(--ease) both;
+    animation: sheet-up 0.38s var(--ease) both;
   }
   @keyframes sheet-up {
     from { transform: translate3d(0, 14px, 0); opacity: 0; }
@@ -1056,12 +1056,12 @@
   /* Blaetter, die selbst auf- und zufahren, tragen "faehrt". Die anderen
      bleiben, wie sie waren — eine Regel auf .sheet allein haette auch die
      unsichtbar gemacht, die niemand umgestellt hat. */
-  .sheet.faehrt { opacity: 0; transition: opacity 0.26s var(--ease); }
+  .sheet.faehrt { opacity: 0; transition: opacity 0.35s var(--ease); }
   .sheet.faehrt.da { opacity: 1; }
   .sheet.faehrt .sheet-card {
     animation: none;
     transform: translate3d(0, 100%, 0);
-    transition: transform 0.36s var(--weich, cubic-bezier(0.32, 0.72, 0, 1));
+    transition: transform 0.49s var(--weich, cubic-bezier(0.32, 0.72, 0, 1));
   }
   .sheet.faehrt.da .sheet-card { transform: none; }
 
@@ -1089,18 +1089,18 @@
      Der Schleier haelt laenger, als das Blatt braucht: er faellt spaet ab,
      damit das Blatt nicht schon im Nichts sinkt. */
   .sheet.faehrt.zufahrt {
-    transition: opacity 0.5s cubic-bezier(0.62, 0, 0.9, 0.45);
+    transition: opacity 0.68s cubic-bezier(0.62, 0, 0.9, 0.45);
     /* Die Seite gehoert wieder der Seite, sobald der Finger vom Knopf ist */
     pointer-events: none;
   }
   .sheet.faehrt.zufahrt .sheet-card {
     transform: perspective(1200px) translate3d(0, 118%, 0) rotateX(9deg) scale(0.90);
-    transition: transform 0.56s cubic-bezier(0.45, 0, 0.55, 1);
+    transition: transform 0.76s cubic-bezier(0.45, 0, 0.55, 1);
   }
 
   /* Zwischen Liste und Aufgeschlagenem wird geblaettert: das eine geht zur
      Seite hinaus, das andere kommt von der anderen Seite herein. */
-  .blatt-seite { transition: transform 0.24s var(--weich, cubic-bezier(0.32,0.72,0,1)), opacity 0.18s ease; }
+  .blatt-seite { transition: transform 0.32s var(--weich, cubic-bezier(0.32,0.72,0,1)), opacity 0.24s ease; }
   .blatt-seite.weg-links { transform: translate3d(-26px, 0, 0); opacity: 0; }
   .blatt-seite.weg-rechts { transform: translate3d(26px, 0, 0); opacity: 0; }
   .blatt-seite.von-rechts { transform: translate3d(26px, 0, 0); opacity: 0; transition: none; }
@@ -1318,16 +1318,16 @@
   .mock .ring {
     transform-box: fill-box;
     transform-origin: center;
-    animation: schrittRing 7.2s var(--ease) infinite;
+    animation: schrittRing 9.72s var(--ease) infinite;
   }
   /* Negativ, nicht positiv: eine positive Verzoegerung liesse den Ring bis
      zu seinem Einsatz in seiner Grundgestalt stehen — also sichtbar. Alle
      vier waeren gleichzeitig zu sehen. Negativ startet jeder mitten im
      Umlauf, dort, wo er unsichtbar ist. */
   .steps li:nth-child(1) .ring { animation-delay: 0s; }
-  .steps li:nth-child(2) .ring { animation-delay: -5.4s; }
-  .steps li:nth-child(3) .ring { animation-delay: -3.6s; }
-  .steps li:nth-child(4) .ring { animation-delay: -1.8s; }
+  .steps li:nth-child(2) .ring { animation-delay: -7.29s; }
+  .steps li:nth-child(3) .ring { animation-delay: -4.86s; }
+  .steps li:nth-child(4) .ring { animation-delay: -2.43s; }
   @keyframes schrittRing {
     0%           { opacity: 0;    transform: scale(0.88); }
     3%           { opacity: 1;    transform: scale(1.07); }
@@ -1339,12 +1339,12 @@
 
   /* Dazu die Nummer und der Rahmen des Bildes — damit klar ist, welcher
      Schritt gerade dran ist, auch ohne den Ring zu suchen. */
-  .steps .n { animation: schrittNummer 7.2s var(--ease) infinite; }
-  .mock { animation: schrittRahmen 7.2s var(--ease) infinite; }
+  .steps .n { animation: schrittNummer 9.72s var(--ease) infinite; }
+  .mock { animation: schrittRahmen 9.72s var(--ease) infinite; }
   .steps li:nth-child(1) .n, .steps li:nth-child(1) .mock { animation-delay: 0s; }
-  .steps li:nth-child(2) .n, .steps li:nth-child(2) .mock { animation-delay: -5.4s; }
-  .steps li:nth-child(3) .n, .steps li:nth-child(3) .mock { animation-delay: -3.6s; }
-  .steps li:nth-child(4) .n, .steps li:nth-child(4) .mock { animation-delay: -1.8s; }
+  .steps li:nth-child(2) .n, .steps li:nth-child(2) .mock { animation-delay: -7.29s; }
+  .steps li:nth-child(3) .n, .steps li:nth-child(3) .mock { animation-delay: -4.86s; }
+  .steps li:nth-child(4) .n, .steps li:nth-child(4) .mock { animation-delay: -2.43s; }
   @keyframes schrittNummer {
     0%, 26%, 100% { color: var(--muted); }
     3%, 20%       { color: var(--fg); }
@@ -1355,7 +1355,7 @@
   }
 
   /* Schritt 2: die Liste wandert hoch, bis die Zeile auftaucht */
-  .mock .wisch { animation: schrittWisch 7.2s var(--ease) infinite; animation-delay: -5.4s; }
+  .mock .wisch { animation: schrittWisch 9.72s var(--ease) infinite; animation-delay: -7.29s; }
   @keyframes schrittWisch {
     0%, 100%  { transform: translateY(0);     opacity: 0.25; }
     4%        { transform: translateY(-7px);  opacity: 0.1; }
@@ -1389,8 +1389,8 @@
     touch-action: none;
     -webkit-tap-highlight-color: transparent;
     --weich: cubic-bezier(0.32, 0.72, 0, 1);
-    --auf: 0.44s;
-    --zu: 0.24s;
+    --auf: 0.59s;
+    --zu: 0.32s;
   }
   .rundgang[hidden] { display: none; }
 
@@ -1403,7 +1403,7 @@
     border-radius: 8px;
     box-shadow: 0 0 0 9999px rgba(17, 17, 17, 0.62);
     opacity: 0;
-    transition: opacity 0.34s var(--weich),
+    transition: opacity 0.46s var(--weich),
                 left var(--auf) var(--weich), top var(--auf) var(--weich),
                 width var(--auf) var(--weich), height var(--auf) var(--weich);
   }
@@ -1423,9 +1423,9 @@
     border: 2px solid #ffffff;
     border-radius: 10px;
     opacity: 0;
-    animation: rundgangPuls 2.4s var(--weich) infinite;
+    animation: rundgangPuls 3.24s var(--weich) infinite;
   }
-  .rundgang-ring.zwei { animation-delay: 1.2s; }
+  .rundgang-ring.zwei { animation-delay: 1.62s; }
   .rundgang.wechselt .rundgang-ring { animation: none; opacity: 0; }
   @keyframes rundgangPuls {
     0%   { transform: scale(1);     opacity: 0; }
@@ -1447,7 +1447,7 @@
     box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
     opacity: 0;
     transform: translate3d(0, 14px, 0) scale(0.985);
-    transition: opacity 0.34s var(--weich), transform 0.34s var(--weich);
+    transition: opacity 0.46s var(--weich), transform 0.46s var(--weich);
   }
   .rundgang.da .rundgang-karte { opacity: 1; transform: none; }
   .rundgang.wechselt .rundgang-karte { opacity: 0; transform: translate3d(0, 10px, 0) scale(0.99); }
@@ -1459,11 +1459,11 @@
   .rundgang-fuss {
     opacity: 1;
     transform: none;
-    transition: opacity 0.34s var(--weich), transform 0.34s var(--weich);
+    transition: opacity 0.46s var(--weich), transform 0.46s var(--weich);
   }
-  .rundgang-karte h3 { transition-delay: 0.05s; }
-  .rundgang-karte p { transition-delay: 0.1s; }
-  .rundgang-fuss { transition-delay: 0.15s; }
+  .rundgang-karte h3 { transition-delay: 0.07s; }
+  .rundgang-karte p { transition-delay: 0.14s; }
+  .rundgang-fuss { transition-delay: 0.2s; }
   .rundgang.wechselt .rundgang-karte h3,
   .rundgang.wechselt .rundgang-karte p,
   .rundgang.wechselt .rundgang-fuss {
@@ -1512,7 +1512,7 @@
     height: 5px;
     border-radius: 3px;
     background: var(--line);
-    transition: width 0.34s var(--weich), background 0.3s var(--weich);
+    transition: width 0.46s var(--weich), background 0.41s var(--weich);
   }
   /* Der laufende Punkt wird zum Strich statt nur groesser — das zeigt
      Fortschritt, ohne dass etwas huepft. */
@@ -1531,7 +1531,7 @@
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     transform: translateZ(0);
-    transition: transform 0.12s var(--ease), opacity 0.18s ease;
+    transition: transform 0.16s var(--ease), opacity 0.24s ease;
   }
   .rundgang button:active { transform: scale(0.96); }
   .rundgang-weiter { color: #fff; background: var(--fg); border: 1px solid var(--fg); }
@@ -1625,12 +1625,12 @@
     backdrop-filter: saturate(130%) blur(16px);
     border: 1px solid var(--line);
     border-radius: 2px;
-    animation: riseIn 0.55s var(--ease) both;
+    animation: riseIn 0.74s var(--ease) both;
   }
   /* Nacheinander, nicht alles auf einmal */
-  .nur-web .web-mark { animation: riseIn 0.5s var(--ease) 0.1s both; }
-  .nur-web .web-text { animation: riseIn 0.5s var(--ease) 0.18s both; }
-  .nur-web .web-go { animation: riseIn 0.5s var(--ease) 0.28s both; }
+  .nur-web .web-mark { animation: riseIn 0.68s var(--ease) 0.14s both; }
+  .nur-web .web-text { animation: riseIn 0.68s var(--ease) 0.24s both; }
+  .nur-web .web-go { animation: riseIn 0.68s var(--ease) 0.38s both; }
 
   .web-mark {
     width: 78px;
@@ -1671,7 +1671,7 @@
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     transform: translateZ(0);
-    transition: transform 0.12s var(--ease);
+    transition: transform 0.16s var(--ease);
   }
   .web-go:active { transform: scale(0.97); }
 
@@ -1815,7 +1815,7 @@
     background: var(--bg);
     text-align: center;
     padding: 32px 28px;
-    transition: opacity 0.45s var(--ease), visibility 0.45s;
+    transition: opacity 0.61s var(--ease), visibility 0.61s;
   }
   .auftakt.weg {
     opacity: 0;
@@ -1829,13 +1829,13 @@
     color: var(--muted);
     font-weight: 600;
     margin-bottom: 12px;
-    animation: auftaktRein 0.5s var(--ease) 0.05s both;
+    animation: auftaktRein 0.68s var(--ease) 0.07s both;
   }
   .auftakt h1 {
     font-size: 26px;
     font-weight: 700;
     letter-spacing: -0.4px;
-    animation: auftaktRein 0.5s var(--ease) 0.12s both;
+    animation: auftaktRein 0.68s var(--ease) 0.16s both;
   }
   .auftakt .wer {
     font-size: 13px;
@@ -1844,7 +1844,7 @@
     min-height: 19px;
     opacity: 0;
     transform: translate3d(0, 5px, 0);
-    transition: opacity 0.4s var(--ease), transform 0.4s var(--ease);
+    transition: opacity 0.54s var(--ease), transform 0.54s var(--ease);
   }
   .auftakt .wer.da { opacity: 1; transform: none; }
 
@@ -1856,7 +1856,7 @@
     background: var(--line);
     margin: 26px auto 0;
     overflow: hidden;
-    animation: auftaktRein 0.5s var(--ease) 0.2s both;
+    animation: auftaktRein 0.68s var(--ease) 0.27s both;
   }
   .auftakt .balken i {
     display: block;
@@ -1865,7 +1865,7 @@
     background: var(--fg);
     transform: scaleX(0);
     transform-origin: 0 50%;
-    transition: transform 0.5s var(--ease);
+    transition: transform 0.68s var(--ease);
   }
   .auftakt .tun {
     font-size: 10px;
@@ -1874,7 +1874,7 @@
     color: var(--muted);
     font-weight: 600;
     margin-top: 14px;
-    animation: auftaktRein 0.5s var(--ease) 0.26s both;
+    animation: auftaktRein 0.68s var(--ease) 0.35s both;
   }
   @keyframes auftaktRein {
     from { opacity: 0; transform: translate3d(0, 8px, 0); }
@@ -1917,12 +1917,12 @@
   .kerzen-band.hinten {
     height: 150%;
     top: -25%;
-    animation: kerzenLauf 15s linear infinite;
+    animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
     height: 78%;
     top: 11%;
-    animation: kerzenLauf 6s linear infinite;
+    animation: kerzenLauf 8.1s linear infinite;
   }
   .kerzen-feld { display: block; width: 100%; height: 100%; }
   .kerzen-feld .d { fill: #111; opacity: 0.42; }
@@ -2011,7 +2011,7 @@
     transform: scaleX(0);
     transform-origin: 0 50%;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.41s ease;
     will-change: transform;
   }
   nav.klebt .nav-fortschritt { opacity: 1; }
@@ -2043,7 +2043,7 @@
   .nav-wache { height: 1px; margin: 0; }
 
   nav {
-    transition: background 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+    transition: background 0.38s ease, box-shadow 0.38s ease, border-color 0.38s ease;
   }
   nav.klebt {
     background: rgba(250, 250, 250, 0.88);
@@ -2245,15 +2245,15 @@
       .karten.animiert > .card.sichtbar > .chart,
       .karten.animiert > .card.sichtbar > .news-block,
       .karten.animiert > .card.sichtbar > .actions {
-        animation: teilLauf 0.78s var(--weich, cubic-bezier(0.32, 0.72, 0, 1)) both;
+        animation: teilLauf 1.05s var(--weich, cubic-bezier(0.32, 0.72, 0, 1)) both;
       }
-      .karten.animiert > .card.sichtbar > .ziel-bar   { animation-delay: 0.09s; }
-      .karten.animiert > .card.sichtbar > .chart      { animation-delay: 0.18s; }
-      .karten.animiert > .card.sichtbar > .news-block { animation-delay: 0.27s; }
-      .karten.animiert > .card.sichtbar > .actions    { animation-delay: 0.36s; }
+      .karten.animiert > .card.sichtbar > .ziel-bar   { animation-delay: 0.12s; }
+      .karten.animiert > .card.sichtbar > .chart      { animation-delay: 0.24s; }
+      .karten.animiert > .card.sichtbar > .news-block { animation-delay: 0.36s; }
+      .karten.animiert > .card.sichtbar > .actions    { animation-delay: 0.48s; }
 
       .karten.animiert > .card.sichtbar > .card-head::after {
-        animation: kanteLauf 0.9s var(--weich, cubic-bezier(0.32, 0.72, 0, 1)) both;
+        animation: kanteLauf 1.22s var(--weich, cubic-bezier(0.32, 0.72, 0, 1)) both;
       }
 
       /* Und im Kopf noch einmal einzeln */
@@ -2261,10 +2261,10 @@
       .karten.animiert > .card > .card-head > .info { opacity: 0; }
       .karten.animiert > .card.sichtbar > .card-head > .row,
       .karten.animiert > .card.sichtbar > .card-head > .info {
-        animation: teilKlein 0.5s var(--weich, cubic-bezier(0.32, 0.72, 0, 1)) both;
+        animation: teilKlein 0.68s var(--weich, cubic-bezier(0.32, 0.72, 0, 1)) both;
       }
-      .karten.animiert > .card.sichtbar > .card-head > .row  { animation-delay: 0.07s; }
-      .karten.animiert > .card.sichtbar > .card-head > .info { animation-delay: 0.15s; }
+      .karten.animiert > .card.sichtbar > .card-head > .row  { animation-delay: 0.1s; }
+      .karten.animiert > .card.sichtbar > .card-head > .info { animation-delay: 0.2s; }
 
       /* Alles andere, was bisher stillstand. Der Beobachter haengt "zieht"
          an diese Bloecke und schaltet "sichtbar" — anders als bei den Karten
@@ -2273,11 +2273,11 @@
          sie ab, wenn der Block laengst aus dem Bild ist. */
       .zieht { opacity: 0; }
       .zieht.sichtbar {
-        animation: bandLauf 0.7s var(--weich, cubic-bezier(0.32, 0.72, 0, 1)) both;
+        animation: bandLauf 0.94s var(--weich, cubic-bezier(0.32, 0.72, 0, 1)) both;
       }
       .fg-box.zieht.sichtbar,
       footer.zieht.sichtbar {
-        animation: teilLauf 0.78s var(--weich, cubic-bezier(0.32, 0.72, 0, 1)) both;
+        animation: teilLauf 1.05s var(--weich, cubic-bezier(0.32, 0.72, 0, 1)) both;
       }
     }
   }
@@ -2285,10 +2285,10 @@
   /* Sprung aus dem Menue: ein Ring, der von selbst verklingt.
      Bewusst ein Uebergang und keine Animation — die Regel fuers Auftauchen
      ist spezifischer und wuerde eine zweite animation-Angabe schlucken. */
-  .card { transition: box-shadow 0.9s ease-out; }
+  .card { transition: box-shadow 1.22s ease-out; }
   .card.angesprungen {
     box-shadow: 0 0 0 1px rgba(17, 17, 17, 0.32);
-    transition-duration: 0.12s;
+    transition-duration: 0.16s;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -2382,7 +2382,7 @@
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     transform: translateZ(0);
-    transition: background 0.18s ease, color 0.18s ease, transform 0.12s var(--ease);
+    transition: background 0.24s ease, color 0.24s ease, transform 0.16s var(--ease);
   }
   /* Solange keine Meldung geladen ist, gibt es nichts zu teilen —
      applyItems() setzt data-live, sobald welche da sind. */
@@ -2404,7 +2404,7 @@
     align-items: center;
     opacity: 0;
     transform: translateY(10px);
-    transition: opacity 0.5s ease, transform 0.5s ease;
+    transition: opacity 0.68s ease, transform 0.68s ease;
     pointer-events: none;
   }
   .news-rotator .news-item.active {
@@ -2453,7 +2453,7 @@
     flex-shrink: 0;
     position: relative;
     top: 0;
-    animation: liveBlink 1.2s ease-in-out infinite;
+    animation: liveBlink 1.62s ease-in-out infinite;
   }
   @keyframes liveBlink {
     0%, 100% { opacity: 1; }
@@ -2500,7 +2500,7 @@
     min-width: 52px;
     line-height: 1;
     color: #111;
-    transition: color 0.4s ease;
+    transition: color 0.54s ease;
   }
   .fg-box .fg-meta {
     flex: 1;
@@ -2511,7 +2511,7 @@
     font-weight: 700;
     color: #111;
     margin-bottom: 6px;
-    transition: color 0.4s ease;
+    transition: color 0.54s ease;
   }
   .fg-bar {
     height: 6px;
@@ -2525,7 +2525,7 @@
     width: 0%;
     border-radius: 99px;
     background: #111;
-    transition: width 0.6s ease, background 0.4s ease;
+    transition: width 0.81s ease, background 0.54s ease;
   }
   .fg-box .fg-sub {
     margin-top: 8px;
@@ -2644,7 +2644,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=60" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=61" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -2762,7 +2762,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=60" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=61" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -2857,7 +2857,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=60" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=61" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -3240,7 +3240,7 @@
       el.classList.remove("angesprungen");
       void el.offsetWidth;
       el.classList.add("angesprungen");
-      setTimeout(function () { el.classList.remove("angesprungen"); }, 650);
+      setTimeout(function () { el.classList.remove("angesprungen"); }, 880);
     });
   });
   }
@@ -4536,12 +4536,12 @@ if ("serviceWorker" in navigator) {
         sortBtn.addEventListener("click", function () {
           auftritt.disconnect();
           alles.forEach(function (k) { k.classList.add("sichtbar"); });
-          // Lang genug, dass der letzte Teil (0,36 s Vorlauf, 0,78 s Lauf)
+          // Lang genug, dass der letzte Teil (0,48 s Vorlauf, 1,05 s Lauf)
           // ausfaehrt, statt mitten in der Bewegung anzuspringen
           setTimeout(function () {
             stapel.classList.remove("animiert");
             bloecke.forEach(function (b) { b.classList.remove("zieht"); });
-          }, 1300);
+          }, 1760);
         }, { once: true });
       }
     }
@@ -4905,7 +4905,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=60";
+      i.src = "/icon-512.png?v=61";
     });
     return symbolBild;
   }
@@ -5831,12 +5831,12 @@ if ("serviceWorker" in navigator) {
    dann wird nur umgeschaltet. */
 (function () {
   var ruhig = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var HERAUF = ruhig ? 0 : 360;
+  var HERAUF = ruhig ? 0 : 486;
   /* Zufahren dauert laenger als Auffahren — siehe .sheet.faehrt.zufahrt im
      Stylesheet. Hier steht nur, wie lange gewartet wird, bis das Blatt aus
      dem Weg genommen werden darf: etwas mehr als die laengste Bewegung. */
-  var HINUNTER = ruhig ? 0 : 560;
-  var SEITE = ruhig ? 0 : 200;
+  var HINUNTER = ruhig ? 0 : 756;
+  var SEITE = ruhig ? 0 : 270;
 
   function auf(blatt) {
     blatt.classList.add("faehrt");
@@ -6449,7 +6449,7 @@ if ("serviceWorker" in navigator) {
     gesehen();
     lochZu();                       // der Ausschnitt faellt zu, waehrend alles hell wird
     stand.classList.remove("da");
-    setTimeout(function () { stand.hidden = true; }, 360);
+    setTimeout(function () { stand.hidden = true; }, 486);
   }
 
   function gesehen() {
