@@ -846,6 +846,35 @@ Schleier wirklich aufblendet, wie weit die Karte fährt, dass beim Umblättern
 **nie beide Seiten zugleich** dastehen, und dass ein fremdes Blatt weiter
 sichtbar ist.
 
+#### Zufahren ist nicht Auffahren rückwärts
+
+Beim Auffahren sieht man, wohin man kommt — da ist Kürze richtig. Beim
+Zufahren sieht man nur noch, dass es weggeht, und mit derselben Dauer und
+demselben Weg las sich das wie ein Abschalten: das Blatt war fort, ehe der
+Blick nachkam.
+
+Das Zufahren hat deshalb eine **eigene Klasse** (`zufahrt`). Über `.da` allein
+ließe sich nur die Dauer trennen, nicht der Weg: die Stelle, an der das Blatt
+beim Zufahren ankommt, ist dieselbe, von der es beim Auffahren startet.
+
+| | Auffahren | Zufahren |
+|---|---|---|
+| Weg | von 100 % Höhe | auf **118 %**, dazu `scale(0.90)` und 9° nach hinten |
+| Dauer | 360 ms | **560 ms** |
+| Kurve | `--weich` | `cubic-bezier(0.45, 0, 0.55, 1)` |
+
+**Die Kurve war wichtiger als die Dauer.** `--weich` ist stark vorgezogen: nach
+einem knappen Drittel der Zeit ist damit fast alles vorbei, und länger machen
+ändert daran nichts — es wartet dann nur hinterher. Der erste Versuch mit 540
+statt 360 ms sah deshalb genauso aus wie vorher. Der Test hält das jetzt fest:
+**nach 200 ms muss das Blatt zwischen 10 und 62 % des Weges stehen**, also
+sichtbar unterwegs sein.
+
+Während es wegfährt, nimmt es keine Tipps mehr an (`pointer-events: none`), und
+das Scrollen der Seite wird **sofort** freigegeben statt erst nach der halben
+Sekunde. Sonst läge eine gute halbe Sekunde lang ein unsichtbarer Deckel über
+der Liste.
+
 ### Die Lupe
 
 Ein Tipp aufs Bild zeigt es formatfüllend auf schwarzem Grund — und dort lässt

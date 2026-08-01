@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="light">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#fafafa">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=59">
-<link rel="apple-touch-icon" href="/icon-180.png?v=59">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=60">
+<link rel="apple-touch-icon" href="/icon-180.png?v=60">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=59">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=60">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=59">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=60">
 
 <script>
 /* Im Browser oder als App?
@@ -1065,6 +1065,39 @@
   }
   .sheet.faehrt.da .sheet-card { transform: none; }
 
+  /* Zufahren ist nicht Auffahren rueckwaerts.
+
+     Beim Auffahren sieht man, wohin man kommt — da ist Kuerze richtig. Beim
+     Zufahren sieht man nur noch, dass es weggeht, und mit derselben Dauer
+     und demselben Weg las sich das wie ein Abschalten: das Blatt war fort,
+     ehe der Blick nachkam.
+
+     Deshalb eine eigene Klasse. Ueber .da allein liesse sich nur die Dauer
+     trennen, nicht der Weg: die Stelle, an der das Blatt beim Zufahren
+     ankommt, ist dieselbe, von der es beim Auffahren startet.
+
+     Es sinkt jetzt weiter weg, wird dabei kleiner und kippt leicht nach
+     hinten — und braucht dafuer eine gute halbe Sekunde.
+
+     Die Kurve ist dabei wichtiger als die Dauer. --weich ist stark
+     vorgezogen: nach einem knappen Drittel der Zeit ist damit fast alles
+     vorbei, und laenger machen aendert daran nichts — es wartet dann nur
+     hinterher. Beim Zufahren zaehlt aber, dass man die Bewegung sieht.
+     Deshalb hier eine Kurve, die in der Mitte am schnellsten ist und
+     vorn nicht davonrennt.
+
+     Der Schleier haelt laenger, als das Blatt braucht: er faellt spaet ab,
+     damit das Blatt nicht schon im Nichts sinkt. */
+  .sheet.faehrt.zufahrt {
+    transition: opacity 0.5s cubic-bezier(0.62, 0, 0.9, 0.45);
+    /* Die Seite gehoert wieder der Seite, sobald der Finger vom Knopf ist */
+    pointer-events: none;
+  }
+  .sheet.faehrt.zufahrt .sheet-card {
+    transform: perspective(1200px) translate3d(0, 118%, 0) rotateX(9deg) scale(0.90);
+    transition: transform 0.56s cubic-bezier(0.45, 0, 0.55, 1);
+  }
+
   /* Zwischen Liste und Aufgeschlagenem wird geblaettert: das eine geht zur
      Seite hinaus, das andere kommt von der anderen Seite herein. */
   .blatt-seite { transition: transform 0.24s var(--weich, cubic-bezier(0.32,0.72,0,1)), opacity 0.18s ease; }
@@ -1074,7 +1107,8 @@
   .blatt-seite.von-links { transform: translate3d(-26px, 0, 0); opacity: 0; transition: none; }
   @media (prefers-reduced-motion: reduce) {
     .sheet-card { animation: none; }
-    .sheet.faehrt .sheet-card { transform: none; }
+    .sheet.faehrt .sheet-card,
+    .sheet.faehrt.zufahrt .sheet-card { transform: none; }
     .blatt-seite.weg-links, .blatt-seite.weg-rechts,
     .blatt-seite.von-links, .blatt-seite.von-rechts { transform: none; opacity: 1; }
   }
@@ -2610,7 +2644,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=59" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=60" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -2728,7 +2762,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=59" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=60" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -2823,7 +2857,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=59" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=60" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -4871,7 +4905,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=59";
+      i.src = "/icon-512.png?v=60";
     });
     return symbolBild;
   }
@@ -5283,8 +5317,12 @@ if ("serviceWorker" in navigator) {
   }
 
   function schliessen() {
+    /* Das Scrollen sofort freigeben, nicht erst nach der halben Sekunde:
+       das Blatt faehrt nur noch weg und nimmt schon keine Tipps mehr an
+       (pointer-events: none an .zufahrt). Wer gleich weiterwischt, soll
+       nicht auf das Ende der Bewegung warten. */
+    document.body.style.overflow = "";
     window.rcpBlatt.zu(blatt, function () {
-      document.body.style.overflow = "";
       if (vorher && vorher.focus) vorher.focus();
     });
   }
@@ -5697,8 +5735,12 @@ if ("serviceWorker" in navigator) {
   }
 
   function schliessen() {
+    /* Das Scrollen sofort freigeben, nicht erst nach der halben Sekunde:
+       das Blatt faehrt nur noch weg und nimmt schon keine Tipps mehr an
+       (pointer-events: none an .zufahrt). Wer gleich weiterwischt, soll
+       nicht auf das Ende der Bewegung warten. */
+    document.body.style.overflow = "";
     window.rcpBlatt.zu(blatt, function () {
-      document.body.style.overflow = "";
       if (vorher && vorher.focus) vorher.focus();
     });
   }
@@ -5790,6 +5832,10 @@ if ("serviceWorker" in navigator) {
 (function () {
   var ruhig = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var HERAUF = ruhig ? 0 : 360;
+  /* Zufahren dauert laenger als Auffahren — siehe .sheet.faehrt.zufahrt im
+     Stylesheet. Hier steht nur, wie lange gewartet wird, bis das Blatt aus
+     dem Weg genommen werden darf: etwas mehr als die laengste Bewegung. */
+  var HINUNTER = ruhig ? 0 : 560;
   var SEITE = ruhig ? 0 : 200;
 
   function auf(blatt) {
@@ -5800,12 +5846,14 @@ if ("serviceWorker" in navigator) {
   }
 
   function zu(blatt, danach) {
+    blatt.classList.add("zufahrt");
     blatt.classList.remove("da");
     setTimeout(function () {
       blatt.hidden = true;
       blatt.classList.remove("faehrt");
+      blatt.classList.remove("zufahrt");
       if (danach) danach();
-    }, HERAUF);
+    }, HINUNTER);
   }
 
   function blaettern(raus, rein, zurueck, dazwischen) {
