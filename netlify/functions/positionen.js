@@ -64,7 +64,28 @@ export default async (request) => {
   if (gepruft.fehler) return json({ ok: false, fehler: gepruft.fehler }, 400);
 
   const vorher = await lesen(store);
-  await store.setJSON(EINTRAG, { zeit: new Date().toISOString(), von: chef.mail, liste: gepruft.liste });
+  const alt = new Map(vorher.map((p) => [p.id, p]));
+
+  /* Seit wann diese Position mit dieser Zone auf der Liste steht.
+
+     status.js sucht in den Tageskerzen des letzten Monats nach einer
+     Beruehrung der Zone und schreibt dann AKTIV an die Karte. Ohne einen
+     Zeitpunkt findet es auch Kerzen von vorher — und eine eben angelegte
+     Position stand sofort als aktiv da, obwohl der Kurs seit dem Anlegen
+     nie in ihrer Naehe war. Das war bei OXY zu sehen: der Kurs lag sieben
+     Prozent ueber der Zone, unten im Chart lag die Beruehrung drei Wochen
+     zurueck, aus einer Zeit, in der es die Position noch gar nicht gab.
+
+     Eine geaenderte Zone ist ein neues Setup und faengt deshalb von vorne
+     an. Alles andere — Name, Reihenfolge, Ziel — laesst den Zeitpunkt
+     stehen. */
+  const jetzt = new Date().toISOString();
+  for (const p of gepruft.liste) {
+    const v = alt.get(p.id);
+    p.seit = v && v.zone === p.zone && v.seit ? v.seit : jetzt;
+  }
+
+  await store.setJSON(EINTRAG, { zeit: jetzt, von: chef.mail, liste: gepruft.liste });
 
   /* Drei Anlaesse, und jede Position hoechstens in einem — sonst bekaeme man
      fuer denselben Handgriff zwei Meldungen:
@@ -80,7 +101,6 @@ export default async (request) => {
 
      Gemeldet wird nur der Uebergang. Sonst ginge bei jedem Umsortieren
      dasselbe noch einmal raus. */
-  const alt = new Map(vorher.map((p) => [p.id, p]));
   const neu = gepruft.liste.filter((p) => !alt.has(p.id));
 
   const geaendert = [];
@@ -131,16 +151,30 @@ export async function lesen(store) {
   } catch (e) {
     da = null;
   }
-  if (da && Array.isArray(da.liste)) return da.liste;
+  if (da && Array.isArray(da.liste)) return mitSeit(da.liste, da.zeit);
 
   // Erster Aufruf: Bestand uebernehmen
-  const start = pruefen(START).liste || [];
+  const zeit = new Date().toISOString();
+  const start = mitSeit(pruefen(START).liste || [], zeit);
   try {
-    await store.setJSON(EINTRAG, { zeit: new Date().toISOString(), von: "start", liste: start });
+    await store.setJSON(EINTRAG, { zeit: zeit, von: "start", liste: start });
   } catch (e) {
     // nicht schreiben zu koennen ist kein Grund, nichts zu liefern
   }
   return start;
+}
+
+/* Positionen aus der Zeit vor diesem Feld haben keinen Zeitpunkt. Statt sie
+   als "schon immer da" zu behandeln — womit status.js wieder Kerzen von
+   frueher faende — gilt der Stand der Liste selbst. Mehr laesst sich
+   rueckwirkend nicht sagen, und es ist die vorsichtige Richtung: lieber
+   einmal ein AKTIV zu wenig als eines, das nie ausgeloest wurde.
+
+   Geschrieben wird beim Lesen nichts. Beim naechsten Speichern faellt der
+   Wert von selbst an seinen Platz. */
+function mitSeit(liste, zeit) {
+  const stand = zeit || new Date().toISOString();
+  return liste.map((p) => (p.seit ? p : Object.assign({}, p, { seit: stand })));
 }
 
 /* ---------- Pruefen ---------- */

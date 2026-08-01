@@ -31,10 +31,18 @@ export default async () => {
       else abstand = 0;
     }
 
-    // Ausgeloest: irgendeine Tageskerze der letzten Wochen ist in die Zone gelaufen
+    /* Ausgeloest: eine Tageskerze ist in die Zone gelaufen — aber nur eine,
+       die es gab, als die Position mit dieser Zone schon auf der Liste
+       stand. Vorher zaehlt nicht: was der Kurs getan hat, bevor die Zone
+       ueberhaupt festgelegt war, ist kein ausgeloestes Setup, sondern
+       Vergangenheit. Ohne diese Grenze stand eine eben angelegte Position
+       sofort als AKTIV da. */
     let beruehrt = null;
     const kerzen = (q && q.kerzen) || [];
     for (const k of kerzen) {
+      // Auf den Tag genau: die Kerze traegt den Zeitpunkt der Eroeffnung,
+      // die Zone kann am selben Tag spaeter erreicht worden sein
+      if (item.seit && tag(k.zeit * 1000) < item.seit.slice(0, 10)) continue;
       if (k.tief <= item.high) {
         beruehrt = { zeit: k.zeit, tief: k.tief };  // letzte Beruehrung gewinnt
       }
@@ -50,7 +58,8 @@ export default async () => {
       low: item.low,
       abstand: abstand === null ? null : Math.round(abstand * 100) / 100,
       in_zone: kurs !== null && kurs <= item.high && kurs >= item.low,
-      beruehrt_am: beruehrt ? new Date(beruehrt.zeit * 1000).toISOString().slice(0, 10) : null,
+      seit: item.seit || null,
+      beruehrt_am: beruehrt ? tag(beruehrt.zeit * 1000) : null,
       beruehrt_bei: beruehrt ? Math.round(beruehrt.tief * 100) / 100 : null,
       // Setup gilt als aktiv, sobald der Kurs die Zone erreicht hat
       aktiv: (kurs !== null && kurs <= item.high && kurs >= item.low) || beruehrt !== null
@@ -72,7 +81,10 @@ async function zonen() {
       badge: (p.badge || p.yahoo).trim(),
       yahoo: p.yahoo,
       high: z.high,
-      low: z.low
+      low: z.low,
+      // Seit wann sie mit dieser Zone auf der Liste steht — gepflegt von
+      // positionen.js beim Speichern
+      seit: p.seit || ""
     });
   }
   return out;
@@ -159,6 +171,11 @@ async function quoteStooq(symbol) {
   } catch (e) {
     return null;
   }
+}
+
+// Ein Zeitpunkt als Tag, "2026-08-01" — so lassen sich zwei davon vergleichen
+function tag(ms) {
+  return new Date(ms).toISOString().slice(0, 10);
 }
 
 function num(s) {

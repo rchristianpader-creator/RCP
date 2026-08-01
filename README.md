@@ -226,6 +226,51 @@ ist der Store die Wahrheit; Änderungen an dieser Datei haben keine Wirkung mehr
 
 Ohne Netz baut die Seite aus der zuletzt gesehenen Liste im lokalen Speicher.
 
+### AKTIV heißt: seit sie auf der Liste steht
+
+An der Karte hängt ein Kennzeichen, sobald der Kurs die Einkaufszone erreicht
+hat — `IN DER ZONE`, solange er drin steht, sonst `AKTIV`. Dazu sucht
+`status.js` in den Tageskerzen des letzten Monats nach einem Tief innerhalb
+der Zone.
+
+Ein Monat Kerzen weiß aber nicht, seit wann es die Position gibt. OXY wurde
+angelegt, der Kurs stand bei 57,07 und damit **7,7 % über** der Zone
+53,01 – 51,71 — und an der Karte stand trotzdem `AKTIV`, wegen eines Tiefs bei
+48,00 vom 11. Juli. Zu der Zeit gab es die Position nicht und die Zone nicht.
+Das ist kein ausgelöstes Setup, das ist Chartverlauf.
+
+Deshalb trägt jede Position jetzt ein Feld **`seit`**, und Kerzen von davor
+zählen nicht:
+
+| Beim Speichern passiert | `seit` |
+|---|---|
+| Position kommt dazu | jetzt |
+| Zone geändert | jetzt — eine neue Zone ist ein neues Setup |
+| Ziel, Name, Branche, Reihenfolge geändert | bleibt stehen |
+
+Gepflegt wird das Feld **nur vom Server**. Der Editor schickt es zwar mit,
+aber `pruefen()` wirft es weg und der POST setzt es aus dem vorigen Stand neu
+— es lässt sich also nicht von außen setzen.
+
+Positionen aus der Zeit vor diesem Feld haben keines. `lesen()` setzt dafür
+den Speicherstand der Liste ein, statt sie als „schon immer da" zu behandeln
+— das ist die vorsichtige Richtung: lieber einmal ein `AKTIV` zu wenig als
+eines, das nie ausgelöst wurde. Geschrieben wird beim Lesen nichts; beim
+nächsten Speichern fällt der Wert von selbst an seinen Platz.
+
+Verglichen wird **auf den Tag**, nicht auf die Sekunde: eine Tageskerze trägt
+den Zeitpunkt der Eröffnung, die Zone kann am selben Tag später erreicht
+worden sein. Wer morgens eine Position anlegt, deren Kurs mittags in die Zone
+läuft, bekommt das mitgezählt.
+
+`aktiv-test` stellt Yahoo mit festen Kerzen — ein Tief bei 48,00 vor drei
+Wochen, sonst 56,00 — und lässt nur den Zeitpunkt wandern: eben angelegt →
+nicht aktiv; einen Monat dabei → aktiv; Zone geändert → wieder von vorne; nur
+den Namen geändert → bleibt; heute in die Zone gelaufen → sofort aktiv; ohne
+`seit` → der Stand der Liste greift. Gegen den alten Stand fallen sieben der
+fünfzehn Prüfungen durch, mit genau der Ausgabe vom Screenshot
+(`abstand: 7.66`, `beruehrt_am: "2026-07-11"`, `aktiv: true`).
+
 ## Der Auftakt
 
 Wer die App vom Home-Bildschirm oeffnet und angemeldet geblieben ist, sah
