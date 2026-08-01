@@ -1,0 +1,9 @@
+# Nur fuers Pruefen da. Die Functions loesen "@netlify/blobs" von ihrem
+# eigenen Ort nach oben auf, deshalb steht hier beim Pruefen ein Verweis auf
+# die Pakete im Kritzelverzeichnis — Playwright, web-push, der Nachbau des
+# Speichers. Ohne Schraegstrich am Ende, sonst greift es nicht: es ist ein
+# Verweis, kein Verzeichnis.
+#
+# Auf Netlify wird nichts installiert: die Seite ist statisch, und die
+# Functions kommen mit dem aus, was die Laufzeit mitbringt.
+node_modules
