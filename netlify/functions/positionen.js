@@ -162,7 +162,7 @@ export async function lesen(store) {
   } catch (e) {
     da = null;
   }
-  if (da && Array.isArray(da.liste)) return da.liste;
+  if (da && Array.isArray(da.liste)) return mitSeit(da.liste, da.zeit);
 
   // Erster Aufruf: Bestand uebernehmen
   const zeit = new Date().toISOString();
@@ -173,6 +173,27 @@ export async function lesen(store) {
     // nicht schreiben zu koennen ist kein Grund, nichts zu liefern
   }
   return start;
+}
+
+/* Dieselbe Ausnahme wie beim Speichern, nur schon beim Lesen.
+
+   Positionen aus der Zeit vor dem Feld "seit" haben keinen Zeitpunkt und
+   behalten damit den vollen Rueckblick — richtig fuer alles, was laenger
+   dasteht. Wer aber NEU traegt, sagt selbst, dass er gerade erst
+   dazugekommen ist; dann faengt auch seine Zone nicht frueher an als der
+   Stand der Liste.
+
+   Dass das hier steht und nicht erst im POST, ist der Unterschied zwischen
+   "wirkt nach dem naechsten Speichern" und "wirkt sofort". Ein Handgriff,
+   den niemand kennt, ist keine Loesung: OXY stand nach dem ersten Anlauf
+   weiter als aktiv da, weil das Nachziehen ein Speichern gebraucht haette.
+
+   Geschrieben wird beim Lesen nichts — der POST setzt denselben Wert beim
+   naechsten Speichern fest ein, bis dahin gilt er eben so. */
+function mitSeit(liste, stand) {
+  if (!stand) return liste;
+  return liste.map((p) =>
+    p.seit || !p.neu ? p : Object.assign({}, p, { seit: stand }));
 }
 
 /* ---------- Pruefen ---------- */

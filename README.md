@@ -263,11 +263,23 @@ auch über beliebig viele Speichervorgänge hinweg, solange ihre Zone
 unangetastet bleibt.
 
 Eine Ausnahme gibt es: **die NEU-Markierung**. Sie sagt selbst, dass die
-Position gerade erst dazugekommen ist — dann fängt auch ihre Zone jetzt an.
-Damit sortiert sich der Altbestand beim nächsten Speichern von allein, ohne
+Position gerade erst dazugekommen ist — dann fängt auch ihre Zone nicht früher
+an als der Stand der Liste. Damit sortiert sich der Altbestand von allein, ohne
 dass jemand entscheiden müsste, was alt ist und was nicht: OXY trägt NEU und
 bekommt seinen Zeitpunkt, DOW trägt keins und bleibt, wie es war. Und weil die
-Ausnahme nur für Positionen **ohne** Feld greift, feuert sie genau einmal.
+Ausnahme nur für Positionen **ohne** Feld greift, greift sie genau einmal.
+
+Diese Ausnahme steckt in **`lesen()`, nicht nur im POST** — der Unterschied
+zwischen „wirkt nach dem nächsten Speichern" und „wirkt sofort". Im ersten
+Anlauf stand sie nur im POST, und OXY stand danach weiter als aktiv da: das
+Nachziehen hätte ein Speichern in der Verwaltung gebraucht. Ein Handgriff, den
+niemand kennt, ist keine Lösung. Geschrieben wird beim Lesen trotzdem nichts —
+der POST setzt denselben Wert beim nächsten Speichern fest ein, bis dahin gilt
+er eben so.
+
+Nachsehen lässt sich das an `/.netlify/functions/status`: dort steht je
+Position `seit`, `abstand`, `beruehrt_am` und `aktiv` — also auch, *warum*
+etwas als aktiv gilt.
 
 Verglichen wird **auf den Tag**, nicht auf die Sekunde: eine Tageskerze trägt
 den Zeitpunkt der Eröffnung, die Zone kann am selben Tag später erreicht
@@ -279,9 +291,10 @@ Wochen, sonst 56,00 — und lässt nur den Zeitpunkt wandern: eben angelegt →
 nicht aktiv; einen Monat dabei → aktiv; Zone geändert → wieder von vorne; nur
 den Namen geändert → bleibt stehen; heute in die Zone gelaufen → zählt sofort;
 ohne `seit` und ohne NEU → voller Rückblick, auch nach dem Speichern; ohne
-`seit`, aber mit NEU → Zeitpunkt fällt an. Gegen den alten Stand fallen sieben
-Prüfungen durch, mit genau der Ausgabe vom Screenshot (`abstand: 7.66`,
-`beruehrt_am: "2026-07-11"`, `aktiv: true`).
+`seit`, aber mit NEU → greift sofort beim Lesen, und das Speichern schreibt es
+fest. 26 Prüfungen; gegen den alten Stand fallen sieben durch, mit genau der
+Ausgabe vom Screenshot (`abstand: 7.66`, `beruehrt_am: "2026-07-11"`,
+`aktiv: true`).
 
 ## Der Auftakt
 
