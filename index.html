@@ -2111,11 +2111,13 @@
   .kerzen-band.hinten {
     height: 150%;
     top: -25%;
-    /* Blasser. Frueher bekam jede Kerzenart hier ihre eigene Deckkraft; eine
-       Kachel als Hintergrundbild laesst sich von aussen nicht mehr
-       einfaerben, also liegt es jetzt am Band. Die drei Werte lagen ohnehin
-       dicht beieinander (0,38 · 0,37 · 0,43). */
-    opacity: 0.39;
+    /* Blasser — ueber eine eigene Kachel, nicht ueber die Deckkraft des
+       Bandes. Deckkraft am Element zwingt den Compositor, die ganze Ebene
+       bei jedem Bild zu ueberblenden: gemessen bei sechsfach gedrosseltem
+       Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
+       Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
+       0,17 · 0,26) und nichts zu ueberblenden. */
+    background-image: url("/kerzen-blass.svg?v=65");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {

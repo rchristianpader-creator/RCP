@@ -363,14 +363,37 @@ Sekunde.
 
 Zwei Nebenwirkungen, beide gut: `index.html` und `anmelden.html` sind zusammen
 **35 KB leichter** (das Muster stand zweimal drin, je doppelt), und die Datei
-wird einmal geholt und gecacht. Eine, weil ein Hintergrundbild sich von außen
-nicht mehr einfärben lässt: die Farben stehen jetzt **in** der SVG-Datei, und
-die Blässe des hinteren Bandes liegt am Band selbst (`opacity: 0.39` statt drei
-Einzelwerten — die lagen mit 0,38 · 0,37 · 0,43 ohnehin dicht beieinander).
+wird einmal geholt und gecacht.
 
-Die Datei muss **ohne Anmeldung** erreichbar sein, sonst stünde die
-Anmeldeseite leer — sie steht deshalb in `OFFEN` im Tor und im Vorrat des
+**Zwei Kacheln, nicht eine mit Deckkraft.** Ein Hintergrundbild lässt sich von
+außen nicht mehr einfärben — die Farben stehen jetzt *in* der SVG-Datei. Der
+erste Anlauf gab dem hinteren Band deshalb `opacity: 0.39`. Das war teuer:
+Deckkraft am Element zwingt den Compositor, die **ganze Ebene bei jedem Bild zu
+überblenden**. A/B gemessen, je sechs Durchgänge bei sechsfach gedrosseltem
+Prozessor, frischer Browser je Messung:
+
+| Fassung | Mittel | Bilder über 32 ms je Lauf |
+|---|---|---|
+| gedehntes SVG (vorher) | 17,3 ms | 0 · 2 · 0 · 8 · 3 · 11 → 4,0 |
+| Kachel + `opacity` am Band | 17,2 ms | 1 · 4 · 0 · 0 · 2 · 11 → 3,0 |
+| Kachel + eigene blasse Kachel | **17,0 ms** | 0 · 0 · 1 · 0 · 1 · 2 → **0,7** |
+
+Also liegt die Blässe in `kerzen-blass.svg` — dieselbe Zeichnung, nur mit den
+ursprünglichen Einzelwerten (0,16 · 0,17 · 0,26). Nichts zu überblenden, und
+die gekachelte Fassung läuft damit **runder als die alte gedehnte**.
+
+Beide Dateien müssen **ohne Anmeldung** erreichbar sein, sonst stünde die
+Anmeldeseite leer — sie stehen deshalb in `OFFEN` im Tor und im Vorrat des
 Service Workers.
+
+Zur Messung selbst zwei Lehren. Erstens: ein Messskript, das sechs Kontexte in
+**einem** Browser öffnet, wird von Lauf zu Lauf langsamer — der letzte war
+immer der schlechteste, und das sah aus wie ein Rückschritt. Ein frischer
+Browser je Messung räumt das aus. Zweitens: `fluss-test`s alte Schwelle
+„höchstens 3 lange Bilder" lag auf dieser Maschine *im* Rauschen — die alte
+Fassung riss sie in 3 von 6 Messungen genauso. Sie steht jetzt bei 12, mit den
+Zahlen oben als Begründung im Test; was trägt, sind der Mittelwert (stabil bei
+17 ms) und „kein Bild über 100 ms".
 
 `kachel-test` misst die Kerzenbreite bei 390, 1024 und 1900 Pixeln, prüft die
 Deckung (Fenster + Kachel), den Umlauf auf halbem Weg (genau eine halbe Kachel)

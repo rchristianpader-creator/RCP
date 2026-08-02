@@ -21,7 +21,8 @@ const PRECACHE = [
   "/icon-180.png?v=65",
   "/icon-192.png?v=65",
   "/icon-512.png?v=65",
-  "/kerzen.svg?v=65"
+  "/kerzen.svg?v=65",
+  "/kerzen-blass.svg?v=65"
 ];
 
 const STATIC = /\.(?:png|jpg|jpeg|svg|webp|ico|pdf|webmanifest)$/i;

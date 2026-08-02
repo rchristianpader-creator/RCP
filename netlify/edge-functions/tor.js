@@ -24,8 +24,10 @@ const OFFEN = [
   "/manifest.webmanifest",
   "/favicon.ico",
   "/robots.txt",
-  // Der laufende Hintergrund der Anmeldeseite — ohne ihn steht sie leer
-  "/kerzen.svg"
+  // Der laufende Hintergrund der Anmeldeseite — ohne ihn steht sie leer.
+  // Zwei Kacheln: die vordere dunkel, die hintere blass.
+  "/kerzen.svg",
+  "/kerzen-blass.svg"
 ];
 
 const OFFEN_ANFANG = ["/icon-", "/og-preview", "/ansicht-"];
