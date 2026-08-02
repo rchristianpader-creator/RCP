@@ -2776,7 +2776,7 @@
   <h1>Aktien-Liste</h1>
   <p class="sub">Live-Charts · Technische Analyse</p>
   <div class="rule"></div>
-  <div class="author">Ralph Christian Pader · Juli 2026</div>
+  <div class="author">Ralph Christian Pader · <span class="monat">Juli 2026</span></div>
   <div class="header-actions">
     <button class="install-btn" id="installBtn" type="button" hidden>App installieren</button>
     <button class="install-btn" id="pushBtn" type="button" hidden>Benachrichtigungen</button>
@@ -3069,11 +3069,45 @@
 <footer>
   <div class="line"></div>
   Live-Charts · TradingView · Fibos über den Button<br>
-  Ralph Christian Pader · Juli 2026<br>
+  Ralph Christian Pader · <span class="monat">Juli 2026</span><br>
   <button class="fuss-knopf" id="beitraegeBtn" type="button" hidden>Beiträge</button>
   <button class="fuss-knopf" id="rundgangNochmal" type="button">Rundgang noch einmal</button>
 </footer>
 </div>
+
+<script>
+/* Der Monat unter dem Titel und im Fuss.
+
+   Er stand fest im Markup — "Juli 2026" — und war damit am ersten August
+   falsch. Jetzt kommt er aus der Uhr, in Berliner Zeit: aus dem Ausland
+   heraus soll dort nicht schon der naechste Monat stehen.
+
+   Im Markup bleibt ein Wert stehen, damit die Zeile nicht leer ist, falls
+   das Skript nicht laeuft.
+
+   Beim Zurueckkommen wird nachgesehen: die App bleibt tagelang offen, und
+   ein Monatswechsel faende sie sonst nicht. */
+(function () {
+  function setzen() {
+    var text;
+    try {
+      text = new Date().toLocaleDateString("de-DE", {
+        timeZone: "Europe/Berlin", month: "long", year: "numeric"
+      });
+    } catch (e) {
+      return;
+    }
+    var alle = document.querySelectorAll(".monat");
+    for (var i = 0; i < alle.length; i++) {
+      if (alle[i].textContent !== text) alle[i].textContent = text;
+    }
+  }
+  setzen();
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden) setzen();
+  });
+})();
+</script>
 
 <script>
 /* Die Watchlist aufbauen.
