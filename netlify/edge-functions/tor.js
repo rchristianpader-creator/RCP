@@ -13,8 +13,9 @@ const KEKS = "rcp_sitz";
 /* Ohne Anmeldung erreichbar:
    - die Anmeldeseite selbst
    - die Konto-Function, sonst koennte man sich nie anmelden
-   - Manifest und Symbole: der Browser holt sie beim Installieren teils
-     ohne Keks, und sie verraten nichts
+   - Manifest, Symbole und die Ansichten fuers Installationsfenster: der
+     Browser holt sie beim Installieren teils ohne Keks, und sie verraten
+     nichts, was nicht ohnehin auf der Anmeldeseite steht
    - on-publish: das ist der Webhook, den Netlify nach jedem Deploy ruft */
 const OFFEN = [
   "/anmelden.html",
@@ -25,7 +26,7 @@ const OFFEN = [
   "/robots.txt"
 ];
 
-const OFFEN_ANFANG = ["/icon-", "/og-preview"];
+const OFFEN_ANFANG = ["/icon-", "/og-preview", "/ansicht-"];
 
 export default async (request, context) => {
   const url = new URL(request.url);

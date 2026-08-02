@@ -5,13 +5,13 @@
 <meta name="color-scheme" content="light">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#fafafa">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=64">
-<link rel="apple-touch-icon" href="/icon-180.png?v=64">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=65">
+<link rel="apple-touch-icon" href="/icon-180.png?v=65">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Aktien-Liste · Ralph Christian Pader</title>
 
 <meta name="description" content="Live-Charts und technische Analyse – Ralph Christian Pader">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=64">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=65">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=64">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=65">
 
 <script>
 /* Im Browser oder als App?
@@ -2809,7 +2809,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=64" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=65" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -2927,13 +2927,32 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=64" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=65" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
           </svg>
         </div>
       </li>
+    </ol>
+
+    <!-- Android: Chrome bietet den Dialog selbst an. Die Schritte sind der
+         Rueckweg fuer den Fall, dass er nicht kommt — etwa in Firefox oder
+         Samsung Internet, oder wenn er schon einmal weggetippt wurde. -->
+    <ol class="steps" id="stepsAndroid" hidden>
+      <li><span class="n">1</span><span>Oben rechts auf die <b>drei Punkte</b> tippen</span></li>
+      <li><span class="n">2</span><span><b>App installieren</b> wählen — in Firefox und Samsung Internet heißt es <b>Zum Startbildschirm hinzufügen</b></span></li>
+      <li><span class="n">3</span><span><b>Installieren</b> bestätigen</span></li>
+      <li><span class="n">4</span><span>Fertig — App über das neue Icon <b>Aktien-Liste</b> starten</span></li>
+    </ol>
+
+    <!-- Windows und der uebrige Schreibtisch. Edge und Chrome zeigen das
+         Zeichen rechts in der Adressleiste; darueber geht es am schnellsten. -->
+    <ol class="steps" id="stepsDesktop" hidden>
+      <li><span class="n">1</span><span>Rechts in der Adressleiste auf das <b>Installations-Zeichen</b> klicken — ein Bildschirm mit Pfeil</span></li>
+      <li><span class="n">2</span><span>Ohne das Zeichen: Menü <b>⋯</b> → in Edge <b>Apps → Diese Website als App installieren</b>, in Chrome <b>Streamen, Speichern und Teilen → Seite als App installieren</b></span></li>
+      <li><span class="n">3</span><span><b>Installieren</b> bestätigen</span></li>
+      <li><span class="n">4</span><span>Fertig — die Liste läuft in einem eigenen Fenster und steht im Startmenü</span></li>
     </ol>
 
     <ol class="steps" id="stepsOther" hidden>
@@ -3035,7 +3054,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=64" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=65" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -3679,6 +3698,8 @@
   var closeBtn = document.getElementById("installClose");
   var note = document.getElementById("installNote");
   var stepsIos = document.getElementById("stepsIos");
+  var stepsAndroid = document.getElementById("stepsAndroid");
+  var stepsDesktop = document.getElementById("stepsDesktop");
   var stepsOther = document.getElementById("stepsOther");
   var bar = document.getElementById("installBar");
   var barGo = document.getElementById("installBarGo");
@@ -3687,11 +3708,21 @@
   var BAR_OFF = "rcp_install_bar_off";
   if (!btn || !sheet) return;
 
+  /* Welches Geraet, welcher Weg? Drei Anleitungen statt zwei: iOS geht nur
+     ueber Teilen, Android hat den Punkt im Menue, und am Schreibtisch —
+     Windows voran — sitzt das Zeichen rechts in der Adressleiste. Vorher
+     bekamen Android und Windows dieselben drei Zeilen und mussten selbst
+     herausfinden, wo. */
   var ua = navigator.userAgent;
   var isIOS = /iPad|iPhone|iPod/.test(ua) ||
               (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  var isAndroid = /Android/i.test(ua);
+  // Alles ohne Beruehrung und ohne Telefon-Kennung: Windows, macOS, Linux
+  var amTisch = !isIOS && !isAndroid && !/Mobi|Tablet/i.test(ua);
   var inAppBrowser = /CriOS|FxiOS|EdgiOS|OPiOS|GSA|FBAN|FBAV|Instagram|LinkedInApp|Twitter/.test(ua);
   var installed = window.matchMedia("(display-mode: standalone)").matches ||
+                  window.matchMedia("(display-mode: minimal-ui)").matches ||
+                  window.matchMedia("(display-mode: window-controls-overlay)").matches ||
                   navigator.standalone === true;
 
   // Schon installiert: Button bleibt aus
@@ -3711,7 +3742,9 @@
   });
 
   stepsIos.hidden = !isIOS;
-  stepsOther.hidden = isIOS;
+  stepsAndroid.hidden = !isAndroid;
+  stepsDesktop.hidden = !amTisch;
+  stepsOther.hidden = isIOS || isAndroid || amTisch;
 
   if (isIOS && inAppBrowser) {
     note.hidden = false;
@@ -3734,14 +3767,28 @@
     if (lastFocus && lastFocus.focus) lastFocus.focus();
   }
 
-  btn.addEventListener("click", function () {
-    if (prompt) {
-      prompt.prompt();
-      prompt = null;
-      return;
+  /* Wo der Browser den Dialog selbst kann — Android und der Schreibtisch —,
+     ist er der kuerzere Weg als jede Anleitung: ein Tipp statt vier
+     Schritte. Sagt der Dialog nein oder gibt es ihn nicht, bleibt die
+     Anleitung. */
+  function anbieten() {
+    if (!prompt) { openSheet(); return; }
+    var p = prompt;
+    prompt = null;
+    try {
+      p.prompt();
+      if (p.userChoice && p.userChoice.then) {
+        p.userChoice.then(function (wahl) {
+          // Abgelehnt: den Knopf nicht ins Leere laufen lassen
+          if (!wahl || wahl.outcome !== "accepted") prompt = p;
+        });
+      }
+    } catch (e) {
+      openSheet();
     }
-    openSheet();
-  });
+  }
+
+  btn.addEventListener("click", anbieten);
 
   function hideBar(remember) {
     if (!bar) return;
@@ -3773,10 +3820,13 @@
 
   start();
 
-  if (barGo) barGo.addEventListener("click", function () { openSheet(); });
+  if (barGo) barGo.addEventListener("click", anbieten);
   if (barX) barX.addEventListener("click", function () { hideBar(true); });
+  /* Die Sperre im Browser. Auf Android fuehrt sie jetzt in denselben Dialog
+     wie der Knopf oben — vorher bekam man dort eine Anleitung, obwohl der
+     Browser die Installation mit einem Tipp erledigt haette. */
   var webGo = document.getElementById("webGo");
-  if (webGo) webGo.addEventListener("click", function () { openSheet(); });
+  if (webGo) webGo.addEventListener("click", anbieten);
 
   closeBtn.addEventListener("click", closeSheet);
   sheet.addEventListener("click", function (e) {
@@ -5124,7 +5174,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=64";
+      i.src = "/icon-512.png?v=65";
     });
     return symbolBild;
   }

@@ -643,6 +643,64 @@ steht es nicht drin.
 Werten, nicht darauf: die Maschine, auf der das läuft, ist nicht immer gleich
 schnell. Was dort reißt, ist eine echte Verschlechterung, kein Rauschen.
 
+## Android, iOS und Windows
+
+Drei Wege auf den Home-Bildschirm, und lange gab es nur zwei Anleitungen: iOS
+und „alles andere". Android und Windows bekamen dieselben drei vagen Zeilen und
+mussten selbst herausfinden, wo der Punkt sitzt.
+
+**Die Anleitung kennt jetzt drei Geräte.** `#stepsIos`, `#stepsAndroid`,
+`#stepsDesktop` — plus `#stepsOther` als Rückfall für alles, was in keine der
+drei Schubladen passt:
+
+| | Weg |
+|---|---|
+| iOS | Safari → Teilen → Zum Home-Bildschirm (die vier bebilderten Schritte) |
+| Android | ⋮ → App installieren; in Firefox und Samsung Internet heißt es *Zum Startbildschirm hinzufügen* |
+| Windows & Schreibtisch | Zeichen rechts in der Adressleiste; sonst Edge: *Apps → Diese Website als App installieren*, Chrome: *Streamen, Speichern und Teilen → Seite als App installieren* |
+
+**Wo der Browser selbst kann, geht der Dialog vor.** Android und der
+Schreibtisch liefern `beforeinstallprompt` — ein Tipp statt vier Schritten. Das
+galt bisher nur für den Knopf im Kopf; die Sperre im Browser („So geht's") und
+der Streifen am unteren Rand öffneten stur die Anleitung, obwohl der Browser die
+Installation mit einem Tipp erledigt hätte. Jetzt gehen alle drei denselben Weg.
+Lehnt der Dialog ab, wird er zurückgelegt, damit der Knopf nicht ins Leere
+läuft; gibt es ihn nicht, bleibt die Anleitung.
+
+**`viewport-fit=cover`** hat gefehlt. Ohne das liefert `env(safe-area-inset-*)`
+konstant 0 — und genau darauf standen zwei Stellen: der Schließen-Knopf der Lupe
+(sonst unter der Dynamic Island) und der Installationsstreifen unten (sonst
+unter dem Home-Indikator).
+
+**Das Manifest** war zu dünn für die großen Installationsfenster. Chrome auf
+Android und Edge auf Windows zeigen sie nur, wenn `screenshots` da sind — sonst
+bleibt es beim schmalen Streifen am unteren Rand. Dazugekommen sind
+`id`, `description`, `categories`, `display_override` (mit `minimal-ui` als
+Rückfall), ein Schnellzugriff auf die Meldungen (`/?meldungen=1` — ein Weg, den
+die Seite wirklich kennt) und zwei Ansichten:
+
+| Datei | Größe | `form_factor` |
+|---|---|---|
+| `ansicht-schmal.png` | 390 × 844 | `narrow` |
+| `ansicht-breit.png` | 1280 × 800 | `wide` |
+
+Beide entstehen aus der laufenden Seite (`schuss.mjs`), nicht aus einem
+Bildbearbeiter — sie zeigen also immer, was wirklich dasteht. Und beide müssen
+**ohne Anmeldung** zu holen sein: das Installationsfenster baut der Browser,
+nicht die Seite. Das Tor lässt `/ansicht-` deshalb durch, wie `/icon-` und
+`/og-preview`.
+
+Auch das „schon installiert"-Erkennen kannte nur `standalone`. Auf Windows
+läuft eine installierte App je nach Fenster als `minimal-ui` oder
+`window-controls-overlay` — dort stand der Knopf *App installieren* also noch
+in einer bereits installierten App. Alle drei zählen jetzt.
+
+`plattform-test` prüft das mit drei gestellten Kennungen (iPhone, Pixel,
+Windows/Edge): dass je genau eine Anleitung sichtbar ist, dass ihr Text auf die
+richtige Stelle zeigt, dass Manifest und Ansichten vollständig und ohne
+Anmeldung erreichbar sind — und dass ein Tipp auf *App installieren* den Dialog
+des Browsers ruft statt der Anleitung, aber ohne Dialog die Anleitung aufgeht.
+
 ## Im Browser statt in der App
 
 Auf dem Telefon soll die Liste als App laufen — nur dort kommen die Meldungen
