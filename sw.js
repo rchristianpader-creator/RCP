@@ -14,7 +14,10 @@ const PRECACHE = [
   "/manifest.webmanifest",
   "/icon-180.png?v=65",
   "/icon-192.png?v=65",
-  "/icon-512.png?v=65"
+  "/icon-512.png?v=65",
+  // Der laufende Hintergrund. Er steht schon auf dem Ladebildschirm, also
+  // soll er nicht erst geholt werden muessen, wenn es losgeht.
+  "/kerzen.svg?v=65"
 ];
 
 const STATIC = /\.(?:png|jpg|jpeg|svg|webp|ico|pdf|webmanifest)$/i;

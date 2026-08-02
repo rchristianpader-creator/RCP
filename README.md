@@ -325,8 +325,56 @@ nur das Tempo ist heruntergenommen.
 
 Gezeichnet wird nichts live. `kerzen.py` erzeugt einmal ein SVG aus
 einem Zufallsweg mit Trends und Gegenbewegungen; steigende Kerzen bleiben hohl,
-fallende sind gefuellt, also Kontrast ohne eine einzige Farbe. Die Reihe steht
-zweimal hintereinander im Bild, deshalb laeuft `translateX(-50%)` nahtlos um.
+fallende sind gefuellt, also Kontrast ohne eine einzige Farbe.
+
+### Eine Kachel, kein gedehntes Bild
+
+Das Muster stand als SVG im Markup und wurde auf die doppelte Fensterbreite
+gezogen. 34 Kerzen, die immer die volle Breite füllen sollen — auf dem Telefon
+sind das **11 Pixel je Kerze**, auf einem Fenster von 1900 aber **56**. Dieselbe
+Zeichnung, nur riesig. Auf Windows und auf dem Tablett wurde aus dem Hintergrund
+ein Vordergrund.
+
+Der Fehler steckte in der Bauweise, nicht in einem Wert: kleiner werden die
+Kerzen nur, wenn es **mehr** werden. Dehnen hilft nicht, Skalieren auch nicht —
+34 Kerzen auf einen breiten Bildschirm sind eben grob. Es muss gekachelt werden.
+
+Deshalb liegt das Muster jetzt als `/kerzen.svg` daneben, eine Schleife breit
+(748 Einheiten, 34 Kerzen), und die Bänder holen es als
+`background-repeat: repeat-x`:
+
+```css
+--kachel: min(100vw, 620px);
+width: calc(100% + var(--kachel));     /* ein Fenster plus eine Kachel */
+background-size: var(--kachel) 100%;
+```
+
+| Fenster | vorher | jetzt |
+|---|---|---|
+| 390 (Telefon) | 11,5 px | **11,5 px** — unverändert |
+| 1024 (Tablett) | 30 px | **18,2 px** |
+| 1900 (Schreibtisch) | 56 px | **18,2 px** |
+
+Der Umlauf ist jetzt genau **eine Kachel** weit statt einer halben Bandbreite;
+weil das Band ein Fenster *plus* eine Kachel breit ist, deckt es danach immer
+noch alles ab, und weil die Kachel tapeziert, ist der Übergang nahtlos. Gemessen
+in Kerzen ist das Tempo dasselbe wie vorher auf dem Telefon: rund vier je
+Sekunde.
+
+Zwei Nebenwirkungen, beide gut: `index.html` und `anmelden.html` sind zusammen
+**35 KB leichter** (das Muster stand zweimal drin, je doppelt), und die Datei
+wird einmal geholt und gecacht. Eine, weil ein Hintergrundbild sich von außen
+nicht mehr einfärben lässt: die Farben stehen jetzt **in** der SVG-Datei, und
+die Blässe des hinteren Bandes liegt am Band selbst (`opacity: 0.39` statt drei
+Einzelwerten — die lagen mit 0,38 · 0,37 · 0,43 ohnehin dicht beieinander).
+
+Die Datei muss **ohne Anmeldung** erreichbar sein, sonst stünde die
+Anmeldeseite leer — sie steht deshalb in `OFFEN` im Tor und im Vorrat des
+Service Workers.
+
+`kachel-test` misst die Kerzenbreite bei 390, 1024 und 1900 Pixeln, prüft die
+Deckung (Fenster + Kachel), den Umlauf auf halbem Weg (genau eine halbe Kachel)
+und dass in beiden HTML-Dateien kein gedehntes SVG mehr steht.
 
 Bewegt wird nur das Band als Ganzes per `transform` — eine Sache fuer den
 Compositor, kein Layout, kein Skript. Gemessen mit sechsfach gedrosseltem
