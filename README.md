@@ -890,6 +890,29 @@ ohne Anmeldung erreichbar (`OFFEN_ANFANG` in `tor.js`).
 Bei jedem neuen Vorschaubild muss die Nummer im `?v=` hoch, sonst zeigen die
 Dienste ihre alte Kopie — sie merken sich das Bild je Adresse, oft wochenlang.
 
+### Das Bild selbst
+
+Die erste Fassung war korrekt und still: Symbol, Titel, zwei Zeilen, alles
+mittig, viel Luft. In einem Chat voller Vorschaukarten fiel sie nicht auf —
+und sie sagte auch nicht, was die Seite eigentlich ist.
+
+Jetzt steht dieselbe Bildsprache wie in der App, nur laut: der **laufende
+Kursverlauf** hinter allem (dieselben Kacheln, hell gezeichnet, in zwei Ebenen
+für Tiefe), der Titel **füllt die Breite** statt in der Mitte zu schweben, und
+darunter stehen die **Kürzel** — die sagen ohne einen Satz, worum es geht.
+Unten eine Haarlinie, links der Name, rechts *Geschützt · Zugang auf Anfrage*.
+
+Zwei Verläufe halten das zusammen: einer von links, damit die Schrift auf der
+Kurve steht, und einer von unten, damit Kürzel und Fußzeile ruhig liegen. Der
+Titel bekommt zusätzlich einen weichen Schatten — ohne ihn sitzt er dort, wo
+die Kurve gerade dicht ist, auf Unruhe.
+
+Gezeichnet wird es nicht von Hand, sondern gerendert: `vorschaubild.mjs` baut
+die Seite in 1200 × 630 und schießt sie ab. Dieselbe Machart wie bei den
+Ansichten fürs Installationsfenster — die Bilder zeigen damit immer die
+echten Bausteine, nicht eine Nachahmung davon. 72 KB, gut unter der Grenze von
+600 KB, die `sw-test` prüft.
+
 `sw-test` geht den Weg des Roboters nach: Wurzel ohne Keks anfragen, der
 Weiterleitung folgen, Titel/Text/Bild aus dem Kopf lesen, das Bild ohne
 Anmeldung holen und prüfen, dass es ein PNG unter 600 KB ist.
