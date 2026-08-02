@@ -10,13 +10,17 @@ const CACHE = "aktien-liste-v65";
 /* Ohne Sitzung liefert das Tor statt der Seite eine Weiterleitung zur
    Anmeldung — deshalb wird das Dokument hier nicht vorgeladen, sondern
    erst abgelegt, wenn eine echte Antwort durchkommt. */
+/* kerzen.svg ist der laufende Hintergrund. Er steht schon auf dem
+   Ladebildschirm, also soll er nicht erst geholt werden muessen, wenn es
+   losgeht.
+
+   Kein Kommentar zwischen den Zeilen: die Pruefreihe liest diese Liste als
+   JSON aus der Datei, und daran waere sie eben zerbrochen. */
 const PRECACHE = [
   "/manifest.webmanifest",
   "/icon-180.png?v=65",
   "/icon-192.png?v=65",
   "/icon-512.png?v=65",
-  // Der laufende Hintergrund. Er steht schon auf dem Ladebildschirm, also
-  // soll er nicht erst geholt werden muessen, wenn es losgeht.
   "/kerzen.svg?v=65"
 ];
 
