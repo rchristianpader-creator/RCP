@@ -910,8 +910,20 @@ die Kurve gerade dicht ist, auf Unruhe.
 Gezeichnet wird es nicht von Hand, sondern gerendert: `vorschaubild.mjs` baut
 die Seite in 1200 × 630 und schießt sie ab. Dieselbe Machart wie bei den
 Ansichten fürs Installationsfenster — die Bilder zeigen damit immer die
-echten Bausteine, nicht eine Nachahmung davon. 72 KB, gut unter der Grenze von
-600 KB, die `sw-test` prüft.
+echten Bausteine, nicht eine Nachahmung davon. Unter der Grenze von 600 KB,
+die `sw-test` prüft.
+
+**Hell, nicht schwarz.** Lange lag hier `og-preview-black.png`, daneben ein
+ungenutztes helles. Schwarz fällt in einem Chat stärker auf — aber die App
+*ist* hell, und die Vorschau ist ein Versprechen darüber, was hinter dem Link
+liegt. Eine schwarze Karte zeigt etwas, das es dahinter nicht gibt.
+
+Das Skript baut trotzdem **beide** Anstriche aus derselben Vorlage
+(`ANSTRICH` darin), damit die Entscheidung eine Zeile bleibt und nicht eine
+zweite Gestaltung: `og-preview.png` ist im Einsatz, `og-preview-black.png`
+liegt auf demselben Stand daneben. Zum Wechseln die vier `og:image`- und
+`twitter:image`-Zeilen in `index.html` und `anmelden.html` umbiegen — und die
+Nummer hoch, sonst bleibt bei den Diensten die alte Karte stehen.
 
 `sw-test` geht den Weg des Roboters nach: Wurzel ohne Keks anfragen, der
 Weiterleitung folgen, Titel/Text/Bild aus dem Kopf lesen, das Bild ohne
