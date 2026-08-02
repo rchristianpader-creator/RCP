@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="light">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#fafafa">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=65">
-<link rel="apple-touch-icon" href="/icon-180.png?v=65">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=66">
+<link rel="apple-touch-icon" href="/icon-180.png?v=66">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=65">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=66">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=65">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=66">
 
 <script>
 /* Im Browser oder als App?
@@ -2103,7 +2103,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=65");
+    background-image: url("/kerzen.svg?v=66");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -2117,7 +2117,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=65");
+    background-image: url("/kerzen-blass.svg?v=66");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -2838,7 +2838,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=65" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=66" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -2956,7 +2956,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=65" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=66" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3083,7 +3083,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=65" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=66" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -5203,7 +5203,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=65";
+      i.src = "/icon-512.png?v=66";
     });
     return symbolBild;
   }
@@ -5768,6 +5768,19 @@ if ("serviceWorker" in navigator) {
     return dat.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" });
   }
 
+  /* Der Gruss zum Einzug steht einen Tag lang da, dann nicht mehr.
+
+     Er sagt, wofuer die Glocke gut ist — das muss man einmal lesen, nicht
+     jedes Mal. Blieb er liegen, waere er nach einer Woche der aelteste
+     Eintrag und stuende trotzdem noch unter allem, was seither passiert
+     ist. Ein Hinweis, der sich nicht verabschiedet, wird zum Moebel. */
+  var WILLKOMMEN_GILT = 24 * 60 * 60 * 1000;
+
+  function willkommenNoch() {
+    var alter = Date.now() - seit;
+    return isFinite(alter) && alter >= 0 && alter < WILLKOMMEN_GILT;
+  }
+
   function willkommen() {
     return {
       zeit: new Date(seit).toISOString(),
@@ -5776,6 +5789,11 @@ if ("serviceWorker" in navigator) {
       url: "",
       art: "willkommen"
     };
+  }
+
+  // Der Gruss nur, solange er gilt — sonst gar nichts dazu
+  function mitGruss(welche) {
+    return willkommenNoch() ? welche.concat([willkommen()]) : welche;
   }
 
   function zaehlen() {
@@ -5796,6 +5814,19 @@ if ("serviceWorker" in navigator) {
 
   function zeichnen() {
     liste.textContent = "";
+
+    /* Bis der Gruss ging, stand hier immer mindestens er. Jetzt kann die
+       Liste wirklich leer sein — und eine leere Flaeche liest sich wie ein
+       Fehler, nicht wie "nichts passiert". */
+    if (!stand.length) {
+      var l = document.createElement("div");
+      l.className = "leer";
+      l.textContent = "Noch nichts. Hier landen Kurse in ihrer Einkaufszone, "
+        + "neue Positionen und Nachrichten.";
+      liste.appendChild(l);
+      return;
+    }
+
     stand.forEach(function (m) {
       /* Ein Kasten, kein Knopf: die Kuerzel darin sind selbst Knoepfe, und
          Knopf im Knopf gibt es nicht. Angetippt wird er trotzdem wie einer,
@@ -6012,16 +6043,16 @@ if ("serviceWorker" in navigator) {
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (a) {
         laeuft = false;
-        if (!a || !a.ok) { stand = [willkommen()]; zaehlen(); danach(); return; }
+        if (!a || !a.ok) { stand = mitGruss([]); zaehlen(); danach(); return; }
         bezug = Date.parse(a.jetzt) || Date.now();
-        stand = (a.meldungen || []).concat([willkommen()]);
+        stand = mitGruss(a.meldungen || []);
         zaehlen();
         if (!blatt.hidden && !offen) zeichnen();
         danach();
       })
       .catch(function () {
         laeuft = false;
-        if (!stand.length) { stand = [willkommen()]; zaehlen(); }
+        if (!stand.length) { stand = mitGruss([]); zaehlen(); }
         danach();
       });
   }

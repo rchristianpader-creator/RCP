@@ -1104,8 +1104,26 @@ Wer sich heute die App holt, soll nicht die Meldungen von vorletzter Woche
 vorfinden, zu denen er nie gefragt wurde. Der Stichtag geht als `?seit=` an die
 Function, die filtert schon dort.
 
-Ganz unten steht immer der **Willkommensgruß**. Er wird in der App erzeugt,
-nicht verschickt: eine Meldung zum Einzug, die niemanden weckt.
+Ganz unten steht der **Willkommensgruß**. Er wird in der App erzeugt, nicht
+verschickt: eine Meldung zum Einzug, die niemanden weckt.
+
+**Und er geht nach 24 Stunden.** Er sagt, wofür die Glocke gut ist — das muss
+man einmal lesen, nicht jedes Mal. Bliebe er liegen, wäre er nach einer Woche
+der älteste Eintrag und stünde trotzdem noch unter allem, was seither passiert
+ist; ein Hinweis, der sich nicht verabschiedet, wird zum Möbel. Maßgeblich ist
+`rcp:seit`, der Zeitpunkt des Einzugs auf diesem Gerät — auf dem
+Home-Bildschirm hat die App ihren eigenen Speicher, dort zählt also der erste
+Start dort.
+
+Damit kann die Liste zum ersten Mal wirklich **leer** sein. Eine leere Fläche
+liest sich wie ein Fehler, nicht wie „nichts passiert" — deshalb steht dort
+jetzt eine Zeile: *Noch nichts. Hier landen Kurse in ihrer Einkaufszone, neue
+Positionen und Nachrichten.* Die Glocke selbst bleibt erreichbar, nur ohne
+Zähler.
+
+`willkommen-test` prüft alle drei Zeitpunkte über `rcp:seit` — frisch, nach 23
+Stunden, nach 25 — dazu, dass eine echte Meldung die leere Zeile verdrängt und
+der Gruß im frischen Fall unter ihr steht.
 
 ### Eine Meldung im Ganzen
 
