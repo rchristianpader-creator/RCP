@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="light">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#fafafa">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=67">
-<link rel="apple-touch-icon" href="/icon-180.png?v=67">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=68">
+<link rel="apple-touch-icon" href="/icon-180.png?v=68">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=67">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=68">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=67">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=68">
 
 <script>
 /* Im Browser oder als App?
@@ -57,96 +57,19 @@
 
   if (handy && !alsApp && !frei) document.documentElement.className += " nur-web";
 })();
-
-/* Hell oder dunkel?
-
-   Hell ist der Normalfall. Wer umschaltet, behaelt es — der Wunsch steht in
-   rcp:thema und gilt, bis er wieder umschaltet. Was das Geraet eingestellt
-   hat, wird ausdruecklich nicht gefragt: es soll die Seite nicht hinter dem
-   Ruecken des Besitzers umfaerben.
-
-   Das steht hier oben aus demselben Grund wie die Sperre darueber: bis das
-   Skript weiter unten liefe, waere die Seite schon einmal weiss aufgeblitzt.
-   Deshalb auch am <html> und nicht am <body> — das <body> gibt es hier noch
-   gar nicht. */
-(function () {
-  var wunsch = null;
-  try { wunsch = localStorage.getItem("rcp:thema"); } catch (e) {}
-  if (wunsch === "dunkel") {
-    document.documentElement.setAttribute("data-thema", "dunkel");
-    var m = document.querySelector('meta[name="theme-color"]');
-    if (m) m.setAttribute("content", "#000000");
-  }
-})();
 </script>
 
 <style>
-  /* ZWEI ANSTRICHE
-
-     Hell ist der Normalfall — daran aendert der dunkle nichts. Wer umschaltet,
-     bekommt tiefes Schwarz, kein Dunkelgrau: auf einem OLED-Telefon geht ein
-     echtes Schwarz aus, und die Karten heben sich davon deutlicher ab als von
-     einem Grau, das nur ein bisschen dunkler ist als sie selbst.
-
-     Alles laeuft ueber diese Namen. Wo frueher eine Farbe fest im Regelwerk
-     stand, steht jetzt eine Variable — sonst waere der dunkle Anstrich eine
-     zweite Fassung des ganzen Stylesheets, die beim ersten Nachbessern
-     auseinanderliefe.
-
-     Drei Namen sind neu und brauchen eine Erklaerung:
-
-       --auf-fg   Schrift auf einer Flaeche in --fg. Hell ist das Weiss,
-                  dunkel Schwarz — ein festes #fff waere im dunklen Anstrich
-                  weiss auf weiss.
-       --fg-rgb   Dieselbe Vordergrundfarbe als drei Zahlen, fuer alles mit
-                  Deckkraft: Pulsringe, Haarlinien, Rahmen.
-       --schleier Was sich ueber die Seite legt (Rundgang, Blaetter). Der
-                  bleibt dunkel, auch im dunklen Anstrich — er soll
-                  abdunkeln, nicht aufhellen. */
   :root {
     color-scheme: light;
     --bg: #fafafa;
-    --bg-rgb: 250, 250, 250;
     --fg: #111111;
-    --fg-rgb: 17, 17, 17;
-    --auf-fg: #ffffff;
     --muted: #737373;
     --line: #e5e5e5;
     --soft: #f5f5f5;
     --card: #ffffff;
     --hair: #ebebeb;
-    /* Schrift, die kaum da sein soll: der Platzhalter im Chart, der
-       Trenner in der Kontozeile. Ein eigener Name, weil --line dafuer
-       zu blass ist — mit --line waere der Platzhalter auch im hellen
-       Anstrich schwaecher als vorher. */
-    --blass: #c4c4c4;
-    --glas: rgba(255, 255, 255, 0.72);
-    --glas-fest: rgba(255, 255, 255, 0.76);
-    --schleier: rgba(17, 17, 17, 0.62);
-    --schatten: rgba(0, 0, 0, 0.24);
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  :root[data-thema="dunkel"] {
-    color-scheme: dark;
-    --bg: #000000;
-    --bg-rgb: 0, 0, 0;
-    --fg: #f2f2f2;
-    --fg-rgb: 242, 242, 242;
-    --auf-fg: #000000;
-    --muted: #8b8b8b;
-    --line: #262626;
-    --soft: #0d0d0d;
-    --card: #0a0a0a;
-    --hair: #1e1e1e;
-    /* Genauso weit ueber dem Grund wie im hellen Anstrich darunter:
-       #c4c4c4 auf #f3f3f3 ist Kontrast 1,55 — #333 auf #0d0d0d
-       ebenfalls. Gleich blass, nicht gleich hell. */
-    --blass: #333333;
-    --glas: rgba(10, 10, 10, 0.72);
-    --glas-fest: rgba(10, 10, 10, 0.82);
-    --schleier: rgba(0, 0, 0, 0.74);
-    --schatten: rgba(0, 0, 0, 0.72);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html {
@@ -209,7 +132,7 @@
     justify-content: center;
     position: sticky;
     top: 0;
-    background: var(--bg);
+    background: #fafafa;
     z-index: 20;
     border-bottom: 1px solid var(--hair);
   }
@@ -236,7 +159,7 @@
   }
   nav a:active {
     background: var(--fg);
-    color: var(--auf-fg);
+    color: #fff;
     border-color: var(--fg);
     transform: scale(0.95);
   }
@@ -259,7 +182,7 @@
     text-align: center;
   }
   .setup-strip a {
-    color: var(--auf-fg);
+    color: #fff;
     background: var(--fg);
     border-radius: 2px;
     padding: 5px 9px;
@@ -276,9 +199,9 @@
     animation: beat-nav 2.7s ease-in-out infinite;
   }
   @keyframes beat-nav {
-    0%   { box-shadow: 0 0 0 0 rgba(var(--fg-rgb), 0.30); }
-    50%  { box-shadow: 0 0 0 6px rgba(var(--fg-rgb), 0.06); }
-    100% { box-shadow: 0 0 0 0 rgba(var(--fg-rgb), 0.30); }
+    0%   { box-shadow: 0 0 0 0 rgba(17, 17, 17, 0.30); }
+    50%  { box-shadow: 0 0 0 6px rgba(17, 17, 17, 0.06); }
+    100% { box-shadow: 0 0 0 0 rgba(17, 17, 17, 0.30); }
   }
 
   .card.card-live {
@@ -287,21 +210,21 @@
     animation: beat-card 2.7s ease-in-out infinite;
   }
   @keyframes beat-card {
-    0%   { box-shadow: 0 0 0 0 rgba(var(--fg-rgb), 0.30); }
-    50%  { box-shadow: 0 0 0 8px rgba(var(--fg-rgb), 0.06); }
-    100% { box-shadow: 0 0 0 0 rgba(var(--fg-rgb), 0.30); }
+    0%   { box-shadow: 0 0 0 0 rgba(17, 17, 17, 0.30); }
+    50%  { box-shadow: 0 0 0 8px rgba(17, 17, 17, 0.06); }
+    100% { box-shadow: 0 0 0 0 rgba(17, 17, 17, 0.30); }
   }
 
   @media (prefers-reduced-motion: reduce) {
     nav a.nav-live,
     .card.card-live { animation: none; }
-    nav a.nav-live { box-shadow: 0 0 0 3px rgba(var(--fg-rgb), 0.12); }
+    nav a.nav-live { box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.12); }
   }
 
   .entry-note {
     padding: 10px 18px;
     background: var(--fg);
-    color: var(--auf-fg);
+    color: #fff;
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.14em;
@@ -310,16 +233,16 @@
   .badge.aktiv {
     border-color: var(--fg);
     background: var(--fg);
-    color: var(--auf-fg);
+    color: #fff;
     animation: beat-badge 2.7s ease-in-out infinite;
   }
   /* Gleiche Dauer und gleiche Kurve wie beat-nav und beat-card: alle drei
      Zeichen einer aktiven Position schlagen im Gleichtakt. Der Ring ist
      kleiner, weil das Abzeichen selbst klein ist. */
   @keyframes beat-badge {
-    0%   { box-shadow: 0 0 0 0 rgba(var(--fg-rgb), 0.30); }
-    50%  { box-shadow: 0 0 0 5px rgba(var(--fg-rgb), 0.06); }
-    100% { box-shadow: 0 0 0 0 rgba(var(--fg-rgb), 0.30); }
+    0%   { box-shadow: 0 0 0 0 rgba(17, 17, 17, 0.30); }
+    50%  { box-shadow: 0 0 0 5px rgba(17, 17, 17, 0.06); }
+    100% { box-shadow: 0 0 0 0 rgba(17, 17, 17, 0.30); }
   }
   @media (prefers-reduced-motion: reduce) {
     .badge.aktiv { animation: none; }
@@ -379,7 +302,7 @@
   nav .sort-chip:active { transform: scale(0.95); }
   nav .sort-chip[aria-pressed="true"] {
     background: var(--fg);
-    color: var(--auf-fg);
+    color: #fff;
     border-color: var(--fg);
   }
   /* Das Zeichen kippt beim Umschalten — die Pfeile tauschen die Seiten,
@@ -432,16 +355,16 @@
     white-space: nowrap;
   }
   .badge.neu {
-    border-color: var(--fg);
-    background: var(--fg);
-    color: var(--auf-fg);
+    border-color: #111;
+    background: #111;
+    color: #fff;
   }
   /* Ueberarbeitet ist leiser als neu: grau statt schwarz. Die Rangfolge
      soll man sehen, ohne sie zu lesen. */
   .badge.update {
     border-color: var(--muted);
     background: var(--muted);
-    color: var(--auf-fg);
+    color: #fff;
   }
   .card-head .badges {
     display: flex;
@@ -465,8 +388,8 @@
     font-size: 7px;
     font-weight: 800;
     letter-spacing: 0.08em;
-    background: var(--fg);
-    color: var(--auf-fg);
+    background: #111;
+    color: #fff;
     padding: 2px 5px;
     border-radius: 2px;
     line-height: 1.15;
@@ -508,7 +431,7 @@
   .news-banner a {
     color: var(--fg);
     text-decoration: none;
-    border-bottom: 1px solid rgba(var(--fg-rgb), 0.35);
+    border-bottom: 1px solid rgba(17,17,17,0.35);
     font-weight: 700;
   }
   @keyframes marquee {
@@ -544,7 +467,7 @@
     font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: #666;
     margin-bottom: 9px;
   }
   .wirtschaft-block .zaehler {
@@ -583,12 +506,12 @@
     margin-top: 7px;
     font-size: 12px;
     font-weight: 600;
-    color: var(--muted);
+    color: #555;
     font-variant-numeric: tabular-nums;
   }
   .wirtschaft-block .w-werte .ergebnis {
     background: var(--fg);
-    color: var(--auf-fg);
+    color: #fff;
     padding: 3px 7px;
     border-radius: 2px;
     font-weight: 800;
@@ -616,14 +539,14 @@
   .card-head .info {
     margin-top: 10px;
     font-size: 13px;
-    color: var(--muted);
+    color: #555;
     font-weight: 600;
   }
   .card-head .info .zone {
     font-weight: 800;
     font-size: 14px;
     letter-spacing: -0.15px;
-    color: var(--fg);
+    color: #333;
   }
 
   .ziel-bar {
@@ -645,10 +568,10 @@
     font-size: 16px;
     font-weight: 800;
     letter-spacing: -0.3px;
-    color: var(--fg);
+    color: #333;
   }
   .ziel-bar .k {
-    color: var(--muted);
+    color: #666;
   }
 
   /* Live in Euro umgerechnete Chart-Werte */
@@ -660,7 +583,7 @@
   }
   .info-fx b {
     font-weight: 700;
-    color: var(--fg);
+    color: #444;
   }
   .ziel-bar .v-fx {
     display: block;
@@ -684,7 +607,7 @@
     position: relative;
     width: 100%;
     height: 400px;
-    background: var(--soft);
+    background: #f3f3f3;
     border-top: 1px solid var(--hair);
   }
   .chart iframe {
@@ -718,14 +641,14 @@
     font-size: 13px;
     font-weight: 700;
     letter-spacing: 0.14em;
-    color: var(--blass);
+    color: #c4c4c4;
   }
   .chart-warte .wort {
     font-size: 10px;
     letter-spacing: 0.16em;
     text-transform: uppercase;
     font-weight: 600;
-    color: var(--blass);
+    color: #cfcfcf;
   }
   .chart-warte::after {
     content: "";
@@ -734,7 +657,7 @@
     bottom: 0;
     height: 2px;
     width: 100%;
-    background: var(--line);
+    background: #e2e2e2;
     transform-origin: 0 50%;
     animation: wartelinie 2.16s var(--ease) infinite;
   }
@@ -761,7 +684,7 @@
     font-weight: 650;
     text-decoration: none;
     background: var(--fg);
-    color: var(--auf-fg);
+    color: #fff;
     -webkit-tap-highlight-color: transparent;
     transition: transform 0.2s var(--ease), opacity 0.2s ease;
   }
@@ -798,46 +721,7 @@
   .install-btn:active {
     transform: scale(0.98);
     background: var(--fg);
-    color: var(--auf-fg);
-  }
-
-  /* Hell oder dunkel.
-
-     Ein Zeichen, zwei Zustaende: der Kreis bleibt stehen, und der Ausschnitt
-     wandert von aussen herein. Aus der Sonne mit ihren acht Strahlen wird
-     dadurch der Mond — kein Wechsel zwischen zwei Bildern, sondern eine
-     Bewegung, die man mitverfolgen kann. */
-  .thema-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-  }
-  .thema-zeichen { display: block; overflow: visible; }
-  .thema-zeichen .biss {
-    transform: translate(0px, 0px);
-    transition: transform 0.42s var(--ease);
-  }
-  .thema-zeichen .strahlen {
-    transform-origin: 10px 10px;
-    transition: opacity 0.3s ease, transform 0.42s var(--ease);
-  }
-  .thema-zeichen .scheibe {
-    transform-origin: 10px 10px;
-    transition: transform 0.42s var(--ease);
-  }
-  /* Dunkel eingestellt: der Ausschnitt faehrt herein, die Strahlen ziehen
-     sich zusammen und gehen aus, die Scheibe wird etwas groesser. */
-  :root[data-thema="dunkel"] .thema-zeichen .biss { transform: translate(-5.6px, 2.4px); }
-  :root[data-thema="dunkel"] .thema-zeichen .strahlen {
-    opacity: 0;
-    transform: scale(0.4) rotate(-45deg);
-  }
-  :root[data-thema="dunkel"] .thema-zeichen .scheibe { transform: scale(1.18); }
-
-  @media (prefers-reduced-motion: reduce) {
-    .thema-zeichen .biss,
-    .thema-zeichen .strahlen,
-    .thema-zeichen .scheibe { transition: none; }
+    color: #fff;
   }
 
   /* Konto im Kopf: Verwaltung als eigener Knopf, darunter wer angemeldet ist */
@@ -864,14 +748,14 @@
     font-variant-numeric: tabular-nums;
     line-height: 17px;
     text-align: center;
-    color: var(--auf-fg);
+    color: #fff;
     background: var(--fg);
     border-radius: 9px;
     animation: beat-badge 2.7s ease-in-out infinite;
   }
-  .glocke-btn.offen { background: var(--fg); color: var(--auf-fg); }
+  .glocke-btn.offen { background: var(--fg); color: #fff; }
   .glocke-btn.offen .wartend,
-  .glocke-btn:active .wartend { background: var(--auf-fg); color: var(--fg); }
+  .glocke-btn:active .wartend { background: #fff; color: var(--fg); }
 
   /* Die Liste hinter der Glocke */
   .meldungen { margin-top: 18px; }
@@ -1050,7 +934,7 @@
     padding: 30px 22px;
     /* Milchig, damit die Kerzen dahinter weiterlaufen und trotzdem alles
        lesbar bleibt — dieselbe Machart wie beim Anmeldekasten. */
-    background: var(--glas-fest);
+    background: rgba(255, 255, 255, 0.76);
     -webkit-backdrop-filter: saturate(130%) blur(16px);
     backdrop-filter: saturate(130%) blur(16px);
     border: 1px solid var(--line);
@@ -1136,7 +1020,7 @@
     letter-spacing: 0.16em;
     text-transform: uppercase;
     font-weight: 600;
-    color: var(--auf-fg);
+    color: #fff;
     background: var(--fg);
     border: 1px solid var(--fg);
     border-radius: 2px;
@@ -1173,10 +1057,7 @@
     align-items: center;
     justify-content: center;
     padding: 12px;
-    /* Fast schwarz, in beiden Anstrichen. Ein Bild soll gross vor einem
-       dunklen Grund stehen — auch wer hell eingestellt hat, will hier
-       keine weisse Flaeche neben dem Bild. */
-    background: rgba(0, 0, 0, 0.94);
+    background: rgba(17, 17, 17, 0.94);
     touch-action: none;
     overflow: hidden;
     -webkit-user-select: none;
@@ -1204,9 +1085,7 @@
     font: inherit;
     font-size: 22px;
     line-height: 1;
-    color: var(--auf-fg);
-    /* Bleibt hell: der Knopf sitzt auf dem fast schwarzen Grund der Lupe,
-       nicht auf der Seite. */
+    color: #fff;
     background: rgba(255, 255, 255, 0.14);
     border: 0;
     border-radius: 2px;
@@ -1247,7 +1126,7 @@
   /* Steht die Position gerade in ihrer Zone, schlaegt ihr Kuerzel — im
      selben Takt wie das Zeichen auf der Karte und der Chip im Menue. */
   .kuerzel-taste.aktiv {
-    color: var(--auf-fg);
+    color: #fff;
     background: var(--fg);
     border-color: var(--fg);
     animation: beat-badge 2.7s ease-in-out infinite;
@@ -1277,7 +1156,7 @@
     font-variant-numeric: tabular-nums;
     line-height: 17px;
     text-align: center;
-    color: var(--auf-fg);
+    color: #fff;
     background: var(--fg);
     border-radius: 9px;
     animation: beat-badge 2.7s ease-in-out infinite;
@@ -1285,11 +1164,11 @@
   /* Offene Anfragen: der Knopf faellt von selbst auf */
   .verwaltung-btn.offen {
     background: var(--fg);
-    color: var(--auf-fg);
+    color: #fff;
   }
   .verwaltung-btn.offen .wartend,
   .verwaltung-btn:active .wartend {
-    background: var(--auf-fg);
+    background: #fff;
     color: var(--fg);
   }
 
@@ -1304,7 +1183,7 @@
     border-bottom: 1px solid var(--line);
     -webkit-tap-highlight-color: transparent;
   }
-  .konto-zeile .trenner { margin: 0 6px; color: var(--blass); }
+  .konto-zeile .trenner { margin: 0 6px; color: var(--line); }
 
   @media (prefers-reduced-motion: reduce) {
     .verwaltung-btn .wartend { animation: none; }
@@ -1319,7 +1198,7 @@
     display: flex;
     align-items: flex-end;
     justify-content: center;
-    background: rgba(var(--fg-rgb), 0.32);
+    background: rgba(17, 17, 17, 0.32);
     -webkit-backdrop-filter: saturate(120%) blur(2px);
     backdrop-filter: saturate(120%) blur(2px);
   }
@@ -1597,9 +1476,6 @@
     color: var(--fg);
   }
   .mock text { font-family: inherit; }
-  /* Schrift auf der ausgefuellten Flaeche im Bildchen. Fest weiss waere
-     im dunklen Anstrich weiss auf weiss. */
-  .mock .auf-fg { fill: var(--auf-fg); }
 
   /* Die vier Schritte laufen als kleine Vorfuehrung durch: jeder leuchtet
      der Reihe nach auf. Ein Umlauf, vier gleiche Viertel, jedes Bild um ein
@@ -1690,7 +1566,7 @@
     width: 0;
     height: 0;
     border-radius: 8px;
-    box-shadow: 0 0 0 9999px var(--schleier);
+    box-shadow: 0 0 0 9999px rgba(17, 17, 17, 0.62);
     opacity: 0;
     transition: opacity 0.46s var(--weich),
                 left var(--auf) var(--weich), top var(--auf) var(--weich),
@@ -1709,7 +1585,7 @@
   .rundgang-ring {
     position: absolute;
     inset: -3px;
-    border: 2px solid var(--card);
+    border: 2px solid #ffffff;
     border-radius: 10px;
     opacity: 0;
     animation: rundgangPuls 3.24s var(--weich) infinite;
@@ -1733,7 +1609,7 @@
     border: 1px solid var(--line);
     border-radius: 3px;
     padding: 15px 16px 13px;
-    box-shadow: 0 18px 50px var(--schatten);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
     opacity: 0;
     transform: translate3d(0, 14px, 0) scale(0.985);
     transition: opacity 0.46s var(--weich), transform 0.46s var(--weich);
@@ -1806,7 +1682,7 @@
   /* Der laufende Punkt wird zum Strich statt nur groesser — das zeigt
      Fortschritt, ohne dass etwas huepft. */
   .rundgang-punkte i.jetzt { width: 17px; background: var(--fg); }
-  .rundgang-punkte i.war { background: var(--line); }
+  .rundgang-punkte i.war { background: #c4c4c4; }
 
   .rundgang-knoepfe { display: flex; gap: 8px; }
   .rundgang button {
@@ -1823,7 +1699,7 @@
     transition: transform 0.16s var(--ease), opacity 0.24s ease;
   }
   .rundgang button:active { transform: scale(0.96); }
-  .rundgang-weiter { color: var(--auf-fg); background: var(--fg); border: 1px solid var(--fg); }
+  .rundgang-weiter { color: #fff; background: var(--fg); border: 1px solid var(--fg); }
   .rundgang-zurueck { color: var(--fg); background: var(--card); border: 1px solid var(--line); }
   .rundgang-zurueck[disabled] { opacity: 0.35; cursor: default; }
 
@@ -1909,7 +1785,7 @@
     padding: 34px 26px 34px;
     /* Durchscheinend, damit die Kerzen dahinter weiterlaufen — dieselbe
        Machart wie der Anmeldekasten. */
-    background: var(--glas);
+    background: rgba(255, 255, 255, 0.72);
     -webkit-backdrop-filter: saturate(130%) blur(16px);
     backdrop-filter: saturate(130%) blur(16px);
     border: 1px solid var(--line);
@@ -1952,7 +1828,7 @@
     letter-spacing: 0.16em;
     text-transform: uppercase;
     font-weight: 600;
-    color: var(--auf-fg);
+    color: #fff;
     background: var(--fg);
     border: 1px solid var(--fg);
     border-radius: 2px;
@@ -2014,7 +1890,7 @@
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--auf-fg);
+    color: #fff;
     background: var(--fg);
     border: 0;
     border-radius: 2px;
@@ -2227,7 +2103,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=67");
+    background-image: url("/kerzen.svg?v=68");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -2241,24 +2117,13 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=67");
+    background-image: url("/kerzen-blass.svg?v=68");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
     height: 78%;
     top: 11%;
     animation: kerzenLauf 8.1s linear infinite;
-  }
-
-  /* Im dunklen Anstrich zeichnet dieselbe Kurve hell statt dunkel. Zwei
-     weitere Kacheln statt eines Filters: filter: invert() auf einem Band,
-     das bei jedem Bild bewegt wird, kostet dasselbe wie die Deckkraft, die
-     ich gerade erst herausgenommen habe. */
-  :root[data-thema="dunkel"] .kerzen-band.vorn {
-    background-image: url("/kerzen-dunkel.svg?v=67");
-  }
-  :root[data-thema="dunkel"] .kerzen-band.hinten {
-    background-image: url("/kerzen-dunkel-blass.svg?v=67");
   }
 
   @keyframes kerzenLauf {
@@ -2279,10 +2144,10 @@
     z-index: -1;
     background: radial-gradient(
       ellipse at center,
-      rgba(var(--bg-rgb), 0.98) 0%,
-      rgba(var(--bg-rgb), 0.95) 52%,
-      rgba(var(--bg-rgb), 0.78) 70%,
-      rgba(var(--bg-rgb), 0) 88%
+      rgba(250, 250, 250, 0.98) 0%,
+      rgba(250, 250, 250, 0.95) 52%,
+      rgba(250, 250, 250, 0.78) 70%,
+      rgba(250, 250, 250, 0) 88%
     );
   }
 
@@ -2375,11 +2240,11 @@
     transition: background 0.38s ease, box-shadow 0.38s ease, border-color 0.38s ease;
   }
   nav.klebt {
-    background: rgba(var(--bg-rgb), 0.88);
+    background: rgba(250, 250, 250, 0.88);
     -webkit-backdrop-filter: saturate(150%) blur(12px);
     backdrop-filter: saturate(150%) blur(12px);
     border-bottom-color: var(--line);
-    box-shadow: 0 8px 20px -18px rgba(var(--fg-rgb), 0.5);
+    box-shadow: 0 8px 20px -18px rgba(17, 17, 17, 0.5);
   }
 
   /* Wo man gerade ist. Nur die Kante — der pulsierende Ring gehoert
@@ -2616,7 +2481,7 @@
      ist spezifischer und wuerde eine zweite animation-Angabe schlucken. */
   .card { transition: box-shadow 1.22s ease-out; }
   .card.angesprungen {
-    box-shadow: 0 0 0 1px rgba(var(--fg-rgb), 0.32);
+    box-shadow: 0 0 0 1px rgba(17, 17, 17, 0.32);
     transition-duration: 0.16s;
   }
 
@@ -2677,7 +2542,7 @@
   .news-block {
     position: relative;
     border-top: 1px solid var(--hair);
-    background: var(--soft);
+    background: #f3f3f3;
     padding: 12px 16px 14px;
     min-height: 72px;
   }
@@ -2686,7 +2551,7 @@
     font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: #666;
     margin-bottom: 8px;
   }
 
@@ -2703,7 +2568,7 @@
     letter-spacing: 0.12em;
     text-transform: uppercase;
     font-weight: 700;
-    color: var(--muted);
+    color: #666;
     background: none;
     border: 1px solid var(--line);
     border-radius: 2px;
@@ -2719,7 +2584,7 @@
   .news-block[data-live="1"] .teilen-btn { display: inline-flex; }
   .teilen-btn:active { transform: scale(0.94); }
   .teilen-btn[disabled] { opacity: 0.45; cursor: default; }
-  .teilen-btn.laeuft { background: var(--fg); color: var(--auf-fg); border-color: var(--fg); }
+  .teilen-btn.laeuft { background: var(--fg); color: #fff; border-color: var(--fg); }
   .teilen-btn svg { flex: none; }
   .news-rotator {
     position: relative;
@@ -2744,7 +2609,7 @@
   .news-rotator .news-item a {
     font-size: 14px;
     line-height: 1.35;
-    color: var(--fg);
+    color: #111;
     text-decoration: none;
     font-weight: 700;
     display: -webkit-box;
@@ -2761,10 +2626,10 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: var(--line);
+    background: #ccc;
   }
   .news-dots span.on {
-    background: var(--fg);
+    background: #111;
   }
 
 
@@ -2778,7 +2643,6 @@
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    /* Rot bleibt rot — es sagt etwas, es ist kein Anstrich. */
     background: #e11d48;
     flex-shrink: 0;
     position: relative;
@@ -2810,13 +2674,13 @@
     font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: #666;
   }
   .fg-box .fg-link {
     font-size: 11px;
-    color: var(--muted);
+    color: #666;
     text-decoration: none;
-    border-bottom: 1px solid var(--line);
+    border-bottom: 1px solid #ddd;
   }
   .fg-box .fg-row {
     display: flex;
@@ -2829,7 +2693,7 @@
     letter-spacing: -1px;
     min-width: 52px;
     line-height: 1;
-    color: var(--fg);
+    color: #111;
     transition: color 0.54s ease;
   }
   .fg-box .fg-meta {
@@ -2839,13 +2703,13 @@
   .fg-box .fg-label {
     font-size: 15px;
     font-weight: 700;
-    color: var(--fg);
+    color: #111;
     margin-bottom: 6px;
     transition: color 0.54s ease;
   }
   .fg-bar {
     height: 6px;
-    background: var(--hair);
+    background: #eee;
     border-radius: 99px;
     overflow: hidden;
   }
@@ -2854,13 +2718,13 @@
     height: 100%;
     width: 0%;
     border-radius: 99px;
-    background: var(--fg);
+    background: #111;
     transition: width 0.81s ease, background 0.54s ease;
   }
   .fg-box .fg-sub {
     margin-top: 8px;
     font-size: 11px;
-    color: var(--muted);
+    color: #888;
   }
 
   /* ================= Die Spalte auf dem Schreibtisch =================
@@ -2954,26 +2818,6 @@
       Meldungen
     </button>
     <a class="install-btn verwaltung-btn" id="verwaltungBtn" href="/verwaltung.html" hidden>Verwaltung</a>
-    <!-- Hell oder dunkel. Steht am Ende der Reihe: er sagt nichts ueber die
-         Liste, er stellt nur ein, wie sie aussieht. -->
-    <button class="install-btn thema-btn" id="themaBtn" type="button" aria-pressed="false">
-      <svg class="thema-zeichen" viewBox="0 0 20 20" width="13" height="13" aria-hidden="true">
-        <!-- Sonne und Mond in einer Form: der Kreis bleibt, der Ausschnitt
-             wandert herein. Kein Umschalten zwischen zwei Bildern. -->
-        <defs>
-          <mask id="themaBiss">
-            <rect x="0" y="0" width="20" height="20" fill="#fff"/>
-            <circle class="biss" cx="17.5" cy="4.5" r="5.4" fill="#000"/>
-          </mask>
-        </defs>
-        <circle class="scheibe" cx="10" cy="10" r="5.1" fill="currentColor" mask="url(#themaBiss)"/>
-        <g class="strahlen" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-          <path d="M10 1.4v1.6M10 17v1.6M1.4 10h1.6M17 10h1.6"/>
-          <path d="M4 4l1.1 1.1M14.9 14.9L16 16M16 4l-1.1 1.1M5.1 14.9L4 16"/>
-        </g>
-      </svg>
-      <span id="themaWort">Dunkel</span>
-    </button>
   </div>
   <div class="konto-zeile" id="kontoZeile" hidden></div>
  </div>
@@ -2994,7 +2838,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=67" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=68" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -3097,7 +2941,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <text x="14" y="25" font-size="10" fill="currentColor" stroke="none" opacity=".4">Abbrechen</text>
             <rect x="212" y="10" width="76" height="20" rx="3" fill="currentColor" stroke="none"/>
-            <text class="auf-fg" x="250" y="24" font-size="10" font-weight="700" stroke="none" text-anchor="middle">Hinzufügen</text>
+            <text x="250" y="24" font-size="10" font-weight="700" fill="#fff" stroke="none" text-anchor="middle">Hinzufügen</text>
             <rect class="ring" x="207" y="5" width="86" height="30" rx="5"/>
             <line x1="0" y1="40" x2="300" y2="40" stroke="var(--line)"/>
             <rect x="14" y="48" width="90" height="7" rx="2" fill="currentColor" stroke="none" opacity=".16"/>
@@ -3112,7 +2956,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=67" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=68" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3239,7 +3083,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=67" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=68" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -3337,19 +3181,10 @@
      Ein einziges return spart die ganze Kette. */
   if (document.documentElement.classList.contains("nur-web")) return;
 
-  /* Der Chart kommt von TradingView und weiss nichts vom Anstrich hier.
-     Waehlt man dunkel und der Chart bliebe hell, saessen zehn weisse
-     Rechtecke auf schwarzem Grund — das Gegenteil von dem, wofuer man
-     umschaltet. Also geht der Anstrich in der Adresse mit. */
-  function tvAdresse() {
-    var dunkel = document.documentElement.getAttribute("data-thema") === "dunkel";
-    return "https://s.tradingview.com/widgetembed/?symbol=$SYM" +
-      "&interval=D&hidesidetoolbar=0&style=1&locale=de" +
-      "&theme=" + (dunkel ? "dark" : "light") +
-      "&toolbarbg=" + (dunkel ? "0a0a0a" : "ffffff") +
-      "&timezone=Europe%2FBerlin&withdateranges=1" +
-      "&overrides=%7B%22mainSeriesProperties.priceAxisProperties.log%22%3Atrue%7D";
-  }
+  var TV = "https://s.tradingview.com/widgetembed/?symbol=$SYM" +
+    "&interval=D&hidesidetoolbar=0&theme=light&style=1&locale=de&toolbarbg=ffffff" +
+    "&timezone=Europe%2FBerlin&withdateranges=1" +
+    "&overrides=%7B%22mainSeriesProperties.priceAxisProperties.log%22%3Atrue%7D";
 
   function el(tag, klasse, text) {
     var n = document.createElement(tag);
@@ -3415,7 +3250,7 @@
     // gleichzeitig sind der teuerste Posten der Seite; geladen wird nur, was
     // in die Naehe kommt. Die Adresse steht solange am Kasten.
     var chart = el("div", "chart");
-    chart.setAttribute("data-chart", tvAdresse().replace("$SYM", encodeURIComponent(p.tv)));
+    chart.setAttribute("data-chart", TV.replace("$SYM", encodeURIComponent(p.tv)));
     chart.setAttribute("data-badge", p.badge || "");
     s.appendChild(chart);
 
@@ -3552,24 +3387,6 @@
     }
 
     kaesten.forEach(platzhalter);
-
-    /* Der Anstrich hat gewechselt: die Adressen mitziehen und die Rahmen,
-       die schon dastehen, neu laden. Ein Chart, der hell bleibt, waere auf
-       schwarzem Grund ein leuchtendes Rechteck. */
-    document.addEventListener("rcp:thema", function () {
-      var dunkel = document.documentElement.getAttribute("data-thema") === "dunkel";
-      kaesten.forEach(function (k) {
-        var adr = k.getAttribute("data-chart");
-        if (!adr) return;
-        adr = adr.replace(/theme=(light|dark)/, "theme=" + (dunkel ? "dark" : "light"))
-                 .replace(/toolbarbg=[0-9a-fA-F]+/, "toolbarbg=" + (dunkel ? "0a0a0a" : "ffffff"));
-        k.setAttribute("data-chart", adr);
-        var f = k.querySelector("iframe");
-        if (!f) return;
-        k.classList.remove("chart-da");
-        f.src = adr;
-      });
-    });
 
     if (!("IntersectionObserver" in window)) {
       kaesten.forEach(einsetzen);
@@ -3901,58 +3718,6 @@
       });
     }
   });
-})();
-
-/* Hell oder dunkel.
-
-   Gesetzt wird der Anstrich schon im Kopf der Seite, vor dem ersten Bild —
-   hier haengt nur noch der Knopf daran. Er merkt sich den Wunsch, und der
-   gilt, bis man wieder umschaltet: was das Geraet eingestellt hat, wird
-   ausdruecklich nicht gefragt.
-
-   Beim Umschalten geht ein Ereignis heraus (rcp:thema). Daran haengen die
-   Charts, die ihre Adresse mitziehen muessen — TradingView weiss nichts vom
-   Anstrich hier. */
-(function () {
-  var knopf = document.getElementById("themaBtn");
-  var wort = document.getElementById("themaWort");
-  if (!knopf) return;
-
-  var wurzel = document.documentElement;
-  var farbe = document.querySelector('meta[name="theme-color"]');
-  var SCHLUESSEL = "rcp:thema";
-
-  function dunkel() {
-    return wurzel.getAttribute("data-thema") === "dunkel";
-  }
-
-  function anschreiben() {
-    var d = dunkel();
-    // Der Knopf sagt, wohin es geht, nicht wo man steht
-    if (wort) wort.textContent = d ? "Hell" : "Dunkel";
-    knopf.setAttribute("aria-pressed", d ? "true" : "false");
-    knopf.setAttribute("aria-label", d ? "Auf hell umschalten" : "Auf dunkel umschalten");
-    if (farbe) farbe.setAttribute("content", d ? "#000000" : "#fafafa");
-  }
-
-  function setzen(d) {
-    if (d) wurzel.setAttribute("data-thema", "dunkel");
-    else wurzel.removeAttribute("data-thema");
-    try { localStorage.setItem(SCHLUESSEL, d ? "dunkel" : "hell"); } catch (e) {}
-    anschreiben();
-    document.dispatchEvent(new CustomEvent("rcp:thema", { detail: { dunkel: d } }));
-  }
-
-  knopf.addEventListener("click", function () { setzen(!dunkel()); });
-
-  /* Auf einem zweiten Geraet oder in einem zweiten Fenster umgestellt: die
-     App laeuft hier weiter, also mitziehen. */
-  window.addEventListener("storage", function (e) {
-    if (e.key !== SCHLUESSEL) return;
-    setzen(e.newValue === "dunkel");
-  });
-
-  anschreiben();
 })();
 
 // Installation: Button im Header oeffnet die Schritt-fuer-Schritt-Anleitung
@@ -5438,7 +5203,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=67";
+      i.src = "/icon-512.png?v=68";
     });
     return symbolBild;
   }

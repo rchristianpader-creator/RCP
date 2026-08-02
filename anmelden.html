@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#fafafa">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=67">
-<link rel="apple-touch-icon" href="/icon-180.png?v=67">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=68">
+<link rel="apple-touch-icon" href="/icon-180.png?v=68">
 <title>Anmelden · Aktien-Liste</title>
 
 <!-- Die Vorschau beim Verschicken entsteht hier, nicht auf der Liste.
@@ -23,7 +23,7 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Geschützt, Zugang auf Anfrage">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=67">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=68">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -32,60 +32,18 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Geschützt, Zugang auf Anfrage">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=67">
-<script>
-/* Hell oder dunkel — derselbe Wunsch wie in der Liste (rcp:thema).
-
-   Hier oben, weil die Entscheidung vor dem ersten Bild stehen muss: sonst
-   blitzt beim Wechsel von der Liste hierher kurz Weiss auf. Einen Knopf gibt
-   es auf dieser Seite nicht; umgeschaltet wird in der Liste. */
-(function () {
-  var wunsch = null;
-  try { wunsch = localStorage.getItem("rcp:thema"); } catch (e) {}
-  if (wunsch !== "dunkel") return;
-  document.documentElement.setAttribute("data-thema", "dunkel");
-  var m = document.querySelector('meta[name="theme-color"]');
-  if (m) m.setAttribute("content", "#000000");
-})();
-</script>
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview-black.png?v=68">
 <style>
   :root {
     color-scheme: light;
     --bg: #fafafa;
-    --bg-rgb: 250, 250, 250;
     --fg: #111111;
-    --fg-rgb: 17, 17, 17;
-    --auf-fg: #ffffff;
     --muted: #737373;
     --line: #e5e5e5;
     --soft: #f5f5f5;
     --card: #ffffff;
     --hair: #ebebeb;
-    --glas: rgba(255, 255, 255, 0.72);
-    --gut: #15803d;
-    --schlecht: #b91c1c;
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  /* Derselbe dunkle Anstrich wie in der Liste. Gesetzt wird er im Kopf der
-     Seite, vor dem ersten Bild — sonst blitzte beim Wechsel hierher kurz
-     Weiss auf. */
-  :root[data-thema="dunkel"] {
-    color-scheme: dark;
-    --bg: #000000;
-    --bg-rgb: 0, 0, 0;
-    --fg: #f2f2f2;
-    --fg-rgb: 242, 242, 242;
-    --auf-fg: #000000;
-    --muted: #8b8b8b;
-    --line: #262626;
-    --soft: #0d0d0d;
-    --card: #0a0a0a;
-    --hair: #1e1e1e;
-    --glas: rgba(10, 10, 10, 0.72);
-    /* Auf Schwarz brauchen Gruen und Rot mehr Licht, sonst versinken sie */
-    --gut: #4ade80;
-    --schlecht: #f87171;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -147,7 +105,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=67");
+    background-image: url("/kerzen.svg?v=68");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -164,24 +122,13 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=67");
+    background-image: url("/kerzen-blass.svg?v=68");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
     height: 78%;
     top: 11%;
     animation: kerzenLauf 8.1s linear infinite;
-  }
-
-  /* Im dunklen Anstrich zeichnet dieselbe Kurve hell statt dunkel. Zwei
-     weitere Kacheln statt eines Filters: filter: invert() auf einem Band,
-     das bei jedem Bild bewegt wird, kostet dasselbe wie die Deckkraft, die
-     ich gerade erst herausgenommen habe. */
-  :root[data-thema="dunkel"] .kerzen-band.vorn {
-    background-image: url("/kerzen-dunkel.svg?v=67");
-  }
-  :root[data-thema="dunkel"] .kerzen-band.hinten {
-    background-image: url("/kerzen-dunkel-blass.svg?v=67");
   }
 
   @keyframes kerzenLauf {
@@ -200,9 +147,8 @@
     max-width: 326px;
     /* Durchscheinend, damit die Kerzen dahinter weiterlaufen. Die Milchglas-
        Schicht haelt die Schrift trotzdem lesbar — dieselbe Machart wie bei
-       der klebenden Leiste in der Liste. Im dunklen Anstrich ist dasselbe
-       Glas fast schwarz; fest weiss waere die Karte dort ein grauer Fleck. */
-    background: var(--glas);
+       der klebenden Leiste in der Liste. */
+    background: rgba(255, 255, 255, 0.72);
     -webkit-backdrop-filter: saturate(130%) blur(16px);
     backdrop-filter: saturate(130%) blur(16px);
     border: 1px solid var(--line);
@@ -256,7 +202,7 @@
   .reiter button + button { border-left: 1px solid var(--line); }
   .reiter button[aria-selected="true"] {
     background: var(--fg);
-    color: var(--auf-fg);
+    color: #fff;
   }
 
   label.feld {
@@ -303,7 +249,7 @@
     user-select: none;
     -webkit-user-select: none;
   }
-  .merken input { width: 16px; height: 16px; accent-color: var(--fg); }
+  .merken input { width: 16px; height: 16px; accent-color: #111; }
 
   button.senden {
     width: 100%;
@@ -312,7 +258,7 @@
     letter-spacing: 0.16em;
     text-transform: uppercase;
     font-weight: 600;
-    color: var(--auf-fg);
+    color: #fff;
     background: var(--fg);
     border: 1px solid var(--fg);
     border-radius: 2px;
@@ -334,8 +280,8 @@
     transition: opacity 0.27s ease, transform 0.27s ease;
   }
   .meldung.zeig { opacity: 1; transform: translate3d(0, 0, 0); }
-  .meldung.schlecht { color: var(--schlecht); }
-  .meldung.gut { color: var(--gut); }
+  .meldung.schlecht { color: #b91c1c; }
+  .meldung.gut { color: #15803d; }
 
   .fuss {
     margin-top: 22px;
