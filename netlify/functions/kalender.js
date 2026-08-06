@@ -124,6 +124,16 @@ export default async (request) => {
   let roh = [];
   let werte = null;
   let quelle = "Speicher";
+  /* Wann der Terminplan zuletzt wirklich von der Quelle kam. Steht er im
+     Speicher, bleibt der alte Zeitpunkt; wurde er neu geholt, ist es jetzt.
+     Genau daran hing der Fehler: geschrieben wurde immer mit dem alten
+     Zeitpunkt, auch nach einem frischen Abruf. Damit wuchs "alter"
+     unbegrenzt, die Viertelstunde griff nie mehr, und jeder Seitenaufruf
+     landete wieder bei der Quelle — die dann drosselt (429). Was blieb, war
+     der alte Stand: Termine ohne "Aktuell", obwohl sie laengst
+     veroeffentlicht waren. */
+  let planZeit = gespeichert ? gespeichert.zeit : jetzt;
+  let neuGeholt = false;
   const fehler = [];
 
   if (alter < FRISCH) {
@@ -148,6 +158,8 @@ export default async (request) => {
 
     if (roh.length) {
       quelle = "ForexFactory";   // geschrieben wird erst unten, mit den Ergebnissen
+      planZeit = jetzt;
+      neuGeholt = true;
     } else if (gespeichert && alter < NOTNAGEL) {
       roh = gespeichert.roh;                     // Quelle streikt: alter Stand ist besser als nichts
       werte = gespeichert.werte || {};
@@ -190,10 +202,16 @@ export default async (request) => {
     ? jetzt - gespeichert.werte_zeit
     : Infinity;
 
-  if (!werte || (offen && werteAlter > FRISCH_FRED)) {
+  const fredFragen = !werte || (offen && werteAlter > FRISCH_FRED);
+  if (fredFragen) {
     const frisch = await ergebnisse(termine);
     werte = Object.assign({}, werte || {}, frisch);
-    await schreiben(speicher, roh, werte, gespeichert ? gespeichert.zeit : jetzt);
+  }
+  /* Auch dann schreiben, wenn nur der Terminplan neu ist und FRED nichts
+     beizutragen hatte — sonst bliebe der frische Plan ungespeichert und der
+     naechste Aufruf holte ihn wieder. */
+  if (fredFragen || neuGeholt) {
+    await schreiben(speicher, roh, werte, planZeit);
   }
   for (const t of termine) {
     const k = schluesselFuer(t);
@@ -212,7 +230,10 @@ export default async (request) => {
       ok: true,
       stand: new Date().toISOString(),
       quelle: quelle,
-      alter_min: Math.round((Date.now() - (gespeichert ? gespeichert.zeit : Date.now())) / 60000),
+      // Wie alt der Terminplan ist, den diese Antwort zeigt. Nach einem
+      // frischen Abruf ist das 0 — vorher stand hier eine Zahl, die immer
+      // weiter wuchs, weil der Zeitpunkt nie nachgezogen wurde.
+      alter_min: Math.round((Date.now() - planZeit) / 60000),
       // Damit sichtbar ist, warum "Aktuell" leer bleibt: ohne Schluessel
       // wird FRED gar nicht erst gefragt, und das sah man der Antwort
       // bisher nicht an.

@@ -296,6 +296,62 @@ fest. 26 Prüfungen; gegen den alten Stand fallen sieben durch, mit genau der
 Ausgabe vom Screenshot (`abstand: 7.66`, `beruehrt_am: "2026-07-11"`,
 `aktiv: true`).
 
+## Wirtschaftstermine
+
+Das Laufband über den Karten: US-Termine mit hoher Wirkung — CPI, Core PCE,
+FOMC, Arbeitsmarkt, PPI, Einzelhandel, BIP, ISM. Drei Tage zurück, zehn nach
+vorn, höchstens zwölf Einträge.
+
+Zwei Quellen, weil keine allein alles hat:
+
+| | |
+|---|---|
+| **ForexFactory** (`ff_calendar_thisweek.json`) | Termin, Prognose, Vorwert — und `actual`, sobald veröffentlicht |
+| **FRED** (St. Louis Fed) | der amtliche Wert, meist Minuten nach der Veröffentlichung; braucht `FRED_KEY` |
+
+FRED deckt nur 13 fest zugeordnete Reihen ab — eine falsche Zahl wäre
+schlimmer als gar keine. Alles andere lebt vom `actual` aus dem Feed.
+
+### Der eingefrorene Zeitstempel
+
+**Befund:** „Wirtschaftstermine haben keine aktuellen Zahlen, obwohl sie schon
+passiert sind."
+
+Die Quelle drosselt (HTTP 429), wenn jeder Seitenaufruf bei ihr landet — also
+liegt ein Blob-Speicher davor, höchstens ein Abruf je Viertelstunde. Nur:
+geschrieben wurde immer mit dem **alten** Zeitstempel, auch nach einem frischen
+Abruf:
+
+```js
+await schreiben(speicher, roh, werte, gespeichert ? gespeichert.zeit : jetzt);
+//                                    ^ der Zeitpunkt von damals, nie "jetzt"
+```
+
+Damit wuchs `alter` unbegrenzt, die Viertelstunde griff nach dem allerersten
+Mal nie wieder, und **jeder** Seitenaufruf ging an ForexFactory. Die drosselt
+dann — und übrig blieb der gespeicherte Stand von vor Stunden, in dem `actual`
+für alles, was seither veröffentlicht wurde, eben noch leer ist. Die 13
+FRED-Reihen füllten sich weiter, der Rest blieb auf „Aktuell –" stehen. Genau
+das Bild, das gemeldet wurde.
+
+Der Zeitpunkt wird jetzt nachgezogen, wenn der Terminplan wirklich neu geholt
+wurde (`planZeit`), und beim reinen FRED-Nachschlag stehen gelassen — dafür
+war die alte Zeile ja gedacht. Dazu wird auch dann geschrieben, wenn nur der
+Plan neu ist und FRED nichts beizutragen hatte; sonst bliebe der frische Plan
+ungespeichert und der nächste Aufruf holte ihn wieder.
+
+`alter_min` in der Antwort zeigt es an: nach einem frischen Abruf **0**,
+vorher eine Zahl, die immer weiter wuchs.
+
+`kalender-test` stellt die Quelle und misst die Abrufe: zwölf Aufrufe → ein
+Abruf; Viertelstunde zurückgedreht → ein zweiter, und das Ergebnis erscheint;
+danach fünf weitere Aufrufe → immer noch zwei. Gegen den alten Stand zeigt sie
+`alter_min: 16` statt 0 und **sieben** Abrufe statt zwei.
+
+Zum Nachsehen gibt es weiterhin `?pruef=1` (was je Termin gefragt wurde und
+woran es scheitert) und `?roh=1` (der erste unveränderte Datensatz, falls die
+Quelle ihre Feldnamen ändert).
+
 ## Der Auftakt
 
 Wer die App vom Home-Bildschirm oeffnet und angemeldet geblieben ist, sah
