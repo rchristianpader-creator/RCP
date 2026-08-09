@@ -1,33 +1,43 @@
 #!/usr/bin/env python3
-"""App-Logo in der Machart der Apple-Symbole.
+"""App-Logo in der Machart der App.
 
-Was Apples Symbole auf dem Startbildschirm gemeinsam haben: eine volle
-Kachel mit leichtem Verlauf von oben nach unten, darauf ein einziges
-Zeichen — gross, mittig, mit ordentlich Rand ringsum. Keine Haarlinien,
-keine selbst gezeichneten runden Ecken; die macht das Betriebssystem.
+Was sich geaendert hat
+----------------------
+Das Symbol war eine weisse Kachel mit einem dunklen Kerzenverlauf darauf —
+aus der Zeit, als die App hell war. Sie ist dunkel geworden, und ein weisses
+Symbol daneben sieht aus wie eine andere App.
 
-Das Zeichen ist der Kerzenverlauf aus dem Hintergrund der App: steigende
-Kerzen hohl, fallende gefuellt. Der Verlauf ist von Hand gesetzt, nicht
-gewuerfelt — ein Ruecksetzer, dann ein Anstieg, der hoeher endet als er
-begann. Ein Zufallsweg sieht auf 40 Pixeln nach nichts aus, und auf
-40 Pixeln muss es noch lesbar sein.
+Jetzt dieselbe Machart wie die Fenster in der Liste: ein dunkler Grund mit
+zwei Farbfeldern, darauf ein schmaler Lichtstreifen und eine Lichtkante
+oben. Das ist der ganze Trick am Glas — nicht mehr Licht, sondern
+schaerferes: ein breiter Verlauf hat keine Kante, und ohne Kante sieht das
+Auge kein Licht, sondern nur eine hellere Flaeche.
 
-Weiss ist gesetzt, weil die App selbst hell ist und weil Gruen und Blau auf
-einem iPhone-Startbildschirm mit FaceTime, Telefon, Nachrichten, Mail und
-App Store konkurrieren. Die anderen beiden stehen daneben und sind einen
-Aufruf entfernt.
+Warum kein Frost, kein Rundfunkeln, keine Spiegelung: ein Symbol ist auf dem
+Startbildschirm 40 bis 60 Pixel gross. Alles, was feiner ist als ein
+Prozent der Kante, verschwindet dort — oder wird zu Matsch. Geblieben ist,
+was auch bei 40 Pixeln noch zwei Dinge sagt: dunkles Glas, Licht von oben
+links.
 
-    python3 logo.py           schreibt logo-<farbe>.svg und logo-<farbe>-maske.svg
+Das Zeichen
+-----------
+Der Kerzenverlauf: steigende Kerzen hohl, fallende gefuellt. Von Hand
+gesetzt, nicht gewuerfelt — ein Ruecksetzer, dann ein Anstieg, der hoeher
+endet als er begann. Ein Zufallsweg sieht auf 40 Pixeln nach nichts aus.
 
-Daraus werden die PNG-Dateien gerendert, jeweils quadratisch:
+Gezeichnet wird direkt als PNG, nicht mehr ueber SVG: fuer SVG braucht es
+einen Rasterer, und der ist auf keiner Maschine sicher vorhanden. Pillow
+ist es.
 
-    logo-weiss.svg        -> icon-180.png, icon-192.png, icon-512.png
-    logo-weiss-maske.svg  -> icon-maskable-512.png
+    python3 logo.py
 
-Die Maske-Fassung ist kleiner, weil Android auf einen Kreis zuschneidet.
+    -> icon-512.png, icon-192.png, icon-180.png, icon-maskable-512.png
 """
 
-SEITE = 512
+from PIL import Image, ImageDraw
+
+# Alle Masse beziehen sich auf diese Kantenlaenge und werden mitskaliert.
+BEZUG = 512
 
 KOERPER = 66      # Breite eines Kerzenkoerpers
 LUECKE = 24       # Abstand dazwischen
@@ -42,62 +52,152 @@ VERLAUF = [
     (250, 124,  98, 284),
 ]
 
-FARBEN = {
-    # Name: (Kachel oben, Kachel unten, Zeichen)
-    "weiss": ("#ffffff", "#f0f0f2", "#111111"),
-    "gruen": ("#3ad35f", "#1f9a3c", "#ffffff"),
-    "blau":  ("#2b8bff", "#0347d6", "#ffffff"),
-}
+STRICH = (242, 245, 244)          # --fg
+GRUND_OBEN = (34, 41, 39)         # heller Kopf des Verlaufs
+GRUND_UNTEN = (9, 12, 11)         # --bg, praktisch
+KUEHL = (38, 72, 92)              # --grund-kuehl, oben links
+WARM = (78, 60, 42)               # --grund-warm, oben rechts
 
 
-def zeichnen(farbe, anteil=1.0):
-    oben_f, unten_f, strich = FARBEN[farbe]
+def misch(a, b, t):
+    t = 0.0 if t < 0 else (1.0 if t > 1 else t)
+    return tuple(round(a[i] + (b[i] - a[i]) * t) for i in range(3))
+
+
+def heller(farbe, weiss_anteil):
+    return misch(farbe, (255, 255, 255), weiss_anteil)
+
+
+def grund(seite):
+    """Dunkler Verlauf mit zwei weichen Farbfeldern.
+
+    Die Felder sind sehr schwach. Sie sollen nicht als Farbe auffallen,
+    sondern verhindern, dass die Flaeche wie ein graues Rechteck wirkt —
+    dieselbe Aufgabe wie beim Grund der Seite.
+    """
+    bild = Image.new("RGB", (seite, seite))
+    punkte = []
+    for y in range(seite):
+        ty = y / (seite - 1)
+        zeile_grund = misch(GRUND_OBEN, GRUND_UNTEN, ty ** 0.85)
+        for x in range(seite):
+            tx = x / (seite - 1)
+            f = zeile_grund
+            # Kuehles Feld oben links, warmes oben rechts. Quadratischer
+            # Abfall: weich, ohne sichtbaren Rand.
+            dk = ((tx - 0.06) ** 2 + (ty - 0.02) ** 2) ** 0.5
+            if dk < 0.78:
+                f = misch(f, KUEHL, 0.44 * (1 - dk / 0.78) ** 2)
+            dw = ((tx - 0.98) ** 2 + (ty - 0.10) ** 2) ** 0.5
+            if dw < 0.72:
+                f = misch(f, WARM, 0.34 * (1 - dw / 0.72) ** 2)
+            punkte.append(f)
+    bild.putdata(punkte)
+    return bild
+
+
+def glanz(bild):
+    """Der schmale Lichtstreifen und die Lichtkante oben.
+
+    Der Streifen laeuft unter 148 Grad wie in der App. Schmal, mit hartem
+    Anstieg und weichem Abfall — so faellt Licht auf eine glatte Flaeche.
+    """
+    seite = bild.size[0]
+    punkte = list(bild.getdata())
+    # Richtung des Verlaufs: 148 Grad, gemessen wie in CSS (von oben, im
+    # Uhrzeigersinn). Der Wert unten ist der Anteil entlang dieser Achse.
+    import math
+    w = math.radians(148.0)
+    dx, dy = math.sin(w), -math.cos(w)
+    laenge = abs(dx) + abs(dy)
+
+    for y in range(seite):
+        for x in range(seite):
+            t = ((x / seite) * dx + (y / seite) * dy + (1 if dx < 0 else 0) + (1 if dy < 0 else 0)) / laenge
+            # Ein schmaler Streifen, der die obere linke Ecke quert — nicht
+            # die Ecke selbst: von t=0 an waere es kein Streifen, sondern
+            # eine aufgehellte Ecke. Harter Anstieg, weicher Abfall.
+            if 0.075 < t < 0.20:
+                if t < 0.115:
+                    a = (t - 0.075) / 0.04
+                else:
+                    a = max(0.0, 1 - (t - 0.115) / 0.085)
+                if a > 0:
+                    i = y * seite + x
+                    punkte[i] = heller(punkte[i], 0.115 * a)
+    bild.putdata(punkte)
+
+    zeichner = ImageDraw.Draw(bild, "RGBA")
+    # Lichtkante oben: hell in der Mitte, zu den Ecken hin aus. Eine Kante,
+    # die ringsum gleich hell ist, sieht nach Rahmen aus, nicht nach Licht.
+    dicke = max(1, round(seite / 170))
+    for x in range(seite):
+        mitte = 1 - abs(x / (seite - 1) - 0.5) * 2
+        a = round(96 * (mitte ** 0.7))
+        if a > 0:
+            zeichner.rectangle([x, 0, x, dicke - 1], fill=(255, 255, 255, a))
+    # Keine Seitenlinien: auf 40 Pixeln lesen sie sich als Rahmen um das
+    # Symbol, und ein Rahmen ist genau das, was ein Symbol nicht haben soll.
+    return bild
+
+
+def zeichen(bild, anteil):
+    """Der Kerzenverlauf. anteil < 1 schrumpft ihn zur Mitte hin."""
+    seite = bild.size[0]
+    k = seite / BEZUG
+    zeichner = ImageDraw.Draw(bild)
     n = len(VERLAUF)
     breite = n * KOERPER + (n - 1) * LUECKE
-    x0 = (SEITE - breite) / 2
-    mitte = SEITE / 2
-    innen = []
+    x0 = (BEZUG - breite) / 2
+    mitte = BEZUG / 2
+
+    def um(v):
+        """Auf die Zielgroesse und, wenn noetig, zur Mitte hin gestaucht."""
+        return (mitte + (v - mitte) * anteil) * k
 
     for i, (offen, schluss, hoch, tief) in enumerate(VERLAUF):
         x = x0 + i * (KOERPER + LUECKE)
         m = x + KOERPER / 2
         steigt = schluss < offen
 
-        innen.append('<rect x="%.1f" y="%.1f" width="%d" height="%.1f" rx="%.1f" fill="%s"/>'
-                     % (m - DOCHT / 2, hoch, DOCHT, tief - hoch, DOCHT / 2, strich))
+        r = DOCHT * anteil * k / 2
+        zeichner.rounded_rectangle(
+            [um(m - DOCHT / 2), um(hoch), um(m + DOCHT / 2), um(tief)],
+            radius=r, fill=STRICH)
 
         o = min(offen, schluss)
         h = max(KANTE * 2.8, abs(schluss - offen))
-        innen.append('<rect x="%.1f" y="%.1f" width="%d" height="%.1f" rx="9" fill="%s"/>'
-                     % (x, o, KOERPER, h, strich))
+        zeichner.rounded_rectangle(
+            [um(x), um(o), um(x + KOERPER), um(o + h)],
+            radius=9 * anteil * k, fill=STRICH)
         if steigt:
-            # Hohl: der Grund wird wieder ausgestanzt, der Rand bleibt stehen.
-            # Das Loch bekommt denselben Verlauf wie die Kachel, sonst saehe
-            # man an dieser Stelle eine flache Flaeche.
-            innen.append('<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" rx="4" fill="url(#loch)"/>'
-                         % (x + KANTE, o + KANTE, KOERPER - 2 * KANTE, h - 2 * KANTE))
+            # Hohl: der Grund wird wieder ausgestanzt, der Rand bleibt
+            # stehen. Ausgestanzt wird mit dem, was an dieser Stelle
+            # ohnehin liegt — sonst saehe man dort eine flache Flaeche.
+            kasten = [round(um(x + KANTE)), round(um(o + KANTE)),
+                      round(um(x + KOERPER - KANTE)), round(um(o + h - KANTE))]
+            loch = bild.copy().crop(kasten)
+            maske = Image.new("L", (kasten[2] - kasten[0], kasten[3] - kasten[1]), 0)
+            ImageDraw.Draw(maske).rounded_rectangle(
+                [0, 0, maske.size[0] - 1, maske.size[1] - 1],
+                radius=max(1, round(4 * anteil * k)), fill=255)
+            bild.paste(hintergrund.crop(kasten), (kasten[0], kasten[1]), maske)
+    return bild
 
-    s = "".join(innen)
-    if anteil != 1.0:
-        v = mitte * (1 - anteil)
-        s = '<g transform="translate(%.2f %.2f) scale(%.4f)">%s</g>' % (v, v, anteil, s)
 
-    return (
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d" width="%d" height="%d">'
-        '<defs>'
-        '<linearGradient id="kachel" x1="0" y1="0" x2="0" y2="1">'
-        '<stop offset="0" stop-color="%s"/><stop offset="1" stop-color="%s"/></linearGradient>'
-        '<linearGradient id="loch" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="%d">'
-        '<stop offset="0" stop-color="%s"/><stop offset="1" stop-color="%s"/></linearGradient>'
-        '</defs>'
-        '<rect width="%d" height="%d" fill="url(#kachel)"/>%s</svg>'
-        % (SEITE, SEITE, SEITE, SEITE, oben_f, unten_f, SEITE, oben_f, unten_f, SEITE, SEITE, s)
-    )
+def symbol(seite, anteil=1.0):
+    global hintergrund
+    hintergrund = glanz(grund(seite))
+    return zeichen(hintergrund.copy(), anteil)
 
 
 if __name__ == "__main__":
-    for name in FARBEN:
-        open("logo-" + name + ".svg", "w", encoding="utf-8").write(zeichnen(name))
-        # Android schneidet zum Kreis: alles muss in die mittleren 80 Prozent
-        open("logo-" + name + "-maske.svg", "w", encoding="utf-8").write(zeichnen(name, 0.70))
-    print("geschrieben:", ", ".join(FARBEN))
+    gross = symbol(BEZUG)
+    gross.save("icon-512.png")
+    # Kleinere Groessen nativ zeichnen, nicht herunterrechnen: die Lichtkante
+    # ist einen Pixel dick und wuerde beim Verkleinern zu Grau verwaschen.
+    symbol(192).save("icon-192.png")
+    symbol(180).save("icon-180.png")
+    # Android schneidet zum Kreis: alles Wesentliche in die mittleren 70 %
+    symbol(BEZUG, 0.70).save("icon-maskable-512.png")
+    print("geschrieben: icon-512, icon-192, icon-180, icon-maskable-512")

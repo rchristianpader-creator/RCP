@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="dark">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#0a0d0c">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=94">
-<link rel="apple-touch-icon" href="/icon-180.png?v=94">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=95">
+<link rel="apple-touch-icon" href="/icon-180.png?v=95">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=94">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=95">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=94">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=95">
 
 <script>
 /* Im Browser oder als App?
@@ -40,6 +40,13 @@
    Home-Bildschirm", und eine gesperrte Seite waere schlicht kaputt. Deshalb
    greift die Sperre nur auf Telefonen und Tabletts.
 
+   Keine Ausnahme fuer die Verwaltung mehr. Sie stand hier mit der
+   Begruendung, wer die Liste pflegt, brauche sie auch im Browser — das
+   stimmt fuer die Verwaltungsseiten, und die sind ohnehin nicht gesperrt.
+   Fuer die Liste selbst galt es nie: wer sie pflegt, sollte sie sehen wie
+   alle anderen, sonst pflegt er etwas, das er selbst nie zu Gesicht
+   bekommt. Und die Meldungen kommen auch bei ihm nur in der App an.
+
    Das steht hier oben und nicht weiter unten: die Entscheidung muss vor dem
    ersten Bild stehen, sonst blitzt kurz alles auf und verschwindet dann. */
 (function () {
@@ -49,13 +56,7 @@
   var alsApp = (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
                window.navigator.standalone === true;
 
-  /* Die Verwaltung ist ausgenommen: wer die Liste pflegt, braucht sie auch
-     im Browser. Das Zeichen dafuer legt das Tor daneben, nachdem es die
-     Unterschrift geprueft hat (netlify/edge-functions/tor.js) — der
-     Sitzungs-Keks selbst ist HttpOnly und fuer Skripte nicht lesbar. */
-  var frei = /(?:^|;\s*)rcp_frei=1(?:;|$)/.test(document.cookie || "");
-
-  if (handy && !alsApp && !frei) document.documentElement.className += " nur-web";
+  if (handy && !alsApp) document.documentElement.className += " nur-web";
 })();
 </script>
 
@@ -326,7 +327,7 @@
        schwimmen. Die Koernung bricht die Baender auf, die dunkle Verlaeufe
        sonst zeigen. */
     --grund-flaeche:
-      url("/grund.svg?v=94") repeat,
+      url("/grund.svg?v=95") repeat,
       radial-gradient(120% 90% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.55) 100%),
       radial-gradient(78% 58% at 10% 4%, var(--grund-kuehl) 0%, transparent 68%),
       radial-gradient(66% 52% at 92% 14%, var(--grund-warm) 0%, transparent 68%),
@@ -2929,7 +2930,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=94");
+    background-image: url("/kerzen.svg?v=95");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -2943,7 +2944,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=94");
+    background-image: url("/kerzen-blass.svg?v=95");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -3672,7 +3673,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=94" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=95" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -3790,7 +3791,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=94" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=95" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3838,7 +3839,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=94" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=95" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -3857,7 +3858,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=94" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=95" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3974,7 +3975,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=94" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=95" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -6400,7 +6401,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=94";
+      i.src = "/icon-512.png?v=95";
     });
     return symbolBild;
   }

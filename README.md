@@ -1534,22 +1534,28 @@ Das war zu viel: halbe Sachen sind schlechter als gar keine, eine Liste voller
 Schlösser liest sich wie eine kaputte Seite. Entweder richtig oder eben nicht
 hier.
 
-### Die Verwaltung ist ausgenommen
+### Die Verwaltung ist **nicht** ausgenommen
 
-Wer die Liste pflegt, braucht sie auch am Schreibtisch und unterwegs im
-Browser. Für die Verwaltung ist die Sperre deshalb aus — alles ist da: Leiste,
-Karten, Charts, News, Termine, Marktstimmung, Glocke, Beiträge. Für alle
-anderen bleibt es, wie es war.
+Sie war es. Die Begründung: wer die Liste pflegt, braucht sie auch unterwegs im
+Browser. Das stimmt für die **Verwaltungsseiten** — und die sind ohnehin nicht
+gesperrt. Für die Liste selbst stimmte es nie: wer sie pflegt, sollte sie sehen
+wie alle anderen, sonst pflegt er etwas, das er selbst nie zu Gesicht bekommt.
+Und die Meldungen kommen auch bei ihm nur in der App an.
 
-Die Seite kann das nicht selbst wissen: der Sitzungs-Keks ist `HttpOnly`, kein
-Skript kommt daran. Im **Tor** ist die Unterschrift aber ohnehin schon geprüft
-— also legt es der Verwaltung ein lesbares Zeichen daneben (`rcp_frei=1`), und
-das Kopfskript in `index.html` sieht vor dem ersten Bild nach. Nur an Seiten,
-nicht an jedes Symbol: sonst hinge an jeder Anfrage ein `Set-Cookie`.
+Also gilt die Sperre für alle. Wer die Liste auf dem Telefon sehen will, legt
+sie auf den Home-Bildschirm — die Verwaltung eingeschlossen.
 
-Das Zeichen folgt der Rolle, nicht dem Gerät: bei jedem Seitenaufruf wird es
-neu gesetzt oder gelöscht. Wer die Verwaltung abgibt, hat es beim nächsten
-Aufruf nicht mehr.
+Das Zeichen `rcp_frei=1` **bleibt**, es hat nur noch eine Aufgabe: es steuert,
+ob der Wegräumen-Knopf im Meldungsblatt dasteht. Die Seite kann die Rolle nicht
+selbst wissen — der Sitzungs-Keks ist `HttpOnly`, kein Skript kommt daran. Im
+**Tor** ist die Unterschrift ohnehin schon geprüft, also legt es der Verwaltung
+ein lesbares Zeichen daneben. Nur an Seiten, nicht an jedes Symbol: sonst hinge
+an jeder Anfrage ein `Set-Cookie`.
+
+Das Zeichen folgt der Rolle, nicht dem Gerät: bei jedem Seitenaufruf wird es neu
+gesetzt oder gelöscht. Wer die Verwaltung abgibt, hat es beim nächsten Aufruf
+nicht mehr. Ob wirklich gelöscht werden darf, entscheidet weiterhin die
+Function am Konto — das Zeichen steuert nur, ob der Knopf sichtbar ist.
 
 **Es ist ein Komfortschalter, kein Schloss.** Es steuert nur, welche Teile der
 Oberfläche gezeigt werden. Alles Echte hängt weiter am Tor und an
@@ -1646,36 +1652,40 @@ Kurve kräftig hinter allem. Fiel auf, drückte aber.
 um Aufmerksamkeit rangelt. Also eine klare Ordnung statt vieler lauter Teile:
 
 - eine Haarlinie unter dem Kopf, eine über den Kürzeln, dazwischen Ruhe
-- der Titel groß, aber **leicht** (Gewicht 300 statt 800), darüber das Wort
-  *Watchlist* weit gesperrt im Kleingedruckten
-- die Kürzel **ohne Kästen** — nur gesperrt, durch feine Punkte getrennt, das
-  erste hervorgehoben
-- die Kurve als **schmales Band am Fuß**, nicht als Tapete hinter allem: sie
-  sagt, worum es geht, ohne sich vorzudrängen. Nach oben blendet sie über eine
-  Maske aus, zu den Seiten über einen Verlauf — so wirkt sie nirgends
-  abgeschnitten.
-- kein Rahmen ums Ganze; der Rand trägt die Ruhe
+Es zeigt jetzt, was hinter dem Link liegt: derselbe dunkle Grund, dasselbe
+Glas, dieselben Symboltasten, dasselbe App-Zeichen. Vorher war es die helle
+Fassung aus der Zeit davor — eine Vorschau, die eine andere App versprach als
+die, die dann aufging.
 
-Nichts liegt mehr übereinander: erst lagen die Kürzel auf den Kerzen, das las
-sich unruhig. Jetzt endet der Inhalt über dem Band.
+Auf der Glasscheibe: Name und *Zugang auf Anfrage*, darunter *Watchlist*, der
+Titel, die drei Stichworte und die Kürzel als Tasten. Am Fuß ein schmales
+Kerzenband — der Inhalt endet **darüber**. Ragt die Karte hinein, schauen unten
+Bruchstücke von Kerzen hervor, und die lesen sich als Rest, nicht als Zeichnung.
 
-Gezeichnet wird es nicht von Hand, sondern gerendert: `vorschaubild.mjs` baut
-die Seite in 1200 × 630 und schießt sie ab. Dieselbe Machart wie bei den
-Ansichten fürs Installationsfenster — die Bilder zeigen damit immer die
-echten Bausteine, nicht eine Nachahmung davon. Unter der Grenze von 600 KB,
-die `sw-test` prüft.
+**Gerendert, nicht gezeichnet.** `vorschaubild.mjs` baut die Seite in
+1200 × 630 und schießt sie ab — und holt sich die Marken dafür aus
+`index.html` selbst: der `:root`-Block wird herausgeschnitten und eingesetzt.
+Damit benutzt das Bild denselben Grund, dieselben Glasmarken, dieselben Radien
+und dieselben Farben wie die Seite, statt einer Nachbildung, die beim nächsten
+Nachbessern zurückbleibt.
 
-**Hell, nicht schwarz.** Lange lag hier `og-preview-black.png`, daneben ein
-ungenutztes helles. Schwarz fällt in einem Chat stärker auf — aber die App
-startet hell, und die Vorschau ist ein Versprechen darüber, was hinter dem
-Link liegt.
+Das Skript stand hier beschrieben, **lag aber nirgends**: es war ein
+Wegwerf-Skript, und das Bild daneben war ein Stand, den niemand mehr erzeugen
+konnte. Jetzt liegt es dabei.
 
-Das Skript baut trotzdem **beide** Anstriche aus derselben Vorlage
-(`ANSTRICH` darin), damit die Entscheidung eine Zeile bleibt und nicht eine
-zweite Gestaltung: `og-preview.png` ist im Einsatz, `og-preview-black.png`
-liegt auf demselben Stand daneben. Zum Wechseln die vier `og:image`- und
-`twitter:image`-Zeilen in `index.html` und `anmelden.html` umbiegen — und die
-Nummer hoch, sonst bleibt bei den Diensten die alte Karte stehen.
+**256 Farben mit Streuung.** Roh sind es 821 kB — über der Grenze von 600, die
+`sw-test` prüft. Der Grund ist die Körnung: feines Rauschen ist für einen
+PNG-Packer der schlimmste Fall, jeder Punkt anders als sein Nachbar. Eine
+Palette mit Streuung löst das, ohne die Körnung aufzugeben: **350 statt
+821 kB**. Ohne Streuung wären die dunklen Verläufe wieder gestreift — genau
+das, wogegen die Körnung überhaupt da ist.
+
+Das Skript baut **beide** Anstriche aus derselben Vorlage (`ANSTRICH` darin),
+damit die Entscheidung eine Zeile bleibt und nicht eine zweite Gestaltung:
+`og-preview.png` ist im Einsatz, `og-preview-black.png` liegt auf demselben
+Stand daneben. Zum Wechseln die vier `og:image`- und `twitter:image`-Zeilen in
+`index.html` und `anmelden.html` umbiegen — und die Nummer hoch, sonst bleibt
+bei den Diensten die alte Karte stehen.
 
 `sw-test` geht den Weg des Roboters nach: Wurzel ohne Keks anfragen, der
 Weiterleitung folgen, Titel/Text/Bild aus dem Kopf lesen, das Bild ohne
@@ -1778,23 +1788,43 @@ einmal drankommen.
 Vorher stand da ein schwarzes Quadrat mit „RCP" — auf einem schwarzen
 Hintergrundbild war es kaum zu finden, und mit der App hatte es nichts zu tun.
 
-Jetzt trägt es dasselbe Motiv wie der laufende Hintergrund: vier Kerzen,
-steigende hohl, fallende gefüllt, ein Rücksetzer und ein Anstieg, der höher
-endet als er begann. Gebaut nach den Regeln, nach denen Apples eigene Symbole
-gebaut sind — volle Kachel mit leichtem Verlauf, ein einziges Zeichen groß und
-mittig darauf, keine Haarlinien, keine selbst gezeichneten runden Ecken.
+Es trägt dasselbe Motiv wie der Hintergrund: vier Kerzen, steigende hohl,
+fallende gefüllt, ein Rücksetzer und ein Anstieg, der höher endet als er begann.
+Von Hand gesetzt, nicht gewürfelt — ein Zufallsweg sieht auf 40 Pixeln nach
+nichts aus.
 
-Die Kachel ist weiß, weil die App selbst hell ist und weil Grün und Blau auf
-einem iPhone-Startbildschirm gegen FaceTime, Telefon, Nachrichten, Mail und
-App Store antreten müssten. `logo.py` kennt alle drei Farben; ein Aufruf
-schreibt die SVG-Dateien, daraus werden die PNG gerendert:
+**Die Kachel war weiß**, weil die App hell war. Sie ist dunkel geworden, und ein
+weißes Symbol daneben sieht aus wie eine andere App. Jetzt dieselbe Machart wie
+die Fenster in der Liste:
 
-| Datei | Größe | Quelle |
+| | |
+|---|---|
+| dunkler Verlauf | von `#222927` oben nach `#090c0b` unten |
+| zwei Farbfelder | kühl oben links, warm oben rechts — sehr schwach |
+| Lichtstreifen | schmal, 148°, quert die obere linke **Ecke** |
+| Lichtkante | oben, hell in der Mitte, zu den Ecken hin aus |
+
+Kein Frost, kein Rundfunkeln, keine Spiegelung: ein Symbol ist auf dem
+Startbildschirm 40 bis 60 Pixel groß. Alles, was feiner ist als ein Prozent der
+Kante, verschwindet dort — oder wird zu Matsch. Geblieben ist, was auch bei
+40 Pixeln noch zwei Dinge sagt: dunkles Glas, Licht von oben links.
+
+Zwei Anläufe brauchte der Streifen. Beim ersten stand er auf 0,17 und begann
+bei t=0 — auf fast schwarzem Grund wirkt derselbe Wert viel stärker als auf
+einer Karte, und von der Ecke an ist es kein Streifen, sondern eine aufgehellte
+Ecke. Jetzt 0,115, und er beginnt erst hinter der Ecke.
+
+**`logo.py` zeichnet direkt PNG**, nicht mehr über SVG: für SVG braucht es
+einen Rasterer, und der ist auf keiner Maschine sicher vorhanden. Pillow ist es.
+Jede Größe wird **nativ** gezeichnet statt heruntergerechnet — die Lichtkante
+ist einen Pixel dick und würde beim Verkleinern zu Grau verwaschen.
+
+| Datei | Größe | |
 |---|---|---|
-| `icon-180.png` | 180 | `logo-weiss.svg` |
-| `icon-192.png` | 192 | `logo-weiss.svg` |
-| `icon-512.png` | 512 | `logo-weiss.svg` |
-| `icon-maskable-512.png` | 512 | `logo-weiss-maske.svg` |
+| `icon-180.png` | 180 | |
+| `icon-192.png` | 192 | |
+| `icon-512.png` | 512 | |
+| `icon-maskable-512.png` | 512 | Zeichen auf 70 % |
 
 Die Maske-Fassung ist kleiner gezeichnet, weil Android auf einen Kreis
 zuschneidet.
