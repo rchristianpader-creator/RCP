@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#0a0d0c">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=91">
-<link rel="apple-touch-icon" href="/icon-180.png?v=91">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=92">
+<link rel="apple-touch-icon" href="/icon-180.png?v=92">
 <title>Positionen · Aktien-Liste</title>
 <style>
   :root {
@@ -334,6 +334,7 @@
     { k: "frage", t: "Suchbegriff für News", h: "z. B. Intel Aktie — leer lassen heißt keine News" },
     { k: "fn", t: "finanzen.net-Seite", h: "Vollständige https-Adresse, optional" },
     { k: "fibo", t: "Analyse-Chart", h: "Dein gespeicherter TradingView-Chart, optional" },
+    { k: "logo", t: "Logo-Adresse", h: "Optional. Leer lassen: dann wird das Logo automatisch gesucht — https-Adresse eines Bildes" },
     { k: "id", t: "Anker", h: "Kleinbuchstaben, wird in der Adresse benutzt (#intc) — später nicht mehr ändern" }
   ];
 
@@ -473,6 +474,7 @@
     daten.push({
       id: "", name: "", badge: "", chip: "", neu: true, update: false, branche: "",
       zone: "", ziel: "", tv: "", yahoo: "", frage: "", fn: "", keys: "", fibo: "",
+      logo: "",
       _offen: true
     });
     zeichnen();

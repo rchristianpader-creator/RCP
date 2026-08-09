@@ -544,6 +544,50 @@ aus der Wirklichkeit:
 `--glas-kante-glanz` legt Licht ringsum statt nur oben: hell an der Oberkante,
 ein Hauch an den Seiten, unten der dunkle Abschluss, der die Dicke macht.
 
+### Das Logo neben dem Namen
+
+Links vom Firmennamen sitzt das Logo auf einer runden Glasscheibe — dieselbe
+Machart wie die Symboltasten, nur rund. Ohne die Scheibe stünde ein fremdes Bild
+ohne Übergang auf dem Glas: die meisten Logos kommen mit weißem oder
+durchsichtigem Grund, und beides sieht auf einer dunklen Fläche nach Ausschnitt
+aus, nicht nach Zugehörigkeit. `object-fit: contain` bei fester Größe, damit ein
+breites Wortlogo und ein quadratisches Zeichen gleich viel Platz einnehmen.
+
+**Das Logo ist ein Zusatz, kein Träger.** Kommt keins, steht der Name genau da,
+wo er ohne Logo stünde. Deshalb hängt das Bild erst dann im Kasten, wenn es
+*geladen* ist — ein `<img>`, das nichts findet, hinterlässt sonst ein leeres Feld
+oder das Symbol für ein kaputtes Bild, und die Zeile springt beim Nachladen.
+
+Eine Falle dabei: `loading="lazy"` an einem Bild, das noch nicht im Dokument
+hängt. Ein aufgeschoben ladendes Bild wartet darauf, in den sichtbaren Bereich zu
+kommen — und etwas, das nirgends steht, kommt dort nie an. Es wurde nie geladen,
+und keine Karte bekam ein Logo.
+
+**Zwei Wege zum Bild**, und der erste geht vor:
+
+1. **Feld „Logo-Adresse" an der Position.** Eine https-Adresse, die du selbst
+   einträgst. Das ist der Weg, der immer geht.
+2. **`netlify/functions/logo.js`.** Fragt nacheinander bei mehreren
+   schlüssellosen Quellen an, legt das Ergebnis in Blobs ab (vier Wochen; ein
+   *Nicht*-Ergebnis nur sechs Stunden, sonst hängt eine Position wochenlang an
+   einem Ausfall fest) und liefert es von dort aus.
+
+Warum überhaupt eine Function statt eines `<img>` auf die fremde Adresse: der
+Zwischenspeicher (sonst zehn Fremdabrufe bei jedem Blick auf die Liste), die
+Rückfallkette — und **kein Fremder erfährt, wer hier zusieht**. Ein direktes
+`<img>` schickt bei jedem Blick die IP des Geräts dorthin; so sieht die fremde
+Quelle nur diesen Server, und den nur einmal je Symbol.
+
+Rohstoffe und Indizes (`GC=F`, `SI=F`, `^…`, `…-USD`) haben kein Firmenlogo —
+danach zu suchen wäre bei jedem Aufruf verschwendete Zeit. Sie stehen in
+`OHNE_LOGO` und bekommen sofort ein 404.
+
+**Offen gesagt:** welche der Quellen wirklich liefert, konnte beim Bauen nicht
+geprüft werden — die Entwicklungsumgebung lässt keine fremden Hosts durch
+(403 am Proxy). Deshalb eine Kette statt einer Quelle, deshalb ein sauberes 404
+statt eines kaputten Bildes, und deshalb das Feld an der Position, das
+unabhängig davon funktioniert.
+
 ### Die Karten sind so laut wie die Symboltasten
 
 „Zu leise Design, bitte wie Symboltasten für Karten." Die Tasten hatten das

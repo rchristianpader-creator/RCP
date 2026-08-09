@@ -232,7 +232,10 @@ function pruefen(roh) {
       return { fehler: wo + ": TradingView-Symbol muss so aussehen: NASDAQ:INTC." };
     }
 
-    for (const feld of ["fn", "fibo"]) {
+    /* "logo" steht mit in der Reihe: eine eigene Adresse geht der
+       automatischen Suche vor, und https ist Bedingung — ein Bild ueber
+       http wuerde die ganze Seite als unsicher markieren. */
+    for (const feld of ["fn", "fibo", "logo"]) {
       const url = String(p[feld] || "").trim();
       if (url && !/^https:\/\/[^\s"'<>]+$/.test(url)) {
         return { fehler: wo + ": „" + feld + "“ muss eine https-Adresse sein." };
@@ -257,7 +260,8 @@ function pruefen(roh) {
       frage: text(p.frage, GRENZEN.frage),
       fn: text(p.fn, 200),
       keys: text(p.keys, GRENZEN.keys),
-      fibo: text(p.fibo, 200)
+      fibo: text(p.fibo, 200),
+      logo: text(p.logo, 300)
     });
   }
 

@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="dark">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#0a0d0c">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=91">
-<link rel="apple-touch-icon" href="/icon-180.png?v=91">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=92">
+<link rel="apple-touch-icon" href="/icon-180.png?v=92">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=91">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=92">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=91">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=92">
 
 <script>
 /* Im Browser oder als App?
@@ -371,7 +371,7 @@
        mittelt es weg und sieht einen glatten Verlauf. Die Datei dafuer ist
        370 Byte gross; das Rauschen entsteht im Browser. */
     background:
-      url("/grund.svg?v=91") repeat,
+      url("/grund.svg?v=92") repeat,
       radial-gradient(120% 90% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.55) 100%),
       radial-gradient(78% 58% at 10% 4%, var(--grund-kuehl) 0%, transparent 68%),
       radial-gradient(66% 52% at 92% 14%, var(--grund-warm) 0%, transparent 68%),
@@ -848,6 +848,36 @@
     font-size: 17px;
     font-weight: 700;
     letter-spacing: -0.2px;
+  }
+  /* Name und Logo bilden eine Gruppe, damit die Zeichen rechts weiter am
+     rechten Rand stehen. */
+  .card-head .titel {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+  /* Das Logo sitzt auf einer eigenen kleinen Scheibe — dieselbe Machart wie
+     die Symboltasten, nur rund. Ohne sie stuende ein fremdes Bild ohne
+     Uebergang auf dem Glas: die meisten Logos kommen mit weissem oder
+     durchsichtigem Grund, und beides sieht auf einer dunklen Scheibe nach
+     Ausschnitt aus, nicht nach Zugehoerigkeit.
+
+     Feste Groesse und object-fit: contain, damit ein breites Wortlogo und
+     ein quadratisches Zeichen gleich viel Platz einnehmen und die Zeile
+     nicht je nach Firma anders hoch ist. */
+  .card-head .logo {
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    padding: 4px;
+    object-fit: contain;
+    background:
+      var(--glas-schimmer),
+      var(--glas-fuellung-taste);
+    box-shadow: var(--glas-kante);
+    border: 1px solid var(--line);
   }
   .badge {
     font-size: 10px;
@@ -2669,7 +2699,7 @@
     align-items: center;
     justify-content: center;
     background:
-      url("/grund.svg?v=91") repeat,
+      url("/grund.svg?v=92") repeat,
       radial-gradient(120% 90% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.55) 100%),
       radial-gradient(78% 58% at 10% 4%, var(--grund-kuehl) 0%, transparent 68%),
       radial-gradient(66% 52% at 92% 14%, var(--grund-warm) 0%, transparent 68%),
@@ -2848,7 +2878,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=91");
+    background-image: url("/kerzen.svg?v=92");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -2862,7 +2892,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=91");
+    background-image: url("/kerzen-blass.svg?v=92");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -3590,7 +3620,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=91" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=92" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -3708,7 +3738,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=91" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=92" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3756,7 +3786,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=91" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=92" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -3775,7 +3805,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=91" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=92" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3892,7 +3922,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=91" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=92" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -4032,6 +4062,47 @@
     return a;
   }
 
+  /* Der Name mit dem Logo davor.
+
+     Das Logo ist ein Zusatz, kein Traeger: kommt keins, steht der Name
+     genau da, wo er ohne Logo staende. Deshalb haengt das Bild erst dann im
+     Kasten, wenn es wirklich geladen ist — ein <img>, das nichts findet,
+     hinterlaesst sonst ein leeres Feld oder das Symbol des Browsers fuer
+     "kaputtes Bild", und die Zeile springt beim Nachladen.
+
+     Zwei Wege zum Bild, und der erste geht vor: eine eigene Adresse an der
+     Position (Feld "logo" in der Verwaltung). Der zweite ist die Function,
+     die bei mehreren Quellen nachfragt. Welche davon liefert, entscheidet
+     sich draussen — der eigene Weg ist der, der immer geht. */
+  function logoNeben(p) {
+    var kasten = el("div", "titel");
+    kasten.appendChild(el("h2", null, p.name));
+
+    var sym = p.yahoo || p.badge;
+    var quelle = p.logo ||
+      (sym ? "/.netlify/functions/logo?sym=" + encodeURIComponent(sym) : "");
+    if (!quelle) return kasten;
+
+    var bild = new Image();
+    bild.decoding = "async";
+    /* Kein loading="lazy". Das Bild haengt absichtlich noch nicht im
+       Dokument — es soll erst hinein, wenn es geladen ist. Ein aufgeschoben
+       ladendes Bild wartet aber darauf, in den sichtbaren Bereich zu
+       kommen, und etwas, das nirgends steht, kommt dort nie an: es wurde
+       nie geladen, und keine Karte bekam ein Logo. */
+    bild.alt = "";
+    /* Kein alt-Text: der Name steht direkt daneben. Ein Vorleser saehe
+       sonst denselben Namen zweimal. */
+    bild.setAttribute("aria-hidden", "true");
+    bild.onload = function () {
+      bild.className = "logo";
+      kasten.insertBefore(bild, kasten.firstChild);
+    };
+    bild.onerror = function () { /* Dann eben ohne — die Karte merkt nichts */ };
+    bild.src = quelle;
+    return kasten;
+  }
+
   function karte(p) {
     var s = el("section", "card");
     s.id = p.id;
@@ -4042,7 +4113,7 @@
 
     var kopf = el("div", "card-head");
     var reihe = el("div", "row");
-    reihe.appendChild(el("h2", null, p.name));
+    reihe.appendChild(logoNeben(p));
     var m = marke(p);
     if (m) {
       // Markiert: das Kennzeichen davor, beide in einer Gruppe — dort setzt
@@ -6277,7 +6348,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=91";
+      i.src = "/icon-512.png?v=92";
     });
     return symbolBild;
   }
