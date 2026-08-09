@@ -31,23 +31,63 @@ const OFFEN = [
    Liste, damit eine dritte nicht wieder nachgepflegt werden muss. */
 const OFFEN_ANFANG = ["/icon-", "/og-preview", "/ansicht-", "/kerzen", "/grund"];
 
+/* Das Tor faellt nie mit der ganzen Seite um.
+
+   Diese Function laeuft vor jedem Pfad. Wirft sie, antwortet Netlify mit
+   "This edge function has crashed" — und zwar auf alles: Seite, Symbole,
+   Anmeldung. Ein Tuersteher, der stolpert, darf nicht das Haus schliessen.
+
+   Deshalb liegt alles Riskante in einem Versuch, und wenn etwas
+   Unerwartetes passiert, wird abgewiesen statt abgestuerzt: zur Anmeldung,
+   nicht ins Leere. Das faellt zur sicheren Seite — wer nicht geprueft
+   werden kann, kommt nicht durch —, und die Anmeldeseite selbst bleibt
+   erreichbar, weil sie in OFFEN steht und beantwortet ist, bevor
+   irgendetwas passieren kann, das werfen koennte. */
 export default async (request, context) => {
-  const url = new URL(request.url);
-  const pfad = url.pathname;
+  let url;
+  try {
+    url = new URL(request.url);
+    const pfad = url.pathname;
 
-  if (OFFEN.indexOf(pfad) >= 0) return context.next();
-  for (const p of OFFEN_ANFANG) {
-    if (pfad.startsWith(p)) return context.next();
+    /* "return await", nicht "return".
+
+       Ohne das await gibt diese Function das Versprechen zurueck, bevor es
+       sich entschieden hat — und ein Wurf daraus fliegt am catch vorbei,
+       weil der Versuch da laengst verlassen ist. Genau daran ist der
+       Rueckweg beim ersten Anlauf gescheitert: alles abgesichert, und der
+       eine Pfad, der am haeufigsten genommen wird, war es nicht. */
+    if (OFFEN.indexOf(pfad) >= 0) return await context.next();
+    for (const p of OFFEN_ANFANG) {
+      if (pfad.startsWith(p)) return await context.next();
+    }
+
+    /* Ohne die Umgebung gibt es nichts zu pruefen. Der Zugriff steht hier
+       in einem eigenen Versuch, weil schon das Fehlen des Netlify-Objekts
+       werfen wuerde — und das waere der Absturz, den es zu verhindern
+       gilt. */
+    let geheim = "";
+    try {
+      geheim = Netlify.env.get("RCP_GEHEIMNIS") || "";
+    } catch (e) {
+      geheim = "";
+    }
+    if (!geheim) return einrichten();
+
+    const token = keksLesen(request) || request.headers.get("x-rcp-sitzung") || "";
+    const daten = await pruefen(token, geheim);
+    if (daten) return await durchlassen(context, url, daten);
+
+    return abweisen(request, url);
+  } catch (e) {
+    try {
+      return abweisen(request, url || new URL("https://x/"));
+    } catch (e2) {
+      return new Response(null, {
+        status: 302,
+        headers: { Location: "/anmelden.html", "Cache-Control": "no-store" }
+      });
+    }
   }
-
-  const geheim = Netlify.env.get("RCP_GEHEIMNIS");
-  if (!geheim) return einrichten();
-
-  const token = keksLesen(request) || request.headers.get("x-rcp-sitzung") || "";
-  const daten = await pruefen(token, geheim);
-  if (daten) return await durchlassen(context, url, daten);
-
-  return abweisen(request, url);
 };
 
 /* Im Browser bleibt die Liste zu — das soll dazu bringen, die App zu
