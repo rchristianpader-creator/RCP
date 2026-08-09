@@ -128,9 +128,11 @@
     --grund-flieder: rgba(94, 58, 86, 0.26);
     --grund-tuerkis: rgba(31, 95, 99, 0.24);
 
-    /* Was man nicht erkennt, ist kein Glas, sondern Milch. Die Aufhellung
-       haelt die Schrift lesbar trotz duenner Fuellung. */
-    --glas-frost: saturate(320%) brightness(1.05) blur(20px);
+    /* Zwei Stufen guenstiger: der Aufwand eines Weichzeichners waechst mit
+       dem Radius, und drei Filter kosten drei Durchgaenge. Gemessen wird auf
+       einer anderen Maschine als der, auf der es benutzt wird — im Zweifel
+       gilt das Telefon. */
+    --glas-frost: saturate(190%) blur(12px);
     /* Duenn — der Frost dahinter verwischt und hellt auf. */
     --glas-fuellung: rgba(255, 255, 255, 0.26);
     /* Dicker, wo man liest: hinter Saetzen soll nichts mitlesbar sein. */
@@ -152,10 +154,13 @@
        Randes gibt der Flaeche Dicke; hell oben zieht ins Kuehle, dunkel
        unten ins Warme — abgeschwaecht das, was an einer Linsenkante
        passiert: die Farben laufen auseinander. */
+    /* Die Woelbung — ein weicher dunkler Ring knapp innerhalb des Randes —
+       ist raus. Ein weicher Schatten muss bei jedem Zeichnen neu berechnet
+       werden, und sie hing an jeder Karte, jedem Streifen und jedem Blatt.
+       Was bleibt, sind drei harte Linien: die kosten nichts. */
     --glas-kante:
       inset 0 1px 0 rgba(255, 255, 255, 1),
       inset 0 2px 1px -1px rgba(214, 233, 255, 0.85),
-      inset 0 0 14px -6px rgba(var(--fg-rgb), 0.26),
       inset 0 -1px 0 rgba(78, 60, 38, 0.2);
     --glas-schimmer: linear-gradient(148deg,
       rgba(255, 255, 255, 0.96) 0%,
@@ -189,9 +194,12 @@
        liegt jetzt ein Schatten, den man nicht als Schatten bemerkt: er hebt
        die Karte vom Grund, ohne sie schweben zu lassen. Zwei Lagen, weil eine
        einzelne entweder zu hart am Rand sitzt oder zu weit ausfranst. */
+    /* Ebenfalls guenstiger: ein Schatten mit 28 Pixeln Weichzeichnung an
+       jeder Flaeche der Seite ist teuer. 12 reichen, damit die Flaeche vom
+       Grund abhebt. */
     --hebung:
-      0 1px 2px rgba(var(--fg-rgb), 0.045),
-      0 10px 28px -18px rgba(var(--fg-rgb), 0.12);
+      0 1px 2px rgba(var(--fg-rgb), 0.05),
+      0 6px 12px -8px rgba(var(--fg-rgb), 0.14);
     /* Steigt und faellt. Die einzigen zwei Farben, die in dieser App etwas
        bedeuten statt zu schmuecken — bisher standen sie nur auf der
        Anmeldeseite, seit die Charts selbst gezeichnet werden auch hier. */
@@ -237,7 +245,12 @@
      darueber drei ruhige Kurslinien (grund.py). */
   .grundkurve {
     position: fixed;
-    inset: 0;
+    /* Oben und unten ueber den Rand hinaus, statt die Ebene beim Ziehen zu
+       vergroessern: eine Skalierung im transform zwingt zum Neurastern einer
+       bildschirmgrossen Flaeche, und genau daran fiel "Scrollen bleibt
+       fluessig" durch. Groesser aufgespannt und nur verschoben kostet
+       nichts. */
+    inset: -8% 0;
     z-index: -1;
     pointer-events: none;
     background:
@@ -249,6 +262,21 @@
       var(--bg);
   }
   .nur-web .grundkurve { display: none; }
+
+  /* Kein Mitziehen des Grundes.
+
+     Versucht: der Grund faehrt beim Scrollen langsamer als die Fenster
+     darueber — eine Ebene, ein transform, aufgehaengt am Dokument-Scrollen.
+     Genau die Tiefe, die Scrollen nach Glas aussehen laesst.
+
+     Gemessen ist es nicht umsonst: "Scrollen bleibt fluessig" fiel in drei
+     von sechs Laeufen durch (lang 4 bis 8 statt hoechstens 3), erst mit
+     Skalierung, dann auch ohne. Eine bildschirmgrosse Ebene mit Kachelbild
+     und vier Verlaeufen kostet beim Verschieben eben doch.
+
+     Zweimal hat das Telefon gesagt, dass Scrollen traege ist. Solange das
+     nicht sicher weg ist, kommt nichts dazu, das an derselben Stelle
+     zieht. */
   /* Bei "weniger Transparenz" bleibt der Grund stehen: der Wunsch gilt dem
      Durchscheinen, nicht dem Hintergrund. */
 
@@ -370,23 +398,31 @@
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    padding: 10px 8px;
+    padding: 10px 12px;
     justify-content: center;
     position: sticky;
-    /* Schwebt, statt am oberen Rand zu kleben — dasselbe Fenster wie alles
-       andere. Der Abstand steckt auch in --leiste, sonst landete der Sprung
-       unter der Leiste statt darunter. */
-    top: 8px;
-    margin: 0 14px 12px;
-    border-radius: var(--r-karte);
-    border: 1px solid var(--hair);
+    /* Sitzt am oberen Rand. Kurz stand hier top: 8px mit Abstand nach beiden
+       Seiten — und dann zog der Inhalt in den Spalten darueber und daneben
+       sichtbar durch. Eine klebende Leiste deckt ab oder sie ist keine. Die
+       Fensterform bleibt: unten rund, oben gerade. */
+    top: 0;
+    margin: 0 0 12px;
+    padding-top: calc(10px + env(safe-area-inset-top));
+    /* Von Rand zu Rand, nur unten rund. Mit Abstand nach beiden Seiten sah
+       man in den beiden Streifen daneben den Inhalt vorbeiziehen — dasselbe
+       Loch wie oben, nur schmaler. Eine klebende Leiste deckt ab oder sie
+       ist keine. */
+    border-radius: 0 0 var(--r-karte) var(--r-karte);
+    border-bottom: 1px solid var(--hair);
     z-index: 20;
-    /* Glas: die Karten ziehen sichtbar darunter durch. Das ist die Flaeche,
-       an der man den Unterschied am ehesten sieht — sie liegt den ganzen Tag
-       ueber bewegtem Inhalt. */
-    background: var(--glas-grund);
-    -webkit-backdrop-filter: var(--glas-frost);
-    backdrop-filter: var(--glas-frost);
+    /* Kein Frost, und das folgt aus der eigenen Regel: eine klebende Leiste
+       steht still, waehrend sich darunter alles bewegt — der Filter muss
+       also bei jedem Bild ueber einen anderen Ausschnitt laufen. Derselbe
+       Aufwand wie beim Mitscrollen, an der einzigen Flaeche, die den ganzen
+       Tag ueber bewegtem Inhalt liegt. Dafuer deckt die Fuellung. */
+    background:
+      var(--glas-schimmer),
+      linear-gradient(rgba(255, 255, 255, 0.97), rgba(255, 255, 255, 0.97));
     box-shadow: var(--glas-kante);
     border-bottom: 1px solid var(--hair);
   }
@@ -408,7 +444,13 @@
     border-radius: var(--r-chip);
     text-decoration: none;
     color: var(--fg);
-    background: transparent;
+    /* Dieselbe Machart wie die Fenster: Fuellung, Schimmer, Lichtkante.
+       Hier ist es reine Optik — hinter der deckenden Leiste gibt es nichts
+       durchscheinen zu lassen. Aber das Licht faengt es genauso. */
+    background:
+      var(--glas-schimmer),
+      linear-gradient(rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.62));
+    box-shadow: var(--glas-kante);
     -webkit-tap-highlight-color: transparent;
     transition: background 0.24s ease, color 0.24s ease, border-color 0.24s ease, transform 0.2s var(--ease);
   }
@@ -520,26 +562,21 @@
   }
   .karten > .card {
     margin: 0 14px 34px;
-    /* Eine Karte fuellt den Schirm.
+    /* Eine Karte fuellt den Schirm. Vorher schaute unten immer schon die
+       naechste herein — man sah nie eine Position allein, sondern anderthalb.
 
-       Vorher war sie kuerzer als das Fenster, und unten schaute immer schon
-       die naechste herein — man sah nie eine Position allein, sondern immer
-       anderthalb. Jetzt reicht sie von der Unterkante der klebenden Leiste
-       bis zum unteren Bildrand; die naechste beginnt darunter, ausser Sicht.
+       Was weit weg ist, zeichnet der Browser gar nicht erst; dafuer muss eine
+       Hoehe vorgegeben sein, sonst springt die Seite unter dem laufenden
+       Scrollen weg. Dieser Wert stand schon zweimal falsch. Deshalb gibt es
+       ihn nur noch einmal: --kartenhoehe gilt fuer die wirkliche und fuer die
+       reservierte Hoehe, sie koennen nicht mehr auseinanderlaufen.
 
-       Was weit weg ist, zeichnet der Browser gar nicht erst — dafuer muss
-       eine Hoehe vorgegeben sein, sonst springt die Seite unter dem
-       laufenden Scrollen weg. Dieser Wert stand schon zweimal falsch: bei
-       760, als die Zeitraum-Knoepfe dazukamen, und bei 800, als der Chart
-       von 400 auf 208 schrumpfte.
-
-       Deshalb ist es jetzt derselbe Wert. --kartenhoehe steht einmal da und
-       gilt fuer beides: fuer die wirkliche Hoehe und fuer die reservierte.
-       Sie koennen nicht mehr auseinanderlaufen, weil es sie nur einmal gibt.
-
-       --leiste traegt die Hoehe der klebenden Leiste; ein Skript misst sie
-       nach, weil sie ein- oder zweizeilig sein kann. */
-    --kartenhoehe: calc(100dvh - var(--leiste) - 10px);
+       --leiste misst ein Skript nach: die Leiste ist mal ein-, mal
+       zweizeilig. */
+    /* Zehn Pixel Luft unten waren zu knapp: auf dem Telefon lief der untere
+       Fensterrand aus dem Bild. Dazu der Bereich der Home-Anzeige, den
+       100dvh mitzaehlt, den man aber nicht bespielen sollte. */
+    --kartenhoehe: calc(100dvh - var(--leiste) - 26px - env(safe-area-inset-bottom));
     min-height: var(--kartenhoehe);
     display: flex;
     flex-direction: column;
@@ -1669,27 +1706,9 @@
 
   /* Zufahren ist nicht Auffahren rueckwaerts.
 
-     Beim Auffahren sieht man, wohin man kommt — da ist Kuerze richtig. Beim
-     Zufahren sieht man nur noch, dass es weggeht, und mit derselben Dauer
-     und demselben Weg las sich das wie ein Abschalten: das Blatt war fort,
-     ehe der Blick nachkam.
-
-     Deshalb eine eigene Klasse. Ueber .da allein liesse sich nur die Dauer
-     trennen, nicht der Weg: die Stelle, an der das Blatt beim Zufahren
-     ankommt, ist dieselbe, von der es beim Auffahren startet.
-
-     Es sinkt jetzt weiter weg, wird dabei kleiner und kippt leicht nach
-     hinten — und braucht dafuer eine gute halbe Sekunde.
-
-     Die Kurve ist dabei wichtiger als die Dauer. --weich ist stark
-     vorgezogen: nach einem knappen Drittel der Zeit ist damit fast alles
-     vorbei, und laenger machen aendert daran nichts — es wartet dann nur
-     hinterher. Beim Zufahren zaehlt aber, dass man die Bewegung sieht.
-     Deshalb hier eine Kurve, die in der Mitte am schnellsten ist und
-     vorn nicht davonrennt.
-
-     Der Schleier haelt laenger, als das Blatt braucht: er faellt spaet ab,
-     damit das Blatt nicht schon im Nichts sinkt. */
+     Beim Auffahren sieht man, wohin man kommt — da darf es schwingen. Beim
+     Zufahren will man weg, und ein Nachschwingen haelt auf. Deshalb kuerzer
+     und ohne Ueberschwingen. */
   .sheet.faehrt.zufahrt {
     transition: opacity 0.68s cubic-bezier(0.62, 0, 0.9, 0.45);
     /* Die Seite gehoert wieder der Seite, sobald der Finger vom Knopf ist */
@@ -2516,27 +2535,14 @@
   }
   /* Eine Kachel, nicht ein gedehntes Bild.
 
-     Vorher stand das ganze Muster als SVG im Band und wurde auf die doppelte
-     Fensterbreite gezogen. Auf dem Telefon ergab das 11 Pixel je Kerze — auf
-     einem Fenster von 2000 Pixeln aber 59. Dieselbe Zeichnung, nur riesig:
-     aus einem Hintergrund wurde ein Vordergrund. Auf Windows und auf dem
-     Tablett war genau das zu sehen.
+     Vorher stand das Muster als SVG im Band und wurde auf die doppelte
+     Fensterbreite gezogen: auf dem Telefon 11 Pixel je Kerze, auf einem
+     Fenster von 2000 aber 59 — aus einem Hintergrund wurde ein Vordergrund.
+     34 Kerzen, die immer die volle Breite fuellen, werden auf einem breiten
+     Bildschirm eben gross; kleiner gehen sie nur, wenn es mehr werden.
 
-     Der Grund steckte in der Bauweise: 34 Kerzen, die immer die volle Breite
-     fuellen sollen, werden auf einem breiten Bildschirm eben gross. Kleiner
-     gehen sie nur, wenn es mehr werden. Deshalb liegt das Muster jetzt als
-     Datei daneben (/kerzen.svg) und wird gekachelt — dieselbe Datei fuer den
-     Ladebildschirm, die Sperre im Browser, den Neuheiten-Schirm und die
-     Anmeldeseite.
-
-     Die Kachel ist so breit wie das Fenster, hoechstens aber 620 Pixel. Auf
-     dem Telefon aendert das nichts — dort war sie schon so breit. Am
-     Schreibtisch stehen mehrere nebeneinander, und die Kerze ist wieder 18
-     statt 59 Pixel breit.
-
-     Der Weg je Umlauf ist damit eine Kachel statt einer halben Bandbreite.
-     Gemessen in Kerzen ist das Tempo dasselbe wie vorher auf dem Telefon:
-     etwa vier je Sekunde. */
+     Also gekachelt, hoechstens 620 Pixel breit. Am Schreibtisch stehen drei
+     Kacheln nebeneinander, und die Kerze ist wieder 18 statt 59 Pixel. */
   .kerzen-band {
     position: absolute;
     top: 0;
@@ -2718,15 +2724,20 @@
 
      Die Deckkraft ist frueher da als die Bewegung: die Zeile steht schon
      lesbar, waehrend sie ihren letzten Zentimeter noch faehrt. */
+  /* Nur Verschieben und Deckkraft. Drehung im Raum und Verkleinerung sahen
+     am Schreibtisch grossartig aus und waren auf dem Telefon der teuerste
+     Posten: eine gedrehte, skalierte Flaeche wird bei jedem Bild neu
+     gerastert — eine davon ist der Chart mit achtzig Stuetzpunkten. Dafuer
+     ein laengerer Weg: was an Tiefe wegfaellt, holt die Strecke herein. */
   @keyframes teilLauf {
     from {
       opacity: 0;
-      transform: perspective(900px) translate3d(0, 140px, 0) rotateX(22deg) scale(0.80);
+      transform: translate3d(0, 180px, 0);
     }
     55% { opacity: 1; }
     to {
       opacity: 1;
-      transform: perspective(900px) translate3d(0, 0, 0) rotateX(0deg) scale(1);
+      transform: translate3d(0, 0, 0);
     }
   }
 
@@ -2810,24 +2821,15 @@
          Stueckes selbst. */
       /* cover, nicht entry.
 
-         "entry" reicht von "das Teil beruehrt den unteren Rand" bis "es ist
-         ganz drin" — und ist damit so lang wie das Teil selbst. Der
-         Kartenkopf ist 120 Pixel hoch, also lief seine ganze Bewegung in 30 %
-         davon ab: 36 Pixel Scrollweg. Gemessen sprang er zwischen zwei
-         Proben von 0 auf 1. Kein Gleiten, ein Blitzen.
+         "entry" ist so lang wie das Teil selbst. Der Kartenkopf ist 120 Pixel
+         hoch, seine ganze Bewegung lief also in 30 % davon ab: 36 Pixel
+         Scrollweg, gemessen ein Sprung von 0 auf 1. Kein Gleiten, ein
+         Blitzen. "cover" reicht von der ersten bis zur letzten Beruehrung mit
+         dem Fenster — bei schirmfuellenden Karten rund 1560 Pixel.
 
-         "cover" reicht von der ersten bis zur letzten Beruehrung mit dem
-         Fenster und ist damit so lang wie Karte plus Fenster — bei einer
-         schirmfuellenden Karte rund 1560 Pixel. Dieselben Abstufungen, nur
-         auf einer Strecke, auf der man die Bewegung auch sieht.
-
-         Bei kurzen Karten war entry richtig; seit eine Karte den Schirm
-         fuellt, ist es das Gegenteil.
-
-         Alle Abschnitte enden vor 54 %. Bei 54 % steht die Oberkante der
-         Karte genau am oberen Fensterrand — das ist die Leseposition. Was
-         danach noch laeuft, laeuft, waehrend man liest: der Knopf stand mit
-         einem Ende bei 54 % dauerhaft 19 Pixel zu tief. */
+         Alle Abschnitte enden vor 54 %: dort steht die Oberkante am oberen
+         Fensterrand, das ist die Leseposition. Was danach laeuft, laeuft
+         waehrend man liest — der Knopf stand so dauerhaft 19 Pixel zu tief. */
       .karten > .card > .card-head  { animation-range: cover 2% cover 22%; }
       .karten > .card > .ziel-bar   { animation-range: cover 6% cover 26%; }
       .karten > .card > .chart      { animation-range: cover 10% cover 31%; }
@@ -3190,26 +3192,10 @@
 
   /* ================= Die Spalte auf dem Schreibtisch =================
 
-     Am Telefon fuellt jeder Block die Breite; ab 720 Pixeln steht alles in
-     einer Spalte in der Mitte. Das galt frueher nur fuer ".card" — und seit
-     die Karten in einem Flex-Stapel liegen, nicht einmal mehr dafuer:
-     ".karten > .card" ist die staerkere Regel und hat das Mittigsetzen
-     ueberstimmt. Die Karten klebten am linken Rand, waehrend Kopf, Reiter
-     und Stimmungskasten in der Mitte standen.
-
-     Deshalb steht die Spalte jetzt hier, am Ende: was hier steht, kommt
-     nach allen Grundregeln und gewinnt ohne Spezifitaets-Tricks.
-
-     Im Stapel wird nicht mit "margin: auto" mittig gesetzt. Ein Flex-Kind
-     mit selbsttaetigem Aussenabstand quer zur Richtung hoert auf, sich zu
-     dehnen, und faellt auf seine Inhaltsbreite zurueck — die Karte war
-     danach 374 Pixel breit statt 780. Im Stapel also "align-self: center"
-     mit fester Breite, ausserhalb der gewohnte selbsttaetige Abstand.
-
-     Die Baender bleiben ueber die ganze Breite: das Laufband muss laufen
-     koennen, und der Setup-Streifen steht ohnehin mittig. Bei den Terminen
-     wandert nur ihr Inhalt in die Spalte — sein Text ist linksbuendig und
-     begaenne sonst ganz aussen, wo sonst nichts steht. */
+     Am Telefon fuellt jede Karte die Breite. Am Schreibtisch waere dieselbe
+     Karte 1900 Pixel breit: eine Zeile Text ueber die ganze Wand, ein Chart
+     wie ein Plakat. Deshalb steht die Liste dort als Spalte in der Mitte,
+     hoechstens so breit wie eine Karte am Telefon plus etwas Luft. */
   @media (min-width: 720px) {
     .karten > .card,
     .karten-fehler {
@@ -4069,11 +4055,7 @@
   function leisteMessen() {
     if (!nav) return;
     var setzen = function () {
-      /* Hoehe plus der Abstand, mit dem die Leiste vom oberen Rand
-         wegschwebt — sonst landete ein Sprung genau um diesen Abstand zu
-         hoch, naemlich unter der Leiste statt darunter. */
-      var oben = parseFloat(getComputedStyle(nav).top) || 0;
-      var h = Math.round(nav.getBoundingClientRect().height + oben * 2);
+      var h = Math.round(nav.getBoundingClientRect().height);
       if (h > 0) document.documentElement.style.setProperty("--leiste", h + "px");
     };
     setzen();
