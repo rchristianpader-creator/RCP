@@ -368,6 +368,92 @@ Zwischenspeicher liegt; hoechstens 3 Sekunden, damit ein haengender Dienst
 niemanden aufhaelt. Dazu ein Notausgang direkt im Markup, der ihn auch dann
 wegnimmt, wenn weiter unten ein Skript stolpert.
 
+## Hell und dunkel
+
+Ein Knopf im Kopf, am Ende der Reihe — er sagt nichts über die Liste, er
+stellt nur ein, wie sie aussieht. **Hell ist der Normalfall**, daran ändert
+der dunkle Anstrich nichts. Wer umschaltet, behält es: der Wunsch steht in
+`rcp:thema` und gilt, bis er wieder umschaltet.
+
+**Was das Gerät eingestellt hat, wird ausdrücklich nicht gefragt.** Kein
+`prefers-color-scheme`. Die Seite soll nicht hinter dem Rücken ihres Besitzers
+umfärben, weil das Telefon abends in den Nachtmodus geht.
+
+**Tiefes Schwarz, kein Dunkelgrau.** Auf einem OLED-Telefon geht ein echtes
+Schwarz aus, und die Karten (`#0a0a0a`) heben sich davon deutlicher ab als von
+einem Grau, das nur ein bisschen dunkler ist als sie selbst.
+
+### Der Zeitpunkt ist das Schwierige, nicht die Farbe
+
+Stünde der Anstrich erst fest, wenn das Skript unten läuft, blitzte die Seite
+vorher weiß auf — jedes Mal. Deshalb steht er **im Kopf jeder Seite**, direkt
+neben der Browser-Sperre und vor dem Stylesheet, und wird an `<html>` gesetzt:
+das `<body>` gibt es dort noch gar nicht. `thema-test` prüft diese Reihenfolge
+im Quelltext aller vier Seiten nach.
+
+Aus demselben Grund steht dasselbe Kopfskript auch in `anmelden.html`,
+`verwaltung.html` und `positionen.html`. Einen Knopf gibt es dort nicht —
+umgeschaltet wird in der Liste, mitgezogen wird überall.
+
+### Alles läuft über Namen
+
+Wo vorher eine Farbe fest im Regelwerk stand, steht jetzt eine Variable — 98
+Stellen allein in `index.html`. Sonst wäre der dunkle Anstrich eine zweite
+Fassung des ganzen Stylesheets, die beim ersten Nachbessern auseinanderliefe.
+Drei Namen sind neu:
+
+| | |
+|---|---|
+| `--auf-fg` | Schrift auf einer Fläche in `--fg`. Ein festes `#fff` wäre im dunklen Anstrich weiß auf weiß — 22 Stellen. |
+| `--fg-rgb` | Dieselbe Farbe als drei Zahlen, für alles mit Deckkraft: Pulsringe, Haarlinien, Rahmen. |
+| `--blass` | Schrift, die kaum da sein soll (Chart-Platzhalter, Trenner). |
+
+`--blass` ist die Stelle, an der ich mir selbst einen Fehler eingebaut hatte:
+`#c4c4c4` auf `--line` abzubilden machte den Platzhalter **auch im hellen
+Anstrich** blasser als vorher (Kontrast 1,16 statt 1,55). Jetzt ist es hell
+`#c4c4c4` und dunkel `#333` — *gleich blass*, nicht gleich hell: `#c4c4c4` auf
+`#f5f5f5` ergibt 1,60, `#333` auf `#0d0d0d` ergibt 1,54.
+
+Drei Farben bleiben fest, und zwar mit Absicht: der fast schwarze Grund der
+Lupe (ein Bild soll auch für den, der hell eingestellt hat, vor Dunkel
+stehen), der helle Knopf darauf, und Rot — Rot sagt etwas, es ist kein
+Anstrich. Grün und Rot in den Statuszeilen werden dunkel heller (`#4ade80`,
+`#f87171`), sonst versinken sie auf Schwarz.
+
+### Was sonst noch mitziehen muss
+
+**Die Kerzen.** `#111` auf Schwarz wäre nichts. Also zwei weitere Kacheln,
+`kerzen-dunkel.svg` und `kerzen-dunkel-blass.svg` — kein `filter: invert()`:
+ein Filter auf einem Band, das bei jedem Bild bewegt wird, kostet dasselbe wie
+die Deckkraft, die ich gerade erst herausgenommen hatte. Das Tor lässt jetzt
+alles unter `/kerzen` durch statt einer Liste, die beim nächsten Anstrich
+wieder nachgepflegt werden müsste.
+
+**Die Charts.** TradingView weiß nichts vom Anstrich hier. Bliebe der Chart
+hell, säßen zehn leuchtende Rechtecke auf schwarzem Grund — das Gegenteil von
+dem, wofür man umschaltet. Also gehen `theme=dark` und `toolbarbg=0a0a0a` in
+der Adresse mit, und beim Umschalten werden die Adressen nachgezogen und
+bereits geladene Rahmen neu geladen (Ereignis `rcp:thema`).
+
+**Die Farbe der Systemleiste** (`<meta name="theme-color">`) — sonst bliebe
+oben ein heller Streifen stehen.
+
+Nicht mitgezogen wird das **Bild zum Teilen**: es ist ein Erzeugnis, kein
+Fenster. Wer es bekommt, soll es so sehen wie alle anderen.
+
+### Das Zeichen
+
+Ein Kreis, ein Ausschnitt. Bei Hell ist der Ausschnitt draußen und acht
+Strahlen stehen darum — eine Sonne. Beim Umschalten fährt der Ausschnitt
+herein, die Strahlen ziehen sich zusammen und gehen aus, die Scheibe wird
+etwas größer: der Mond. Kein Wechsel zwischen zwei Bildern, sondern eine
+Bewegung, die man mitverfolgen kann. Bei `prefers-reduced-motion` steht sie.
+
+`thema-test` prüft 38 Dinge: den Standard, das Umschalten in beide Richtungen,
+das Merken über Neuladen und Seitenwechsel, Kacheln, Chart-Adresse,
+Systemleiste, die Reihenfolge im Kopf — und dass ein dunkel eingestelltes
+Gerät die Seite eben *nicht* umfärbt.
+
 ## Der Hintergrund aus Kerzen
 
 Anmeldeseite und Auftakt haben denselben Hintergrund: ein Kursverlauf aus
@@ -964,22 +1050,31 @@ ohne Anmeldung erreichbar (`OFFEN_ANFANG` in `tor.js`).
 Bei jedem neuen Vorschaubild muss die Nummer im `?v=` hoch, sonst zeigen die
 Dienste ihre alte Kopie — sie merken sich das Bild je Adresse, oft wochenlang.
 
-### Das Bild selbst
+### Das Bild selbst — drei Anläufe
 
-Die erste Fassung war korrekt und still: Symbol, Titel, zwei Zeilen, alles
-mittig, viel Luft. In einem Chat voller Vorschaukarten fiel sie nicht auf —
-und sie sagte auch nicht, was die Seite eigentlich ist.
+**Erster Anlauf: still und beliebig.** Symbol, Titel, zwei Zeilen, alles
+mittig, viel Luft. In einem Chat voller Vorschaukarten fiel das nicht auf —
+und es sagte auch nicht, was die Seite eigentlich ist.
 
-Jetzt steht dieselbe Bildsprache wie in der App, nur laut: der **laufende
-Kursverlauf** hinter allem (dieselben Kacheln, hell gezeichnet, in zwei Ebenen
-für Tiefe), der Titel **füllt die Breite** statt in der Mitte zu schweben, und
-darunter stehen die **Kürzel** — die sagen ohne einen Satz, worum es geht.
-Unten eine Haarlinie, links der Name, rechts *Geschützt · Zugang auf Anfrage*.
+**Zweiter Anlauf: laut.** Titel über die volle Breite, Kürzel in Kästen, die
+Kurve kräftig hinter allem. Fiel auf, drückte aber.
 
-Zwei Verläufe halten das zusammen: einer von links, damit die Schrift auf der
-Kurve steht, und einer von unten, damit Kürzel und Fußzeile ruhig liegen. Der
-Titel bekommt zusätzlich einen weichen Schatten — ohne ihn sitzt er dort, wo
-die Kurve gerade dicht ist, auf Unruhe.
+**Dritter Anlauf: edel.** Und edel heißt nicht leise — es heißt, dass nichts
+um Aufmerksamkeit rangelt. Also eine klare Ordnung statt vieler lauter Teile:
+
+- eine Haarlinie unter dem Kopf, eine über den Kürzeln, dazwischen Ruhe
+- der Titel groß, aber **leicht** (Gewicht 300 statt 800), darüber das Wort
+  *Watchlist* weit gesperrt im Kleingedruckten
+- die Kürzel **ohne Kästen** — nur gesperrt, durch feine Punkte getrennt, das
+  erste hervorgehoben
+- die Kurve als **schmales Band am Fuß**, nicht als Tapete hinter allem: sie
+  sagt, worum es geht, ohne sich vorzudrängen. Nach oben blendet sie über eine
+  Maske aus, zu den Seiten über einen Verlauf — so wirkt sie nirgends
+  abgeschnitten.
+- kein Rahmen ums Ganze; der Rand trägt die Ruhe
+
+Nichts liegt mehr übereinander: erst lagen die Kürzel auf den Kerzen, das las
+sich unruhig. Jetzt endet der Inhalt über dem Band.
 
 Gezeichnet wird es nicht von Hand, sondern gerendert: `vorschaubild.mjs` baut
 die Seite in 1200 × 630 und schießt sie ab. Dieselbe Machart wie bei den
@@ -989,8 +1084,8 @@ die `sw-test` prüft.
 
 **Hell, nicht schwarz.** Lange lag hier `og-preview-black.png`, daneben ein
 ungenutztes helles. Schwarz fällt in einem Chat stärker auf — aber die App
-*ist* hell, und die Vorschau ist ein Versprechen darüber, was hinter dem Link
-liegt. Eine schwarze Karte zeigt etwas, das es dahinter nicht gibt.
+startet hell, und die Vorschau ist ein Versprechen darüber, was hinter dem
+Link liegt.
 
 Das Skript baut trotzdem **beide** Anstriche aus derselben Vorlage
 (`ANSTRICH` darin), damit die Entscheidung eine Zeile bleibt und nicht eine
