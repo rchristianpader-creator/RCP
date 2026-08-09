@@ -208,6 +208,17 @@
     /* Die Hoehe der klebenden Leiste. Der Vorgabewert passt zu zwei Reihen
        Chips; das Skript misst nach, sobald die Leiste steht. */
     --leiste: 96px;
+    /* Die Luft unter einer Karte — und zugleich der Abstand zur naechsten.
+
+       Zwei Wuensche, die sich zu widersprechen scheinen: die Karte soll nicht
+       den ganzen Schirm fuellen (das wirkte zu gross), und die naechste soll
+       trotzdem nicht hereinschauen. Beides geht, wenn beide Masse dasselbe
+       sind: endet die Karte 96 Pixel ueber dem Rand und beginnt die naechste
+       96 Pixel darunter, faengt sie genau am Rand an — sichtbar ist der
+       ruhige Grund, nicht die naechste Position.
+
+       Ein Wert, zwei Stellen. Sie koennen nicht auseinanderlaufen. */
+    --luft: 96px;
     --schleier: rgba(17, 17, 17, 0.62);
     --schatten: rgba(0, 0, 0, 0.24);
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -563,7 +574,7 @@
     margin-top: 16px;
   }
   .karten > .card {
-    margin: 0 14px 34px;
+    margin: 0 14px var(--luft);
     /* Eine Karte fuellt den Schirm. Vorher schaute unten immer schon die
        naechste herein — man sah nie eine Position allein, sondern anderthalb.
 
@@ -575,16 +586,10 @@
 
        --leiste misst ein Skript nach: die Leiste ist mal ein-, mal
        zweizeilig. */
-    /* Die Luft unten ist genau der Abstand zur naechsten Karte.
-
-       Damit geht die Rechnung auf: steht eine Karte oben an der Leiste, endet
-       sie 34 Pixel ueber dem unteren Rand — man sieht ihre Kante — und die
-       naechste beginnt genau am Rand, also gerade nicht mehr im Bild. Weniger
-       Luft, und die Kante lief heraus; mehr, und die naechste schaute herein.
-
-       Dazu der Bereich der Home-Anzeige, den 100dvh mitzaehlt, den man aber
-       nicht bespielen sollte. */
-    --kartenhoehe: calc(100dvh - var(--leiste) - 34px - env(safe-area-inset-bottom));
+    /* Fenster minus Leiste minus Luft — siehe --luft. Dazu der Bereich der
+       Home-Anzeige, den 100dvh mitzaehlt, den man aber nicht bespielen
+       sollte. */
+    --kartenhoehe: calc(100dvh - var(--leiste) - var(--luft) - env(safe-area-inset-bottom));
     min-height: var(--kartenhoehe);
     display: flex;
     flex-direction: column;
@@ -654,7 +659,7 @@
      Frost. Siehe die Marke oben; der Versuch hat das Scrollen traege
      gemacht. */
   .card {
-    margin: 16px 14px 56px;
+    margin: 16px 14px var(--luft);
     border: 1px solid var(--hair);
     border-radius: var(--r-karte);
     overflow: hidden;
@@ -2324,7 +2329,10 @@
     box-shadow: var(--glas-kante);
     border-top: 1px solid var(--fg);
   }
-  body.has-install-bar { padding-bottom: 104px; }
+  /* Solange der Streifen unten steht, deckt er die letzten Pixel jeder Karte
+     ab. Also wird die Luft unter der Karte um seine Hoehe groesser — und mit
+     ihr, weil es derselbe Wert ist, der Abstand zur naechsten. */
+  body.has-install-bar { padding-bottom: 104px; --luft: 200px; }
   /* Das echte Symbol, keine nachgebaute Kachel — so zeigt der Streifen
      immer das, was nachher auch auf dem Home-Bildschirm steht. */
   .install-mark {
