@@ -298,9 +298,17 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html {
     scroll-behavior: smooth;
-    /* Die klebende Leiste verdeckt sonst den Kopf der angesprungenen Karte.
-       Derselbe gemessene Wert wie bei der Kartenhoehe. */
-    scroll-padding-top: var(--leiste);
+    /* Wohin ein Sprung die Karte setzt.
+
+       Die Leiste allein war zu wenig: dann sass die angesprungene Karte
+       buendig unter der Leiste — oben null Abstand, unten die ganze Luft.
+       Genau die Schieflage, die auf dem Telefon zu sehen war, und sie kommt
+       nicht vom Scrollen, sondern vom Sprung.
+
+       Also Leiste plus die halbe Luft. Dann steht die Karte mit demselben
+       Abstand oben wie unten: 80 ueber ihr, 80 unter ihr, bei 588 Hoehe auf
+       einem Schirm von 844. */
+    scroll-padding-top: calc(var(--leiste) + var(--luft) / 2);
     /* Kein Einrasten.
 
        Es stand kurz drin: die Karten rasten beim Loslassen auf die Leiste
@@ -4264,10 +4272,24 @@
 
 <script>
 (function () {
-  // Precise nav scroll under sticky bar
+  /* Wohin ein Kuerzel springt.
+
+     Nicht knapp unter die Leiste, sondern mit der halben Luft darueber —
+     dann steht die Karte mit demselben Abstand oben wie unten. Gemessen war
+     es vorher 14 oben gegen 146 unten; genau die Schieflage, die auf dem
+     Telefon zu sehen war.
+
+     Die 14 Pixel Zugabe von frueher sind damit ersetzt: die halbe Luft ist
+     der Abstand, mit dem die Karte ohnehin ueberall steht.
+
+     scroll-padding-top an html allein reicht nicht — dieser Sprung rechnet
+     selbst und geht am Browser vorbei. Beide Werte muessen dasselbe sagen. */
   function stickyOffset() {
     var nav = document.querySelector("nav");
-    return nav ? nav.getBoundingClientRect().height + 14 : 76;
+    var hoch = nav ? nav.getBoundingClientRect().height : 62;
+    var luft = parseFloat(
+      getComputedStyle(document.documentElement).getPropertyValue("--luft")) || 160;
+    return hoch + luft / 2;
   }
   /* Wo steht die Karte wirklich?
 
