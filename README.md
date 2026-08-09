@@ -672,6 +672,47 @@ geprüft werden — die Entwicklungsumgebung lässt keine fremden Hosts durch
 statt eines kaputten Bildes, und deshalb das Feld an der Position, das
 unabhängig davon funktioniert.
 
+### Warum es trotzdem nicht scharf aussah
+
+„Sieht nicht so scharf aus wie auf dem Bild." Der Verdacht lag auf der Kante —
+falsch. Alle vier Kanten gemessen, Karte in der App gegen den Kasten auf dem
+Sperrbildschirm (Kontrast Kante gegen Grund):
+
+| | oben | links | rechts | unten |
+|---|---|---|---|---|
+| App, Karte | 4,29 | 1,61 | 1,63 | 1,24 |
+| Sperrbildschirm, Kopf | 4,22 | 1,55 | 1,60 | 1,09 |
+
+Gleich. Zwei andere Dinge waren es:
+
+**Der Grund war ein Nebel.** In der Bildmitte 22 von 255, während derselbe
+Kasten auf dem Sperrbildschirm — wo `.grundkurve` gar nicht gezeichnet wird —
+auf 12 steht. Seit die Fenster durchsichtig sind, ist der Grund das, was man
+überall sieht, und alles darauf verliert Kontrast gegen ihn. Die vier Farbfelder
+sind auf etwa die Hälfte zurückgenommen.
+
+**Die Karte hatte graue Bänder in sich.** Zielleiste (0,05), News-Block
+(`--soft`) und der Chart-Platzhalter (0,22) trugen eigene Flächen. Solange die
+Karte selbst eine Füllung hatte, fielen sie nicht auf; in einer durchsichtigen
+Karte sind sie Streifen, und ein Fenster mit Streifen sieht nicht scharf aus,
+sondern schichtig. Getrennt wird jetzt mit der Haarlinie, die ohnehin da war.
+
+Gemessen quer über die linke Kante, von außen nach innen:
+
+```
+vorher   20 20 … 20  |  58 59 86 87  |  72 72 72 72 …
+jetzt    20 20 … 20  |  58 59 48 48  |  30 31 31 31 …
+```
+
+Innen 31 statt 72, bei einem Grund von 22 — die Karte ist eine Fläche, kein
+Stapel.
+
+Zwei Messfehler auf dem Weg: `scrollIntoView` und `getBoundingClientRect` im
+selben Zug abgelesen, während `scroll-behavior: smooth` noch lief — der
+Ausschnitt landete mitten in der Karte statt an ihrer Kante, und die Messung
+meldete „keine Kante" (alle Zeilen 78). Und der erste Verdacht auf den
+Schlagschatten ließ sich mit einem Profil widerlegen: außen ändert er nichts.
+
 ### Ein Fenster — und es ist wirklich durchsichtig
 
 Gemeint war der Kasten, wie er auf dem **Sperrbildschirm** aussieht: dort steht
