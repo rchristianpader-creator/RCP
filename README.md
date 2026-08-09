@@ -1714,6 +1714,35 @@ steht es nicht drin.
 Werten, nicht darauf: die Maschine, auf der das läuft, ist nicht immer gleich
 schnell. Was dort reißt, ist eine echte Verschlechterung, kein Rauschen.
 
+### Und wenn die Maschine nicht ruhig ist
+
+Das reichte nicht. An einem Tag hat dieselbe Reihe an derselben Seite
+**14,9 s** für den Start gemeldet, allein danach 4,6 s und eine Viertelstunde
+später dreimal grün. Gemessen wurde nicht die Seite, sondern wer sonst noch auf
+den vier Kernen rechnete — dreimal falscher Alarm, und einmal hätte er beinahe
+in die falsche Richtung geschickt.
+
+Die Antwort ist nicht, die Schwellen aufzuweichen; dann misst der Test nichts
+mehr. Sie ist, vorher zu fragen, ob überhaupt zu messen ist. `fluss-test` liest
+`os.loadavg()`, und liegt die Last über einem Viertel der Kernzahl, werden alle
+gedrosselten Messungen **gemeldet, aber nicht bewertet** — sichtbar als `--`
+in der Ausgabe, damit niemand sie für gelaufen hält.
+
+Zwei Dinge daran waren erst falsch:
+
+**Der Lastmesser.** Zuerst ein fester Rechenlauf im Browser unter derselben
+Drosselung. Der Zähler *stieg* unter Last, statt zu fallen — eine Zahl, die in
+die falsche Richtung zeigt, ist schlimmer als keine. Deshalb die Systemlast.
+
+**Der Umfang.** Die Schranke deckte zuerst nur die zwei Ladezeiten ab. Unter
+künstlicher Last (9,64 statt 1,8) fielen die sechs Bildraten-Messungen weiter
+durch — sie messen dasselbe. Jetzt gehen **alle zehn** hindurch, nachgeprüft
+unter Last: bei 8,72 wurde jede gemeldet und keine bewertet, die Reihe lief
+ohne einen einzigen Fehler durch.
+
+Ein Test, der bei Last rot wird, erzieht dazu, rote Tests zu ignorieren. Das
+ist teurer als jede Schwelle.
+
 ## Android, iOS und Windows
 
 Drei Wege auf den Home-Bildschirm, und lange gab es nur zwei Anleitungen: iOS
