@@ -186,6 +186,9 @@
        Anmeldeseite, seit die Charts selbst gezeichnet werden auch hier. */
     --gut: #15803d;
     --schlecht: #b91c1c;
+    /* Die Hoehe der klebenden Leiste. Der Vorgabewert passt zu zwei Reihen
+       Chips; das Skript misst nach, sobald die Leiste steht. */
+    --leiste: 96px;
     --schleier: rgba(17, 17, 17, 0.62);
     --schatten: rgba(0, 0, 0, 0.24);
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -463,18 +466,31 @@
   }
   .karten > .card {
     margin: 0 14px 56px;
-    /* Was weit weg ist, zeichnet der Browser gar nicht erst; die Hoehe ist
-       vorgegeben, damit Sprungmarken und der Rundgang stimmen.
+    /* Eine Karte fuellt den Schirm.
 
-       Der Wert muss der wirklichen Kartenhoehe folgen, sonst springt die
-       Seite unter dem laufenden Scrollen weg. Er stand schon zweimal
-       falsch: bei 760, als die Zeitraum-Knoepfe dazukamen (jede lange Karte
-       schob den Sprung 54 Pixel nach unten), und bei 800, als der Chart von
-       400 auf 208 schrumpfte — da verkuerzte jede Karte beim Zeichnen die
-       Seite um 180 Pixel, und der Rundgang fuhr mitten im Zug zurueck.
-       Gemessen sind es jetzt 601 bis 622. */
+       Vorher war sie kuerzer als das Fenster, und unten schaute immer schon
+       die naechste herein — man sah nie eine Position allein, sondern immer
+       anderthalb. Jetzt reicht sie von der Unterkante der klebenden Leiste
+       bis zum unteren Bildrand; die naechste beginnt darunter, ausser Sicht.
+
+       Was weit weg ist, zeichnet der Browser gar nicht erst — dafuer muss
+       eine Hoehe vorgegeben sein, sonst springt die Seite unter dem
+       laufenden Scrollen weg. Dieser Wert stand schon zweimal falsch: bei
+       760, als die Zeitraum-Knoepfe dazukamen, und bei 800, als der Chart
+       von 400 auf 208 schrumpfte.
+
+       Deshalb ist es jetzt derselbe Wert. --kartenhoehe steht einmal da und
+       gilt fuer beides: fuer die wirkliche Hoehe und fuer die reservierte.
+       Sie koennen nicht mehr auseinanderlaufen, weil es sie nur einmal gibt.
+
+       --leiste traegt die Hoehe der klebenden Leiste; ein Skript misst sie
+       nach, weil sie ein- oder zweizeilig sein kann. */
+    --kartenhoehe: calc(100dvh - var(--leiste) - 10px);
+    min-height: var(--kartenhoehe);
+    display: flex;
+    flex-direction: column;
     content-visibility: auto;
-    contain-intrinsic-size: auto 620px;
+    contain-intrinsic-size: auto var(--kartenhoehe);
   }
   .karten-fehler {
     margin: 0 14px 56px;
@@ -871,7 +887,10 @@
   .chart {
     position: relative;
     width: 100%;
-    height: 208px;
+    /* Waechst in die Hoehe, die durch die volle Kartenhoehe frei wird —
+       sonst stuende unten in jeder Karte ein leerer Streifen. */
+    flex: 1 1 auto;
+    min-height: 208px;
     border-top: 1px solid var(--hair);
     padding: 12px 48px 22px 14px;
     opacity: 0;
@@ -3768,6 +3787,7 @@
     liste.forEach(function (p) { stapel.appendChild(karte(p)); });
 
     window.rcpPositionen = liste;
+    leisteMessen();
     charts();
     document.dispatchEvent(new CustomEvent("rcp:karten", { detail: liste }));
 
@@ -3951,6 +3971,27 @@
       (steigt ? "+" : "\u2212") + Math.abs(prozent).toFixed(2).replace(".", ",") + " %");
     kasten.appendChild(wandel);
     return true;
+  }
+
+  /* Wie hoch die klebende Leiste ist. Davon haengt ab, wie hoch eine Karte
+     sein muss, um den Schirm zu fuellen — und die Leiste ist mal ein-, mal
+     zweizeilig, je nachdem wie viele Positionen auf der Liste stehen und wie
+     breit das Fenster ist. Also nachmessen statt schaetzen.
+
+     Beim Drehen des Geraets aendert sich beides zugleich; ein Zuhoerer am
+     resize reicht, ein ResizeObserver an der Leiste ist genauer, wenn ein
+     NEU-Chip eine dritte Reihe aufmacht. */
+  function leisteMessen() {
+    if (!nav) return;
+    var setzen = function () {
+      var h = Math.round(nav.getBoundingClientRect().height);
+      if (h > 0) document.documentElement.style.setProperty("--leiste", h + "px");
+    };
+    setzen();
+    if (nav.getAttribute("data-misst") === "1") return;
+    nav.setAttribute("data-misst", "1");
+    window.addEventListener("resize", setzen);
+    if ("ResizeObserver" in window) new ResizeObserver(setzen).observe(nav);
   }
 
   function charts() {
