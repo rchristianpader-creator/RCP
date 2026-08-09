@@ -776,8 +776,9 @@ Drei Wege auf den Home-Bildschirm, und lange gab es nur zwei Anleitungen: iOS
 und „alles andere". Android und Windows bekamen dieselben drei vagen Zeilen und
 mussten selbst herausfinden, wo der Punkt sitzt.
 
-**Die Anleitung kennt jetzt drei Geräte.** `#stepsIos`, `#stepsAndroid`,
-`#stepsDesktop` — plus `#stepsOther` als Rückfall für alles, was in keine der
+**Die Anleitung kennt drei Geräte.** Das Gerät wird beim Öffnen erkannt und
+genau eine Anleitung eingeblendet — `#stepsIos`, `#stepsAndroid`,
+`#stepsDesktop`, plus `#stepsOther` als Rückfall für alles, was in keine der
 drei Schubladen passt:
 
 | | Weg |
@@ -785,6 +786,23 @@ drei Schubladen passt:
 | iOS | Safari → Teilen → Zum Home-Bildschirm (die vier bebilderten Schritte) |
 | Android | ⋮ → App installieren; in Firefox und Samsung Internet heißt es *Zum Startbildschirm hinzufügen* |
 | Windows & Schreibtisch | Zeichen rechts in der Adressleiste; sonst Edge: *Apps → Diese Website als App installieren*, Chrome: *Streamen, Speichern und Teilen → Seite als App installieren* |
+
+**iOS und Android sind beide bebildert.** Vier Schritte, je mit einer kleinen
+Zeichnung im selben Maß (300 × 66) und demselben Ring, der auf die Stelle
+zeigt: bei iOS Teilen-Symbol → Liste → *Hinzufügen* → Home-Bildschirm, bei
+Android die drei Punkte → Menüzeile *App installieren* → der Dialog mit
+*Installieren* → Home-Bildschirm. Vorher hatte Android vier nackte Textzeilen
+— das ist eine Liste, kein Tutorial. Die Zeichnungen laufen im selben Takt
+durch (`schrittRing`, `schrittRahmen`, `schrittNummer`), ohne dass dafür etwas
+dazugekommen wäre: die Regeln hängen an `.steps li:nth-child(n)` und greifen
+für jede Liste.
+
+Der Schreibtisch bleibt bei Text — dort ist die Stelle eine Adressleiste, und
+die zu zeichnen erklärt weniger als sie zu benennen.
+
+Eine Falle dabei: zwei `<clipPath>` mit derselben Kennung brechen jedes
+`url(#…)` im ganzen Dokument, und zwar still. `plattform-test` sammelt deshalb
+alle `id`-Attribute der Seite ein und prüft, dass keines zweimal vorkommt.
 
 **Wo der Browser selbst kann, geht der Dialog vor.** Android und der
 Schreibtisch liefern `beforeinstallprompt` — ein Tipp statt vier Schritten. Das

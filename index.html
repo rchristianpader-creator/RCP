@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="light">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#fafafa">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=72">
-<link rel="apple-touch-icon" href="/icon-180.png?v=72">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=73">
+<link rel="apple-touch-icon" href="/icon-180.png?v=73">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=72">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=73">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=72">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=73">
 
 <script>
 /* Im Browser oder als App?
@@ -2103,7 +2103,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=72");
+    background-image: url("/kerzen.svg?v=73");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -2117,7 +2117,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=72");
+    background-image: url("/kerzen-blass.svg?v=73");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -2838,7 +2838,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=72" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=73" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -2956,7 +2956,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=72" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=73" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -2969,10 +2969,67 @@
          Rueckweg fuer den Fall, dass er nicht kommt — etwa in Firefox oder
          Samsung Internet, oder wenn er schon einmal weggetippt wurde. -->
     <ol class="steps" id="stepsAndroid" hidden>
-      <li><span class="n">1</span><span>Oben rechts auf die <b>drei Punkte</b> tippen</span></li>
-      <li><span class="n">2</span><span><b>App installieren</b> wählen — in Firefox und Samsung Internet heißt es <b>Zum Startbildschirm hinzufügen</b></span></li>
-      <li><span class="n">3</span><span><b>Installieren</b> bestätigen</span></li>
-      <li><span class="n">4</span><span>Fertig — App über das neue Icon <b>Aktien-Liste</b> starten</span></li>
+      <li>
+        <span class="n">1</span>
+        <div class="step-body">
+          <div class="step-text">Oben rechts auf die <b>drei Punkte</b> tippen</div>
+          <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="14" y="16" width="222" height="26" rx="13" opacity=".3"/>
+            <rect x="30" y="25" width="104" height="8" rx="4" fill="currentColor" stroke="none" opacity=".18"/>
+            <circle cx="266" cy="22" r="1.8" fill="currentColor" stroke="none"/>
+            <circle cx="266" cy="29" r="1.8" fill="currentColor" stroke="none"/>
+            <circle cx="266" cy="36" r="1.8" fill="currentColor" stroke="none"/>
+            <circle class="ring" cx="266" cy="29" r="16"/>
+            <line x1="0" y1="56" x2="300" y2="56" stroke="var(--line)"/>
+          </svg>
+        </div>
+      </li>
+      <li>
+        <span class="n">2</span>
+        <div class="step-body">
+          <div class="step-text">Im Menü <b>App installieren</b> wählen — in Firefox und Samsung Internet heißt es <b>Zum Startbildschirm hinzufügen</b></div>
+          <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+            <rect class="wisch" x="10" y="8" width="280" height="20" rx="4" opacity=".25"/>
+            <rect x="10" y="34" width="280" height="24" rx="4"/>
+            <rect class="ring" x="6" y="30" width="288" height="32" rx="6"/>
+            <path d="M31 40v10M26.5 45.5l4.5 4.5 4.5-4.5" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="50" y="51" font-size="11" font-weight="600" fill="currentColor" stroke="none">App installieren</text>
+          </svg>
+        </div>
+      </li>
+      <li>
+        <span class="n">3</span>
+        <div class="step-body">
+          <div class="step-text"><b>Installieren</b> bestätigen</div>
+          <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+            <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
+            <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
+            <image href="/icon-192.png?v=73" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
+            <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
+            <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
+            <text x="152" y="52" font-size="9" fill="currentColor" stroke="none" opacity=".4">Abbrechen</text>
+            <rect x="204" y="42" width="52" height="15" rx="3" fill="currentColor" stroke="none"/>
+            <text x="230" y="52.5" font-size="9" font-weight="700" fill="#fff" stroke="none" text-anchor="middle">Installieren</text>
+            <rect class="ring" x="199" y="37" width="62" height="25" rx="5"/>
+          </svg>
+        </div>
+      </li>
+      <li>
+        <span class="n">4</span>
+        <div class="step-body">
+          <div class="step-text">Fertig — App über das neue Icon starten</div>
+          <svg class="mock" viewBox="0 0 300 66" fill="none" aria-hidden="true">
+            <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
+            <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
+            <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
+            <image href="/icon-192.png?v=73" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
+            <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
+            <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
+          </svg>
+        </div>
+      </li>
     </ol>
 
     <!-- Windows und der uebrige Schreibtisch. Edge und Chrome zeigen das
@@ -3083,7 +3140,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=72" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=73" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -5202,7 +5259,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=72";
+      i.src = "/icon-512.png?v=73";
     });
     return symbolBild;
   }
