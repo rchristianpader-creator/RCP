@@ -134,10 +134,10 @@
        mit Absicht: nur Chromium setzt sie um, auf dem iPhone kostete sie
        nur. */
     /* Hier laesst sich das ganze Bild leiser stellen. */
-    --grund-kuehl: rgba(24, 92, 130, 0.85);
-    --grund-warm: rgba(150, 92, 36, 0.7);
-    --grund-flieder: rgba(78, 34, 96, 0.8);
-    --grund-tuerkis: rgba(16, 122, 96, 0.85);
+    --grund-kuehl: rgba(38, 74, 96, 0.5);
+    --grund-warm: rgba(112, 82, 52, 0.4);
+    --grund-flieder: rgba(64, 44, 78, 0.45);
+    --grund-tuerkis: rgba(28, 88, 78, 0.5);
 
     /* Zwei Stufen guenstiger: der Aufwand eines Weichzeichners waechst mit
        dem Radius, und drei Filter kosten drei Durchgaenge. Gemessen wird auf
@@ -246,6 +246,14 @@
        hereinzulassen. */
     --rand: 14px;
     --luft: calc(var(--rand) * 2);
+    /* Worauf die klebende Leiste sitzt.
+
+       Eine Karte liegt auf dem farbigen Grund und nimmt dessen Helligkeit
+       an; die Leiste muss decken und kann das nicht. Auf dem nackten
+       Grundton wurde sie deshalb deutlich schwaerzer als die Karten
+       daneben. Dieser Ton ist der Grund an seiner hellsten Stelle — damit
+       trifft die Leiste die Farbe einer Karte, ohne durchsichtig zu sein. */
+    --leiste-grund: #2b3231;
     --schleier: rgba(0, 0, 0, 0.72);
     --schatten: rgba(0, 0, 0, 0.5);
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -474,6 +482,11 @@
        durchziehen: die Karten stehen auf genau denselben 14 Pixeln, in den
        Streifen liegt nur der Grund — und der scrollt nicht.
 
+       Dieselbe Farbe wie eine Karte: derselbe Schimmer, dieselbe Fuellung.
+       Nur liegt darunter kein Grund, sondern der Grundton selbst — eine
+       klebende Leiste muss decken, und eine durchscheinende Leiste ohne
+       Frost waere ein Schmierbild aus vorbeiziehenden Karten.
+
        Rundherum gerundet wie jedes andere Fenster. Die beiden oberen Ecken
        sitzen ganz oben am Bildrand, unter der Statusleiste; was dort in
        einem 16 Pixel breiten Zwickel durchscheint, sieht ohnehin niemand. */
@@ -490,7 +503,8 @@
        Tag ueber bewegtem Inhalt liegt. Dafuer deckt die Fuellung. */
     background:
       var(--glas-schimmer),
-      linear-gradient(rgba(19, 24, 22, 0.94), rgba(19, 24, 22, 0.94));
+      linear-gradient(var(--glas-fuellung-karte), var(--glas-fuellung-karte)),
+      linear-gradient(var(--leiste-grund), var(--leiste-grund));
     box-shadow: var(--glas-kante);
     border-bottom: 1px solid var(--hair);
   }
@@ -2793,12 +2807,20 @@
   nav {
     transition: background 0.38s ease, box-shadow 0.38s ease, border-color 0.38s ease;
   }
+  /* Wenn die Leiste klebt, aendert sich nur, dass sie abhebt.
+
+     Hier stand eine zweite, vollstaendige Beschreibung ihres Aussehens:
+     eigener Hintergrund und ein eigener Frost. Das hat zwei Dinge auf
+     einmal angerichtet — die Leiste bekam nie die Farbe der Karten,
+     sondern den nackten Grundton (deshalb war sie schwaerzer als alles
+     daneben), und der Frost, den ich weiter oben wegen der Traegheit
+     entfernt hatte, lief hier ungesehen weiter. Auf genau der Flaeche, die
+     den ganzen Tag ueber bewegtem Inhalt liegt.
+
+     Zwei Stellen, die dasselbe beschreiben, sind eine zu viel. Geblieben
+     ist der Schatten, der sie vom Inhalt abhebt. */
   nav.klebt {
-    background: rgba(var(--bg-rgb), 0.88);
-    -webkit-backdrop-filter: saturate(150%) blur(12px);
-    backdrop-filter: saturate(150%) blur(12px);
-    border-bottom-color: var(--line);
-    box-shadow: 0 8px 20px -18px rgba(var(--fg-rgb), 0.5);
+    box-shadow: var(--glas-kante), 0 10px 24px -16px rgba(0, 0, 0, 0.8);
   }
 
   /* Wo man gerade ist. Nur die Kante — der pulsierende Ring gehoert
