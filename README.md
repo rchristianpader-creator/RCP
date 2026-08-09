@@ -370,7 +370,7 @@ Tropfen. Also sechs Marken, nach Rolle vergeben:
 | `--r-karte` | 16 px | Karten und Kästen |
 | `--r-bild` | 12 px | Bilder in Meldungen und Beiträgen |
 | `--r-feld` | 12 px | Knöpfe und Eingaben |
-| `--r-chip` | 11 px | die Marken in der Leiste |
+| `--r-chip` | 11 px | die Symboltasten |
 | `--r-marke` | 6 px | Abzeichen, Punkte, Zähler |
 
 32 Stellen in `index.html`, 23 auf den anderen drei Seiten — keine davon
@@ -427,7 +427,7 @@ wegnimmt, wenn weiter unten ein Skript stolpert.
 
 ## Glas
 
-Flächen, die über etwas liegen, sind nicht mehr deckend: die klebende Leiste,
+Flächen, die über etwas liegen, sind nicht mehr deckend: die Symboltasten,
 die Blätter, der Streifen unten, der Neuheiten-Schirm und der Anmeldekasten.
 Vier Teile machen aus Milchglas Glas:
 
@@ -518,9 +518,38 @@ jetzt Füllung und Schimmer (aber keinen Frost: hinter ihm liegt nur der Grund,
 und der ist schon weich — ein Filter wäre dort reine Rechenzeit ohne Bild), die
 beiden Streifen sind halbdurchsichtig.
 
-**Zwei Dicken.** Die Leiste und der Streifen tragen Marken; dort darf viel
-durchscheinen (`0.42`). Ein Blatt trägt Sätze, und hinter Sätzen soll nichts
-stehen, das man mitliest (`0.66`).
+**Zwei Dicken.** Die Symboltasten und der Streifen tragen Marken; dort darf
+viel durchscheinen (`0.42`). Ein Blatt trägt Sätze, und hinter Sätzen soll
+nichts stehen, das man mitliest (`0.66`).
+
+### Kein Kasten um die Symboltasten
+
+Um die Kürzel stand ein zweites Fenster: eigener Hintergrund, eigene Kante,
+eigene Rundung — und darin nochmals gerundete Tasten. Rahmen um Rahmen. Weil er
+oben klebte, war er außerdem das schwerste Stück auf dem Schirm: die einzige
+Fläche, die den ganzen Tag über bewegtem Inhalt liegt.
+
+Der Kasten ist weg. Die Tasten sind unverändert — sie tragen ihr Glas selbst
+und brauchen keine Schale, um zusammenzugehören; das tut die Reihe.
+
+Mit dem Kasten fällt das Kleben weg, das eine geht ohne das andere nicht: eine
+durchsichtige Reihe, die stehen bleibt, während Karten hinter ihr durchziehen,
+wäre ein Schmierbild, und jede Deckung dagegen wäre wieder der Kasten. Also
+fährt die Reihe mit, wie die Überschrift darüber.
+
+Drei Werte hingen an der klebenden Leiste und sind mitgegangen:
+
+| vorher | jetzt |
+|---|---|
+| `--kartenhoehe: 100dvh − --leiste − --luft` | `100dvh − --luft` |
+| `scroll-padding-top: --leiste + --luft/2` | `--luft/2` |
+| ein Skript maß `--leiste` nach (ein- oder zweizeilig) | entfällt |
+
+Gemessen bei 390 × 844: zehn Karten, alle 816 Pixel hoch, nach einem Sprung
+14 oben und 14 unten, genau eine Karte im Bild. Die Fortschrittslinie lag im
+Kasten und war nur sichtbar, solange er klebte; sie sitzt jetzt fest am oberen
+Bildrand, zwei Pixel hoch, und braucht kein Ein- und Ausblenden mehr — bei
+Scrollstellung null ist sie auf Null zusammengezogen.
 
 **Auch die Karten sind Glas — aber ohne Frost.** Lange stand hier das
 Gegenteil: Glas über einer flachen Fläche ist kein Glas, sondern eine hellere
@@ -752,8 +781,9 @@ Deckung (Fenster + Kachel), den Umlauf auf halbem Weg (genau eine halbe Kachel)
 und dass in beiden HTML-Dateien kein gedehntes SVG mehr steht.
 
 `glanz-test` prüft, dass der Schimmer wirklich ankommt: zwei Hintergrundebenen
-auf Leiste, Blatt und Anmeldekasten, vier Linien an der Kante, keine Fläche mit
-nackter Füllung, kein `::before` mehr — und dass die `background-position` sich
+auf Blatt und Anmeldekasten, Licht oben und Schatten unten an der Kante, keine
+Fläche mit nackter Füllung, kein `::before` mehr — und dass die
+`background-position` sich
 nicht bewegt, nachdem ein Blatt bis zum Anschlag gerollt wurde. Das Fenster
 wird dafür auf 320 Pixel Höhe verkleinert, sonst ist das Blatt kürzer als der
 Platz und rollt gar nicht.
