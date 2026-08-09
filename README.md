@@ -575,21 +575,49 @@ Die **echte Brechung** — ein SVG-`feDisplacementMap` als `backdrop-filter` —
 ist bewusst nicht drin. Nur Chromium reicht SVG-Filter an `backdrop-filter`
 durch; auf dem iPhone, wo diese App läuft, täte sie nichts außer kosten.
 
-### Was es kostet
+### Was es kostet — und die eine Regel, die daraus folgt
 
-Nichts Messbares. A/B beim Scrollen, sechsfach gedrosselter Prozessor,
-frischer Browser je Messung, fünf Durchgänge — Bilder über 32 ms je Lauf:
+**Frost nur, wo eine Fläche steht. Was mitscrollt, bekommt keinen.**
 
-| | Mittel | lange Bilder |
+Ein mitscrollender `backdrop-filter` muss bei *jedem Bild* neu gefiltert
+werden. Das ist der teuerste Fehler, den man in dieser Machart machen kann,
+und ich habe ihn gemacht: Kopf, Laufstreifen und Setup-Streifen bekamen Frost,
+und die Messung fiel von 17,0 auf 19,6 ms bei 17,6 langen Bildern je Lauf —
+auch im Ruhezustand, nicht nur beim Scrollen.
+
+Vier Varianten, je fünf Durchgänge, sechsfach gedrosselter Prozessor,
+frischer Browser je Messung, Bilder über 32 ms:
+
+| Variante | Mittel | lange Bilder |
 |---|---|---|
-| ohne Glas | 17,0 ms | 0 · 2 · 0 · 8 · 3 |
-| Glas, erste Fassung | 17,0 ms | 1 · 0 · 0 · 0 · 0 |
-| Glas laut **plus** Kurve dahinter | **17,0 ms** | **0 · 0 · 0 · 0 · 0** |
+| A — mit Frost auf den Bändern | 20,6 ms | 21,2 |
+| B — Karten wieder deckend | 19,4 ms | 14,8 |
+| C — Karten Glas, ohne Kante | 18,6 ms | 10,8 |
+| **D — Bänder ohne Frost** | **17,0 ms** | **0,6** |
 
-Das schlimmste Einzelbild lag in allen fünf Durchgängen bei 17 ms. Der Grund
-ist, dass nichts davon Layout anfasst: der Frost ist eine Sache für den
-Compositor, und die Kurve ist ein festes Hintergrundbild ohne eigene
-Animation.
+Es waren **nicht** die Karten: B und C bringen kaum etwas. Zehn Karten aus
+Glas kosten nichts, solange sie keinen Filter tragen. Endstand nach der
+Korrektur: `17,0 ms`, `0,8` lange Bilder, schlimmstes Einzelbild 33 ms —
+dasselbe wie vor dem ganzen Umbau.
+
+Zweiter Fund aus derselben Runde: **`background-attachment: fixed`** auf der
+Anmeldeseite. Ein festgenagelter Hintergrund wird neu gezeichnet statt
+zusammengesetzt, sobald sich darüber etwas bewegt — und darüber laufen die
+Kerzenbänder. Die Prüfung „die Kerzen laufen rund" war rot, die Zeile konnte
+ersatzlos weg.
+
+### Die Größe
+
+`index.html` wird auf jeden Aufruf ausgeliefert, deshalb hat `fluss-test`
+einen Deckel bei 260 kB. Diese Sitzung riss ihn (267 kB) — zum größeren Teil
+durch Kommentarprosa. Gekürzt auf 259,5 kB; über die Leitung sind es 70,2
+statt 67,5 kB gzip, also **+2,7 kB** für Glas, Grund, Linien-Charts und
+Zeitraum-Knöpfe.
+
+Der Deckel misst die rohe Datei und trifft damit vor allem Kommentare, die
+sich fast vollständig wegkomprimieren. 259,5 gegen 260 ist hauchdünn — der
+nächste längere Kommentar reißt die Prüfung wieder. Auf gzip umzustellen wäre
+das ehrlichere Maß.
 
 ### Zwei Rückwege
 
