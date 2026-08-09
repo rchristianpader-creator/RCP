@@ -434,23 +434,25 @@
     padding: 10px 12px;
     justify-content: center;
     position: sticky;
-    /* Sitzt am oberen Rand. Kurz stand hier top: 8px mit Abstand nach beiden
-       Seiten — und dann zog der Inhalt in den Spalten darueber und daneben
-       sichtbar durch. Eine klebende Leiste deckt ab oder sie ist keine. Die
-       Fensterform bleibt: unten rund, oben gerade. */
+    /* Klebt am oberen Rand, nicht darunter.
+
+       Kurz stand hier ein Abstand nach oben — dann zog der Inhalt in dem
+       Spalt darueber sichtbar durch. Eine klebende Leiste deckt ab oder sie
+       ist keine. Die Luft ueber den Kuerzeln steckt deshalb im
+       Innenabstand, nicht im Aussenabstand.
+
+       An den Seiten dieselben 14 Pixel wie ueberall. Daneben kann nichts
+       durchziehen: die Karten stehen auf genau denselben 14 Pixeln, in den
+       Streifen liegt nur der Grund — und der scrollt nicht.
+
+       Rundherum gerundet wie jedes andere Fenster. Die beiden oberen Ecken
+       sitzen ganz oben am Bildrand, unter der Statusleiste; was dort in
+       einem 16 Pixel breiten Zwickel durchscheint, sieht ohnehin niemand. */
     top: 0;
-    /* Derselbe Rand wie ueberall. Beiseite kann nichts durchziehen: die
-       Karten stehen auf genau denselben 14 Pixeln, in den Streifen daneben
-       liegt nur der Grund — und der scrollt nicht. */
     margin: 0 var(--rand) 12px;
-    padding-top: calc(10px + env(safe-area-inset-top));
-    /* Von Rand zu Rand, nur unten rund. Mit Abstand nach beiden Seiten sah
-       man in den beiden Streifen daneben den Inhalt vorbeiziehen — dasselbe
-       Loch wie oben, nur schmaler. Eine klebende Leiste deckt ab oder sie
-       ist keine. */
-    border-radius: 0 0 var(--r-karte) var(--r-karte);
+    padding-top: calc(var(--rand) + env(safe-area-inset-top));
+    border-radius: var(--r-karte);
     border: 1px solid var(--hair);
-    border-top: 0;
     z-index: 20;
     /* Kein Frost, und das folgt aus der eigenen Regel: eine klebende Leiste
        steht still, waehrend sich darunter alles bewegt — der Filter muss
