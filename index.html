@@ -312,11 +312,17 @@
     letter-spacing: 0.02em;
   }
 
+  /* Die Chips fuellen die Breite aus. Vorher standen sie mittig und liessen
+     rechts und links Luft stehen — auf dem Telefon las sich das als weisser
+     Rand um die Leiste statt als Leiste. Jeder Chip waechst mit (flex: 1),
+     also endet jede Reihe genau am Bildrand. Der Sortierknopf waechst nicht:
+     er traegt ein Zeichen, keinen Namen, und in die Breite gezogen sieht er
+     aus wie ein Fehler. */
   nav {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    padding: 14px 16px;
+    padding: 12px 10px 10px;
     justify-content: center;
     position: sticky;
     top: 0;
@@ -331,10 +337,11 @@
     border-bottom: 1px solid var(--hair);
   }
   nav a {
+    flex: 1 1 auto;
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.04em;
-    padding: 6px 12px;
+    padding: 6px 10px;
     /* Feste Hoehe fuer alle: die NEU-Chips sind wegen ihres oberen
        Abstands hoeher, und eine Flex-Reihe richtet sich nach dem
        hoechsten Element. Ohne das aendert sich die Kastengroesse,
@@ -484,6 +491,8 @@
      Was er tut, steht in aria-label und title — sichtbar ist der Zustand
      ueber die Fuellung. */
   nav .sort-chip {
+    /* Waechst nicht mit: er traegt ein Zeichen, keinen Namen. */
+    flex: 0 0 auto;
     order: 99;
     font: inherit;
     font-size: 14px;

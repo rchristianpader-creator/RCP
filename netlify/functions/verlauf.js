@@ -23,13 +23,20 @@
 import { getStore } from "@netlify/blobs";
 
 /* Wie weit zurueck und wie fein, je Knopf. Und wie lange die Antwort taugt:
-   ein Tagesverlauf ist nach einer Minute alt, ein Jahresverlauf nicht. */
+   ein Tagesverlauf ist nach einer Minute alt, ein Jahresverlauf nicht.
+
+   Je Spanne mehrere Versuche, vom feinsten zum groebsten. Nicht jedes Papier
+   liefert jede Aufloesung: bei Gold und Silber sind das Futures (GC=F,
+   SI=F), und die geben je nach Tageszeit und Kontrakt keine
+   Fuenf-Minuten-Reihe heraus — dann kam eine leere Antwort zurueck und die
+   Karte blieb leer. Statt aufzugeben wird es eine Stufe groeber versucht.
+   Lieber ein etwas grober Tagesverlauf als gar keiner. */
 const SPANNEN = {
-  "1T": { range: "1d", interval: "5m", frisch: 60 },
-  "1W": { range: "5d", interval: "30m", frisch: 300 },
-  "1M": { range: "1mo", interval: "90m", frisch: 1800 },
-  "1J": { range: "1y", interval: "1d", frisch: 3600 },
-  MAX: { range: "max", interval: "1wk", frisch: 43200 }
+  "1T": { frisch: 60, versuche: [["1d", "5m"], ["1d", "15m"], ["5d", "30m"]] },
+  "1W": { frisch: 300, versuche: [["5d", "30m"], ["5d", "1h"], ["1mo", "1d"]] },
+  "1M": { frisch: 1800, versuche: [["1mo", "90m"], ["1mo", "1d"], ["3mo", "1d"]] },
+  "1J": { frisch: 3600, versuche: [["1y", "1d"], ["1y", "1wk"], ["2y", "1wk"]] },
+  MAX: { frisch: 43200, versuche: [["max", "1wk"], ["max", "1mo"], ["10y", "1mo"]] }
 };
 
 export default async (request) => {
@@ -49,7 +56,7 @@ export default async (request) => {
     return json(Object.assign({ ok: true, aus: "speicher" }, alt), 200, plan.frisch);
   }
 
-  const frisch = await holen(sym, plan);
+  const frisch = await holenMitRueckfall(sym, plan);
   if (!frisch) {
     // Lieber alt als nichts: ein Chart von vorhin ist besser als ein leeres Feld
     if (alt) return json(Object.assign({ ok: true, aus: "speicher-alt" }, alt), 200, 60);
@@ -85,12 +92,21 @@ async function gespeichert(speicher, schluessel) {
   }
 }
 
-async function holen(sym, plan) {
+/* Der Reihe nach, bis eine Reihe herauskommt. */
+async function holenMitRueckfall(sym, plan) {
+  for (const [range, interval] of plan.versuche) {
+    const d = await holen(sym, range, interval);
+    if (d) return d;
+  }
+  return null;
+}
+
+async function holen(sym, range, interval) {
   try {
     const url =
       "https://query1.finance.yahoo.com/v8/finance/chart/" +
       encodeURIComponent(sym) +
-      "?range=" + plan.range + "&interval=" + plan.interval + "&includePrePost=false";
+      "?range=" + range + "&interval=" + interval + "&includePrePost=false";
     const res = await fetch(url, {
       headers: {
         "User-Agent": "Mozilla/5.0 (compatible; AktienListe/1.0)",
@@ -126,7 +142,7 @@ async function holen(sym, plan) {
        daran ist ein Plus ein Plus. Bei den laengeren Spannen gibt es keinen
        sinnvollen "davor", dort ist es der erste Punkt der Reihe selbst. */
     const vorher =
-      plan.range === "1d" && typeof meta.chartPreviousClose === "number"
+      range === "1d" && typeof meta.chartPreviousClose === "number"
         ? runde(meta.chartPreviousClose)
         : punkte[0][1];
 
@@ -135,6 +151,7 @@ async function holen(sym, plan) {
       vorher: vorher,
       waehrung: meta.currency || null,
       quelle: "Yahoo",
+      aufloesung: range + "/" + interval,
       stand: Date.now()
     };
   } catch (e) {
