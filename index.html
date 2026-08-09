@@ -431,7 +431,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    padding: 10px 12px;
+    padding: 10px 12px 12px;
     justify-content: center;
     position: sticky;
     /* Klebt am oberen Rand, nicht darunter.
@@ -2711,12 +2711,21 @@
     }
   }
 
+  /* Der Lesefortschritt liegt IM Kasten, nicht an seiner Unterkante.
+
+     Er lief frueher ueber die volle Breite und einen Pixel unterhalb — das
+     passte, solange die Leiste von Rand zu Rand ging und unten gerade war.
+     Seit sie ein gerundetes Fenster ist, ragte ein schnurgerader schwarzer
+     Balken darunter heraus. Jetzt ein kurzer, gerundeter Strich innerhalb
+     des Innenabstands, mit demselben Abstand zu den Seiten wie die Kuerzel
+     darueber. */
   nav .nav-fortschritt {
     position: absolute;
-    left: 0;
-    bottom: -1px;
+    left: 12px;
+    right: 12px;
+    bottom: 4px;
     height: 2px;
-    width: 100%;
+    border-radius: 2px;
     background: var(--fg);
     transform: scaleX(0);
     transform-origin: 0 50%;
