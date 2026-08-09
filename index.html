@@ -219,10 +219,17 @@
 
        Ein Wert, zwei Stellen. Sie koennen nicht auseinanderlaufen.
 
-       Und er ist der Regler fuer die Kartengroesse: Karte plus Luft ergeben
-       zusammen immer einen Schirm. Die Haelfte der Luft steht ueber der
-       Karte, die andere darunter — oben und unten derselbe Abstand. */
-    --luft: 160px;
+       Die Haelfte der Luft steht ueber der Karte, die andere darunter. Und
+       die Haelfte ist derselbe Wert wie der Abstand an den Seiten: 14 Pixel
+       rundherum, oben wie unten wie links wie rechts. Kein ausgedachtes
+       Mass, sondern das, das die Seite ohnehin benutzt.
+
+       Damit steht die Kartengroesse fest, sie ist keine Geschmacksfrage
+       mehr: Schirm minus Leiste minus 28. Groesser geht nicht, ohne den
+       Rand aufzugeben, kleiner nicht, ohne die naechste Karte
+       hereinzulassen. */
+    --rand: 14px;
+    --luft: calc(var(--rand) * 2);
     --schleier: rgba(17, 17, 17, 0.62);
     --schatten: rgba(0, 0, 0, 0.24);
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -586,7 +593,7 @@
     margin-top: calc(var(--luft) / 2);
   }
   .karten > .card {
-    margin: 0 14px var(--luft);
+    margin: 0 var(--rand) var(--luft);
     /* Eine Karte fuellt den Schirm. Vorher schaute unten immer schon die
        naechste herein — man sah nie eine Position allein, sondern anderthalb.
 
@@ -680,7 +687,7 @@
      Frost. Siehe die Marke oben; der Versuch hat das Scrollen traege
      gemacht. */
   .card {
-    margin: 16px 14px var(--luft);
+    margin: 16px var(--rand) var(--luft);
     border: 1px solid var(--hair);
     border-radius: var(--r-karte);
     overflow: hidden;
@@ -2354,7 +2361,7 @@
   /* Solange der Streifen unten steht, deckt er die letzten Pixel jeder Karte
      ab. Also wird die Luft unter der Karte um seine Hoehe groesser — und mit
      ihr, weil es derselbe Wert ist, der Abstand zur naechsten. */
-  body.has-install-bar { padding-bottom: 104px; --luft: 264px; }
+  body.has-install-bar { padding-bottom: 104px; --luft: calc(var(--rand) * 2 + 104px); }
   /* Das echte Symbol, keine nachgebaute Kachel — so zeigt der Streifen
      immer das, was nachher auch auf dem Home-Bildschirm steht. */
   .install-mark {
@@ -4287,8 +4294,15 @@
   function stickyOffset() {
     var nav = document.querySelector("nav");
     var hoch = nav ? nav.getBoundingClientRect().height : 62;
-    var luft = parseFloat(
-      getComputedStyle(document.documentElement).getPropertyValue("--luft")) || 160;
+    /* Die Luft wird an der Karte abgelesen, nicht an der Marke.
+
+       getPropertyValue liefert eine Marke so, wie sie dasteht — bei einem
+       calc() also den Text "calc(...)", und parseFloat macht daraus NaN.
+       Der Sprung landete damit auf dem Ersatzwert und wieder schief.
+       Die Aussenkante einer Karte ist derselbe Wert, nur ausgerechnet. */
+    var karte = document.querySelector(".karten > .card");
+    var luft = karte ? parseFloat(getComputedStyle(karte).marginBottom) : 28;
+    if (!isFinite(luft)) luft = 28;
     return hoch + luft / 2;
   }
   /* Wo steht die Karte wirklich?
