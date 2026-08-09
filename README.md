@@ -672,37 +672,44 @@ geprüft werden — die Entwicklungsumgebung lässt keine fremden Hosts durch
 statt eines kaputten Bildes, und deshalb das Feld an der Position, das
 unabhängig davon funktioniert.
 
-### Ein Fenster — Kopf, Karten und Ladebildschirm
+### Ein Fenster — und es ist wirklich durchsichtig
 
-„Design Karten bitte wie der Kasten Aktien-Liste." Der Kopf trug eine Füllung
-mehr als die Karten (`--glas-fuellung-fest`), mit der Begründung, dort stehe der
-Titel. Nebeneinander gesehen war er dadurch das einzige Fenster mit Körper, und
-die Karten wirkten daneben dünn.
+Gemeint war der Kasten, wie er auf dem **Sperrbildschirm** aussieht: dort steht
+`.nur-web header` auf `background: transparent`, und die Kerzen laufen sichtbar
+hindurch. Was das Fenster ausmacht, ist die Kante und der Lichtrand — keine
+Füllung.
 
-Jetzt eine Marke für alle: **`--glas-fenster`** — Glanz plus die dichtere
-Füllung. Kopf, Karten und die Scheibe des Ladebildschirms benutzen sie; wer sie
-benutzt, kann nicht mehr abweichen, ohne es zu wollen. Auch die Kante ist
-angeglichen: der Kopf stand noch auf `--hair`, die für helle Flächen gedacht war
-und auf dem dunklen Grund fast verschwindet.
+Ich hatte es zuerst andersherum verstanden und die Karten **dichter** gemacht
+statt durchsichtiger: in die genau entgegengesetzte Richtung. Eine Scheibe, durch
+die man nichts sieht, ist keine Scheibe.
 
-`fenster-test` misst nicht „ähnlich", sondern **gleich**: Hintergrund, Kante und
-Schatten von Kopf und Karte müssen Zeichen für Zeichen übereinstimmen. Zwei
-gleiche Zahlen können aus zwei Beschreibungen kommen und beim nächsten
-Nachbessern auseinanderlaufen.
+Jetzt `--glas-fenster: transparent` für Kopf, Karten und die Scheibe des
+Ladebildschirms. Geblieben ist die Kante — und die reicht: ein Rahmen aus Licht
+sagt „hier liegt Glas" deutlicher als jede Füllung. Der Grund dahinter ist
+dunkel, das Lesen wird dadurch nicht schlechter, sondern besser.
 
-**Was es kostet.** Die zusätzliche Füllung ist 0,10 Weiß, und die sieht man in
-der Helligkeit. Im Lesebereich der Karte:
+Der Glanz ist nicht verloren: `--glas-glanz-karte` trägt weiterhin die
+Symboltasten und den Glocken-Knopf. Nur die großen Flächen sind leer geworden.
 
-| | Helligkeit | Kontrast |
+**Der Beweis.** Dieselbe Stelle zweimal aufnehmen — einmal mit der Scheibe
+(Inhalt, Kante und Schatten unterdrückt), einmal ganz ohne Karte:
+
+| | Mittel | höchstens |
 |---|---|---|
-| die Hälfte der Fläche | 73 | **8,21 : 1** |
-| 90 % | 97 | 5,65 : 1 |
-| das hellste Prozent | 121 | 3,97 : 1 |
+| Messung gegen sich selbst | 0 | 0 |
+| **ohne Körnung: mit ↔ ohne Karte** | **0** | **0** |
+| mit Körnung | 2,7 | 14 |
 
-Nur **2,2 %** der Fläche sind heller als 110 — das ist die Stelle, an der der
-Lichtstreifen die Ecke quert. Auf dem größten Teil der Karte liest es sich bei
-8 : 1. Vorher (v91) lag das hellste Prozent bei 106, also 5,00 : 1; die
-Stellschraube ist die eine Füllungsebene.
+Punkt für Punkt gleich. Die paar Stufen, die mit Körnung übrig bleiben, kommen
+nicht von der Scheibe, sondern davon, wie die Rauschkachel unter einer eigenen
+Ebene gerastert wird — auf den Speckeln bis zu 14 von 255, gleichmäßig verteilt
+und mit bloßem Auge nicht zu sehen. Das war auch der Beweis, dass es die Körnung
+ist: ohne sie null, mit ihr nicht.
+
+Zwei falsche Fährten davor: erst verdächtigte ich die 1,22-Sekunden-Überblendung
+von `box-shadow` (die Aufnahme fiele mitten hinein) — das war es nicht. Dann eine
+Gegenprobe „zweimal dasselbe messen", die 0 ergab und damit zeitliches Rauschen
+ausschloss. Erst danach war klar, wo zu suchen ist.
 
 ### Die Karten sind so laut wie die Symboltasten
 

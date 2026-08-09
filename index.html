@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="dark">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#0a0d0c">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=96">
-<link rel="apple-touch-icon" href="/icon-180.png?v=96">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=97">
+<link rel="apple-touch-icon" href="/icon-180.png?v=97">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=96">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=97">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=96">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=97">
 
 <script>
 /* Im Browser oder als App?
@@ -254,19 +254,24 @@
       var(--glas-schimmer),
       var(--glas-fuellung-karte);
 
-    /* EIN FENSTER — die ganze Flaeche, wie sie an jedem Fenster aussieht.
+    /* EIN FENSTER — und es ist wirklich durchsichtig.
 
-       Der Kopf ("Aktien-Liste") trug bisher eine Fuellung mehr als die
-       Karten, mit der Begruendung, dort stehe der Titel. Nebeneinander
-       gesehen war er dadurch das einzige Fenster mit Koerper, und die
-       Karten wirkten daneben duenn — sie sollen aussehen wie er, nicht
-       aehnlich.
+       Gemeint war der Kasten, wie er auf dem Sperrbildschirm aussieht: dort
+       steht .nur-web header auf background: transparent, und die Kerzen
+       laufen sichtbar hindurch. Was das Fenster ausmacht, ist dort nur die
+       Kante und der Lichtrand — keine Fuellung.
 
-       Also eine Marke fuer alle: Glanz und die dichtere Fuellung. Wer sie
-       benutzt, kann nicht mehr abweichen, ohne es zu wollen. */
-    --glas-fenster:
-      var(--glas-glanz-karte),
-      linear-gradient(var(--glas-fuellung-fest), var(--glas-fuellung-fest));
+       Ich hatte es zuerst andersherum verstanden und die Karten dichter
+       gemacht statt durchsichtiger. Falsch, und zwar in die genau
+       entgegengesetzte Richtung.
+
+       Eine Scheibe, durch die man nichts sieht, ist keine Scheibe. Was
+       bleibt, ist die Kante — und die reicht: ein Rahmen aus Licht sagt
+       "hier liegt Glas" deutlicher als jede Fuellung. Der Grund dahinter
+       ist dunkel, das Lesen wird dadurch nicht schlechter, sondern besser.
+
+       Eine Marke fuer alle Fenster: Kopf, Karten, Ladebildschirm. */
+    --glas-fenster: transparent;
 
     /* Und die Kante glaenzt mit. Bisher lag Licht nur auf der Oberkante;
        eine Scheibe faengt es aber ringsum, nur schwaecher, je weiter weg
@@ -341,7 +346,7 @@
        schwimmen. Die Koernung bricht die Baender auf, die dunkle Verlaeufe
        sonst zeigen. */
     --grund-flaeche:
-      url("/grund.svg?v=96") repeat,
+      url("/grund.svg?v=97") repeat,
       radial-gradient(120% 90% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.55) 100%),
       radial-gradient(78% 58% at 10% 4%, var(--grund-kuehl) 0%, transparent 68%),
       radial-gradient(66% 52% at 92% 14%, var(--grund-warm) 0%, transparent 68%),
@@ -2941,7 +2946,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=96");
+    background-image: url("/kerzen.svg?v=97");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -2955,7 +2960,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=96");
+    background-image: url("/kerzen-blass.svg?v=97");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -3684,7 +3689,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=96" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=97" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -3802,7 +3807,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=96" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=97" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3850,7 +3855,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=96" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=97" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -3869,7 +3874,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=96" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=97" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3986,7 +3991,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=96" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=97" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -6412,7 +6417,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=96";
+      i.src = "/icon-512.png?v=97";
     });
     return symbolBild;
   }
