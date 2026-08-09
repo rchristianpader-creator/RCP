@@ -672,6 +672,38 @@ geprüft werden — die Entwicklungsumgebung lässt keine fremden Hosts durch
 statt eines kaputten Bildes, und deshalb das Feld an der Position, das
 unabhängig davon funktioniert.
 
+### Ein Fenster — Kopf, Karten und Ladebildschirm
+
+„Design Karten bitte wie der Kasten Aktien-Liste." Der Kopf trug eine Füllung
+mehr als die Karten (`--glas-fuellung-fest`), mit der Begründung, dort stehe der
+Titel. Nebeneinander gesehen war er dadurch das einzige Fenster mit Körper, und
+die Karten wirkten daneben dünn.
+
+Jetzt eine Marke für alle: **`--glas-fenster`** — Glanz plus die dichtere
+Füllung. Kopf, Karten und die Scheibe des Ladebildschirms benutzen sie; wer sie
+benutzt, kann nicht mehr abweichen, ohne es zu wollen. Auch die Kante ist
+angeglichen: der Kopf stand noch auf `--hair`, die für helle Flächen gedacht war
+und auf dem dunklen Grund fast verschwindet.
+
+`fenster-test` misst nicht „ähnlich", sondern **gleich**: Hintergrund, Kante und
+Schatten von Kopf und Karte müssen Zeichen für Zeichen übereinstimmen. Zwei
+gleiche Zahlen können aus zwei Beschreibungen kommen und beim nächsten
+Nachbessern auseinanderlaufen.
+
+**Was es kostet.** Die zusätzliche Füllung ist 0,10 Weiß, und die sieht man in
+der Helligkeit. Im Lesebereich der Karte:
+
+| | Helligkeit | Kontrast |
+|---|---|---|
+| die Hälfte der Fläche | 73 | **8,21 : 1** |
+| 90 % | 97 | 5,65 : 1 |
+| das hellste Prozent | 121 | 3,97 : 1 |
+
+Nur **2,2 %** der Fläche sind heller als 110 — das ist die Stelle, an der der
+Lichtstreifen die Ecke quert. Auf dem größten Teil der Karte liest es sich bei
+8 : 1. Vorher (v91) lag das hellste Prozent bei 106, also 5,00 : 1; die
+Stellschraube ist die eine Füllungsebene.
+
 ### Die Karten sind so laut wie die Symboltasten
 
 „Zu leise Design, bitte wie Symboltasten für Karten." Die Tasten hatten das
