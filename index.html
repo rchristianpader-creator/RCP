@@ -2600,22 +2600,81 @@
 
   /* Ein Strich, der sich fuellt. Kein Kreisel: der wuerde behaupten, es
      ginge etwas rund. Der Strich sagt, wie weit es ist. */
+  /* Der Fortschritt als fliessendes Licht.
+
+     Er war ein Pixel hoch und eine Haarlinie breit — auf dem dunklen Grund
+     kaum zu sehen und in nichts wie der Rest. Jetzt eine Rinne aus Glas mit
+     einem Licht darin: die Rinne traegt dieselbe Lichtkante wie jede
+     Scheibe, das Licht darin waechst mit dem Ladestand und hat einen Schein
+     um sich.
+
+     Ueber das Licht laeuft ein heller Streifen. Das ist der Unterschied
+     zwischen "es steht bei 40 %" und "es arbeitet": ein Balken, der nur
+     waechst, sieht bei jeder Pause aus wie stehengeblieben. */
   .auftakt .balken {
-    width: 132px;
-    height: 1px;
-    background: var(--line);
-    margin: 26px auto 0;
+    width: 168px;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.09);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.16),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.35);
+    margin: 28px auto 0;
     overflow: hidden;
+    position: relative;
     animation: auftaktRein 0.68s var(--ease) 0.27s both;
+  }
+  /* Ein Licht, das immer laeuft — auch bei Ladestand null.
+
+     Der wachsende Balken allein zeigt nichts, solange nichts waechst: beim
+     Warten auf die erste Antwort stand eine leere Rinne da, und eine leere
+     Rinne sieht aus wie ein Fehler. Der Streifen darin sagt "es arbeitet",
+     unabhaengig davon, wie weit es ist. */
+  .auftakt .balken::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.5) 50%,
+      rgba(255, 255, 255, 0) 100%);
+    width: 45%;
+    animation: balkenWandern 1.6s var(--weich, cubic-bezier(0.32, 0.72, 0, 1)) infinite;
+  }
+  @keyframes balkenWandern {
+    from { transform: translate3d(-100%, 0, 0); }
+    to   { transform: translate3d(255%, 0, 0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .auftakt .balken::after { animation: none; opacity: 0.35; }
   }
   .auftakt .balken i {
     display: block;
     height: 100%;
     width: 100%;
-    background: var(--fg);
+    border-radius: 3px;
+    background:
+      linear-gradient(90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.55) 45%,
+        rgba(255, 255, 255, 0) 90%),
+      linear-gradient(var(--fg), var(--fg));
+    background-size: 60% 100%, 100% 100%;
+    background-repeat: no-repeat, no-repeat;
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.35);
     transform: scaleX(0);
     transform-origin: 0 50%;
     transition: transform 0.68s var(--ease);
+    animation: balkenLicht 1.9s linear infinite;
+  }
+  /* Der Streifen laeuft von links nach rechts durch das Licht. Bewegt wird
+     eine Hintergrundposition, keine Ebene — das kostet nichts. */
+  @keyframes balkenLicht {
+    from { background-position: -70% 0, 0 0; }
+    to   { background-position: 170% 0, 0 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .auftakt .balken i { animation: none; }
   }
   .auftakt .tun {
     font-size: 10px;
