@@ -605,10 +605,18 @@
 
        --leiste misst ein Skript nach: die Leiste ist mal ein-, mal
        zweizeilig. */
-    /* Fenster minus Leiste minus Luft — siehe --luft. Dazu der Bereich der
-       Home-Anzeige, den 100dvh mitzaehlt, den man aber nicht bespielen
-       sollte. */
-    --kartenhoehe: calc(100dvh - var(--leiste) - var(--luft) - env(safe-area-inset-bottom));
+    /* Fenster minus Leiste minus Luft — siehe --luft.
+
+       Ohne die Sicherheitszone unten. Sie stand hier, damit die Karte nicht
+       unter die Home-Anzeige laeuft — aber abgezogen wurde sie nur von der
+       Hoehe, nicht vom Abstand zur naechsten Karte. Damit endete die Karte
+       um diese Zone hoeher, die naechste rueckte um dieselbe Zone nach oben,
+       und genau so viel davon war zu sehen.
+
+       Entweder beide oder keine. Keine ist richtig: die Karte hat unten
+       ihren eigenen Innenabstand, und der liegt ohnehin ueber der
+       Home-Anzeige. */
+    --kartenhoehe: calc(100dvh - var(--leiste) - var(--luft));
     /* Hoehe, nicht Mindesthoehe.
 
        Mit min-height waren es zehn verschiedene Karten: wer mehr Inhalt hat
