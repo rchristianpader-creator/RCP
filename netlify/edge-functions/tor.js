@@ -27,9 +27,8 @@ const OFFEN = [
 ];
 
 /* Der laufende Hintergrund der Anmeldeseite gehoert dazu — ohne ihn stuende
-   sie leer. Vier Kacheln inzwischen: hell und dunkel, je vorn und blass;
-   deshalb der Anfang statt einer Liste, die beim naechsten Anstrich wieder
-   nachgepflegt werden muesste. */
+   sie leer. Zwei Kacheln, die vordere und die blasse; der Anfang statt einer
+   Liste, damit eine dritte nicht wieder nachgepflegt werden muss. */
 const OFFEN_ANFANG = ["/icon-", "/og-preview", "/ansicht-", "/kerzen"];
 
 export default async (request, context) => {

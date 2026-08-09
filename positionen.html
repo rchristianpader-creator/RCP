@@ -6,24 +6,9 @@
 <meta name="theme-color" content="#fafafa">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=76">
-<link rel="apple-touch-icon" href="/icon-180.png?v=76">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=77">
+<link rel="apple-touch-icon" href="/icon-180.png?v=77">
 <title>Positionen · Aktien-Liste</title>
-<script>
-/* Hell oder dunkel — derselbe Wunsch wie in der Liste (rcp:thema).
-
-   Hier oben, weil die Entscheidung vor dem ersten Bild stehen muss: sonst
-   blitzt beim Wechsel von der Liste hierher kurz Weiss auf. Einen Knopf gibt
-   es auf dieser Seite nicht; umgeschaltet wird in der Liste. */
-(function () {
-  var wunsch = null;
-  try { wunsch = localStorage.getItem("rcp:thema"); } catch (e) {}
-  if (wunsch !== "dunkel") return;
-  document.documentElement.setAttribute("data-thema", "dunkel");
-  var m = document.querySelector('meta[name="theme-color"]');
-  if (m) m.setAttribute("content", "#000000");
-})();
-</script>
 <style>
   :root {
     color-scheme: light;
@@ -52,29 +37,6 @@
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  /* Derselbe dunkle Anstrich wie in der Liste. Gesetzt wird er im Kopf der
-     Seite, vor dem ersten Bild — sonst blitzte beim Wechsel hierher kurz
-     Weiss auf. */
-  :root[data-thema="dunkel"] {
-    color-scheme: dark;
-    --bg: #000000;
-    --bg-rgb: 0, 0, 0;
-    --fg: #f2f2f2;
-    --fg-rgb: 242, 242, 242;
-    --auf-fg: #000000;
-    --muted: #8b8b8b;
-    --line: #262626;
-    --soft: #0d0d0d;
-    --card: #0a0a0a;
-    --hair: #1e1e1e;
-    --hebung:
-      0 1px 2px rgba(0, 0, 0, 0.6),
-      0 12px 32px -20px rgba(0, 0, 0, 0.9);
-    --glas: rgba(10, 10, 10, 0.72);
-    /* Auf Schwarz brauchen Gruen und Rot mehr Licht, sonst versinken sie */
-    --gut: #4ade80;
-    --schlecht: #f87171;
-  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif;
