@@ -550,13 +550,47 @@ sie bewegt. `.card::before` trägt einen schmalen hellen Kern mit weichem Hof un
 wandert an der `view-timeline` der Karte über die volle Strecke — von der ersten
 bis zur letzten Berührung mit dem Fenster.
 
-Er liegt **über** dem Inhalt, und das ist richtig herum: eine Spiegelung sitzt
-auf der Scheibe, nicht dahinter. Deshalb sehr schwach. Wer ihn liest, statt ihn
-zu bemerken, hat einen Fehler gefunden.
+Er liegt **hinter** dem Inhalt (`z-index: -1`, dafür `isolation: isolate` an der
+Karte). Zuerst lag er darüber, mit der Begründung, eine Spiegelung sitze auf der
+Scheibe und nicht dahinter. Das stimmt für Glas und war hier trotzdem falsch: die
+Schrift ist hell auf dunkel, und jedes Weiß darunter zieht den Grund in Richtung
+Schriftfarbe. Der Abstand zwischen beiden wird kleiner — und genau der ist das
+Lesen. Ein Licht, das wandert, wandert dann auch durch jeden Satz.
+
+Gemessen bei stehender Karte, Zug in der Mitte: **3276 Glyphenkerne unverändert,
+8 verändert** (Kantenglättung). Sichtbar bleibt er trotzdem auf der ganzen Karte —
+Kopf, Chart und Knopf haben keinen eigenen Hintergrund, Zielleiste und News-Block
+sind fast durchsichtig.
 
 Der erste Anlauf war ein einzelner breiter Verlauf über ein Drittel der
 Kartenbreite — auf einer schirmhohen Karte las sich das als heller Schmierstreifen
 quer durch den Chart, nicht als Licht.
+
+### Wo die Helligkeit wirklich herkam
+
+„Dieser weiße Schein ist zu extrem und erschwert das Lesen." Stimmte, und war
+messbar. Gemessen wird das **99. Perzentil des reinen Kartengrunds** (Inhalt auf
+`visibility: hidden`, dann die Helligkeitsverteilung): die Spitze hängt an der
+einen hellen Linie der Kante und sagt nichts, der Mittelwert verwischt alles.
+
+Statt zu raten, welche Zahl zu hoch ist, wurde jede Ebene einmal weggelassen:
+
+| Zustand | hellstes Prozent | Kontrast |
+|---|---|---|
+| alles zusammen | 104 | 5,08 : 1 |
+| ohne Lichtstreifen | 97 | 5,65 : 1 |
+| ohne Wölbung | 108 | 4,79 : 1 |
+| ohne Rückwurf | 109 | 4,72 : 1 |
+| **ohne Schimmer** | **77** | **7,71 : 1** |
+
+Der Schuldige war nicht der neue Glanz, sondern der **alte breite Schimmer**
+darunter — er allein macht zwei Drittel der hellen Fläche aus und stand schon
+vorher da. Deshalb trägt er auf den Karten nur noch die Hälfte
+(`--glas-schimmer-leise`): der scharfe Streifen sagt dasselbe über die Oberfläche
+und braucht ein Zehntel der Fläche dafür.
+
+Ergebnis: **87 statt 93** wie vor dem Glanz, Kontrast **6,59 statt 6,00**. Die
+Karten glänzen und lesen sich besser als vorher.
 
 **Was es kostet: nichts.** Nur eine Verschiebung. Ein Verlauf, der seine Stellung
 ändert, müsste bei jedem Bild neu gezeichnet werden; ein Streifen, der sich
@@ -822,6 +856,13 @@ Zahlen oben als Begründung im Test; was trägt, sind der Mittelwert (stabil bei
 `kachel-test` misst die Kerzenbreite bei 390, 1024 und 1900 Pixeln, prüft die
 Deckung (Fenster + Kachel), den Umlauf auf halbem Weg (genau eine halbe Kachel)
 und dass in beiden HTML-Dateien kein gedehntes SVG mehr steht.
+
+`css-test` zählt Klammern und Keyframes — und seit dem Glanz auch die Form jeder
+Angabe im Markenblock. Ein Kommentar, der zu früh schließt, lässt Prosa roh im
+Stylesheet stehen; die nimmt die folgende Angabe mit, `--glas-glanz-karte` fiel
+weg, und die Karten wurden dunkel. Die Klammern gingen dabei auf, der Test war
+grün. Jetzt fällt auf, was vor dem Doppelpunkt kein Name ist: „Wie hell" hat ein
+Leerzeichen. Gegengeprüft, indem der Fehler absichtlich wieder eingebaut wurde.
 
 `glanz-test` prüft, dass der Schimmer wirklich ankommt: zwei Hintergrundebenen
 auf Blatt und Anmeldekasten, Licht oben und Schatten unten an der Kante, keine
