@@ -135,17 +135,19 @@
     --glas-fuellung: rgba(255, 255, 255, 0.26);
     /* Dicker, wo man liest: hinter Saetzen soll nichts mitlesbar sein. */
     --glas-fuellung-fest: rgba(255, 255, 255, 0.52);
-    /* Die Karten. 0,74 war noch eine weisse Flaeche mit einem Hauch Grund
-       darunter — kein Glas. Jetzt so duenn, dass die Zeichnung dahinter
-       wirklich durchkommt; lesbar bleibt es, weil die Karte als einzige
-       Flaeche der Seite einen Frost traegt und der alles darunter zu ruhigen
-       Flaechen verwischt.
+    /* Die Karten. 0,74 war eine weisse Flaeche mit einem Hauch Grund
+       darunter — kein Glas. 0,55 laesst die Zeichnung dahinter durch und
+       traegt die Schrift trotzdem.
 
-       Frost auf einer mitscrollenden Flaeche war frueher zu teuer. Bei zehn
-       kurzen Karten waren immer vier bis fuenf gleichzeitig im Bild; seit
-       eine Karte den ganzen Schirm fuellt, sind es hoechstens zwei — und die
-       anderen zeichnet der Browser wegen content-visibility gar nicht. */
-    --glas-fuellung-karte: rgba(255, 255, 255, 0.4);
+       Ohne Frost, und diesmal ist es keine Vermutung mehr. Ich habe es
+       einmal mit Frost versucht, mit der Begruendung, dass bei
+       schirmfuellenden Karten nur noch zwei gleichzeitig im Bild sind. Das
+       Scrollen wurde traege — auf dem Telefon sofort spuerbar, noch bevor
+       die Messung durch war.
+
+       Die Regel gilt also ohne Ausnahme: Frost nur, wo eine Flaeche steht.
+       Was mitscrollt, bekommt keinen — egal wie wenige es sind. */
+    --glas-fuellung-karte: rgba(255, 255, 255, 0.55);
     /* Die Kante faengt Licht. Der weiche dunkle Ring knapp innerhalb des
        Randes gibt der Flaeche Dicke; hell oben zieht ins Kuehle, dunkel
        unten ins Warme — abgeschwaecht das, was an einer Linsenkante
@@ -223,12 +225,7 @@
     header { background: var(--card); box-shadow: none; }
     .news-banner { background: var(--soft); }
     .setup-strip { background: var(--card); }
-    .card {
-      background: var(--card);
-      box-shadow: var(--hebung);
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
-    }
+    .card { background: var(--card); box-shadow: var(--hebung); }
     .chart { background: var(--soft); }
     .ziel-bar, .chart-warte { background: var(--soft); }
   }
@@ -302,12 +299,33 @@
   /* War eine deckende weisse Platte quer ueber den oberen Bildrand — dort,
      wo vom Grund am meisten zu sehen sein sollte. Jetzt Fuellung und
      Schimmer, ohne Frost (siehe GLAS). */
+  /* OBEN WIE UNTEN
+
+     Der Kopf, die Leiste, das Laufband, die Wirtschaftstermine und der
+     Setup-Streifen waren Baender von Rand zu Rand, mit rechten Winkeln —
+     waehrend darunter Fenster mit Rundungen und Rand stehen. Zwei
+     Formensprachen auf einer Seite.
+
+     Jetzt tragen sie dieselbe: derselbe Aussenabstand wie eine Karte,
+     dieselbe Rundung, dieselbe Kante, dieselbe Hebung. Der Grund laeuft
+     links und rechts an ihnen vorbei, wie an den Karten auch. */
+  .flaeche {
+    margin: 0 14px 12px;
+    border-radius: var(--r-karte);
+    border: 1px solid var(--hair);
+    background: var(--glas-grund-karte);
+    box-shadow: var(--glas-kante), var(--hebung);
+    overflow: hidden;
+  }
+
   header {
-    padding: 40px 24px 28px;
+    margin: 12px 14px 12px;
+    border-radius: var(--r-karte);
+    border: 1px solid var(--hair);
+    box-shadow: var(--glas-kante), var(--hebung);
+    padding: 34px 24px 26px;
     text-align: center;
     background: var(--glas-grund-fest);
-    box-shadow: var(--glas-kante);
-    border-bottom: 1px solid var(--hair);
   }
   header .label {
     font-size: 10px;
@@ -352,10 +370,16 @@
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    padding: 12px 10px 10px;
+    padding: 10px 8px;
     justify-content: center;
     position: sticky;
-    top: 0;
+    /* Schwebt, statt am oberen Rand zu kleben — dasselbe Fenster wie alles
+       andere. Der Abstand steckt auch in --leiste, sonst landete der Sprung
+       unter der Leiste statt darunter. */
+    top: 8px;
+    margin: 0 14px 12px;
+    border-radius: var(--r-karte);
+    border: 1px solid var(--hair);
     z-index: 20;
     /* Glas: die Karten ziehen sichtbar darunter durch. Das ist die Flaeche,
        an der man den Unterschied am ehesten sieht — sie liegt den ganzen Tag
@@ -404,8 +428,11 @@
     gap: 8px;
     padding: 11px 16px;
     /* Scheint durch, sonst bliebe hier ein deckender Balken. */
-    background: rgba(255, 255, 255, 0.55);
-    border-bottom: 1px solid var(--hair);
+    margin: 0 14px 12px;
+    border-radius: var(--r-karte);
+    border: 1px solid var(--hair);
+    box-shadow: var(--glas-kante), var(--hebung);
+    background: var(--glas-grund-karte);
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.16em;
@@ -578,18 +605,19 @@
     .karten { transition: none !important; }
   }
 
-  /* Auch die Karten sind Glas — und zwar richtig: duenne Fuellung, Frost,
-     Kante, Schimmer. Lange stand hier das Gegenteil, und es stimmte,
-     solange hinter ihnen nichts lag. */
+  /* Auch die Karten sind Glas: duenne Fuellung, Kante, Schimmer — aber kein
+     Frost. Siehe die Marke oben; der Versuch hat das Scrollen traege
+     gemacht. */
   .card {
     margin: 16px 14px 56px;
     border: 1px solid var(--hair);
     border-radius: var(--r-karte);
     overflow: hidden;
     background: var(--glas-grund-karte);
-    -webkit-backdrop-filter: var(--glas-frost);
-    backdrop-filter: var(--glas-frost);
-    scroll-margin-top: 80px;
+    /* Kein scroll-margin-top mehr: der Abstand zur klebenden Leiste steht
+       einmal an html als scroll-padding-top: var(--leiste). Beides zusammen
+       addierte sich, und der Sprung landete 176 statt 96 Pixel unter der
+       Leiste — man sah oben noch den Fuss der vorigen Karte. */
     box-shadow: var(--glas-kante), var(--hebung);
   }
 
@@ -665,11 +693,15 @@
     background: var(--muted);
   }
   /* Banner */
-  /* Laesst den Grund durch, ohne Frost. */
+  /* Laesst den Grund durch, ohne Frost. Und traegt jetzt dieselbe Form wie
+     eine Karte — siehe .flaeche. */
   .news-banner {
+    margin: 0 14px 12px;
+    border-radius: var(--r-karte);
+    border: 1px solid var(--hair);
+    box-shadow: var(--glas-kante), var(--hebung);
     overflow: hidden;
-    border-bottom: 1px solid var(--hair);
-    background: rgba(255, 255, 255, 0.55);
+    background: var(--glas-grund-karte);
     color: var(--fg);
   }
   .news-banner-track {
@@ -710,8 +742,11 @@
      wiederverwendet. Ein Laufband war der falsche Weg: man muss warten,
      bis der Text vorbeigezogen ist, statt ihn im Stehen zu lesen. */
   .wirtschaft-block {
-    background: var(--card);
-    border-bottom: 1px solid var(--hair);
+    margin: 0 14px 12px;
+    border-radius: var(--r-karte);
+    border: 1px solid var(--hair);
+    box-shadow: var(--glas-kante), var(--hebung);
+    background: var(--glas-grund-karte);
     padding: 12px 16px 13px;
     -webkit-tap-highlight-color: transparent;
     cursor: pointer;
@@ -818,7 +853,7 @@
     padding: 12px 18px;
     border-top: 1px solid var(--hair);
     /* Nicht weiss: sonst laege mitten im Glas ein deckender Balken. */
-    background: rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.3);
   }
   .ziel-bar .k {
     font-size: 10px;
@@ -2773,11 +2808,31 @@
 
          Der zweite Abschnitt ist immer derselbe: die ganze Ausfahrt des
          Stueckes selbst. */
-      .karten > .card > .card-head { animation-range: entry 0% entry 30%; }
-      .karten > .card > .ziel-bar  { animation-range: entry 11% entry 41%; }
-      .karten > .card > .chart     { animation-range: entry 22% entry 56%; }
-      .karten > .card > .news-block { animation-range: entry 35% entry 70%; }
-      .karten > .card > .actions   { animation-range: entry 48% entry 84%; }
+      /* cover, nicht entry.
+
+         "entry" reicht von "das Teil beruehrt den unteren Rand" bis "es ist
+         ganz drin" — und ist damit so lang wie das Teil selbst. Der
+         Kartenkopf ist 120 Pixel hoch, also lief seine ganze Bewegung in 30 %
+         davon ab: 36 Pixel Scrollweg. Gemessen sprang er zwischen zwei
+         Proben von 0 auf 1. Kein Gleiten, ein Blitzen.
+
+         "cover" reicht von der ersten bis zur letzten Beruehrung mit dem
+         Fenster und ist damit so lang wie Karte plus Fenster — bei einer
+         schirmfuellenden Karte rund 1560 Pixel. Dieselben Abstufungen, nur
+         auf einer Strecke, auf der man die Bewegung auch sieht.
+
+         Bei kurzen Karten war entry richtig; seit eine Karte den Schirm
+         fuellt, ist es das Gegenteil.
+
+         Alle Abschnitte enden vor 54 %. Bei 54 % steht die Oberkante der
+         Karte genau am oberen Fensterrand — das ist die Leseposition. Was
+         danach noch laeuft, laeuft, waehrend man liest: der Knopf stand mit
+         einem Ende bei 54 % dauerhaft 19 Pixel zu tief. */
+      .karten > .card > .card-head  { animation-range: cover 2% cover 22%; }
+      .karten > .card > .ziel-bar   { animation-range: cover 6% cover 26%; }
+      .karten > .card > .chart      { animation-range: cover 10% cover 31%; }
+      .karten > .card > .news-block { animation-range: cover 14% cover 36%; }
+      .karten > .card > .actions    { animation-range: cover 18% cover 41%; }
 
       /* Und im Kopf noch einmal einzeln: erst der Name mit dem Kuerzel,
          dann die Zeile mit Branche und Einkaufszone. */
@@ -2786,8 +2841,8 @@
         animation: teilKlein linear both;
         animation-timeline: --karte;
       }
-      .karten > .card > .card-head > .row  { animation-range: entry 6% entry 26%; }
-      .karten > .card > .card-head > .info { animation-range: entry 13% entry 33%; }
+      .karten > .card > .card-head > .row  { animation-range: cover 3% cover 19%; }
+      .karten > .card > .card-head > .info { animation-range: cover 7% cover 23%; }
 
       .karten > .card > .card-head::after {
         animation: kanteLauf linear both;
@@ -4014,7 +4069,11 @@
   function leisteMessen() {
     if (!nav) return;
     var setzen = function () {
-      var h = Math.round(nav.getBoundingClientRect().height);
+      /* Hoehe plus der Abstand, mit dem die Leiste vom oberen Rand
+         wegschwebt — sonst landete ein Sprung genau um diesen Abstand zu
+         hoch, naemlich unter der Leiste statt darunter. */
+      var oben = parseFloat(getComputedStyle(nav).top) || 0;
+      var h = Math.round(nav.getBoundingClientRect().height + oben * 2);
       if (h > 0) document.documentElement.style.setProperty("--leiste", h + "px");
     };
     setzen();
