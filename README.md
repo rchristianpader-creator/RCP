@@ -544,6 +544,51 @@ aus der Wirklichkeit:
 `--glas-kante-glanz` legt Licht ringsum statt nur oben: hell an der Oberkante,
 ein Hauch an den Seiten, unten der dunkle Abschluss, der die Dicke macht.
 
+### Der Ladebildschirm ist dieselbe Fläche wie die Liste
+
+Nicht „sieht aus wie", sondern **ist**: `--grund-flaeche` und `--grund-kacheln`
+stehen einmal da und gelten für `.grundkurve` wie für `.auftakt`. Beide liegen
+`fixed` über den ganzen Schirm, also decken sich auch die Verläufe und die
+Körnung Punkt für Punkt.
+
+Vorher stand der Grund **zweimal** im Stylesheet. Zwei Stellen, die dasselbe
+beschreiben, laufen auseinander, sobald eine angefasst wird — und der
+Ladebildschirm ist genau die Stelle, an der ein Unterschied auffällt, weil er
+unmittelbar in die Liste übergeht.
+
+**Die Kerzen sind weg.** Sie waren das Einzige, was den Ladebildschirm von der
+Liste unterschieden hat: eine bewegte Zeichnung, die es danach nirgends mehr
+gibt — der erste Eindruck war eine andere App als die, die dann kam. Das
+Element bleibt im Markup (`display: none`), denn es wird später in den
+Neuheiten-Schirm und in die Browsersperre **verschoben**, nicht kopiert.
+
+Damit fällt auch der Grund für die dunkle Lage unter der Textscheibe weg — sie
+war gegen die laufenden Kerzen. Die Scheibe trägt jetzt denselben Glanz und
+dieselbe Kante wie eine Karte.
+
+**Der Übergang.** Die Scheibe geht zuerst und schneller als der Schirm um sie
+herum: sie hebt sich 12 px ab, wird auf 0,97 kleiner und löst sich auf. Kein
+Schirm, der weggeschoben wird, sondern ein Deckel, der abgenommen wird — was
+danach kommt, war die ganze Zeit an derselben Stelle.
+
+Gemessen an sechs Punkten, an denen nie etwas steht (die vier Ecken und die
+beiden 14-px-Seitenstreifen), vor, mitten im und nach dem Übergang:
+
+```
+vorher  21,33,39  31,28,22  16,31,28  23,21,26  17,20,19  16,19,18
+mitten  20,32,39  30,27,21  14,29,26  21,19,24  16,19,19  15,19,17
+nachher 21,33,39  31,28,22  15,30,27  22,20,25  17,20,19  16,19,18
+```
+
+Der Grund steht still. `uebergang-test` wacht darüber.
+
+Zwei falsche Alarme auf dem Weg dahin, beide lehrreich: beim ersten Anlauf fuhr
+das **Installations-Blatt** genau während des Übergangs herein und übernahm die
+Ecken; beim zweiten lag ein Messpunkt oben in der Mitte — also **auf der
+Kopfkarte**. Beide Male meldete die Messung pflichtgemäß eine Änderung, und
+beide Male hatte sich nicht der Grund geändert, sondern die Stelle war falsch
+gewählt.
+
 ### Das Logo neben dem Namen
 
 Links vom Firmennamen sitzt das Logo auf einer runden Glasscheibe — dieselbe

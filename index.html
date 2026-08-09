@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="dark">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#0a0d0c">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=92">
-<link rel="apple-touch-icon" href="/icon-180.png?v=92">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=93">
+<link rel="apple-touch-icon" href="/icon-180.png?v=93">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=92">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=93">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=92">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=93">
 
 <script>
 /* Im Browser oder als App?
@@ -312,6 +312,28 @@
        nicht mehr, also gehoert der Platz wieder der Karte. */
     --rand: 14px;
     --luft: calc(var(--rand) * 2);
+    /* DER GRUND — einmal beschrieben.
+
+       Er stand zweimal da: an .grundkurve und noch einmal am
+       Ladebildschirm. Zwei Stellen, die dasselbe beschreiben, sind eine zu
+       viel — sie laufen auseinander, sobald eine von beiden angefasst wird,
+       und der Ladebildschirm ist genau die Stelle, an der ein Unterschied
+       auffaellt: er geht unmittelbar in die Liste ueber.
+
+       Vier grosse Farbfelder, eine Vignette darueber, feine Koernung
+       obenauf. Die Vignette nimmt die Raender zurueck, damit die Fenster in
+       der Mitte stehen und nicht auf einer gleichmaessig hellen Flaeche
+       schwimmen. Die Koernung bricht die Baender auf, die dunkle Verlaeufe
+       sonst zeigen. */
+    --grund-flaeche:
+      url("/grund.svg?v=93") repeat,
+      radial-gradient(120% 90% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.55) 100%),
+      radial-gradient(78% 58% at 10% 4%, var(--grund-kuehl) 0%, transparent 68%),
+      radial-gradient(66% 52% at 92% 14%, var(--grund-warm) 0%, transparent 68%),
+      radial-gradient(84% 62% at 74% 96%, var(--grund-flieder) 0%, transparent 70%),
+      radial-gradient(64% 48% at 8% 88%, var(--grund-tuerkis) 0%, transparent 70%),
+      var(--bg);
+    --grund-kacheln: 160px 160px, auto, auto, auto, auto, auto, auto;
     --schleier: rgba(0, 0, 0, 0.72);
     --schatten: rgba(0, 0, 0, 0.5);
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -355,30 +377,12 @@
     inset: 0;
     z-index: -1;
     pointer-events: none;
-    /* Vier grosse Farbfelder, eine Vignette darueber, feine Koernung
-       obenauf.
-
-       Keine Zeichnung mehr. Drei grosse Kurslinien standen hier und machten
-       den Grund zu einem Bild, statt ihn Grund sein zu lassen.
-
-       Die Vignette nimmt die Raender zurueck, damit die Fenster in der Mitte
-       stehen und nicht auf einer gleichmaessig hellen Flaeche schwimmen.
-
-       Die Koernung ist das, was einen dunklen Verlauf teuer aussehen laesst.
-       Ohne sie streift er: bei dunklen Toenen liegt zwischen zwei
-       Helligkeitsstufen weniger Abstand, als das Auge unterscheiden kann, und
-       es entstehen sichtbare Baender. Rauschen bricht sie auf — das Auge
-       mittelt es weg und sieht einen glatten Verlauf. Die Datei dafuer ist
-       370 Byte gross; das Rauschen entsteht im Browser. */
-    background:
-      url("/grund.svg?v=92") repeat,
-      radial-gradient(120% 90% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.55) 100%),
-      radial-gradient(78% 58% at 10% 4%, var(--grund-kuehl) 0%, transparent 68%),
-      radial-gradient(66% 52% at 92% 14%, var(--grund-warm) 0%, transparent 68%),
-      radial-gradient(84% 62% at 74% 96%, var(--grund-flieder) 0%, transparent 70%),
-      radial-gradient(64% 48% at 8% 88%, var(--grund-tuerkis) 0%, transparent 70%),
-      var(--bg);
-    background-size: 160px 160px, auto, auto, auto, auto, auto, auto;
+    /* Keine Zeichnung mehr. Drei grosse Kurslinien standen hier und machten
+       den Grund zu einem Bild, statt ihn Grund sein zu lassen. Die Flaeche
+       selbst steht als Marke oben — sie gilt auch fuer den
+       Ladebildschirm. */
+    background: var(--grund-flaeche);
+    background-size: var(--grund-kacheln);
     opacity: 1;
   }
 
@@ -2685,12 +2689,18 @@
      sonst eine halbfertige Seite: Karten ohne Charts, Zahlen ohne Kurse.
      Diese Sekunden bekommen jetzt eine Form — und werden zugleich genutzt,
      denn darunter baut sich alles auf und die ersten Charts laden schon. */
-  /* Der Ladebildschirm zeigt schon, was danach kommt.
+  /* DER LADEBILDSCHIRM IST DIESELBE FLAECHE WIE DIE LISTE
 
-     Er stand auf dem nackten Grundton, waehrend die Seite dahinter aus
-     Farbfeldern, Vignette und Koernung besteht — der erste Eindruck war
-     also ein anderer als die App. Jetzt derselbe Grund, dieselbe Machart:
-     die Kerzen laufen darueber, und die Schrift steht auf einer Scheibe. */
+     Nicht "sieht aus wie", sondern ist: dieselbe Marke, dieselben Kacheln,
+     dieselbe Lage im Bild (beide fixed, beide ueber den ganzen Schirm). Der
+     Grund faellt also beim Uebergang nicht weg und wird nicht neu
+     gezeichnet — er steht schon da und bleibt stehen. Was verschwindet, ist
+     nur die Scheibe mit dem Text.
+
+     Vorher liefen hier ausserdem Kerzen. Sie sind das Einzige gewesen, was
+     den Ladebildschirm von der Liste unterschieden hat: eine bewegte
+     Zeichnung, die es danach nirgends mehr gibt — der erste Eindruck war
+     eine andere App als die, die dann kam. */
   .auftakt {
     position: fixed;
     inset: 0;
@@ -2698,23 +2708,40 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background:
-      url("/grund.svg?v=92") repeat,
-      radial-gradient(120% 90% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.55) 100%),
-      radial-gradient(78% 58% at 10% 4%, var(--grund-kuehl) 0%, transparent 68%),
-      radial-gradient(66% 52% at 92% 14%, var(--grund-warm) 0%, transparent 68%),
-      radial-gradient(84% 62% at 74% 96%, var(--grund-flieder) 0%, transparent 70%),
-      radial-gradient(64% 48% at 8% 88%, var(--grund-tuerkis) 0%, transparent 70%),
-      var(--bg);
-    background-size: 160px 160px, auto, auto, auto, auto, auto, auto;
+    background: var(--grund-flaeche);
+    background-size: var(--grund-kacheln);
     text-align: center;
     padding: 32px 28px;
     transition: opacity 0.61s var(--ease), visibility 0.61s;
   }
+  /* Die Kerzen bleiben im Markup — sie werden spaeter in den
+     Neuheiten-Schirm und in die Browsersperre verschoben, und dorthin
+     gehoeren sie weiterhin. Auf dem Ladebildschirm stehen sie still und
+     unsichtbar: display: none nimmt sie aus dem Bild, ohne sie zu
+     entfernen, und beendet auch ihre Bewegung. */
+  .auftakt .kerzen { display: none; }
   .auftakt.weg {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
+  }
+  /* Und die Scheibe geht zuerst und schneller als der Schirm um sie herum.
+
+     Damit wird aus zwei Bildern eins: der Grund steht ohnehin schon da und
+     bleibt stehen, die Scheibe hebt sich ab und loest sich auf, und
+     darunter steht die Liste. Kein Schirm, der weggeschoben wird, sondern
+     ein Deckel, der abgenommen wird — was danach kommt, war die ganze Zeit
+     an derselben Stelle. */
+  .auftakt-mitte {
+    transition: transform 0.52s var(--ease), opacity 0.34s ease;
+  }
+  .auftakt.weg .auftakt-mitte {
+    transform: translate3d(0, -12px, 0) scale(0.97);
+    opacity: 0;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .auftakt-mitte { transition: opacity 0.34s ease; }
+    .auftakt.weg .auftakt-mitte { transform: none; }
   }
   .auftakt .label {
     font-size: 10px;
@@ -2878,7 +2905,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=92");
+    background-image: url("/kerzen.svg?v=93");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -2892,7 +2919,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=92");
+    background-image: url("/kerzen-blass.svg?v=93");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -2919,15 +2946,16 @@
     z-index: 1;
     padding: 38px 30px 34px;
     border-radius: var(--r-blatt);
-    border: 1px solid var(--hair);
-    /* Eine dunkle Lage unter dem Glas. Ueber den laufenden Kerzen reicht
-       eine helle Fuellung nicht: sie hellt auf, verdeckt aber nichts, und
-       die Schrift stuende mitten in den Kerzen. Auf Dunkel deckt Dunkel. */
-    background:
-      var(--glas-schimmer),
-      var(--glas-fuellung-karte),
-      linear-gradient(rgba(10, 13, 12, 0.62), rgba(10, 13, 12, 0.62));
-    box-shadow: var(--glas-kante), var(--hebung);
+    border: 1px solid var(--line);
+    /* Dieselbe Scheibe wie eine Karte, mit demselben Glanz.
+
+       Hier lag zusaetzlich eine dunkle Lage: ueber den laufenden Kerzen
+       reichte eine helle Fuellung nicht, die Schrift haette mitten in den
+       Kerzen gestanden. Die Kerzen sind weg, und damit auch der Grund fuer
+       die Verdunkelung — geblieben waere ein Fenster, das dunkler ist als
+       jedes andere auf der Seite, ausgerechnet das erste, das man sieht. */
+    background: var(--glas-glanz-karte);
+    box-shadow: var(--glas-kante-glanz), var(--hebung);
     max-width: 340px;
     width: 100%;
   }
@@ -3620,7 +3648,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=92" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=93" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -3738,7 +3766,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=92" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=93" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3786,7 +3814,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=92" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=93" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -3805,7 +3833,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=92" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=93" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3922,7 +3950,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=92" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=93" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -6348,7 +6376,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=92";
+      i.src = "/icon-512.png?v=93";
     });
     return symbolBild;
   }
