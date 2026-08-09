@@ -544,6 +544,45 @@ aus der Wirklichkeit:
 `--glas-kante-glanz` legt Licht ringsum statt nur oben: hell an der Oberkante,
 ein Hauch an den Seiten, unten der dunkle Abschluss, der die Dicke macht.
 
+### Der Schleier, der aufhellte statt abzudunkeln
+
+„Mitteilungen sind nicht sichtbar." Das Meldungsblatt stand da, und die Seite
+dahinter leuchtete hindurch — Symboltasten, Laufband, Fear & Greed, alles lag
+über den Sätzen.
+
+Die Ursache ist eine Nebenwirkung der Umstellung auf Dunkel, und sie ist
+lehrreich:
+
+```css
+.sheet { background: rgba(var(--fg-rgb), 0.32); }
+```
+
+Auf der hellen Seite war `--fg` fast **schwarz** — ein Schleier, der abdunkelt.
+Mit dem dunklen Thema ist `--fg` fast **weiß** geworden, und aus dem Schleier
+wurde ein Aufheller. Dieselbe Zeile, gegenteilige Wirkung. Eine Marke, die ihre
+Rolle wechselt, nimmt jede Stelle mit, die sich auf ihre *Helligkeit* verlässt
+statt auf ihre *Bedeutung*.
+
+Behoben: `var(--schleier)` (schwarz, 0,72), und unter das Glas des Blattes eine
+deckende dunkle Lage — **auf Dunkel deckt Dunkel**, dieselbe Regel wie beim
+Ladebildschirm über den Kerzen. Schimmer, Kante und Frost bleiben obenauf; das
+Blatt ist weiterhin Glas. Der Schatten nach oben ist ebenfalls dunkel geworden:
+ein heller Schein auf dunklem Grund wäre ein Leuchten, kein Schatten.
+
+**Wie es gemessen wird.** Nicht über die Helligkeitsspanne im Blatt — die kommt
+zum großen Teil vom Schimmer des Blattes selbst, und der soll da sein. Die
+richtige Frage ist: *ändert sich das Blatt, wenn sich die Seite dahinter
+ändert?* Dieselbe Fläche zweimal aufnehmen, dazwischen die Seite dahinter an
+eine ganz andere Stelle fahren:
+
+| | vorher | jetzt |
+|---|---|---|
+| Kontrast unter der Schrift | — | **7,71 : 1** |
+| Durchscheinen, im Mittel | sichtbar | **0** |
+| an der hellsten Stelle | sichtbar | **1** |
+
+`blatt-test` wacht darüber.
+
 ### Der Ladebildschirm ist dieselbe Fläche wie die Liste
 
 Nicht „sieht aus wie", sondern **ist**: `--grund-flaeche` und `--grund-kacheln`
