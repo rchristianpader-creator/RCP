@@ -297,19 +297,18 @@
     /* Die klebende Leiste verdeckt sonst den Kopf der angesprungenen Karte.
        Derselbe gemessene Wert wie bei der Kartenhoehe. */
     scroll-padding-top: var(--leiste);
-    /* Karten rasten ein.
+    /* Kein Einrasten.
 
-       Ohne das kann eine Karte ueberall stehen bleiben, wo der Finger sie
-       loslaesst — und dann wird unten der Rand abgeschnitten, weil sie
-       genau einen Schirm hoch ist. Mit dem Einrasten sitzt sie immer
-       zwischen Unterkante der Leiste und unterem Bildrand.
+       Es stand kurz drin: die Karten rasten beim Loslassen auf die Leiste
+       ein, damit keine halb abgeschnitten stehen bleibt. Auf dem Telefon
+       fuehlte sich das genau falsch an — jeder Wisch wurde zur naechsten
+       Karte gezogen, und wer nur ein Stueck weiter wollte, musste dagegen
+       anwischen. "langsam und anstrengend".
 
-       "proximity", nicht "mandatory": mandatory zwingt jede Bewegung in die
-       naechste Karte, auch das kurze Nachsehen im Chart darueber. */
-    scroll-snap-type: y proximity;
-  }
-  /* Wer faehrt, bestimmt allein — siehe hinfahren(). */
-  html.fuehrt { scroll-snap-type: none; }
+       Noetig ist es auch nicht mehr: seit eine Karte plus ihr Abstand
+       zusammen etwa einen Schirm ergeben, steht ohnehin fast immer eine
+       ganze Karte im Bild — nur eben ohne Zwang. Und die Sprungmarken der
+       Kuerzel treffen weiterhin genau, dafuer sorgt scroll-padding-top. */
 
   /* Ziffern mit fester Breite, ueberall wo Zahlen stehen.
 
@@ -595,7 +594,6 @@
     flex-direction: column;
     content-visibility: auto;
     contain-intrinsic-size: auto var(--kartenhoehe);
-    scroll-snap-align: start;
   }
   .karten-fehler {
     margin: 0 14px 56px;
