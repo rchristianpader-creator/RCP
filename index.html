@@ -106,68 +106,41 @@
     --r-chip: 11px;    /* die kleinen Marken in der Leiste */
     --r-marke: 6px;    /* Abzeichen, Punkte, Zaehler */
 
-    /* GLAS
+    /* GLAS — vier Teile machen aus Milchglas Glas:
 
-       Flaechen, die ueber etwas liegen — die klebende Leiste, die Blaetter,
-       der Streifen unten —, sind nicht mehr deckend, sondern durchscheinend.
-       Vier Teile machen aus Milchglas Glas:
-
-         Frost    das Verwischen dahinter, mit hochgezogener Saettigung.
-                  Ohne die Saettigung wird alles dahinter grau.
+         Frost    das Verwischen dahinter, mit hochgezogener Saettigung;
+                  ohne sie wird alles dahinter grau
          Fuellung eine helle Schicht darauf, sonst waere die Schrift auf
-                  bewegtem Grund nicht zu lesen.
-         Kante    eine Lichtlinie oben, eine dunkle unten. Das ist der
-                  Unterschied zwischen einer milchigen Scheibe und einer
-                  Kante, die Licht faengt.
-         Glanz    ein schraeger Schimmer ueber die obere Haelfte.
+                  bewegtem Grund nicht zu lesen
+         Kante    eine Lichtlinie oben, eine dunkle unten
+         Glanz    ein schraeger Schimmer ueber die obere Haelfte
 
-       Was nicht ueber etwas liegt, bleibt deckend. Glas ueber einer flachen
-       Flaeche ist kein Glas, es ist nur eine hellere Flaeche mit Kosten. Die
-       Karten behalten deshalb ihren vollen Grund — sie tragen Charts und
-       Text, dort waere Durchscheinen ein Nachteil.
+       Frost nur, wo eine Flaeche steht. Was mitscrollt, bekommt ihn nicht:
+       ein mitscrollender backdrop-filter wird bei jedem Bild neu gefiltert
+       — gemessen 21 lange Bilder je Lauf statt 0,6.
 
-       Die echte Brechung — ein SVG-Verschiebungsfilter im backdrop-filter —
-       fehlt mit Absicht: die setzt nur Chromium um. Auf dem iPhone, wo diese
-       App laeuft, wuerde sie nichts tun ausser kosten. */
-    /* Die vier Farbfelder im Grund. Sie stehen hier oben, weil sie die
-       Lautstaerke regeln: an diesen vier Zeilen laesst sich das ganze Bild
-       leiser oder lauter stellen, ohne irgendwo sonst etwas anzufassen. */
+       Die echte Brechung (SVG-Verschiebungsfilter im backdrop-filter) fehlt
+       mit Absicht: nur Chromium setzt sie um, auf dem iPhone kostete sie
+       nur. */
+    /* Hier laesst sich das ganze Bild leiser stellen. */
     --grund-kuehl: rgba(47, 59, 107, 0.30);
     --grund-warm: rgba(168, 124, 74, 0.26);
     --grund-flieder: rgba(94, 58, 86, 0.26);
     --grund-tuerkis: rgba(31, 95, 99, 0.24);
 
-    /* Weniger Verwischen, mehr Saettigung: was man nicht erkennt, ist kein
-       Glas, sondern Milch. 20 statt 28 Pixel laesst die Formen dahinter
-       ahnen, saturate(320%) macht aus den blassen Farbfeldern im Grund
-       genau dort kraeftige Farbe, wo Glas darueber liegt. Die Aufhellung
-       haelt die Schrift lesbar, obwohl die Fuellung duenner geworden ist. */
+    /* Was man nicht erkennt, ist kein Glas, sondern Milch. Die Aufhellung
+       haelt die Schrift lesbar trotz duenner Fuellung. */
     --glas-frost: saturate(320%) brightness(1.05) blur(20px);
-    /* Duenn. 0,26 statt 0,42 — die Schrift traegt das, weil der Frost
-       dahinter alles zu Flaechen verwischt und aufhellt. */
+    /* Duenn — der Frost dahinter verwischt und hellt auf. */
     --glas-fuellung: rgba(255, 255, 255, 0.26);
-    /* Dicker fuer Flaechen, auf denen man liest. Die Leiste und der Streifen
-       tragen Marken — dort darf viel durchscheinen. Ein Blatt traegt Saetze,
-       und hinter Saetzen soll nichts stehen, das man mitliest. */
+    /* Dicker, wo man liest: hinter Saetzen soll nichts mitlesbar sein. */
     --glas-fuellung-fest: rgba(255, 255, 255, 0.52);
-    /* Die Karten tragen die meiste Schrift der ganzen Seite — Namen, Zonen,
-       Ziele, Zahlen. Sie sind deshalb die dickste der drei Fuellungen. */
+    /* Die Karten tragen die meiste Schrift: dickste der drei Fuellungen. */
     --glas-fuellung-karte: rgba(255, 255, 255, 0.74);
-    /* Die Kante faengt Licht: oben eine helle Linie, darunter noch eine
-       schwaechere, unten eine dunkle.
-
-       Zwei Zutaten sind dazugekommen, beide aus derselben Ecke wie der Rest
-       dieser Machart:
-
-       Woelbung  ein weicher dunkler Ring knapp innerhalb des Randes. Ohne
-                 ihn ist die Flaeche eine Folie; mit ihm hat sie Dicke —
-                 Licht, das durch eine Scheibe faellt, wird am Rand
-                 schraeger gebrochen und kommt dort dunkler an.
-       Farbstich die helle Linie oben zieht ins Kuehle, die dunkle unten ins
-                 Warme. Das ist die abgeschwaechte Fassung dessen, was an
-                 einer echten Linsenkante passiert: die Farben laufen
-                 auseinander. Ganz leise — sichtbar wird nur, dass der Rand
-                 lebt statt grau zu sein. */
+    /* Die Kante faengt Licht. Der weiche dunkle Ring knapp innerhalb des
+       Randes gibt der Flaeche Dicke; hell oben zieht ins Kuehle, dunkel
+       unten ins Warme — abgeschwaecht das, was an einer Linsenkante
+       passiert: die Farben laufen auseinander. */
     --glas-kante:
       inset 0 1px 0 rgba(255, 255, 255, 1),
       inset 0 2px 1px -1px rgba(214, 233, 255, 0.85),
@@ -181,20 +154,14 @@
 
     /* Schimmer und Fuellung in einem, als zwei Hintergrundebenen.
 
-       Frueher lag der Schimmer in einem ::before — und genau deshalb hatte
-       ihn in der Liste keine einzige Flaeche: die Klasse .glas, die ihn
-       mitbrachte, stand im Stylesheet, aber an keinem Element. Die vier
-       echten Flaechen hatten sich die Bausteine einzeln geholt und dabei
-       den Glanz vergessen. Es war Milchglas, kein Glas.
+       Frueher lag er in einem ::before — und hatte deshalb in der Liste
+       keine einzige Flaeche: die Klasse, die ihn mitbrachte, stand im
+       Stylesheet, aber an keinem Element. Ein Bauplan, den niemand befolgt,
+       ist kein Bauplan; sie ist ganz weg.
 
        Als Hintergrundebene ist er ausserdem dort richtig, wo ein ::before
-       falsch waere: das Blatt und die Neuheiten-Karte scrollen innen, und
-       ein absolut gesetztes Kind scrollt mit. Ein Hintergrund nicht — der
-       bleibt am Rahmen des Elements stehen.
-
-       Die Fuellung muss als Verlauf geschrieben werden, weil eine Farbe in
-       background nur als letzte Angabe stehen darf und dann unter allen
-       Ebenen laege. */
+       falsch waere: Blatt und Neuheiten-Karte scrollen innen. Die Fuellung
+       als Verlauf, weil eine Farbe in background nur zuletzt stehen darf. */
     --glas-grund:
       var(--glas-schimmer),
       linear-gradient(var(--glas-fuellung), var(--glas-fuellung));
@@ -219,38 +186,23 @@
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  /* Der Bauplan. Wer .glas traegt, bekommt alle vier Teile auf einmal —
-     ohne Pseudo-Element und ohne zusaetzliche Ebene. */
-  .glas {
-    background: var(--glas-grund);
-    -webkit-backdrop-filter: var(--glas-frost);
-    backdrop-filter: var(--glas-frost);
-    box-shadow: var(--glas-kante), var(--hebung);
-  }
-
-  /* Zwei Faelle, in denen es wieder deckend wird.
-
-     Ohne backdrop-filter waere die Fuellung eine halbdurchsichtige Schicht
-     ueber scharfem Text darunter — unleserlich. Und wer sein Geraet auf
-     weniger Transparenz gestellt hat, meint genau das. */
+  /* Zwei Faelle, in denen es wieder deckend wird: ohne backdrop-filter
+     laege die Fuellung ueber scharfem Text, und wer weniger Transparenz
+     eingestellt hat, meint genau das. */
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .glas, nav, .sheet-card, .install-bar, .neuheit-mitte,
+    nav, .sheet-card, .install-bar, .neuheit-mitte,
     header, .setup-strip, .card { background: var(--card); }
     .news-banner { background: var(--soft); }
     .chart { background: var(--soft); }
   }
   @media (prefers-reduced-transparency: reduce) {
-    .glas, nav, .sheet-card, .install-bar, .neuheit-mitte {
+    nav, .sheet-card, .install-bar, .neuheit-mitte {
       background: var(--card);
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
     }
     /* Kopf, Laufstreifen und Setup-Streifen scheinen ebenfalls durch —
        auch das ist gemeint. */
-    header, .news-banner, .setup-strip {
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
-    }
     header { background: var(--card); box-shadow: none; }
     .news-banner { background: var(--soft); }
     .setup-strip { background: var(--card); }
@@ -258,36 +210,11 @@
     .chart { background: var(--soft); }
   }
 
-  /* Der Grund hinter allem.
-
-     Ohne ihn bleibt jedes Glas ein hellerer Balken: durchscheinend ist nur
-     zu sehen, wenn darunter etwas ist. Nur ein Kursverlauf allein war zu
-     wenig — grau auf fast weiss, und der Frost verwischt genau das zu
-     nichts. Was Glas zeigt, ist Farbe: der saturate() im Frost hebt sie
-     genau dort hervor, wo Glas darueber liegt, und laesst sie auf dem
-     nackten Grund kaum auffallen.
-
-     Farbe allein reicht aber auch nicht. Ein Verlauf ist weich, und ein
-     20-Pixel-Blur ueber etwas Weichem ergibt wieder dasselbe Weiche: man
-     sieht keine Scheibe, man sieht eine hellere Flaeche. Was Glas sichtbar
-     macht, sind Kanten — Formen mit hohem oertlichem Kontrast, die beim
-     Verwischen zu erkennbaren Flecken zerlaufen. Auf den Vorlagen aus dem
-     Netz ist das ein Foto. Hier ist es das, was diese App ohnehin zeigt:
-     eine ganzflaechige Wand aus Kerzen, fuenf Lagen tief, in den vier
-     Farben des Grundes (grund.py erzeugt sie).
-
-     Also: vier grosse, sehr weiche Farbfelder — kuehl oben links, warm oben
-     rechts, Flieder unten rechts, Tuerkis unten links — und darueber die
-     Kerzenwand. Alles in einem einzigen Element mit mehreren
-     Hintergrundebenen: eine Ebene, nicht sechs.
-
-     Die Karten bleiben deckend und decken den groessten Teil davon zu. Zu
-     sehen ist die Farbe in den Luecken, an den Raendern — und durch jedes
-     Glas. Genau so soll es sein: der Grund rahmt die Liste, er traegt sie
-     nicht.
-
-     Fest am Fenster, nicht mitscrollend, ohne eigene Bewegung: was hinter
-     zehn Charts liegt, soll nichts kosten. */
+  /* Der Grund hinter allem. Grau auf fast weiss verwischt der Frost zu
+     nichts, Farbe hebt er hervor — aber Farbe allein reicht nicht, denn ein
+     Blur ueber einem weichen Verlauf ergibt wieder dasselbe Weiche.
+     Sichtbar wird Glas an Kanten. Also vier gedeckte Farbfelder und
+     darueber drei ruhige Kurslinien (grund.py). */
   .grundkurve {
     position: fixed;
     inset: 0;
@@ -302,10 +229,8 @@
       var(--bg);
   }
   .nur-web .grundkurve { display: none; }
-  /* Bei "weniger Transparenz" bleibt der Grund stehen. Der Wunsch gilt dem
-     Durchscheinen — die Flaechen darueber werden deckend, und ein Grund, den
-     dann niemand mehr durchschimmern sieht, ist einfach ein Hintergrund. Ihn
-     mit abzuschalten hiesse, die Seite fuer diese Leute nackt zu machen. */
+  /* Bei "weniger Transparenz" bleibt der Grund stehen: der Wunsch gilt dem
+     Durchscheinen, nicht dem Hintergrund. */
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html {
@@ -339,19 +264,13 @@
     padding-bottom: 40px;
   }
 
-  /* Der Kopf war eine deckende weisse Platte quer ueber den ganzen oberen
-     Bildrand — und damit genau dort, wo vom Grund am meisten zu sehen sein
-     sollte, gar nichts. Jetzt traegt er dieselbe Machart wie die Blaetter,
-     Frost eingeschlossen: seit hinter ihm die Kerzenwand steht und nicht
-     mehr nur ein weicher Verlauf, gibt es dort etwas zu verwischen — und
-     ohne das Verwischen stuenden die Kanten der Wand mitten in der
-     Ueberschrift. */
+  /* War eine deckende weisse Platte quer ueber den oberen Bildrand — dort,
+     wo vom Grund am meisten zu sehen sein sollte. Jetzt Fuellung und
+     Schimmer, ohne Frost (siehe GLAS). */
   header {
     padding: 40px 24px 28px;
     text-align: center;
     background: var(--glas-grund-fest);
-    -webkit-backdrop-filter: var(--glas-frost);
-    backdrop-filter: var(--glas-frost);
     box-shadow: var(--glas-kante);
     border-bottom: 1px solid var(--hair);
   }
@@ -442,11 +361,8 @@
     justify-content: center;
     gap: 8px;
     padding: 11px 16px;
-    /* Auch dieser Streifen scheint durch — sonst bliebe zwischen Laufband
-       und erster Karte ein letzter deckender Balken stehen. */
+    /* Scheint durch, sonst bliebe hier ein deckender Balken. */
     background: rgba(255, 255, 255, 0.55);
-    -webkit-backdrop-filter: var(--glas-frost);
-    backdrop-filter: var(--glas-frost);
     border-bottom: 1px solid var(--hair);
     font-size: 10px;
     font-weight: 700;
@@ -535,15 +451,10 @@
   }
   .karten > .card {
     margin: 0 14px 56px;
-    /* Was weit weg ist, zeichnet der Browser gar nicht erst. Die Hoehe ist
-       vorgegeben, damit die Seite trotzdem die richtige Laenge hat und
-       Sprungmarken stimmen.
-
-       800 statt 760, seit die Zeitraum-Knoepfe ueber dem Chart stehen:
-       gemessen sind die Karten 762 hoch, zwei mit laengerem Kopf 814. Mit
-       dem alten Wert schob jede der langen Karten den Sprung um 54 Pixel
-       nach unten — bei fuenf Karten ueber dem Ziel reichte das, um an der
-       Sprungmarke vorbeizulanden. */
+    /* Was weit weg ist, zeichnet der Browser gar nicht erst; die Hoehe ist
+       vorgegeben, damit Sprungmarken stimmen. 800 statt 760, seit die
+       Zeitraum-Knoepfe dazukamen — sonst schob jede lange Karte den Sprung
+       um 54 Pixel nach unten. */
     content-visibility: auto;
     contain-intrinsic-size: auto 800px;
   }
@@ -603,18 +514,10 @@
     .karten { transition: none !important; }
   }
 
-  /* Auch die Karten sind Glas.
-
-     Lange stand hier das Gegenteil: Glas ueber einer flachen Flaeche ist
-     kein Glas, sondern eine hellere Flaeche mit Kosten. Das galt, solange
-     hinter den Karten nichts lag. Jetzt liegt dort der Grund, und die Karten
-     decken den groessten Teil des Bildes ab — bleiben sie weiss, sieht man
-     vom Grund nur die Fugen dazwischen.
-
-     Ohne Frost. Der Grund ist eine ruhige Zeichnung aus drei weichen
-     Kurslinien; da gibt es nichts zu verwischen, was die Schrift stoeren
-     wuerde. Zehn Karten mit backdrop-filter waeren dagegen zehn
-     Filterflaechen beim Scrollen — teuer bezahlt fuer kein Bild. */
+  /* Auch die Karten sind Glas. Lange stand hier das Gegenteil, und es
+     stimmte, solange hinter ihnen nichts lag — jetzt liegt dort der Grund,
+     und die Karten decken das meiste davon ab. Ohne Frost, wie alles, was
+     mitscrollt. */
   .card {
     margin: 16px 14px 56px;
     border: 1px solid var(--hair);
@@ -697,15 +600,11 @@
     background: var(--muted);
   }
   /* Banner */
-  /* Auch der Laufstreifen laesst den Grund durch — sonst stuende zwischen
-     Kopf und Leiste wieder ein deckender Balken. Mit Frost, aus demselben
-     Grund wie beim Kopf: hier laeuft Schrift, und darunter steht die Wand. */
+  /* Laesst den Grund durch, ohne Frost. */
   .news-banner {
     overflow: hidden;
     border-bottom: 1px solid var(--hair);
     background: rgba(255, 255, 255, 0.55);
-    -webkit-backdrop-filter: var(--glas-frost);
-    backdrop-filter: var(--glas-frost);
     color: var(--fg);
   }
   .news-banner-track {
@@ -901,12 +800,8 @@
     text-align: center;
   }
 
-  /* Die Zeitraum-Knoepfe ueber dem Chart.
-
-     Sie ersetzen die obere Leiste von TradingView. Die trug denselben
-     Zweck, aber in fremder Schrift, mit Symbolfeld, Indikatoren und
-     Vollbild daneben — und liess den Chart nach eingebetteter Fremdsoftware
-     aussehen statt nach dieser Seite. */
+  /* Ersetzen die obere Leiste von TradingView — die trug denselben Zweck,
+     aber in fremder Schrift und mit Symbolfeld, Indikatoren, Vollbild. */
   .spanne {
     display: flex;
     gap: 4px;
@@ -942,10 +837,9 @@
     .spanne-knopf { transition: none; }
   }
 
-  /* Durchsichtig, damit das Glas der Karte auch unter dem Chart weiterlaeuft.
-     Die Flaeche des Charts selbst wird in den Overrides auf durchsichtiges
-     Weiss gesetzt — sollte TradingView die Deckkraft verwerfen, bleibt
-     Weiss, also genau das Bild von vorher. */
+  /* Durchsichtig, damit das Glas der Karte unter dem Chart weiterlaeuft.
+     In den Overrides steht die Chartflaeche auf durchsichtigem Weiss —
+     verwirft TradingView die Deckkraft, bleibt Weiss. */
   .chart {
     position: relative;
     width: 100%;
@@ -3607,27 +3501,12 @@
 
   /* Der Chart in der Karte ist eine Linie, keine Kerzen.
 
-     Zehn Kerzencharts nebeneinander sind zehn dichte Muster aus Balken,
-     Dochten und Gitternetz. Das ist die lauteste Flaeche der ganzen Seite —
-     und sie sagt auf der Groesse einer Karte fast nichts, weil eine
-     Tageskerze dort drei Pixel breit ist. Eine Linie sagt dasselbe ruhiger:
-     wo der Kurs herkommt und wo er steht.
-
-     Dazu faellt weg, was in einer Karte ohnehin niemand benutzt: die
-     Werkzeugleiste an der Seite, die Legende, die Zeitraum-Knoepfe, das
-     Gitternetz. Die Werkzeuge fehlen nicht — der Knopf unter dem Chart
-     oeffnet den vollen Analyse-Chart mit den Fibonacci-Marken.
-
-     Auch die obere Leiste faellt weg. Sie war das letzte, was den Chart nach
-     Fremdsoftware aussehen liess — Symbolfeld, Zeitrahmen, Indikatoren,
-     Vollbild, alles in TradingViews eigener Schrift. Den Zeitrahmen gibt es
-     dafuer als eigene Knoepfe ueber dem Chart, in der Schrift und den Marken
-     dieser Seite: 1T · 1W · 1M · 1J · Max. Antippen tauscht die Adresse des
-     Rahmens aus.
-
-     mainSeriesProperties.style 2 ist die Linie; der Rest der Overrides holt
-     die Farben in die der Seite — Linie in --fg, Achsen in --line und
-     --muted, Gitter unsichtbar. */
+     Zehn Kerzencharts sind die lauteste Flaeche der Seite und sagen auf
+     Kartengroesse fast nichts — eine Tageskerze ist dort drei Pixel breit.
+     Weg faellt alles, was nach Fremdsoftware aussah: Seitenleiste, obere
+     Leiste, Legende, Volumen, Studien, Gitternetz, Datums- und Fusszeile.
+     Den Zeitrahmen gibt es als eigene Knoepfe darueber; die Zeichenwerkzeuge
+     stehen im vollen Analyse-Chart hinter dem Knopf darunter. */
   var TV_ART = {
     "mainSeriesProperties.priceAxisProperties.log": true,
     "mainSeriesProperties.style": 2,
@@ -3642,9 +3521,8 @@
     "scalesProperties.lineColor": "#ebebeb",
     "scalesProperties.textColor": "#737373"
   };
-  /* Die Zeitraeume. Zwei Angaben je Knopf: wie weit zurueck (range) und wie
-     fein (interval). Ein Jahr in Fuenf-Minuten-Schritten waere sinnlos, ein
-     Tag in Wochenschritten auch. */
+  /* Zwei Angaben je Knopf: wie weit zurueck und wie fein. Ein Jahr in
+     Fuenf-Minuten-Schritten waere so sinnlos wie ein Tag in Wochen. */
   var SPANNEN = [
     { k: "1T", i: "5", r: "1D" },
     { k: "1W", i: "30", r: "5D" },
@@ -3652,10 +3530,8 @@
     { k: "1J", i: "D", r: "12M" },
     { k: "Max", i: "W", r: "ALL" }
   ];
-  /* 1T beim Aufmachen: das ist der Blick, an dem man sieht, dass der Chart
-     lebt — die Linie des laufenden Tages, die sich waehrend der Handelszeit
-     weiterschreibt. Der Jahresblick, mit dem die Zonen dieser Liste
-     arbeiten, ist einen Tipp entfernt. */
+  /* 1T beim Aufmachen: der Blick, an dem man sieht, dass der Chart lebt.
+     Der Jahresblick, mit dem die Zonen arbeiten, ist einen Tipp weit. */
   var SPANNE_START = 0;
 
   function tvAdresse(sym, s) {
@@ -3731,8 +3607,8 @@
     // Der Chart wird nicht gleich eingesetzt. Zehn TradingView-Anwendungen
     // gleichzeitig sind der teuerste Posten der Seite; geladen wird nur, was
     // in die Naehe kommt. Die Adresse steht solange am Kasten.
-    // Die Zeitraum-Knoepfe stehen ueber dem Chart, nicht darin — das ist der
-    // Unterschied zwischen "unsere Seite" und "eingebettete Fremdsoftware".
+    // Ueber dem Chart, nicht darin — das ist der Unterschied zwischen
+    // "unsere Seite" und "eingebettete Fremdsoftware".
     var spanne = el("div", "spanne");
     spanne.setAttribute("role", "group");
     spanne.setAttribute("aria-label", "Zeitraum");
@@ -3885,25 +3761,14 @@
       k.classList.remove("chart-da");
     }
 
-    /* Zeitraum wechseln.
+    /* Zeitraum wechseln. Ein Klick tauscht die Adresse am Kasten aus und
+       setzt einen vorhandenen Rahmen neu — src im laufenden iframe zu
+       aendern legt in Safari einen Eintrag in die Zurueck-Liste, und dann
+       fuehrt der Zurueck-Wisch durch die Zeitraeume statt aus der App.
 
-       Ein Klick tauscht nur die Adresse am Kasten aus. Haengt schon ein
-       Rahmen darin, wird er weggenommen und neu gesetzt — src im laufenden
-       iframe zu aendern hinterlaesst in Safari einen Eintrag in der
-       Zurueck-Liste, und dann fuehrt der Zurueck-Wisch nicht aus der App,
-       sondern durch die Zeitraeume.
-
-       Haengt noch keiner darin, passiert nichts weiter: der Kasten ist
-       ausser Sicht, und wenn er hereinkommt, wird ohnehin die neue Adresse
-       genommen.
-
-       Der Horcher haengt am Stapel, nicht an den Knoepfen — die kommen und
-       gehen mit jedem Neubau. Genau deshalb die Sperre davor: bauen() laeuft
-       zweimal, einmal mit den frischen Zahlen und einmal mit den
-       aufgehobenen, und textContent = "" raeumt zwar die Kinder weg, nicht
-       aber einen Horcher am Stapel selbst. Ohne die Sperre wuerde ein Tipp
-       den Rahmen zweimal wegnehmen und zweimal neu setzen — TradingView
-       laedt dann doppelt. */
+       Der Horcher haengt am Stapel, nicht an den Knoepfen. Daher die
+       Sperre: bauen() laeuft zweimal, und textContent = "" raeumt die
+       Kinder weg, nicht ihn. */
     if (!stapel.hasAttribute("data-spanne-horcht")) {
       stapel.setAttribute("data-spanne-horcht", "1");
       stapel.addEventListener("click", spanneKlick);
