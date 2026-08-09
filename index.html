@@ -7553,14 +7553,6 @@ if ("serviceWorker" in navigator) {
      Das geht, weil die Hoehen feststehen: der Chart-Kasten ist 400 Pixel hoch,
      ob die Zeichnung schon drin haengt oder nicht. Nichts rutscht nach. */
   function hinfahren(el, fertig) {
-    /* Waehrend des Rundgangs rastet nichts ein.
-
-       Das Einrasten der Karten und das Hinfahren des Rundgangs sind zwei,
-       die dasselbe wollen: beide bestimmen, wo die Seite stehen bleibt. Nach
-       dem weichen Zug rueckte der Einrast-Mechanismus noch einmal um 21
-       Pixel nach — von aussen sieht das aus wie hin und wieder zurueck, und
-       rundgang-test hat genau das gemeldet. Wer faehrt, bestimmt allein. */
-    document.documentElement.classList.add("fuehrt");
     var oben = navHoehe() + 22;
     var streifen = window.innerHeight - oben - 200;   // was zwischen Leiste und Karte frei ist
     var hoehe = el.offsetHeight;
@@ -7569,10 +7561,7 @@ if ("serviceWorker" in navigator) {
     var grenze = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
     var ziel = Math.max(0, Math.min(layoutOben(el) - oben - luft, grenze));
 
-    var los = function () {
-      document.documentElement.classList.remove("fuehrt");
-      fertig();
-    };
+    var los = fertig;
     if (Math.abs(window.scrollY - ziel) < 2) return los();
     window.scrollTo({ top: ziel, behavior: sanft });
     steht(function () {
@@ -7699,6 +7688,14 @@ if ("serviceWorker" in navigator) {
     if (!liste.length) return;
     laeuft = true;
     gesehen();
+    /* Solange der Rundgang laeuft, rastet nichts ein.
+
+       Erst stand die Sperre nur um einen einzelnen Zug herum — und griff
+       damit zu kurz: der Zug fuhr auf sein Ziel, die Sperre fiel, und danach
+       zog das Einrasten die Seite auf den naechsten Kartenanfang zurueck. Von
+       aussen genau das, was rundgang-test meldet: hin und gleich wieder
+       zurueck, am Ende wieder da, wo es losging. */
+    document.documentElement.classList.add("fuehrt");
     stand.hidden = false;
     punkteBauen();
     stand.classList.add("wechselt");
@@ -7713,6 +7710,7 @@ if ("serviceWorker" in navigator) {
     if (!laeuft) return;
     laeuft = false;
     gesehen();
+    document.documentElement.classList.remove("fuehrt");
     lochZu();                       // der Ausschnitt faellt zu, waehrend alles hell wird
     stand.classList.remove("da");
     setTimeout(function () { stand.hidden = true; }, 486);
