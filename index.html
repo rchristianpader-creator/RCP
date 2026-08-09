@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="dark">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#0a0d0c">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=87">
-<link rel="apple-touch-icon" href="/icon-180.png?v=87">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=88">
+<link rel="apple-touch-icon" href="/icon-180.png?v=88">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=87">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=88">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=87">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=88">
 
 <script>
 /* Im Browser oder als App?
@@ -353,7 +353,7 @@
        mittelt es weg und sieht einen glatten Verlauf. Die Datei dafuer ist
        370 Byte gross; das Rauschen entsteht im Browser. */
     background:
-      url("/grund.svg?v=87") repeat,
+      url("/grund.svg?v=88") repeat,
       radial-gradient(120% 90% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.55) 100%),
       radial-gradient(78% 58% at 10% 4%, var(--grund-kuehl) 0%, transparent 68%),
       radial-gradient(66% 52% at 92% 14%, var(--grund-warm) 0%, transparent 68%),
@@ -793,12 +793,6 @@
     border: 1px solid var(--hair);
     border-radius: var(--r-karte);
     overflow: hidden;
-    /* Der Lichtzug liegt in einem ::before und braucht die Karte als Bezug.
-       isolation macht sie ausserdem zur eigenen Ebene — nur dann kann der
-       Zug mit z-index: -1 UEBER dem Kartenhintergrund und UNTER der Schrift
-       liegen. Ohne sie fiele er hinter die Karte und waere ganz weg. */
-    position: relative;
-    isolation: isolate;
     background: var(--glas-glanz-karte);
     /* Kein scroll-margin-top: der Abstand beim Sprung steht einmal an html
        als scroll-padding-top. Beides zusammen addierte sich, und der Sprung
@@ -807,45 +801,24 @@
     box-shadow: var(--glas-kante-glanz), var(--hebung);
   }
 
-  /* DER LICHTZUG
+  /* KEIN LICHTZUG MEHR
 
-     Was eine Scheibe von einem hellen Rechteck unterscheidet, ist nicht ihr
-     Aussehen im Stillstand, sondern dass sich das Licht darauf bewegt, wenn
-     man sie bewegt. Ein feststehendes Licht ist Farbe, kein Licht.
+     Hier zog ein zweiter, schmaler Streifen ueber die ganze Karte, waehrend
+     sie durchs Bild fuhr — mit der Begruendung, ein feststehendes Licht sei
+     Farbe und kein Licht.
 
-     Also ein zweiter, schmalerer Streifen, der ueber die Karte zieht,
-     waehrend sie durchs Bild faehrt.
+     Zwei Anlaeufe, ihn ertraeglich zu machen: erst schwaecher, dann hinter
+     den Inhalt, damit er die Schrift nicht mehr aufhellt. Beides hat das
+     Lesen gerettet und das eigentliche Problem nicht angeruehrt: etwas
+     Helles wandert ueber die ganze Flaeche, auf jeder Karte, bei jedem
+     Wisch. Das ist kein Detail, das man bemerkt — das ist Bewegung im
+     Augenwinkel, die man nicht abstellen kann.
 
-     Er lag zuerst UEBER dem Inhalt — eine Spiegelung sitzt auf der Scheibe.
-     Das stimmt fuer Glas und war hier falsch: die Schrift ist hell auf
-     dunkel, und jedes Weiss darunter zieht den Grund in Richtung
-     Schriftfarbe. Der Abstand zwischen beiden ist das Lesen.
+     Der Glanz bleibt, aber er bleibt stehen: der schmale Streifen in der
+     oberen Ecke, die Woelbung, der Rueckwurf, die Kante. Eine Scheibe, die
+     Licht faengt, ohne damit zu wedeln.
 
-     Jetzt liegt er zwischen Hintergrund und Inhalt: sichtbar auf der ganzen
-     Karte, weil Kopf, Chart und Knopf keinen eigenen Hintergrund haben —
-     aber nie zwischen Auge und Schrift.
-
-     Nur eine Verschiebung. Ein Verlauf, der seine Stellung aendert, muesste
-     bei jedem Bild neu gezeichnet werden; ein Streifen, der sich
-     verschiebt, wird einmal gezeichnet und danach nur geschoben. */
-  .card::before {
-    content: "";
-    position: absolute;
-    inset: -25% -55%;
-    pointer-events: none;
-    z-index: -1;
-    /* Ein schmaler Kern mit einem weichen Hof — so sieht eine Spiegelung
-       aus. Der erste Anlauf war ein einzelner breiter Verlauf ueber ein
-       Drittel der Kartenbreite; auf einer schirmhohen Karte las sich das
-       als heller Schmierstreifen quer durch den Chart, nicht als Licht. */
-    background: linear-gradient(105deg,
-      rgba(255, 255, 255, 0) 40%,
-      rgba(255, 255, 255, 0.03) 47%,
-      rgba(255, 255, 255, 0.12) 50%,
-      rgba(255, 255, 255, 0.03) 53%,
-      rgba(255, 255, 255, 0) 60%);
-    transform: translate3d(-14%, 0, 0);
-  }
+     Nebenbei ein Element weniger, das sich bei jedem Bild bewegt. */
 
   .card-head { padding: 18px 18px 12px; }
   .card-head .row {
@@ -2644,7 +2617,7 @@
     align-items: center;
     justify-content: center;
     background:
-      url("/grund.svg?v=87") repeat,
+      url("/grund.svg?v=88") repeat,
       radial-gradient(120% 90% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.55) 100%),
       radial-gradient(78% 58% at 10% 4%, var(--grund-kuehl) 0%, transparent 68%),
       radial-gradient(66% 52% at 92% 14%, var(--grund-warm) 0%, transparent 68%),
@@ -2823,7 +2796,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=87");
+    background-image: url("/kerzen.svg?v=88");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -2837,7 +2810,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=87");
+    background-image: url("/kerzen-blass.svg?v=88");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -3124,21 +3097,6 @@
         animation: kanteLauf linear both;
         animation-timeline: --karte;
         animation-range: entry 2% entry 52%;
-      }
-
-      /* Der Lichtzug haengt an derselben Uhr wie alles andere in der Karte,
-         nur ueber die ganze Strecke: von der ersten bis zur letzten
-         Beruehrung mit dem Fenster. So wandert das Licht einmal komplett
-         ueber die Scheibe, waehrend die Karte durchs Bild faehrt — und es
-         steht nie still, solange man scrollt. */
-      .karten > .card::before {
-        animation: glanzZug linear both;
-        animation-timeline: --karte;
-        animation-range: cover;
-      }
-      @keyframes glanzZug {
-        from { transform: translate3d(-42%, 0, 0); }
-        to   { transform: translate3d(42%, 0, 0); }
       }
 
       /* ---- Und alles andere, was bisher stillstand ----
@@ -3580,7 +3538,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=87" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=88" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -3698,7 +3656,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=87" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=88" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3746,7 +3704,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=87" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=88" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -3765,7 +3723,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=87" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=88" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3882,7 +3840,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=87" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=88" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -6243,7 +6201,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=87";
+      i.src = "/icon-512.png?v=88";
     });
     return symbolBild;
   }

@@ -544,27 +544,31 @@ aus der Wirklichkeit:
 `--glas-kante-glanz` legt Licht ringsum statt nur oben: hell an der Oberkante,
 ein Hauch an den Seiten, unten der dunkle Abschluss, der die Dicke macht.
 
-**Der Lichtzug.** Was eine Scheibe von einem hellen Rechteck unterscheidet, ist
-nicht ihr Aussehen im Stillstand, sondern dass sich das Licht bewegt, wenn man
-sie bewegt. `.card::before` trägt einen schmalen hellen Kern mit weichem Hof und
-wandert an der `view-timeline` der Karte über die volle Strecke — von der ersten
-bis zur letzten Berührung mit dem Fenster.
+### Der Lichtzug, und warum er wieder weg ist
 
-Er liegt **hinter** dem Inhalt (`z-index: -1`, dafür `isolation: isolate` an der
-Karte). Zuerst lag er darüber, mit der Begründung, eine Spiegelung sitze auf der
-Scheibe und nicht dahinter. Das stimmt für Glas und war hier trotzdem falsch: die
-Schrift ist hell auf dunkel, und jedes Weiß darunter zieht den Grund in Richtung
-Schriftfarbe. Der Abstand zwischen beiden wird kleiner — und genau der ist das
-Lesen. Ein Licht, das wandert, wandert dann auch durch jeden Satz.
+Hier zog ein schmaler heller Streifen über die ganze Karte, während sie durchs
+Bild fuhr — an der `view-timeline` der Karte, über die volle Strecke. Die
+Begründung: was eine Scheibe von einem hellen Rechteck unterscheidet, ist nicht
+ihr Aussehen im Stillstand, sondern dass sich das Licht bewegt, wenn man sie
+bewegt. Ein feststehendes Licht ist Farbe, kein Licht.
 
-Gemessen bei stehender Karte, Zug in der Mitte: **3276 Glyphenkerne unverändert,
-8 verändert** (Kantenglättung). Sichtbar bleibt er trotzdem auf der ganzen Karte —
-Kopf, Chart und Knopf haben keinen eigenen Hintergrund, Zielleiste und News-Block
-sind fast durchsichtig.
+Drei Runden, bis klar war, dass die Begründung nicht trägt:
 
-Der erste Anlauf war ein einzelner breiter Verlauf über ein Drittel der
-Kartenbreite — auf einer schirmhohen Karte las sich das als heller Schmierstreifen
-quer durch den Chart, nicht als Licht.
+1. Zu hell (0,17 Kern) → **„zu extrem und erschwert das Lesen"**.
+2. Hinter den Inhalt gelegt (`z-index: -1` + `isolation: isolate`). Gemessen:
+   3276 Glyphenkerne unverändert, 8 verändert. Das Lesen war gerettet.
+3. **„Die Blendung über die ganze Karte ist nervig."** Und das war der Punkt,
+   den beide Anläufe nicht angerührt hatten: etwas Helles wandert über die ganze
+   Fläche, auf jeder Karte, bei jedem Wisch. Das ist kein Detail, das man
+   bemerkt — das ist Bewegung im Augenwinkel, die man nicht abstellen kann.
+
+Der Glanz bleibt, aber er bleibt stehen: Streifen, Wölbung, Rückwurf, Kante. Eine
+Scheibe, die Licht fängt, ohne damit zu wedeln. `glanz-test` wacht darüber, dass
+kein `glanzZug` zurückkommt — weder als Regel noch als laufende Bewegung.
+
+Der erste Anlauf des Zuges war übrigens ein einzelner breiter Verlauf über ein
+Drittel der Kartenbreite — auf einer schirmhohen Karte las sich das als heller
+Schmierstreifen quer durch den Chart, nicht als Licht.
 
 ### Wo die Helligkeit wirklich herkam
 
@@ -592,12 +596,11 @@ und braucht ein Zehntel der Fläche dafür.
 Ergebnis: **87 statt 93** wie vor dem Glanz, Kontrast **6,59 statt 6,00**. Die
 Karten glänzen und lesen sich besser als vorher.
 
-**Was es kostet: nichts.** Nur eine Verschiebung. Ein Verlauf, der seine Stellung
-ändert, müsste bei jedem Bild neu gezeichnet werden; ein Streifen, der sich
-verschiebt, wird einmal gezeichnet und danach nur noch geschoben. Gemessen bei
-sechsfach gedrosseltem Prozessor: **89 Bilder beim Scrollen, Mittel 16 ms,
-schlechtestes 17 ms, null über 32 ms.** Ein Frost wäre hier das Naheliegende und
-das Falsche — siehe die Regel weiter oben.
+**Was es kostet: nichts.** Alles davon sind Hintergrundebenen — einmal
+gezeichnet, danach nur noch verschoben. Gemessen bei sechsfach gedrosseltem
+Prozessor: **89 Bilder beim Scrollen, Mittel 16 ms, schlechtestes 17 ms, null
+über 32 ms.** Ein Frost wäre hier das Naheliegende und das Falsche — siehe die
+Regel weiter oben.
 
 ### Kein Kasten um die Symboltasten
 
