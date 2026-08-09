@@ -689,8 +689,39 @@ XML-Attributen**. Als `stroke="var(--gut)"` bleibt die Linie grau. Farbe muss
 über `style` gesetzt werden.
 
 **Zeitraum-Knöpfe** `1T · 1W · 1M · 1J · Max` über dem Chart, beim Aufmachen
-1T. Ein Klick holt die Reihe neu. Eine Antwort, die zu einem inzwischen
+**1W**. Ein Klick holt die Reihe neu. Eine Antwort, die zu einem inzwischen
 abgewählten Zeitraum gehört, wird verworfen statt gezeichnet.
+
+Vorher stand 1T da — der Blick, an dem man sieht, dass der Chart lebt. Er zeigt
+aber nur das Rauschen eines Handelstages, und bei allem, was nicht durchgehend
+gehandelt wird (Gold, Silber, Bitcoin am Wochenende), auch das nicht
+verlässlich. Eine Woche hat genug Weg für eine Richtung.
+
+### Die Kaufzone ist beschriftet
+
+Sie ist der Grund für den eigenen Chart und stand trotzdem als kaum sichtbarer
+Schleier da: **0,06 Deckkraft, ohne Kante, ohne Namen.** Auf dem Telefon war
+nicht zu erkennen, wo sie anfängt und aufhört — und schon gar nicht, dass sie es
+überhaupt ist.
+
+Drei Dinge machen daraus einen Bereich:
+
+| | |
+|---|---|
+| Füllung **0,06 → 0,13** | das Band ist da, nicht nur zu ahnen |
+| zwei **durchgezogene** Kanten (0,44) | wo sie anfängt und wo sie aufhört |
+| ein Schild **„KAUFZONE 5,70 – 6,01"** | links auf dem Band, mit der Spanne |
+
+Zwei Kanten statt eines Rahmens: die Zone ist ein Kursbereich, sie hat keinen
+Anfang und kein Ende in der Zeit. **Durchgezogen**, während der Zielstrich
+gestrichelt bleibt — zwei verschiedene Dinge dürfen nicht gleich aussehen.
+Farbe scheidet als Unterscheidung aus: Grün und Rot bedeuten hier Steigen und
+Fallen und nichts sonst.
+
+Das Schild sitzt auf der Mitte des Bandes. Liegt das Band ganz oben oder ganz
+unten, rückt es an die gegenüberliegende Kante — dort stehen die Prozentangabe
+und die Zeitmarken. Vorher stand nur das Wort „Zone" rechts bei den Kursmarken,
+wo es zu jeder Linie hätte gehören können.
 
 Die Zeichenwerkzeuge fehlen nicht: der Knopf unter dem Chart öffnet weiter den
 vollen Analyse-Chart mit den Fibonacci-Marken — als Knopf, nicht als

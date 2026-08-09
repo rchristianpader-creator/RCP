@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="dark">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#0a0d0c">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=88">
-<link rel="apple-touch-icon" href="/icon-180.png?v=88">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=89">
+<link rel="apple-touch-icon" href="/icon-180.png?v=89">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=88">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=89">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=88">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=89">
 
 <script>
 /* Im Browser oder als App?
@@ -353,7 +353,7 @@
        mittelt es weg und sieht einen glatten Verlauf. Die Datei dafuer ist
        370 Byte gross; das Rauschen entsteht im Browser. */
     background:
-      url("/grund.svg?v=88") repeat,
+      url("/grund.svg?v=89") repeat,
       radial-gradient(120% 90% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.55) 100%),
       radial-gradient(78% 58% at 10% 4%, var(--grund-kuehl) 0%, transparent 68%),
       radial-gradient(66% 52% at 92% 14%, var(--grund-warm) 0%, transparent 68%),
@@ -1188,7 +1188,22 @@
     stroke-dasharray: 2 4;
     vector-effect: non-scaling-stroke;
   }
-  .chart .zonenband { fill: rgba(var(--fg-rgb), 0.06); }
+  /* DIE KAUFZONE
+
+     Sie ist der Grund, warum diese Liste eigene Charts zeichnet — und stand
+     als kaum sichtbarer Schleier da: 0,06 Deckkraft, ohne Kante, ohne Namen.
+     Drei Dinge machen daraus einen Bereich: mehr Fuellung, zwei feste Kanten
+     und ein Name.
+
+     Die Kanten sind durchgezogen, das Kursziel bleibt gestrichelt — zwei
+     verschiedene Dinge duerfen nicht gleich aussehen. Farbe scheidet aus:
+     Gruen und Rot bedeuten hier Steigen und Fallen und nichts sonst. */
+  .chart .zonenband { fill: rgba(var(--fg-rgb), 0.13); }
+  .chart .zonenkante {
+    stroke: rgba(var(--fg-rgb), 0.44);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
   .chart .zielstrich {
     stroke: rgba(var(--fg-rgb), 0.34);
     stroke-width: 1;
@@ -1217,12 +1232,32 @@
     padding: 2px 5px;
     right: 4px;
   }
-  .chart-marke.zone,
   .chart-marke.ziel {
     font-weight: 700;
     letter-spacing: 0.1em;
     font-size: 8px;
     text-transform: uppercase;
+  }
+  /* Der Name steht links auf dem Band, nicht rechts bei den Kursmarken.
+     Dort stand nur "Zone" — ein Wort am Rand, das zu jeder Linie haette
+     gehoeren koennen. Auf dem Band ist die Zuordnung eindeutig. */
+  .chart-zonenschild {
+    position: absolute;
+    left: 8px;
+    transform: translateY(-50%);
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(var(--fg-rgb), 0.72);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .chart-zonenschild b {
+    font-weight: 700;
+    color: var(--fg);
+    letter-spacing: 0.04em;
   }
   .chart-zeiten {
     position: absolute;
@@ -2617,7 +2652,7 @@
     align-items: center;
     justify-content: center;
     background:
-      url("/grund.svg?v=88") repeat,
+      url("/grund.svg?v=89") repeat,
       radial-gradient(120% 90% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.55) 100%),
       radial-gradient(78% 58% at 10% 4%, var(--grund-kuehl) 0%, transparent 68%),
       radial-gradient(66% 52% at 92% 14%, var(--grund-warm) 0%, transparent 68%),
@@ -2796,7 +2831,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=88");
+    background-image: url("/kerzen.svg?v=89");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -2810,7 +2845,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=88");
+    background-image: url("/kerzen-blass.svg?v=89");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -3538,7 +3573,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=88" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=89" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -3656,7 +3691,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=88" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=89" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3704,7 +3739,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=88" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=89" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -3723,7 +3758,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=88" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=89" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3840,7 +3875,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=88" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=89" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -3950,9 +3985,12 @@
      Yahoos range/interval steht in der Function, nicht hier — die Seite muss
      davon nichts wissen. */
   var SPANNEN = ["1T", "1W", "1M", "1J", "Max"];
-  /* 1T beim Aufmachen: der Blick, an dem man sieht, dass der Chart lebt.
-     Der Jahresblick, mit dem die Zonen arbeiten, ist einen Tipp weit. */
-  var SPANNE_START = 0;
+  /* Eine Woche beim Aufmachen (Index in SPANNEN: 0 = 1T, 1 = 1W).
+
+     Der Tagesverlauf zeigt nur das Rauschen eines Handelstages, und bei
+     allem, was nicht durchgehend gehandelt wird, auch das nicht
+     verlaesslich. Eine Woche hat genug Weg fuer eine Richtung. */
+  var SPANNE_START = 1;
 
   function el(tag, klasse, text) {
     var n = document.createElement(tag);
@@ -4241,6 +4279,10 @@
       svg.appendChild(svgEl("rect", {
         class: "zonenband", x: "0", y: zo, width: "100", height: Math.max(zu - zo, 0.6)
       }));
+      /* Zwei Kanten statt eines Rahmens: die Zone ist ein Kursbereich, sie
+         hat keinen Anfang und kein Ende in der Zeit. */
+      svg.appendChild(svgEl("line", { class: "zonenkante", x1: "0", x2: "100", y1: zo, y2: zo }));
+      svg.appendChild(svgEl("line", { class: "zonenkante", x1: "0", x2: "100", y1: zu, y2: zu }));
     }
     if (zielAn) {
       svg.appendChild(svgEl("line", {
@@ -4277,9 +4319,26 @@
     }
     marke("", oben - luft * 0.5, kursMarke(oben - luft * 0.5, daten.waehrung));
     marke("", unten + luft * 0.5, kursMarke(unten + luft * 0.5, daten.waehrung));
-    if (zoneAn) marke("zone", (zone[0] + zone[1]) / 2, "Zone");
     if (zielAn) marke("ziel", ziel, "Ziel");
     marke("jetzt", jetzt, kursMarke(jetzt, daten.waehrung));
+
+    /* Das Schild: Name und Spanne, links auf dem Band. Ohne Waehrung — die
+       steht schon an den Kursmarken rechts. */
+    if (zoneAn) {
+      var schild = el("div", "chart-zonenschild");
+      schild.appendChild(el("b", "", "Kaufzone"));
+      schild.appendChild(document.createTextNode(
+        " " + kursMarke(Math.min(zone[0], zone[1]), null) +
+        " – " + kursMarke(Math.max(zone[0], zone[1]), null)));
+      /* Auf der Mitte des Bandes — ausser es liegt ganz oben oder unten.
+         Dort stehen die Prozentangabe und die Zeitmarken; dann rueckt das
+         Schild an die gegenueberliegende Kante und bleibt trotzdem am Band. */
+      var mitte = (zo + zu) / 2;
+      if (mitte < 16) mitte = Math.min(zu + 6, 84);
+      else if (mitte > 84) mitte = Math.max(zo - 6, 16);
+      schild.style.top = "calc(12px + " + (mitte / 100) + " * (100% - 34px))";
+      kasten.appendChild(schild);
+    }
 
     var zeiten = el("div", "chart-zeiten");
     var stellen = [0, Math.floor((punkte.length - 1) / 2), punkte.length - 1];
@@ -6201,7 +6260,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=88";
+      i.src = "/icon-512.png?v=89";
     });
     return symbolBild;
   }
