@@ -629,18 +629,29 @@ zusammengesetzt, sobald sich darüber etwas bewegt — und darüber laufen die
 Kerzenbänder. Die Prüfung „die Kerzen laufen rund" war rot, die Zeile konnte
 ersatzlos weg.
 
-### Die Größe
+### Die Größe — und was ein Deckel messen sollte
 
 `index.html` wird auf jeden Aufruf ausgeliefert, deshalb hat `fluss-test`
-einen Deckel bei 260 kB. Diese Sitzung riss ihn (267 kB) — zum größeren Teil
-durch Kommentarprosa. Gekürzt auf 259,5 kB; über die Leitung sind es 70,2
-statt 67,5 kB gzip, also **+2,7 kB** für Glas, Grund, Linien-Charts und
-Zeitraum-Knöpfe.
+einen Deckel. Der lag lange bei 260 kB **roher** Datei, wurde auf 275
+angehoben — und in einer einzigen Sitzung **viermal** gerissen. Jedes Mal war
+die Antwort dieselbe: Kommentare kürzen.
 
-Der Deckel misst die rohe Datei und trifft damit vor allem Kommentare, die
-sich fast vollständig wegkomprimieren. 259,5 gegen 260 ist hauchdünn — der
-nächste längere Kommentar reißt die Prüfung wieder. Auf gzip umzustellen wäre
-das ehrlichere Maß.
+Das ist die falsche Antwort auf die falsche Frage. Die Zahlen:
+
+| | roh | gzip |
+|---|---|---|
+| vor dem Umbau auf eigene Charts | 253,1 kB | 67,5 kB |
+| danach | 275,7 kB | 74,9 kB |
+
+Roh **+22,6 kB**, über die Leitung **+7,4**. Der Unterschied ist Prosa, und
+Prosa komprimiert sich fast vollständig weg. Ein Deckel auf der rohen Datei
+bestraft also Erklärungen und lässt Nutzlast durch — genau verkehrt herum.
+
+Deshalb jetzt zwei Werte: **gzip unter 80 kB** ist der scharfe (das ist die
+Ladezeit), **roh unter 300 kB** bleibt als weiter Riegel gegen ein
+Davonlaufen. Gemessen wird die Datei selbst, nicht die Antwort des Servers —
+der lokale Prüfserver komprimiert nicht, und der Wert soll überall derselbe
+sein.
 
 ### Zwei Rückwege
 
