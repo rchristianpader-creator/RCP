@@ -135,8 +135,17 @@
     --glas-fuellung: rgba(255, 255, 255, 0.26);
     /* Dicker, wo man liest: hinter Saetzen soll nichts mitlesbar sein. */
     --glas-fuellung-fest: rgba(255, 255, 255, 0.52);
-    /* Die Karten tragen die meiste Schrift: dickste der drei Fuellungen. */
-    --glas-fuellung-karte: rgba(255, 255, 255, 0.74);
+    /* Die Karten. 0,74 war noch eine weisse Flaeche mit einem Hauch Grund
+       darunter — kein Glas. Jetzt so duenn, dass die Zeichnung dahinter
+       wirklich durchkommt; lesbar bleibt es, weil die Karte als einzige
+       Flaeche der Seite einen Frost traegt und der alles darunter zu ruhigen
+       Flaechen verwischt.
+
+       Frost auf einer mitscrollenden Flaeche war frueher zu teuer. Bei zehn
+       kurzen Karten waren immer vier bis fuenf gleichzeitig im Bild; seit
+       eine Karte den ganzen Schirm fuellt, sind es hoechstens zwei — und die
+       anderen zeichnet der Browser wegen content-visibility gar nicht. */
+    --glas-fuellung-karte: rgba(255, 255, 255, 0.4);
     /* Die Kante faengt Licht. Der weiche dunkle Ring knapp innerhalb des
        Randes gibt der Flaeche Dicke; hell oben zieht ins Kuehle, dunkel
        unten ins Warme — abgeschwaecht das, was an einer Linsenkante
@@ -201,7 +210,7 @@
     nav, .sheet-card, .install-bar, .neuheit-mitte,
     header, .setup-strip, .card { background: var(--card); }
     .news-banner { background: var(--soft); }
-    .chart { background: var(--soft); }
+    .chart, .ziel-bar, .chart-warte { background: var(--soft); }
   }
   @media (prefers-reduced-transparency: reduce) {
     nav, .sheet-card, .install-bar, .neuheit-mitte {
@@ -214,8 +223,14 @@
     header { background: var(--card); box-shadow: none; }
     .news-banner { background: var(--soft); }
     .setup-strip { background: var(--card); }
-    .card { background: var(--card); box-shadow: var(--hebung); }
+    .card {
+      background: var(--card);
+      box-shadow: var(--hebung);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
     .chart { background: var(--soft); }
+    .ziel-bar, .chart-warte { background: var(--soft); }
   }
 
   /* Der Grund hinter allem. Grau auf fast weiss verwischt der Frost zu
@@ -243,7 +258,19 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html {
     scroll-behavior: smooth;
-    scroll-padding-top: 88px;
+    /* Die klebende Leiste verdeckt sonst den Kopf der angesprungenen Karte.
+       Derselbe gemessene Wert wie bei der Kartenhoehe. */
+    scroll-padding-top: var(--leiste);
+    /* Karten rasten ein.
+
+       Ohne das kann eine Karte ueberall stehen bleiben, wo der Finger sie
+       loslaesst — und dann wird unten der Rand abgeschnitten, weil sie
+       genau einen Schirm hoch ist. Mit dem Einrasten sitzt sie immer
+       zwischen Unterkante der Leiste und unterem Bildrand.
+
+       "proximity", nicht "mandatory": mandatory zwingt jede Bewegung in die
+       naechste Karte, auch das kurze Nachsehen im Chart darueber. */
+    scroll-snap-type: y proximity;
   }
 
   /* Ziffern mit fester Breite, ueberall wo Zahlen stehen.
@@ -465,7 +492,7 @@
     margin-top: 16px;
   }
   .karten > .card {
-    margin: 0 14px 56px;
+    margin: 0 14px 34px;
     /* Eine Karte fuellt den Schirm.
 
        Vorher war sie kuerzer als das Fenster, und unten schaute immer schon
@@ -491,6 +518,7 @@
     flex-direction: column;
     content-visibility: auto;
     contain-intrinsic-size: auto var(--kartenhoehe);
+    scroll-snap-align: start;
   }
   .karten-fehler {
     margin: 0 14px 56px;
@@ -550,16 +578,17 @@
     .karten { transition: none !important; }
   }
 
-  /* Auch die Karten sind Glas. Lange stand hier das Gegenteil, und es
-     stimmte, solange hinter ihnen nichts lag — jetzt liegt dort der Grund,
-     und die Karten decken das meiste davon ab. Ohne Frost, wie alles, was
-     mitscrollt. */
+  /* Auch die Karten sind Glas — und zwar richtig: duenne Fuellung, Frost,
+     Kante, Schimmer. Lange stand hier das Gegenteil, und es stimmte,
+     solange hinter ihnen nichts lag. */
   .card {
     margin: 16px 14px 56px;
     border: 1px solid var(--hair);
     border-radius: var(--r-karte);
     overflow: hidden;
     background: var(--glas-grund-karte);
+    -webkit-backdrop-filter: var(--glas-frost);
+    backdrop-filter: var(--glas-frost);
     scroll-margin-top: 80px;
     box-shadow: var(--glas-kante), var(--hebung);
   }
@@ -788,7 +817,8 @@
     justify-content: space-between;
     padding: 12px 18px;
     border-top: 1px solid var(--hair);
-    background: var(--soft);
+    /* Nicht weiss: sonst laege mitten im Glas ein deckender Balken. */
+    background: rgba(255, 255, 255, 0.22);
   }
   .ziel-bar .k {
     font-size: 10px;
@@ -995,7 +1025,7 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background: var(--soft);
+    background: rgba(255, 255, 255, 0.22);
   }
   .chart-warte .kuerzel {
     font-size: 13px;
