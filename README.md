@@ -352,6 +352,62 @@ Zum Nachsehen gibt es weiterhin `?pruef=1` (was je Termin gefragt wurde und
 woran es scheitert) und `?roh=1` (der erste unveränderte Datensatz, falls die
 Quelle ihre Feldnamen ändert).
 
+## Runder und ruhiger
+
+Die Handschrift bleibt — Haarlinien, viel Weiss, gesperrte Versalien —, aber
+drei Dinge waren aus der Zeit gefallen.
+
+### Radien nach Rolle, nicht nach Gewohnheit
+
+Überall standen dieselben **2 Pixel**: hart, technisch, ohne Zugeständnis. Das
+war einmal eine Haltung und ist heute nur noch alt. Weichere Ecken lesen sich
+ruhiger — aber nicht überall gleich weich, sonst wird aus einem Abzeichen ein
+Tropfen. Also sechs Marken, nach Rolle vergeben:
+
+| | | |
+|---|---|---|
+| `--r-blatt` | 22 px | Blätter und Schirme, die von unten hereinfahren |
+| `--r-karte` | 16 px | Karten und Kästen |
+| `--r-bild` | 12 px | Bilder in Meldungen und Beiträgen |
+| `--r-feld` | 12 px | Knöpfe und Eingaben |
+| `--r-chip` | 11 px | die Marken in der Leiste |
+| `--r-marke` | 6 px | Abzeichen, Punkte, Zähler |
+
+32 Stellen in `index.html`, 23 auf den anderen drei Seiten — keine davon
+einzeln zurechtgeschoben, alle über die Marke.
+
+### Eine Hebung unter der Haarlinie
+
+Die Haarlinie bleibt die Handschrift: sie zeichnet die Kante. Darunter liegt
+jetzt ein Schatten, den man nicht als Schatten bemerkt — er hebt die Karte vom
+Grund, ohne sie schweben zu lassen. **Zwei Lagen**, weil eine einzelne
+entweder zu hart am Rand sitzt oder zu weit ausfranst:
+
+```css
+--hebung:
+  0 1px 2px rgba(var(--fg-rgb), 0.045),
+  0 10px 28px -18px rgba(var(--fg-rgb), 0.12);
+```
+
+Im dunklen Anstrich trägt ein heller Schatten nichts — der Grund ist schon
+schwarz. Dort arbeitet vor allem die Linie, der Schatten nur noch als Saum.
+
+Der Ring beim Sprung aus dem Menü kommt **zur** Hebung dazu, statt sie zu
+ersetzen: sonst fiele die Karte für den Moment des Sprungs flach auf den
+Grund. Genau daran hat `scroll-test` angeschlagen — es prüfte „danach ist kein
+Ring mehr da" gegen `box-shadow: none`, und das stimmt nicht mehr: „kein Ring"
+heißt jetzt „wieder der Schatten von vorher". Die Reihe misst deshalb gegen
+eine Karte, die gerade nicht angesprungen ist.
+
+### Ziffern, die nicht wackeln
+
+In der Grundschrift ist die 1 schmaler als die 8. Untereinander stehende Kurse
+wackeln dadurch, und beim Aktualisieren springt die Zeile, weil aus 51,71 eben
+48,03 wird. `font-variant-numeric: tabular-nums` gibt allen Ziffern dieselbe
+Breite: die Zahl ändert sich, ihr Platz nicht. Gesetzt an Ziel und Umrechnung,
+am Fear-&-Greed-Wert, an den Wirtschaftsterminen, am Setup-Streifen und an den
+Zeitangaben in der Glocke.
+
 ## Der Auftakt
 
 Wer die App vom Home-Bildschirm oeffnet und angemeldet geblieben ist, sah

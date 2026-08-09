@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#fafafa">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=75">
-<link rel="apple-touch-icon" href="/icon-180.png?v=75">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=76">
+<link rel="apple-touch-icon" href="/icon-180.png?v=76">
 <title>Positionen · Aktien-Liste</title>
 <script>
 /* Hell oder dunkel — derselbe Wunsch wie in der Liste (rcp:thema).
@@ -37,6 +37,15 @@
     --soft: #f5f5f5;
     --card: #ffffff;
     --hair: #ebebeb;
+    /* Dieselben Marken wie in der Liste — die Seiten sollen sich nicht
+       unterscheiden, nur weil sie ein eigenes Regelwerk haben. */
+    --r-karte: 16px;
+    --r-feld: 12px;
+    --r-chip: 11px;
+    --r-marke: 6px;
+    --hebung:
+      0 1px 2px rgba(17, 17, 17, 0.045),
+      0 10px 28px -18px rgba(17, 17, 17, 0.12);
     --glas: rgba(255, 255, 255, 0.72);
     --gut: #15803d;
     --schlecht: #b91c1c;
@@ -58,6 +67,9 @@
     --soft: #0d0d0d;
     --card: #0a0a0a;
     --hair: #1e1e1e;
+    --hebung:
+      0 1px 2px rgba(0, 0, 0, 0.6),
+      0 12px 32px -20px rgba(0, 0, 0, 0.9);
     --glas: rgba(10, 10, 10, 0.72);
     /* Auf Schwarz brauchen Gruen und Rot mehr Licht, sonst versinken sie */
     --gut: #4ade80;
@@ -114,9 +126,10 @@
   .pos {
     background: var(--card);
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-karte);
     margin-bottom: 10px;
     animation: riseIn 0.47s var(--ease) both;
+    box-shadow: var(--hebung);
   }
   .pos.offen { border-color: var(--fg); }
 
@@ -141,7 +154,7 @@
     text-transform: uppercase;
     font-weight: 700;
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-marke);
     padding: 3px 7px;
   }
   .kopf .wie { flex: 1; font-size: 14px; font-weight: 600; }
@@ -151,7 +164,7 @@
     font-weight: 700;
     color: var(--auf-fg);
     background: var(--fg);
-    border-radius: 2px;
+    border-radius: var(--r-marke);
     padding: 2px 5px;
     white-space: nowrap;
   }
@@ -180,7 +193,7 @@
     color: var(--fg);
     background: var(--card);
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-feld);
     padding: 9px 11px;
     transition: border-color 0.27s ease;
   }
@@ -213,7 +226,7 @@
     color: var(--fg);
     background: var(--card);
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-feld);
     padding: 8px 12px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
@@ -235,7 +248,7 @@
     color: var(--fg);
     background: var(--card);
     border: 1px dashed var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-marke);
     padding: 14px;
     margin-top: 6px;
     cursor: pointer;
@@ -294,7 +307,7 @@
     color: var(--auf-fg);
     background: var(--fg);
     border: 1px solid var(--fg);
-    border-radius: 2px;
+    border-radius: var(--r-feld);
     padding: 12px 20px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;

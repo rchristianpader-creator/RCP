@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#fafafa">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=75">
-<link rel="apple-touch-icon" href="/icon-180.png?v=75">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=76">
+<link rel="apple-touch-icon" href="/icon-180.png?v=76">
 <title>Verwaltung · Aktien-Liste</title>
 <script>
 /* Hell oder dunkel — derselbe Wunsch wie in der Liste (rcp:thema).
@@ -37,6 +37,15 @@
     --soft: #f5f5f5;
     --card: #ffffff;
     --hair: #ebebeb;
+    /* Dieselben Marken wie in der Liste — die Seiten sollen sich nicht
+       unterscheiden, nur weil sie ein eigenes Regelwerk haben. */
+    --r-karte: 16px;
+    --r-feld: 12px;
+    --r-chip: 11px;
+    --r-marke: 6px;
+    --hebung:
+      0 1px 2px rgba(17, 17, 17, 0.045),
+      0 10px 28px -18px rgba(17, 17, 17, 0.12);
     --glas: rgba(255, 255, 255, 0.72);
     --gut: #15803d;
     --schlecht: #b91c1c;
@@ -58,6 +67,9 @@
     --soft: #0d0d0d;
     --card: #0a0a0a;
     --hair: #1e1e1e;
+    --hebung:
+      0 1px 2px rgba(0, 0, 0, 0.6),
+      0 12px 32px -20px rgba(0, 0, 0, 0.9);
     --glas: rgba(10, 10, 10, 0.72);
     /* Auf Schwarz brauchen Gruen und Rot mehr Licht, sonst versinken sie */
     --gut: #4ade80;
@@ -130,7 +142,7 @@
     color: var(--fg);
     background: var(--soft);
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-marke);
     padding: 1px 6px;
   }
 
@@ -141,7 +153,7 @@
     gap: 10px;
     background: var(--card);
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-feld);
     padding: 15px 16px;
     margin-bottom: 10px;
     text-decoration: none;
@@ -163,7 +175,7 @@
   .senden {
     background: var(--card);
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-feld);
     padding: 16px;
     margin-bottom: 30px;
     animation: riseIn 0.54s var(--ease) both;
@@ -185,7 +197,7 @@
     color: var(--fg);
     background: var(--card);
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-feld);
     padding: 10px 12px;
     margin-bottom: 10px;
     resize: none;
@@ -210,7 +222,7 @@
     color: var(--auf-fg);
     background: var(--fg);
     border: 1px solid var(--fg);
-    border-radius: 2px;
+    border-radius: var(--r-feld);
     padding: 10px 18px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
@@ -244,7 +256,7 @@
     color: var(--fg);
     background: var(--card);
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-feld);
     padding: 8px 12px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
@@ -270,7 +282,7 @@
     object-position: left center;
     background: var(--soft);
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-feld);
   }
   .bildvorschau button {
     position: absolute;
@@ -285,7 +297,7 @@
     color: var(--fg);
     background: var(--card);
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-feld);
     cursor: pointer;
   }
 
@@ -306,7 +318,7 @@
     color: var(--fg);
     background: var(--card);
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-feld);
     padding: 6px 9px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
@@ -360,7 +372,7 @@
     align-items: stretch;
     gap: 0;
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-marke);
     overflow: hidden;
     margin-bottom: 10px;
     animation: riseIn 0.41s var(--ease) both;
@@ -458,7 +470,7 @@
     font-weight: 700;
     color: var(--muted);
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-marke);
     padding: 2px 5px;
     margin-right: 7px;
     vertical-align: 1px;
@@ -476,7 +488,7 @@
   .jetzt {
     background: var(--card);
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-feld);
     padding: 16px;
     margin-bottom: 30px;
     animation: riseIn 0.54s var(--ease) both;
@@ -498,7 +510,7 @@
     color: var(--fg);
     background: var(--soft);
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-marke);
     padding: 1px 6px;
   }
 
@@ -540,7 +552,7 @@
   .konto {
     background: var(--card);
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-feld);
     padding: 14px 16px;
     margin-bottom: 10px;
     animation: riseIn 0.54s var(--ease) both;
@@ -575,7 +587,7 @@
     font-weight: 600;
     color: var(--auf-fg);
     background: var(--fg);
-    border-radius: 2px;
+    border-radius: var(--r-feld);
     padding: 2px 6px;
   }
   .konto .zeile {
@@ -598,7 +610,7 @@
     color: var(--fg);
     background: var(--card);
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-feld);
     padding: 8px 12px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;

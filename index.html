@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="light">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#fafafa">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=75">
-<link rel="apple-touch-icon" href="/icon-180.png?v=75">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=76">
+<link rel="apple-touch-icon" href="/icon-180.png?v=76">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=75">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=76">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=75">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=76">
 
 <script>
 /* Im Browser oder als App?
@@ -122,6 +122,29 @@
     --blass: #c4c4c4;
     --glas: rgba(255, 255, 255, 0.72);
     --glas-fest: rgba(255, 255, 255, 0.76);
+
+    /* RADIEN
+
+       Zwei Pixel waren ueberall dieselbe Antwort: hart, technisch, ohne
+       Zugestaendnis. Weichere Ecken lesen sich ruhiger — aber nicht ueberall
+       gleich weich. Was gross ist, darf runder sein; was klein ist, muss
+       seine Form behalten, sonst wird aus einem Abzeichen ein Tropfen. */
+    --r-blatt: 22px;   /* Blaetter und Schirme, die von unten hereinfahren */
+    --r-karte: 16px;   /* Karten und Kaesten */
+    --r-bild: 12px;    /* Bilder in Meldungen und Beitraegen */
+    --r-feld: 12px;    /* Knoepfe und Eingaben */
+    --r-chip: 11px;    /* die kleinen Marken in der Leiste */
+    --r-marke: 6px;    /* Abzeichen, Punkte, Zaehler */
+
+    /* HEBUNG
+
+       Die Haarlinie bleibt die Handschrift — sie zeichnet die Kante. Darunter
+       liegt jetzt ein Schatten, den man nicht als Schatten bemerkt: er hebt
+       die Karte vom Grund, ohne sie schweben zu lassen. Zwei Lagen, weil eine
+       einzelne entweder zu hart am Rand sitzt oder zu weit ausfranst. */
+    --hebung:
+      0 1px 2px rgba(var(--fg-rgb), 0.045),
+      0 10px 28px -18px rgba(var(--fg-rgb), 0.12);
     --schleier: rgba(17, 17, 17, 0.62);
     --schatten: rgba(0, 0, 0, 0.24);
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -145,6 +168,12 @@
     --blass: #333333;
     --glas: rgba(10, 10, 10, 0.72);
     --glas-fest: rgba(10, 10, 10, 0.82);
+    /* Auf Schwarz traegt ein heller Schatten nichts. Er muss dunkler sein als
+       der Grund — und der ist schon schwarz, also arbeitet hier vor allem die
+       Haarlinie, der Schatten nur noch als Saum. */
+    --hebung:
+      0 1px 2px rgba(0, 0, 0, 0.6),
+      0 12px 32px -20px rgba(0, 0, 0, 0.9);
     --schleier: rgba(0, 0, 0, 0.74);
     --schatten: rgba(0, 0, 0, 0.72);
   }
@@ -152,6 +181,24 @@
   html {
     scroll-behavior: smooth;
     scroll-padding-top: 88px;
+  }
+
+  /* Ziffern mit fester Breite, ueberall wo Zahlen stehen.
+
+     In der Grundschrift ist die 1 schmaler als die 8. Untereinander stehende
+     Kurse wackeln dadurch, und beim Aktualisieren springt die Zeile, weil
+     aus 51,71 eben 48,03 wird. Mit tabular-nums haben alle Ziffern dieselbe
+     Breite — die Zahl aendert sich, ihr Platz nicht. */
+  .ziel-bar .v,
+  .ziel-bar .v-fx,
+  .fg-box .fg-score,
+  .card .zeile b,
+  .wirtschaft-block .w-werte,
+  .setup-strip,
+  .m-eintrag .wann,
+  .kurs-note {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
   }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif;
@@ -227,7 +274,7 @@
     align-items: center;
     justify-content: center;
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-chip);
     text-decoration: none;
     color: var(--fg);
     background: transparent;
@@ -261,7 +308,7 @@
   .setup-strip a {
     color: var(--auf-fg);
     background: var(--fg);
-    border-radius: 2px;
+    border-radius: var(--r-chip);
     padding: 5px 9px;
     text-decoration: none;
     letter-spacing: 0.1em;
@@ -349,7 +396,7 @@
     padding: 18px 16px;
     background: var(--card);
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-karte);
     font-size: 13px;
     color: var(--muted);
     text-align: center;
@@ -369,7 +416,7 @@
     align-items: center;
     justify-content: center;
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-chip);
     background: transparent;
     color: var(--fg);
     cursor: pointer;
@@ -403,10 +450,11 @@
   .card {
     margin: 16px 14px 56px;
     border: 1px solid var(--hair);
-    border-radius: 2px;
+    border-radius: var(--r-karte);
     overflow: hidden;
     background: var(--card);
     scroll-margin-top: 80px;
+    box-shadow: var(--hebung);
   }
 
   .card-head { padding: 18px 18px 12px; }
@@ -428,7 +476,7 @@
     color: var(--muted);
     border: 1px solid var(--line);
     padding: 3px 8px;
-    border-radius: 2px;
+    border-radius: var(--r-marke);
     white-space: nowrap;
   }
   .badge.neu {
@@ -468,7 +516,7 @@
     background: var(--fg);
     color: var(--auf-fg);
     padding: 2px 5px;
-    border-radius: 2px;
+    border-radius: var(--r-marke);
     line-height: 1.15;
   }
   /* UPDATE ist doppelt so lang wie NEU — enger gesetzt, damit es dem Chip
@@ -590,7 +638,7 @@
     background: var(--fg);
     color: var(--auf-fg);
     padding: 3px 7px;
-    border-radius: 2px;
+    border-radius: var(--r-marke);
     font-weight: 800;
   }
   .wirtschaft-block .w-werte .leise { color: var(--muted); font-weight: 600; }
@@ -756,7 +804,7 @@
     width: 100%;
     text-align: center;
     padding: 13px 16px;
-    border-radius: 2px;
+    border-radius: var(--r-feld);
     font-size: 13px;
     font-weight: 650;
     text-decoration: none;
@@ -789,7 +837,7 @@
     color: var(--fg);
     background: none;
     border: 1px solid var(--fg);
-    border-radius: 2px;
+    border-radius: var(--r-feld);
     padding: 9px 16px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
@@ -930,7 +978,7 @@
     object-position: left center;
     background: var(--soft);
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-bild);
     margin-top: 10px;
   }
   /* Eine Meldung im Ganzen: mehr Luft, groessere Schrift, das Bild gross */
@@ -943,7 +991,7 @@
     object-fit: contain;
     background: var(--soft);
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-bild);
     margin-top: 16px;
     cursor: zoom-in;
   }
@@ -984,7 +1032,7 @@
     color: var(--muted);
     background: none;
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-feld);
     padding: 12px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
@@ -1054,8 +1102,9 @@
     -webkit-backdrop-filter: saturate(130%) blur(16px);
     backdrop-filter: saturate(130%) blur(16px);
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-karte);
     transition: transform 0.54s var(--weich, cubic-bezier(0.32, 0.72, 0, 1));
+    box-shadow: var(--hebung);
   }
 
   /* Nacheinander herein, nicht alles auf einmal: erst die Zeile, dann die
@@ -1087,7 +1136,7 @@
     color: var(--fg);
     background: var(--card);
     border: 1px solid var(--hair);
-    border-radius: 2px;
+    border-radius: var(--r-chip);
     padding: 13px 14px;
     margin-bottom: 8px;
     cursor: pointer;
@@ -1139,7 +1188,7 @@
     color: var(--auf-fg);
     background: var(--fg);
     border: 1px solid var(--fg);
-    border-radius: 2px;
+    border-radius: var(--r-feld);
     padding: 15px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
@@ -1190,7 +1239,7 @@
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
-    border-radius: 2px;
+    border-radius: var(--r-bild);
     transform-origin: 50% 50%;
     will-change: transform;
     -webkit-user-drag: none;
@@ -1209,7 +1258,7 @@
        nicht auf der Seite. */
     background: rgba(255, 255, 255, 0.14);
     border: 0;
-    border-radius: 2px;
+    border-radius: var(--r-feld);
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     transition: opacity 0.27s ease;
@@ -1235,7 +1284,7 @@
     color: var(--fg);
     background: var(--soft);
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-chip);
     padding: 4px 7px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
@@ -1265,7 +1314,7 @@
     width: 3px;
     height: 14px;
     background: var(--fg);
-    border-radius: 2px;
+    border-radius: var(--r-marke);
   }
   .m-eintrag:first-child.neu::before { top: 6px; }
   .verwaltung-btn .wartend {
@@ -1328,7 +1377,7 @@
     max-width: 520px;
     background: var(--card);
     border-top: 1px solid var(--fg);
-    border-radius: 2px 2px 0 0;
+    border-radius: var(--r-blatt) var(--r-blatt) 0 0;
     padding: 22px 22px 28px;
     max-height: 88vh;
     overflow-y: auto;
@@ -1493,7 +1542,7 @@
     object-fit: cover;
     background: var(--soft);
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-bild);
   }
   /* Die Quelle im Ton der uebrigen Beschriftungen — 10px, gesperrt,
      Grossbuchstaben. Kein buntes Zeichen davor: die Liste ist schwarzweiss. */
@@ -1518,7 +1567,7 @@
     object-fit: contain;
     background: var(--soft);
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-bild);
     margin-top: 14px;
   }
   #beitragEiner .btn + .btn { margin-top: 8px; }
@@ -1592,7 +1641,7 @@
     height: auto;
     margin-top: 10px;
     border: 1px solid var(--line);
-    border-radius: 3px;
+    border-radius: var(--r-marke);
     background: var(--soft);
     color: var(--fg);
   }
@@ -1689,7 +1738,7 @@
     top: 0;
     width: 0;
     height: 0;
-    border-radius: 8px;
+    border-radius: var(--r-feld);
     box-shadow: 0 0 0 9999px var(--schleier);
     opacity: 0;
     transition: opacity 0.46s var(--weich),
@@ -1710,7 +1759,7 @@
     position: absolute;
     inset: -3px;
     border: 2px solid var(--card);
-    border-radius: 10px;
+    border-radius: calc(var(--r-feld) + 2px);
     opacity: 0;
     animation: rundgangPuls 3.24s var(--weich) infinite;
   }
@@ -1731,7 +1780,7 @@
     margin: 0 auto;
     background: var(--card);
     border: 1px solid var(--line);
-    border-radius: 3px;
+    border-radius: var(--r-karte);
     padding: 15px 16px 13px;
     box-shadow: 0 18px 50px var(--schatten);
     opacity: 0;
@@ -1799,7 +1848,7 @@
   .rundgang-punkte i {
     width: 5px;
     height: 5px;
-    border-radius: 3px;
+    border-radius: 99px;
     background: var(--line);
     transition: width 0.46s var(--weich), background 0.41s var(--weich);
   }
@@ -1815,7 +1864,7 @@
     letter-spacing: 0.14em;
     text-transform: uppercase;
     font-weight: 600;
-    border-radius: 2px;
+    border-radius: var(--r-feld);
     padding: 9px 14px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
@@ -1913,7 +1962,7 @@
     -webkit-backdrop-filter: saturate(130%) blur(16px);
     backdrop-filter: saturate(130%) blur(16px);
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-karte);
     animation: riseIn 0.74s var(--ease) both;
   }
   /* Nacheinander, nicht alles auf einmal */
@@ -1955,7 +2004,7 @@
     color: var(--auf-fg);
     background: var(--fg);
     border: 1px solid var(--fg);
-    border-radius: 2px;
+    border-radius: var(--r-feld);
     padding: 14px 18px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
@@ -2017,7 +2066,7 @@
     color: var(--auf-fg);
     background: var(--fg);
     border: 0;
-    border-radius: 2px;
+    border-radius: var(--r-feld);
     padding: 10px 13px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
@@ -2033,7 +2082,7 @@
     color: var(--fg);
     background: var(--soft);
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-feld);
     resize: vertical;
     -webkit-user-select: all;
     user-select: all;
@@ -2227,7 +2276,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=75");
+    background-image: url("/kerzen.svg?v=76");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -2241,7 +2290,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=75");
+    background-image: url("/kerzen-blass.svg?v=76");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -2255,10 +2304,10 @@
      das bei jedem Bild bewegt wird, kostet dasselbe wie die Deckkraft, die
      ich gerade erst herausgenommen habe. */
   :root[data-thema="dunkel"] .kerzen-band.vorn {
-    background-image: url("/kerzen-dunkel.svg?v=75");
+    background-image: url("/kerzen-dunkel.svg?v=76");
   }
   :root[data-thema="dunkel"] .kerzen-band.hinten {
-    background-image: url("/kerzen-dunkel-blass.svg?v=75");
+    background-image: url("/kerzen-dunkel-blass.svg?v=76");
   }
 
   @keyframes kerzenLauf {
@@ -2616,7 +2665,9 @@
      ist spezifischer und wuerde eine zweite animation-Angabe schlucken. */
   .card { transition: box-shadow 1.22s ease-out; }
   .card.angesprungen {
-    box-shadow: 0 0 0 1px rgba(var(--fg-rgb), 0.32);
+    /* Der Ring kommt zur Hebung dazu, er ersetzt sie nicht — sonst faellt
+       die Karte fuer den Moment des Sprungs flach auf den Grund. */
+    box-shadow: 0 0 0 1px rgba(var(--fg-rgb), 0.32), var(--hebung);
     transition-duration: 0.16s;
   }
 
@@ -2706,7 +2757,7 @@
     color: var(--muted);
     background: none;
     border: 1px solid var(--line);
-    border-radius: 2px;
+    border-radius: var(--r-feld);
     padding: 5px 8px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
@@ -2794,9 +2845,10 @@
   .fg-box {
     margin: 14px 14px 0;
     border: 1px solid var(--hair);
-    border-radius: 2px;
+    border-radius: var(--r-karte);
     background: var(--card);
     padding: 14px 16px 16px;
+    box-shadow: var(--hebung);
   }
   .fg-box .fg-top {
     display: flex;
@@ -2994,7 +3046,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=75" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=76" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -3112,7 +3164,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=75" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=76" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3160,7 +3212,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=75" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=76" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -3179,7 +3231,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=75" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=76" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3296,7 +3348,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=75" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=76" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -5494,7 +5546,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=75";
+      i.src = "/icon-512.png?v=76";
     });
     return symbolBild;
   }
