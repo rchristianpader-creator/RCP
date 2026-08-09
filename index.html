@@ -7576,10 +7576,20 @@ if ("serviceWorker" in navigator) {
     if (Math.abs(window.scrollY - ziel) < 2) return los();
     window.scrollTo({ top: ziel, behavior: sanft });
     steht(function () {
-      // Nachfassen nur, wenn wirklich etwas dazwischenkam — im Regelfall
-      // steht nach dem einen Zug alles, und es rueckt nichts mehr.
+      /* Nachfassen nur, wenn das Ziel wirklich nicht dasteht.
+
+         Die Bedingung fragte frueher, ob das Ziel im oberen Streifen sitzt
+         und weit genug vom unteren Rand weg ist. Seit eine Karte den ganzen
+         Schirm fuellt, ist das zweite bei fast jedem Ziel verletzt — und
+         dann rueckte der Rundgang nach, obwohl alles gut stand. Von aussen:
+         hin und gleich wieder zurueck.
+
+         Gefragt wird jetzt nur noch das, worauf es ankommt: ist das Ziel
+         ganz zu sehen, und zwar unterhalb der Leiste? Dann bleibt alles,
+         wo es ist. */
       var r = el.getBoundingClientRect();
-      if (r.top < oben - 2 || (r.bottom > window.innerHeight - 200 && r.height < streifen)) {
+      var ganzDa = r.top >= oben - 2 && r.bottom <= window.innerHeight - 8;
+      if (!ganzDa && r.height < window.innerHeight - oben - 8) {
         window.scrollBy({ top: r.top - oben, behavior: sanft });
         return steht(los);
       }
