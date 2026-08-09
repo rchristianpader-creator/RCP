@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="dark">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#0a0d0c">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=83">
-<link rel="apple-touch-icon" href="/icon-180.png?v=83">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=84">
+<link rel="apple-touch-icon" href="/icon-180.png?v=84">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=83">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=84">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=83">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=84">
 
 <script>
 /* Im Browser oder als App?
@@ -310,7 +310,7 @@
        mittelt es weg und sieht einen glatten Verlauf. Die Datei dafuer ist
        370 Byte gross; das Rauschen entsteht im Browser. */
     background:
-      url("/grund.svg?v=83") repeat,
+      url("/grund.svg?v=84") repeat,
       radial-gradient(120% 90% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.55) 100%),
       radial-gradient(78% 58% at 10% 4%, var(--grund-kuehl) 0%, transparent 68%),
       radial-gradient(66% 52% at 92% 14%, var(--grund-warm) 0%, transparent 68%),
@@ -2541,6 +2541,12 @@
      sonst eine halbfertige Seite: Karten ohne Charts, Zahlen ohne Kurse.
      Diese Sekunden bekommen jetzt eine Form — und werden zugleich genutzt,
      denn darunter baut sich alles auf und die ersten Charts laden schon. */
+  /* Der Ladebildschirm zeigt schon, was danach kommt.
+
+     Er stand auf dem nackten Grundton, waehrend die Seite dahinter aus
+     Farbfeldern, Vignette und Koernung besteht — der erste Eindruck war
+     also ein anderer als die App. Jetzt derselbe Grund, dieselbe Machart:
+     die Kerzen laufen darueber, und die Schrift steht auf einer Scheibe. */
   .auftakt {
     position: fixed;
     inset: 0;
@@ -2548,7 +2554,15 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--bg);
+    background:
+      url("/grund.svg?v=84") repeat,
+      radial-gradient(120% 90% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.55) 100%),
+      radial-gradient(78% 58% at 10% 4%, var(--grund-kuehl) 0%, transparent 68%),
+      radial-gradient(66% 52% at 92% 14%, var(--grund-warm) 0%, transparent 68%),
+      radial-gradient(84% 62% at 74% 96%, var(--grund-flieder) 0%, transparent 70%),
+      radial-gradient(64% 48% at 8% 88%, var(--grund-tuerkis) 0%, transparent 70%),
+      var(--bg);
+    background-size: 160px 160px, auto, auto, auto, auto, auto, auto;
     text-align: center;
     padding: 32px 28px;
     transition: opacity 0.61s var(--ease), visibility 0.61s;
@@ -2661,7 +2675,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=83");
+    background-image: url("/kerzen.svg?v=84");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -2675,7 +2689,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=83");
+    background-image: url("/kerzen-blass.svg?v=84");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -2691,24 +2705,30 @@
   }
 
   /* Ein weicher Hof haelt die Schrift lesbar, ohne einen Kasten zu setzen */
+  /* Eine Scheibe, kein Nebelfleck.
+
+     Hier lag ein radialer Verlauf aus dem Grundton, der den Text freihielt —
+     das war eine Aufhellung, keine Flaeche. Jetzt dasselbe Glas wie ueberall:
+     Fuellung, Schimmer, Lichtkante, gerundet. Ohne Frost, wie alles, was
+     ueber Bewegtem liegt: darunter laufen die Kerzen. */
   .auftakt-mitte {
     position: relative;
     z-index: 1;
-    padding: 42px 30px;
+    padding: 38px 30px 34px;
+    border-radius: var(--r-blatt);
+    border: 1px solid var(--hair);
+    /* Eine dunkle Lage unter dem Glas. Ueber den laufenden Kerzen reicht
+       eine helle Fuellung nicht: sie hellt auf, verdeckt aber nichts, und
+       die Schrift stuende mitten in den Kerzen. Auf Dunkel deckt Dunkel. */
+    background:
+      var(--glas-schimmer),
+      linear-gradient(var(--glas-fuellung-karte), var(--glas-fuellung-karte)),
+      linear-gradient(rgba(10, 13, 12, 0.62), rgba(10, 13, 12, 0.62));
+    box-shadow: var(--glas-kante), var(--hebung);
+    max-width: 340px;
+    width: 100%;
   }
-  .auftakt-mitte::before {
-    content: "";
-    position: absolute;
-    inset: -52px -20px;
-    z-index: -1;
-    background: radial-gradient(
-      ellipse at center,
-      rgba(var(--bg-rgb), 0.98) 0%,
-      rgba(var(--bg-rgb), 0.95) 52%,
-      rgba(var(--bg-rgb), 0.78) 70%,
-      rgba(var(--bg-rgb), 0) 88%
-    );
-  }
+
 
   @media (prefers-reduced-motion: reduce) {
     .kerzen-band { animation: none; }
@@ -3417,7 +3437,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=83" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=84" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -3535,7 +3555,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=83" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=84" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3583,7 +3603,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=83" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=84" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -3602,7 +3622,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=83" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=84" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3719,7 +3739,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=83" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=84" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -6113,7 +6133,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=83";
+      i.src = "/icon-512.png?v=84";
     });
     return symbolBild;
   }
