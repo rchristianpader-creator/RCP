@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="dark">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#0a0d0c">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=90">
-<link rel="apple-touch-icon" href="/icon-180.png?v=90">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=91">
+<link rel="apple-touch-icon" href="/icon-180.png?v=91">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=90">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=91">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=90">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=91">
 
 <script>
 /* Im Browser oder als App?
@@ -160,7 +160,21 @@
 
        Die Regel gilt also ohne Ausnahme: Frost nur, wo eine Flaeche steht.
        Was mitscrollt, bekommt keinen — egal wie wenige es sind. */
-    --glas-fuellung-karte: rgba(255, 255, 255, 0.09);
+    /* Die Fuellung der Symboltasten: oben heller als unten. Ein Verlauf,
+       keine Farbe — eine glatte Flaeche nimmt Licht von oben an und gibt
+       nach unten weniger zurueck, und genau das ist der Unterschied
+       zwischen einer Taste und einem grauen Rechteck. */
+    --glas-fuellung-taste: linear-gradient(
+      rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.04));
+    /* Dieselbe Fuellung fuer die Karte, mit hoeherem Boden — kein Abweichen
+       von "wie die Symboltasten", sondern die Bedingung dafuer: ein Verlauf
+       skaliert mit seiner Flaeche. Was auf 34 Pixel die ganze Taste
+       aufhellt, sitzt auf 816 Pixeln im obersten Zehntel, und das untere
+       Ende faerbt fast die ganze Karte. Gemessen in Dritteln 75/45/40 gegen
+       46 bei der Taste. Der Boden hebt die unteren zwei Drittel auf
+       Tastenhelligkeit. */
+    --glas-fuellung-karte: linear-gradient(
+      rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.075));
     /* Die Kante faengt Licht — drei harte Linien, oben hell. Die weiche
        Woelbung ist raus: ein weicher Schatten wird bei jedem Zeichnen neu
        berechnet, und sie hing an jeder Flaeche der Seite. Harte Linien
@@ -191,9 +205,13 @@
     --glas-grund-fest:
       var(--glas-schimmer),
       linear-gradient(var(--glas-fuellung-fest), var(--glas-fuellung-fest));
+    /* --glas-fuellung-karte ist ein Verlauf, keine Farbe: sie steht direkt
+       da und nicht mehr in einem linear-gradient(). Zweimal geschachtelt
+       waere die ganze Angabe ungueltig — und eine ungueltige Angabe faellt
+       lautlos aus. */
     --glas-grund-karte:
       var(--glas-schimmer),
-      linear-gradient(var(--glas-fuellung-karte), var(--glas-fuellung-karte));
+      var(--glas-fuellung-karte);
 
     /* GLANZ
 
@@ -212,16 +230,13 @@
        Alles Hintergrundebenen: einmal gezeichnet, danach nur verschoben.
        Ein Frost waere hier das Naheliegende und das Falsche.
 
-       Wie hell: so schwach wie moeglich, ohne die Kante zu verlieren. Die
-       Form macht den Glanz, nicht die Helligkeit — und breit ist es kein
-       Licht mehr, sondern eine aufgehellte Flaeche, die das Lesen kostet.
-       Beim Nachbessern wurde deshalb die Flaeche verkleinert, nicht die
-       Helligkeit gesenkt. Zahlen dazu im README. */
-    --glas-schimmer-leise: linear-gradient(148deg,
-      rgba(255, 255, 255, 0.11) 0%,
-      rgba(255, 255, 255, 0.06) 24%,
-      rgba(255, 255, 255, 0.02) 50%,
-      rgba(255, 255, 255, 0) 72%);
+       Wie hell: die Form macht den Glanz, nicht die Helligkeit — ein
+       breiter Wisch ist kein Licht, sondern eine aufgehellte Flaeche.
+       Deshalb ist der Streifen schmal geblieben, waehrend Schimmer und
+       Fuellung wieder die vollen Werte der Symboltasten tragen. Eine
+       Weile stand hier ein halbierter Schimmer; das war die Antwort auf
+       einen wandernden Lichtzug, den es nicht mehr gibt, und ohne ihn war
+       es nur noch leise. Zahlen im README. */
     --glas-glanz-karte:
       linear-gradient(148deg,
         rgba(255, 255, 255, 0) 5%,
@@ -235,8 +250,8 @@
       radial-gradient(150% 46% at 50% 124%,
         rgba(255, 255, 255, 0.06) 0%,
         rgba(255, 255, 255, 0) 46%),
-      var(--glas-schimmer-leise),
-      linear-gradient(var(--glas-fuellung-karte), var(--glas-fuellung-karte));
+      var(--glas-schimmer),
+      var(--glas-fuellung-karte);
 
     /* Und die Kante glaenzt mit. Bisher lag Licht nur auf der Oberkante;
        eine Scheibe faengt es aber ringsum, nur schwaecher, je weiter weg
@@ -356,7 +371,7 @@
        mittelt es weg und sieht einen glatten Verlauf. Die Datei dafuer ist
        370 Byte gross; das Rauschen entsteht im Browser. */
     background:
-      url("/grund.svg?v=90") repeat,
+      url("/grund.svg?v=91") repeat,
       radial-gradient(120% 90% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.55) 100%),
       radial-gradient(78% 58% at 10% 4%, var(--grund-kuehl) 0%, transparent 68%),
       radial-gradient(66% 52% at 92% 14%, var(--grund-warm) 0%, transparent 68%),
@@ -561,11 +576,12 @@
     text-decoration: none;
     color: var(--fg);
     /* Dieselbe Machart wie die Fenster: Fuellung, Schimmer, Lichtkante.
-       Hier ist es reine Optik — hinter der deckenden Leiste gibt es nichts
-       durchscheinen zu lassen. Aber das Licht faengt es genauso. */
+       Die Fuellung steht als Marke da und wird von den Karten mitbenutzt —
+       "wie die Symboltasten" ist sonst eine Absicht, die beim naechsten
+       Nachbessern auseinanderlaeuft. */
     background:
       var(--glas-schimmer),
-      linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.04));
+      var(--glas-fuellung-taste);
     box-shadow: var(--glas-kante);
     -webkit-tap-highlight-color: transparent;
     transition: background 0.24s ease, color 0.24s ease, border-color 0.24s ease, transform 0.2s var(--ease);
@@ -800,7 +816,10 @@
      gemacht. */
   .card {
     margin: 16px var(--rand) var(--luft);
-    border: 1px solid var(--hair);
+    /* Dieselbe Kante wie die Symboltasten (--line, nicht --hair): die
+       Haarlinie war fuer helle Flaechen gedacht und verschwindet auf dem
+       dunklen Grund fast. */
+    border: 1px solid var(--line);
     border-radius: var(--r-karte);
     overflow: hidden;
     /* Bezug fuer das Puls-Blatt der aktiven Karte. */
@@ -2650,7 +2669,7 @@
     align-items: center;
     justify-content: center;
     background:
-      url("/grund.svg?v=90") repeat,
+      url("/grund.svg?v=91") repeat,
       radial-gradient(120% 90% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.55) 100%),
       radial-gradient(78% 58% at 10% 4%, var(--grund-kuehl) 0%, transparent 68%),
       radial-gradient(66% 52% at 92% 14%, var(--grund-warm) 0%, transparent 68%),
@@ -2829,7 +2848,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=90");
+    background-image: url("/kerzen.svg?v=91");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -2843,7 +2862,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=90");
+    background-image: url("/kerzen-blass.svg?v=91");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -2876,7 +2895,7 @@
        die Schrift stuende mitten in den Kerzen. Auf Dunkel deckt Dunkel. */
     background:
       var(--glas-schimmer),
-      linear-gradient(var(--glas-fuellung-karte), var(--glas-fuellung-karte)),
+      var(--glas-fuellung-karte),
       linear-gradient(rgba(10, 13, 12, 0.62), rgba(10, 13, 12, 0.62));
     box-shadow: var(--glas-kante), var(--hebung);
     max-width: 340px;
@@ -3571,7 +3590,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=90" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=91" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -3689,7 +3708,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=90" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=91" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3737,7 +3756,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=90" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=91" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -3756,7 +3775,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=90" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=91" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3873,7 +3892,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=90" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=91" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -6258,7 +6277,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=90";
+      i.src = "/icon-512.png?v=91";
     });
     return symbolBild;
   }

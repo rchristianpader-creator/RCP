@@ -544,6 +544,39 @@ aus der Wirklichkeit:
 `--glas-kante-glanz` legt Licht ringsum statt nur oben: hell an der Oberkante,
 ein Hauch an den Seiten, unten der dunkle Abschluss, der die Dicke macht.
 
+### Die Karten sind so laut wie die Symboltasten
+
+„Zu leise Design, bitte wie Symboltasten für Karten." Die Tasten hatten das
+lautere Rezept, und die Karten trugen noch die Vorsichtsmaßnahmen gegen einen
+wandernden Lichtzug, den es nicht mehr gibt:
+
+| | Taste vorher | Karte vorher | jetzt beide |
+|---|---|---|---|
+| Schimmer | `--glas-schimmer` (0,22) | halbiert (0,11) | **0,22** |
+| Füllung | Verlauf 0,10 → 0,04 | flach 0,09 | **Verlauf** |
+| Kante | `--line` (0,16) | `--hair` (0,12) | **0,16** |
+
+Die Füllung steht als `--glas-fuellung-taste` an einer Stelle — „wie die
+Symboltasten" ist sonst eine Absicht, die beim nächsten Nachbessern
+auseinanderläuft.
+
+**Gleiche Zahlen ergeben aber nicht gleiche Helligkeit.** Ein Verlauf skaliert
+mit seiner Fläche: was auf einer 34 px hohen Taste die ganze Taste aufhellt,
+sitzt auf einer 816 px hohen Karte im obersten Zehntel, und das untere Ende des
+Verlaufs (0,04) färbt fast die ganze Karte. Gemessen in Dritteln:
+
+| | oben | Mitte | unten | Taste im Mittel |
+|---|---|---|---|---|
+| mit dem Tasten-Verlauf 1:1 | 75 | 45 | 40 | 46 |
+| **mit Boden bei 0,075** | **77** | **49** | **47** | **46** |
+
+Deshalb hat die Karte einen eigenen Boden — kein Abweichen von „wie die
+Symboltasten", sondern die Bedingung dafür.
+
+**Was es kostet:** im Lesebereich steigt das hellste Prozent von 87 auf 106, der
+Kontrast fällt von 6,59 auf **5,00 : 1**. Das ist die lauteste Einstellung
+dieser Sitzung und liegt weiter über der Schwelle von 4,5 : 1 für normalen Text.
+
 ### Das aktive Setup pulst wie Glas, nicht wie ein Fokusrahmen
 
 Steht der Kurs in der Einkaufszone, war das bisher ein **Auswahlrahmen**: eine
@@ -830,11 +863,25 @@ Roh **+22,6 kB**, über die Leitung **+7,4**. Der Unterschied ist Prosa, und
 Prosa komprimiert sich fast vollständig weg. Ein Deckel auf der rohen Datei
 bestraft also Erklärungen und lässt Nutzlast durch — genau verkehrt herum.
 
-Deshalb jetzt zwei Werte: **gzip unter 80 kB** ist der scharfe (das ist die
+Deshalb jetzt zwei Werte: **gzip unter 84 kB** ist der scharfe (das ist die
 Ladezeit), **roh unter 300 kB** bleibt als weiter Riegel gegen ein
 Davonlaufen. Gemessen wird die Datei selbst, nicht die Antwort des Servers —
 der lokale Prüfserver komprimiert nicht, und der Wert soll überall derselbe
 sein.
+
+Zwei Korrekturen am Deckel selbst, beide aus Schaden:
+
+**Er rundete erst und verglich dann.** Bei 79,76 kB stand da 80, und der Test
+fiel durch, obwohl die Datei unter der Grenze lag. Das hat zweimal Kommentare
+gekostet, die nicht zu kürzen waren.
+
+**Er stand bei 80 und bestrafte dreimal hintereinander das Falsche.** Jedes Mal,
+wenn eine Runde einen echten Fehler aufdeckte, ging die Begründung dafür in die
+Datei — und musste danach wieder heraus. Drei Fehler dieser Sitzung wurden
+gefunden, *weil* früher jemand aufgeschrieben hat, warum etwas so steht. Vier
+Kilobyte gzip sind auf einer langsamen Verbindung rund 60 ms; das ist der Preis,
+und er ist klein gegen einen Fehler, den niemand mehr versteht. Der Deckel soll
+ein Davonlaufen verhindern, nicht das Denken.
 
 ### Zwei Rückwege
 
