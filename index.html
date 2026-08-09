@@ -575,10 +575,16 @@
 
        --leiste misst ein Skript nach: die Leiste ist mal ein-, mal
        zweizeilig. */
-    /* Zehn Pixel Luft unten waren zu knapp: auf dem Telefon lief der untere
-       Fensterrand aus dem Bild. Dazu der Bereich der Home-Anzeige, den
-       100dvh mitzaehlt, den man aber nicht bespielen sollte. */
-    --kartenhoehe: calc(100dvh - var(--leiste) - 26px - env(safe-area-inset-bottom));
+    /* Die Luft unten ist genau der Abstand zur naechsten Karte.
+
+       Damit geht die Rechnung auf: steht eine Karte oben an der Leiste, endet
+       sie 34 Pixel ueber dem unteren Rand — man sieht ihre Kante — und die
+       naechste beginnt genau am Rand, also gerade nicht mehr im Bild. Weniger
+       Luft, und die Kante lief heraus; mehr, und die naechste schaute herein.
+
+       Dazu der Bereich der Home-Anzeige, den 100dvh mitzaehlt, den man aber
+       nicht bespielen sollte. */
+    --kartenhoehe: calc(100dvh - var(--leiste) - 34px - env(safe-area-inset-bottom));
     min-height: var(--kartenhoehe);
     display: flex;
     flex-direction: column;
