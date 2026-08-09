@@ -220,10 +220,9 @@
        Ein Wert, zwei Stellen. Sie koennen nicht auseinanderlaufen.
 
        Und er ist der Regler fuer die Kartengroesse: Karte plus Luft ergeben
-       zusammen immer einen Schirm — mehr Luft heisst also kleinere Karte und
-       mehr Grund darunter, weniger Luft eine groessere. 96 war noch zu
-       gross, 200 laesst die Karte auf etwa zwei Drittel des Schirms. */
-    --luft: 200px;
+       zusammen immer einen Schirm. Die Haelfte der Luft steht ueber der
+       Karte, die andere darunter — oben und unten derselbe Abstand. */
+    --luft: 160px;
     --schleier: rgba(17, 17, 17, 0.62);
     --schatten: rgba(0, 0, 0, 0.24);
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -575,7 +574,8 @@
   .karten {
     display: flex;
     flex-direction: column;
-    margin-top: 16px;
+    /* Die halbe Luft — die andere Haelfte liegt unter der Karte. */
+    margin-top: calc(var(--luft) / 2);
   }
   .karten > .card {
     margin: 0 14px var(--luft);
@@ -594,7 +594,17 @@
        Home-Anzeige, den 100dvh mitzaehlt, den man aber nicht bespielen
        sollte. */
     --kartenhoehe: calc(100dvh - var(--leiste) - var(--luft) - env(safe-area-inset-bottom));
-    min-height: var(--kartenhoehe);
+    /* Hoehe, nicht Mindesthoehe.
+
+       Mit min-height waren es zehn verschiedene Karten: wer mehr Inhalt hat
+       — ein AKTIV-Zeichen, eine zweizeilige Schlagzeile —, wuchs darueber
+       hinaus und lief unten aus dem Schirm. Eine Groesse, die nur die
+       kuerzeste Karte einhaelt, ist keine Groesse.
+
+       Damit das aufgeht, muessen die Teile darin nachgeben koennen: Chart
+       und Nachrichten schrumpfen mit (flex-basis 0, min-height 0), der Rest
+       steht fest. */
+    height: var(--kartenhoehe);
     display: flex;
     flex-direction: column;
     content-visibility: auto;
@@ -1005,10 +1015,11 @@
   .chart {
     position: relative;
     width: 100%;
-    /* Waechst in die Hoehe, die durch die volle Kartenhoehe frei wird —
-       sonst stuende unten in jeder Karte ein leerer Streifen. */
-    flex: 1 1 auto;
-    min-height: 208px;
+    /* Nimmt den Platz auf, der uebrig bleibt — und gibt ihn wieder her, wenn
+       die Karte mehr Text traegt. Ohne das Nachgeben waere die Karte so hoch
+       wie ihr laengster Inhalt statt so hoch wie vorgesehen. */
+    flex: 1 1 0;
+    min-height: 120px;
     border-top: 1px solid var(--hair);
     padding: 12px 48px 22px 14px;
     opacity: 0;
@@ -2335,7 +2346,7 @@
   /* Solange der Streifen unten steht, deckt er die letzten Pixel jeder Karte
      ab. Also wird die Luft unter der Karte um seine Hoehe groesser — und mit
      ihr, weil es derselbe Wert ist, der Abstand zur naechsten. */
-  body.has-install-bar { padding-bottom: 104px; --luft: 300px; }
+  body.has-install-bar { padding-bottom: 104px; --luft: 264px; }
   /* Das echte Symbol, keine nachgebaute Kachel — so zeigt der Streifen
      immer das, was nachher auch auf dem Home-Bildschirm steht. */
   .install-mark {
