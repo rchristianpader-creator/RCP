@@ -537,9 +537,15 @@
     margin: 0 14px 56px;
     /* Was weit weg ist, zeichnet der Browser gar nicht erst. Die Hoehe ist
        vorgegeben, damit die Seite trotzdem die richtige Laenge hat und
-       Sprungmarken stimmen. */
+       Sprungmarken stimmen.
+
+       800 statt 760, seit die Zeitraum-Knoepfe ueber dem Chart stehen:
+       gemessen sind die Karten 762 hoch, zwei mit laengerem Kopf 814. Mit
+       dem alten Wert schob jede der langen Karten den Sprung um 54 Pixel
+       nach unten — bei fuenf Karten ueber dem Ziel reichte das, um an der
+       Sprungmarke vorbeizulanden. */
     content-visibility: auto;
-    contain-intrinsic-size: auto 760px;
+    contain-intrinsic-size: auto 800px;
   }
   .karten-fehler {
     margin: 0 14px 56px;
@@ -3889,8 +3895,21 @@
 
        Haengt noch keiner darin, passiert nichts weiter: der Kasten ist
        ausser Sicht, und wenn er hereinkommt, wird ohnehin die neue Adresse
-       genommen. */
-    stapel.addEventListener("click", function (e) {
+       genommen.
+
+       Der Horcher haengt am Stapel, nicht an den Knoepfen — die kommen und
+       gehen mit jedem Neubau. Genau deshalb die Sperre davor: bauen() laeuft
+       zweimal, einmal mit den frischen Zahlen und einmal mit den
+       aufgehobenen, und textContent = "" raeumt zwar die Kinder weg, nicht
+       aber einen Horcher am Stapel selbst. Ohne die Sperre wuerde ein Tipp
+       den Rahmen zweimal wegnehmen und zweimal neu setzen — TradingView
+       laedt dann doppelt. */
+    if (!stapel.hasAttribute("data-spanne-horcht")) {
+      stapel.setAttribute("data-spanne-horcht", "1");
+      stapel.addEventListener("click", spanneKlick);
+    }
+
+    function spanneKlick(e) {
       var knopf = e.target.closest ? e.target.closest(".spanne-knopf") : null;
       if (!knopf) return;
       var reihe = knopf.parentNode;
@@ -3912,7 +3931,7 @@
         raus(kasten);
         einsetzen(kasten);
       }
-    });
+    }
 
     kaesten.forEach(platzhalter);
 
