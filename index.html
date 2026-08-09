@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="dark">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#0a0d0c">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=102">
-<link rel="apple-touch-icon" href="/icon-180.png?v=102">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=103">
+<link rel="apple-touch-icon" href="/icon-180.png?v=103">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=102">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=103">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=102">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=103">
 
 <script>
 /* Im Browser oder als App?
@@ -945,6 +945,19 @@
       var(--glas-fuellung-taste);
     box-shadow: var(--glas-kante);
     border: 1px solid var(--line);
+  }
+  /* Dieselbe Scheibe, nur mit Schrift statt Bild. Sie traegt beide Klassen,
+     damit Groesse, Rundung und Glas nicht auseinanderlaufen koennen. */
+  .card-head .logo-zeichen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    color: var(--muted);
+    user-select: none;
   }
   .badge {
     font-size: 10px;
@@ -3008,7 +3021,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=102");
+    background-image: url("/kerzen.svg?v=103");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -3022,7 +3035,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=102");
+    background-image: url("/kerzen-blass.svg?v=103");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -3767,7 +3780,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=102" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=103" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -3885,7 +3898,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=102" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=103" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3933,7 +3946,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=102" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=103" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -3952,7 +3965,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=102" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=103" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -4069,7 +4082,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=102" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=103" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -4221,13 +4234,46 @@
      Position (Feld "logo" in der Verwaltung). Der zweite ist die Function,
      die bei mehreren Quellen nachfragt. Welche davon liefert, entscheidet
      sich draussen — der eigene Weg ist der, der immer geht. */
+  /* Ein Zeichen statt eines Bildes.
+
+     Gold, Silber und Bitcoin haben kein Firmenlogo, und keine Quelle kennt
+     jede Firma. Die Karte blieb dann leer — neben Karten mit Logo sieht das
+     nach Ladefehler aus, nicht nach Absicht. Jede Karte bekommt deshalb
+     dieselbe Scheibe: kommt ein Bild, steht es darauf, sonst das Kuerzel.
+     Und die Scheibe steht sofort da, damit die Zeile nicht springt. */
+  var ZEICHEN = {
+    "GC=F": "Au", "SI=F": "Ag", "HG=F": "Cu",
+    "CL=F": "Öl", "NG=F": "Gas", "ZC=F": "Korn",
+    "BTC-USD": "₿", "ETH-USD": "Ξ"
+  };
+  /* Dieselbe Regel wie OHNE_LOGO in netlify/functions/logo.js: dort, um
+     nicht zu suchen, hier, um gar nicht erst zu fragen. logo-test haelt die
+     beiden zusammen. */
+  function ohneLogo(sym) {
+    return /^(\^|GC=F|SI=F|CL=F|HG=F|NG=F|ZC=F|.*-USD$)/i.test(sym);
+  }
+  function zeichenFuer(sym) {
+    if (ZEICHEN[sym]) return ZEICHEN[sym];
+    if (sym.charAt(0) === "^") return sym.slice(1, 4);
+    var basis = sym.split("-")[0].split(".")[0].split("=")[0];
+    return basis.slice(0, 2) || "?";
+  }
+
   function logoNeben(p) {
     var kasten = el("div", "titel");
     kasten.appendChild(el("h2", null, p.name));
 
-    var sym = p.yahoo || p.badge;
+    var sym = (p.yahoo || p.badge || "").toUpperCase();
+    if (!sym) return kasten;
+
+    var scheibe = el("span", "logo logo-zeichen", zeichenFuer(sym));
+    scheibe.setAttribute("aria-hidden", "true");
+    kasten.insertBefore(scheibe, kasten.firstChild);
+
+    /* Eine eigene Adresse geht immer vor — auch bei Gold, falls jemand dort
+       doch ein Bild hinterlegt hat. */
     var quelle = p.logo ||
-      (sym ? "/.netlify/functions/logo?sym=" + encodeURIComponent(sym) : "");
+      (ohneLogo(sym) ? "" : "/.netlify/functions/logo?sym=" + encodeURIComponent(sym));
     if (!quelle) return kasten;
 
     var bild = new Image();
@@ -4243,9 +4289,9 @@
     bild.setAttribute("aria-hidden", "true");
     bild.onload = function () {
       bild.className = "logo";
-      kasten.insertBefore(bild, kasten.firstChild);
+      kasten.replaceChild(bild, scheibe);
     };
-    bild.onerror = function () { /* Dann eben ohne — die Karte merkt nichts */ };
+    bild.onerror = function () { /* Dann bleibt das Kuerzel stehen */ };
     bild.src = quelle;
     return kasten;
   }
@@ -6495,7 +6541,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=102";
+      i.src = "/icon-512.png?v=103";
     });
     return symbolBild;
   }

@@ -45,17 +45,50 @@ const TYPEN = ["image/png", "image/svg+xml", "image/webp", "image/jpeg"];
 const OHNE_LOGO = /^(\^|GC=F|SI=F|CL=F|HG=F|NG=F|ZC=F|.*-USD$)/i;
 
 /* Von fein nach grob. Jede Quelle bekommt das Kuerzel, wie Yahoo es
-   schreibt, und darf daraus machen, was sie braucht. */
+   schreibt, und darf daraus machen, was sie braucht.
+
+   Financial Modeling Prep steht jetzt vorn. Zwei Gruende: die Adresse ist
+   nach dem Kuerzel benannt, so wie Yahoo es schreibt — also genau das, was
+   hier ankommt — und es ist dieselbe Stelle, von der die Seite ohnehin ihre
+   Kurse holt. Was dort ein Kuerzel ist, ist dort auch ein Bild.
+
+   companiesmarketcap ist rausgeflogen. Die Seite benennt ihre Bilder nach
+   dem Firmennamen, nicht nach dem Kuerzel — .../128/AAPL.png hat also nie
+   etwas treffen koennen. Eine Quelle, die von der Bauart her nicht
+   antworten kann, ist keine Rueckfallebene, sondern nur Wartezeit vor der
+   naechsten.
+
+   Und ein Kuerzel wie BRK-B oder SAP.DE schreibt jede Quelle anders. Statt
+   zu raten, wird beides versucht: wie es ankommt und auf den Teil vor dem
+   Trennzeichen gekuerzt. */
 const QUELLEN = [
+  (s) => "https://financialmodelingprep.com/image-stock/" + encodeURIComponent(s) + ".png",
   (s) => "https://assets.parqet.com/logos/symbol/" + encodeURIComponent(s) + "?format=png&size=128",
-  (s) => "https://companiesmarketcap.com/img/company-logos/128/" + encodeURIComponent(s) + ".png",
-  (s) => "https://eodhd.com/img/logos/US/" + encodeURIComponent(s.toLowerCase()) + ".png"
+  (s) => "https://eodhd.com/img/logos/US/" + encodeURIComponent(s) + ".png"
 ];
+
+/* Aus einem Kuerzel werden die Schreibweisen, die es zu versuchen lohnt —
+   ohne Dubletten und in dieser Reihenfolge. */
+function schreibweisen(sym) {
+  const kurz = sym.split(".")[0].split("-")[0];
+  return kurz && kurz !== sym ? [sym, kurz] : [sym];
+}
 
 export default async (request) => {
   const url = new URL(request.url);
   const sym = (url.searchParams.get("sym") || "").trim();
   if (!sym || sym.length > 24) return leer(400);
+
+  if (url.searchParams.get("pruef")) {
+    const bericht = OHNE_LOGO.test(sym)
+      ? { sym, ohneLogo: true, zeilen: [], hinweis: "Rohstoff, Index oder Krypto — hier wird nicht gesucht, die Karte traegt ein Zeichen." }
+      : await pruefen(sym);
+    return new Response(JSON.stringify(bericht, null, 2), {
+      status: 200,
+      headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" }
+    });
+  }
+
   if (OHNE_LOGO.test(sym)) return leer(404, FRISCH);
 
   const speicher = laden();
@@ -106,11 +139,59 @@ async function merken(speicher, sym, wert) {
 }
 
 async function holenMitRueckfall(sym) {
-  for (const bauen of QUELLEN) {
-    const d = await holen(bauen(sym));
-    if (d) return d;
+  for (const schreibweise of schreibweisen(sym)) {
+    for (const bauen of QUELLEN) {
+      const d = await holen(bauen(schreibweise));
+      if (d) return d;
+    }
   }
   return null;
+}
+
+/* Warum hat dieses Symbol kein Logo?
+
+   Aufruf: /.netlify/functions/logo?sym=NVO&pruef=1
+
+   Diese Frage liess sich bisher nicht beantworten. Die Entwicklungsumgebung
+   kommt an keinen fremden Host heran, also war beim Bauen nicht zu sehen,
+   welche Quelle liefert und welche nicht — und auf der fertigen Seite sieht
+   man nur das Ergebnis: Bild oder kein Bild. Ein 404 sagt nicht, ob die
+   Quelle das Kuerzel nicht kennt, ob sie eine Fehlerseite als Bild
+   ausliefert oder ob sie gar nicht erreichbar war.
+
+   Hier steht es Zeile fuer Zeile: jede Adresse mit Status, Typ und Groesse,
+   und was daran ausgeschlagen hat. Antwortet nichts, ist es kein Raetsel
+   mehr, sondern eine Liste.
+
+   Nichts Geheimes darin — es sind oeffentliche Adressen ohne Schluessel. */
+async function pruefen(sym) {
+  const zeilen = [];
+  for (const schreibweise of schreibweisen(sym)) {
+    for (const bauen of QUELLEN) {
+      const adresse = bauen(schreibweise);
+      const z = { schreibweise, adresse };
+      try {
+        const res = await fetch(adresse, {
+          headers: { "User-Agent": "Mozilla/5.0 (compatible; AktienListe/1.0)", Accept: "image/*" },
+          redirect: "follow"
+        });
+        z.status = res.status;
+        z.typ = (res.headers.get("content-type") || "").split(";")[0].trim().toLowerCase();
+        const roh = new Uint8Array(await res.arrayBuffer());
+        z.groesse = roh.length;
+        if (!res.ok) z.urteil = "Status nicht ok";
+        else if (TYPEN.indexOf(z.typ) < 0) z.urteil = "kein Bildtyp, den wir nehmen";
+        else if (roh.length < 120) z.urteil = "zu klein, vermutlich Platzhalter";
+        else if (roh.length > HOECHSTENS) z.urteil = "zu gross";
+        else z.urteil = "brauchbar";
+      } catch (e) {
+        z.urteil = "nicht erreichbar: " + (e && e.message ? e.message : "unbekannt");
+      }
+      zeilen.push(z);
+      if (z.urteil === "brauchbar") return { sym, ohneLogo: false, zeilen };
+    }
+  }
+  return { sym, ohneLogo: false, zeilen };
 }
 
 async function holen(adresse) {

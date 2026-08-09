@@ -637,10 +637,39 @@ durchsichtigem Grund, und beides sieht auf einer dunklen Fläche nach Ausschnitt
 aus, nicht nach Zugehörigkeit. `object-fit: contain` bei fester Größe, damit ein
 breites Wortlogo und ein quadratisches Zeichen gleich viel Platz einnehmen.
 
-**Das Logo ist ein Zusatz, kein Träger.** Kommt keins, steht der Name genau da,
-wo er ohne Logo stünde. Deshalb hängt das Bild erst dann im Kasten, wenn es
-*geladen* ist — ein `<img>`, das nichts findet, hinterlässt sonst ein leeres Feld
-oder das Symbol für ein kaputtes Bild, und die Zeile springt beim Nachladen.
+**Das Logo ist ein Zusatz, kein Träger.** Das Bild hängt erst dann im Kasten,
+wenn es *geladen* ist — ein `<img>`, das nichts findet, hinterlässt sonst das
+Symbol für ein kaputtes Bild.
+
+### Ein Zeichen, wenn kein Bild kommt
+
+Rückmeldung vom Gerät: „Manche Symbole haben kein Logo." Das stimmte, und es war
+kein Ausfall, sondern Bauart. Gold, Silber und Bitcoin **haben** kein
+Firmenlogo, und keine Quelle kennt jede Firma. Bis dahin blieb die Karte dann
+einfach leer und der Name rückte an die Innenkante — neben Karten mit Logo sieht
+das nach Ladefehler aus, nicht nach Absicht. Von zehn Positionen der Startliste
+sind drei per Definition ohne Bild.
+
+Jetzt trägt **jede** Karte dieselbe Scheibe. Kommt ein Bild, steht es darauf;
+kommt keins, steht das Kürzel darauf:
+
+| | |
+|---|---|
+| `GC=F` `SI=F` `HG=F` | Au, Ag, Cu |
+| `CL=F` `NG=F` `ZC=F` | Öl, Gas, Korn |
+| `BTC-USD` `ETH-USD` | ₿, Ξ |
+| `^…` | die ersten Zeichen des Index |
+| sonst | die ersten zwei Buchstaben des Kürzels |
+
+Die Scheibe steht **sofort** da, nicht erst nach dem Laden. Damit springt die
+Zeile nicht mehr, wenn ein Logo nachträglich eintrifft — vorher rückte der Name
+in dem Moment um 40 Pixel nach rechts. `logo-test` prüft jetzt genau das
+Gegenteil von früher: dass die Zeile mit und ohne Bild **identisch** steht.
+
+Für diese Symbole fragt die Seite gar nicht erst an. Die `OHNE_LOGO`-Regel steht
+dafür zweimal da — in der Function, um nicht zu suchen, und in `index.html`, um
+nicht zu fragen. `logo-test` vergleicht die beiden Zeichen für Zeichen, damit sie
+nicht auseinanderlaufen.
 
 Eine Falle dabei: `loading="lazy"` an einem Bild, das noch nicht im Dokument
 hängt. Ein aufgeschoben ladendes Bild wartet darauf, in den sichtbaren Bereich zu
@@ -666,10 +695,35 @@ Rohstoffe und Indizes (`GC=F`, `SI=F`, `^…`, `…-USD`) haben kein Firmenlogo 
 danach zu suchen wäre bei jedem Aufruf verschwendete Zeit. Sie stehen in
 `OHNE_LOGO` und bekommen sofort ein 404.
 
+**Die Kette, nachgeschärft.** `financialmodelingprep.com/image-stock/<KÜRZEL>.png`
+steht jetzt vorn: die Adresse ist nach dem Kürzel benannt, so wie Yahoo es
+schreibt — also genau das, was ankommt — und es ist dieselbe Stelle, von der die
+Seite ohnehin ihre Kurse holt. **companiesmarketcap ist rausgeflogen:** die Seite
+benennt ihre Bilder nach dem Firmennamen, nicht nach dem Kürzel, `…/128/AAPL.png`
+konnte also nie etwas treffen. Eine Quelle, die von der Bauart her nicht antworten
+kann, ist keine Rückfallebene, sondern nur Wartezeit vor der nächsten. Und weil
+`BRK-B` oder `SAP.DE` jede Quelle anders schreibt, wird beides versucht: wie es
+ankommt und auf den Teil vor dem Trennzeichen gekürzt.
+
+**Warum hat *dieses* Symbol kein Logo?** `?pruef=1` an die Function hängen:
+
+```
+/.netlify/functions/logo?sym=NVO&pruef=1
+```
+
+Antwort ist eine Liste — jede Adresse mit Status, Typ, Größe und einem Urteil
+(„Status nicht ok", „kein Bildtyp, den wir nehmen", „zu klein, vermutlich
+Platzhalter", „brauchbar"). Ein 404 allein sagt nicht, ob die Quelle das Kürzel
+nicht kennt, eine Fehlerseite als Bild ausliefert oder gar nicht erreichbar war.
+Hier steht es. Öffentliche Adressen, kein Schlüssel, nichts Geheimes darin.
+
 **Offen gesagt:** welche der Quellen wirklich liefert, konnte beim Bauen nicht
 geprüft werden — die Entwicklungsumgebung lässt keine fremden Hosts durch
-(403 am Proxy). Deshalb eine Kette statt einer Quelle, deshalb ein sauberes 404
-statt eines kaputten Bildes, und deshalb das Feld an der Position, das
+(403 am Proxy, für `assets.parqet.com` und `companiesmarketcap.com` nachgelesen
+im Proxy-Protokoll). Genau deshalb gibt es `?pruef=1`: die Frage ist auf der
+fertigen Seite in einem Klick zu beantworten. Deshalb eine Kette statt einer
+Quelle, deshalb ein sauberes 404 statt eines kaputten Bildes, und deshalb das
+Feld an der Position, das
 unabhängig davon funktioniert.
 
 ### Etwas, das durch das Glas zu sehen ist
@@ -1209,7 +1263,7 @@ Roh **+22,6 kB**, über die Leitung **+7,4**. Der Unterschied ist Prosa, und
 Prosa komprimiert sich fast vollständig weg. Ein Deckel auf der rohen Datei
 bestraft also Erklärungen und lässt Nutzlast durch — genau verkehrt herum.
 
-Deshalb jetzt zwei Werte: **gzip unter 84 kB** ist der scharfe (das ist die
+Deshalb jetzt zwei Werte: **gzip unter 86 kB** ist der scharfe (das ist die
 Ladezeit), **roh unter 320 kB** bleibt als weiter Riegel gegen ein
 Davonlaufen. (Der rohe Riegel stand bei 300 und ist aus demselben Grund
 gestiegen wie der gzip-Deckel von 80 auf 84: bei 301 kB roh sind es 79 kB
