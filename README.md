@@ -483,13 +483,29 @@ auseinander. Sichtbar wird nur, dass der Rand lebt statt grau zu sein.
 
 ### Was Glas braucht, um Glas zu sein
 
-**Etwas dahinter.** Über flachem `#fafafa` bleibt jedes Glas ein hellerer
-Balken — man sieht ja nichts durch. Deshalb liegt der laufende Kursverlauf
-jetzt nicht mehr nur auf der Anmeldeseite und hinter dem Ladebildschirm,
-sondern **unter der ganzen Liste**: fest am Fenster, sehr blass, ohne eigene
-Bewegung. Sichtbar wird er vor allem dort, wo Glas darüber liegt — der
-`saturate(210%)` im Frost hebt ihn hervor, während er auf dem nackten
-Hintergrund kaum auffällt.
+**Etwas dahinter, und zwar Farbe.** Über flachem `#fafafa` bleibt jedes Glas
+ein hellerer Balken — man sieht ja nichts durch. Ein grauer Kursverlauf allein
+reichte auch nicht: grau auf fast weiß verwischt der Frost zu nichts. Was Glas
+zeigen kann, ist Farbe.
+
+Unter der ganzen Liste liegen deshalb **vier große, sehr weiche Farbfelder** —
+kühl oben links, warm oben rechts, Flieder unten rechts, Türkis unten links —
+und darüber, als Struktur, weiter der Kursverlauf. Alles in einem einzigen
+festen Element mit mehreren Hintergrundebenen. Der `saturate(320%)` im Frost
+hebt die Farbe genau dort hervor, wo Glas darüber liegt, und lässt sie daneben
+blass.
+
+Die Lautstärke hängt an vier Zeilen — `--grund-kuehl`, `--grund-warm`,
+`--grund-flieder`, `--grund-tuerkis`. Sie stehen in beiden HTML-Dateien gleich,
+und `glanz-test` vergleicht sie, damit Liste und Anmeldeseite nicht
+auseinanderdriften.
+
+**Und die Bänder oben mussten aufmachen.** Kopf, Laufstreifen und
+Setup-Streifen waren deckende Platten quer über den oberen Bildrand — genau
+dort, wo vom Grund am meisten zu sehen sein sollte, war nichts. Der Kopf trägt
+jetzt Füllung und Schimmer (aber keinen Frost: hinter ihm liegt nur der Grund,
+und der ist schon weich — ein Filter wäre dort reine Rechenzeit ohne Bild), die
+beiden Streifen sind halbdurchsichtig.
 
 **Zwei Dicken.** Die Leiste und der Streifen tragen Marken; dort darf viel
 durchscheinen (`0.42`). Ein Blatt trägt Sätze, und hinter Sätzen soll nichts
@@ -497,7 +513,28 @@ stehen, das man mitliest (`0.66`).
 
 **Und die Karten bleiben deckend.** Glas über einer flachen Fläche ist kein
 Glas, es ist eine hellere Fläche mit Kosten. Karten tragen Charts und Text —
-dort wäre Durchscheinen ein Nachteil, kein Effekt.
+dort wäre Durchscheinen ein Nachteil, kein Effekt. Zu sehen ist der Grund
+stattdessen in den 56 Pixeln zwischen zwei Karten, an den Rändern, im Kopf und
+durch jedes Blatt. Der Grund rahmt die Liste, er trägt sie nicht.
+
+### Der Chart in der Karte ist eine Linie
+
+Zehn Kerzencharts nebeneinander sind zehn dichte Muster aus Balken, Dochten und
+Gitternetz — die lauteste Fläche der ganzen Seite, und auf Kartengröße sagt sie
+fast nichts, weil eine Tageskerze dort drei Pixel breit ist. Eine Linie sagt
+dasselbe ruhiger: wo der Kurs herkommt und wo er steht. Erst damit hat das Glas
+überhaupt eine Chance, gesehen zu werden.
+
+`style=2` in der Widget-Adresse, dazu `mainSeriesProperties.style: 2` in den
+Overrides und Farben aus dem eigenen Regelwerk: Linie in `--fg`, Achsen in
+`--line` und `--muted`, Gitternetz unsichtbar. Weg fallen Seitenleiste,
+Legende und Zeitraum-Knöpfe. Die **obere Leiste bleibt** — dort steht der
+Zeitrahmen, und den soll man wechseln können, ohne die App zu verlassen. Die
+Zeichenwerkzeuge fehlen nicht: der Knopf unter dem Chart öffnet den vollen
+Analyse-Chart mit den Fibonacci-Marken.
+
+Nicht hier geprüft: TradingView ist aus dieser Umgebung nicht erreichbar, die
+Prüfreihen fangen den Rahmen ab. Was sich prüfen ließ, ist die Adresse selbst.
 
 ### Was fehlt, und warum
 
