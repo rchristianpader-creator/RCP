@@ -80,9 +80,44 @@ def svg():
     )
 
 
+def blasser(quelle, anteil, ziel):
+    """Dieselbe Zeichnung, nur blasser — ueber die Deckkraft der Formen.
+
+    Warum nicht ueber opacity am Element: Deckkraft an einer Ebene zwingt
+    den Compositor, sie bei jedem Bild zu ueberblenden. Gemessen bei
+    sechsfach gedrosseltem Prozessor kostete das 5 lange Bilder je Lauf
+    statt 0 — auf einer Ebene, die sich ohnehin dauernd bewegt, ist das der
+    teuerste Weg zu etwas, das auch umsonst zu haben ist.
+
+    Deshalb werden die Werte in der Datei selbst heruntergerechnet. Die
+    Formen bleiben Zeichen fuer Zeichen dieselben, damit die drei Kacheln
+    uebereinanderpassen.
+    """
+    import re
+    roh = open(quelle, encoding="utf-8").read()
+    aus = re.sub(r"(opacity:)(0\.\d+)",
+                 lambda m: m.group(1) + str(round(float(m.group(2)) * anteil, 4)), roh)
+    open(ziel, "w", encoding="utf-8").write(aus)
+    return aus
+
+
 if __name__ == "__main__":
-    breite, s = svg()
-    print("Breite eines vollen Durchgangs:", breite // 2)
-    print("Zeichen:", len(s))
-    open("kerzen.svg",
-         "w", encoding="utf-8").write(s)
+    """Achtung, ehrlich gesagt: die Formen unten stammen aus der ersten
+    Fassung und werden gewuerfelt — ein zweiter Aufruf von svg() ergibt
+    andere Kerzen als die, die im Verzeichnis liegen. Die drei Kacheln
+    muessen aber dieselben Formen tragen, sonst passen sie nicht
+    uebereinander.
+
+    Deshalb ist kerzen.svg die Vorlage, und die beiden blasseren werden
+    daraus abgeleitet. Wer die Zeichnung wirklich neu wuerfeln will, ruft
+    svg() von Hand auf und leitet danach neu ab.
+    """
+    import os
+    if not os.path.exists("kerzen.svg"):
+        breite, s = svg()
+        print("neu gewuerfelt, Breite eines Durchgangs:", breite // 2)
+        open("kerzen.svg", "w", encoding="utf-8").write(s)
+
+    blasser("kerzen.svg", 0.41, "kerzen-blass.svg")
+    blasser("kerzen-blass.svg", 0.5, "kerzen-grund.svg")
+    print("abgeleitet: kerzen-blass.svg (41 %), kerzen-grund.svg (halb davon)")

@@ -672,6 +672,46 @@ geprüft werden — die Entwicklungsumgebung lässt keine fremden Hosts durch
 statt eines kaputten Bildes, und deshalb das Feld an der Position, das
 unabhängig davon funktioniert.
 
+### Etwas, das durch das Glas zu sehen ist
+
+„Warum jetzt nur noch schwarz — klar, Schwarz behalten, aber ein Bild, das die
+Glas-Optik zur Geltung bringt, das sich bewegt, aber die Karten nicht stört."
+
+Genau das fehlte, und es steht sogar in der Vorlage: auf dem Sperrbildschirm
+laufen **Kerzen** hinter dem Kasten — deshalb wirkt er dort wie Glas. Eine
+Scheibe, hinter der nichts ist, sieht nicht aus wie Glas, sondern wie ein Loch.
+
+Also dieselben Kerzen unter der Liste, mit drei Auflagen:
+
+| | |
+|---|---|
+| sehr blass | eigene Kachel `kerzen-grund.svg`, halb so stark wie die blasse |
+| sehr langsam | **96 s** und **150 s** je Umlauf statt 8 s und 20 s |
+| nur verschoben | `translate3d`, kein Bild, das neu entsteht |
+
+Was in acht Sekunden durchs Bild zieht, zieht den Blick mit; was zweieinhalb
+Minuten braucht, bemerkt man nur, wenn man hinsieht.
+
+**Der Preis, und wie er wieder verschwand.** Erster Anlauf mit
+`opacity: 0.5` am Band: **5 lange Bilder im Stillstand** (vorher 0), 4 beim
+Scrollen. Deckkraft an einer bewegten Ebene zwingt den Compositor, sie bei jedem
+Bild zu überblenden — dieselbe Falle, die schon einmal 3,0 statt 0,3 gekostet
+hat. Mit einer blasseren Kachel statt Deckkraft: **0 lange Bilder**, im
+Stillstand wie beim Scrollen, bei genau demselben Aussehen.
+
+`kerzen.py` leitet die beiden blasseren Kacheln jetzt aus `kerzen.svg` ab statt
+sie nebenher entstehen zu lassen. Die Formen werden gewürfelt — ein zweiter
+Aufruf ergäbe andere Kerzen, und die drei Kacheln müssen übereinanderpassen.
+Deshalb ist `kerzen.svg` die Vorlage und wird nur neu gewürfelt, wenn sie fehlt.
+
+### Kein weißer Rand mehr
+
+Die aktive Karte hatte eine hellere Kante, die angesprungene einen Ring. Auf dem
+Telefon ist das ein weißer Strich um eine **schirmfüllende** Fläche — eine
+Einrahmung, keine Auskunft. Gesagt wird es weiterhin, nur an den kleinen
+Zeichen: am Abzeichen *IN DER ZONE* und an der Symboltaste, die beide schlagen.
+Beim Sprung hellt kurz die Lichtkante auf — dieselbe Kante, nur heller.
+
 ### Die Körnung war die Unschärfe
 
 Dreimal hieß es „sieht nicht so scharf aus wie auf dem Bild", und dreimal habe

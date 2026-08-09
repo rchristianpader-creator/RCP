@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="dark">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#0a0d0c">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=100">
-<link rel="apple-touch-icon" href="/icon-180.png?v=100">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=101">
+<link rel="apple-touch-icon" href="/icon-180.png?v=101">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=100">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=101">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=100">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=101">
 
 <script>
 /* Im Browser oder als App?
@@ -387,6 +387,38 @@
     opacity: 1;
   }
 
+  /* ETWAS, DAS DURCH DAS GLAS ZU SEHEN IST
+
+     Der Grund war schwarz und glatt. Schwarz soll er bleiben — aber eine
+     Scheibe, hinter der nichts ist, sieht nicht aus wie Glas, sondern wie
+     ein Loch. Auf dem Sperrbildschirm, der Vorlage fuer dieses ganze
+     Aussehen, laufen Kerzen dahinter; genau deshalb wirkt der Kasten dort
+     wie Glas.
+
+     Also dieselben Kerzen unter der Liste, aber:
+
+     - sehr blass. Beide Baender nehmen die blasse Kachel, nicht nur das
+       hintere. Sichtbar sein soll, dass sich dort etwas bewegt, nicht was.
+     - sehr langsam. 96 und 150 Sekunden fuer einen Umlauf statt 8 und 20.
+       Was in acht Sekunden durchs Bild zieht, zieht den Blick mit; was
+       zweieinhalb Minuten braucht, bemerkt man nur, wenn man hinsieht.
+     - nur verschoben, nie neu gezeichnet: eine Bewegung des Compositors,
+       kein Bild, das jedes Mal neu entsteht.
+
+     Bei "weniger Bewegung" steht es still. */
+  /* Blasser ueber eine eigene Kachel, nicht ueber opacity: Deckkraft an
+     einer bewegten Ebene zwingt den Compositor, sie bei jedem Bild zu
+     ueberblenden. Gemessen kostete das hier 5 lange Bilder je Lauf statt
+     0 — bei genau demselben Aussehen. */
+  .grundkerzen .kerzen-band {
+    background-image: url("/kerzen-grund.svg?v=101");
+  }
+  .grundkerzen .kerzen-band.hinten { animation-duration: 150s; }
+  .grundkerzen .kerzen-band.vorn { animation-duration: 96s; }
+  @media (prefers-reduced-motion: reduce) {
+    .grundkerzen .kerzen-band { animation: none; }
+  }
+
   .nur-web .grundkurve { display: none; }
 
   /* Kein Mitziehen des Grundes.
@@ -647,7 +679,13 @@
 
      Geblieben ist die hellere Kante: sie steht still und sagt trotzdem,
      welche Karte gemeint ist. */
-  .card.card-live { border-color: rgba(var(--fg-rgb), 0.55); }
+  /* Kein hellerer Rand an der aktiven Karte.
+
+     Er sollte still sagen, welche Karte gemeint ist — auf dem Telefon war
+     er ein weisser Strich um eine schirmfuellende Flaeche, und das ist
+     keine Auskunft, das ist eine Einrahmung. Gesagt wird es weiterhin, nur
+     leiser und an den kleinen Zeichen: am Abzeichen "IN DER ZONE" und an
+     der Symboltaste, die beide schlagen. */
 
   @media (prefers-reduced-motion: reduce) {
     nav a.nav-live { animation: none;
@@ -2916,7 +2954,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=100");
+    background-image: url("/kerzen.svg?v=101");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -2930,7 +2968,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=100");
+    background-image: url("/kerzen-blass.svg?v=101");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -3308,9 +3346,17 @@
      ist spezifischer und wuerde eine zweite animation-Angabe schlucken. */
   .card { transition: box-shadow 1.22s ease-out; }
   .card.angesprungen {
-    /* Der Ring kommt zur Hebung dazu, er ersetzt sie nicht — sonst faellt
-       die Karte fuer den Moment des Sprungs flach auf den Grund. */
-    box-shadow: 0 0 0 1px rgba(var(--fg-rgb), 0.32), var(--hebung);
+    /* Aus demselben Grund kein weisser Ring mehr, wenn ein Kuerzel eine
+       Karte anspringt: die Karte fuellt den Schirm, ein Rahmen darum sagt
+       nichts, was das Ankommen nicht schon gesagt haette. Geblieben ist
+       ein kurzes Aufhellen der Lichtkante — dieselbe Kante, nur heller. */
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.6),
+      inset 0 2px 1px -1px rgba(255, 255, 255, 0.24),
+      inset 1px 0 0 rgba(255, 255, 255, 0.14),
+      inset -1px 0 0 rgba(255, 255, 255, 0.1),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.34),
+      var(--hebung);
     transition-duration: 0.16s;
   }
 
@@ -3645,7 +3691,9 @@
  </div>
 </header>
 
-<div class="grundkurve" aria-hidden="true"></div>
+<div class="grundkurve" aria-hidden="true">
+  <div class="kerzen grundkerzen"><div class="kerzen-band hinten"></div><div class="kerzen-band vorn"></div></div>
+</div>
 <div class="web-kerzen" id="webKerzen" aria-hidden="true"></div>
 <script>
 /* Im Browser bekommt die Installationsseite den laufenden Hintergrund.
@@ -3661,7 +3709,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=100" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=101" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -3779,7 +3827,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=100" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=101" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3827,7 +3875,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=100" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=101" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -3846,7 +3894,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=100" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=101" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3963,7 +4011,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=100" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=101" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -6389,7 +6437,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=100";
+      i.src = "/icon-512.png?v=101";
     });
     return symbolBild;
   }
