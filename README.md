@@ -435,8 +435,51 @@ Vier Teile machen aus Milchglas Glas:
 |---|---|
 | **Frost** | `saturate(210%) blur(28px)` — die Sättigung muss hoch, sonst wird alles dahinter grau statt farbig verwischt |
 | **Füllung** | eine helle Schicht darauf, sonst wäre Schrift auf bewegtem Grund nicht zu lesen |
-| **Kante** | drei Linien: eine helle oben, eine schwächere darunter, eine dunkle unten. Das ist der Unterschied zwischen „durchscheinend" und „aus Glas" |
-| **Schimmer** | ein schräger Glanz über die obere Hälfte, in einem `::before` hinter dem Inhalt |
+| **Kante** | vier Linien: eine helle oben, eine kühle darunter, eine weiche Wölbung knapp innerhalb des Randes, eine warme dunkle unten |
+| **Schimmer** | ein schräger Glanz über die obere Hälfte, als zweite Hintergrundebene |
+
+### Der Glanz, der zwei Runden lang nirgends ankam
+
+Im Stylesheet stand eine Klasse `.glas` mit allen vier Bausteinen. Getragen hat
+sie **kein einziges Element**. Die vier Flächen in der Liste hatten sich Frost,
+Füllung und Kante einzeln geholt — und dabei den Schimmer vergessen. Nur der
+Anmeldekasten hatte ihn, über ein eigenes `::before`. Es war Milchglas, kein
+Glas, und niemand sah, woran es lag.
+
+Jetzt liegt der Schimmer in `--glas-grund` (bzw. `--glas-grund-fest`), zusammen
+mit der Füllung, als zwei Hintergrundebenen:
+
+```css
+--glas-grund:
+  var(--glas-schimmer),
+  linear-gradient(var(--glas-fuellung), var(--glas-fuellung));
+```
+
+Die Füllung muss als Verlauf geschrieben werden, weil eine Farbe in
+`background` nur als letzte Angabe stehen darf — und dann unter allen Ebenen
+läge.
+
+Ein Hintergrund statt eines `::before` ist hier nicht nur kürzer, sondern der
+einzige Weg, der bei den beiden Flächen funktioniert, die **innen scrollen**
+(`.sheet-card`, `.neuheit-mitte`): ein absolut gesetztes Kind scrollt mit dem
+Inhalt weg, ein Hintergrund bleibt am Rahmen des Elements stehen. Die
+Prüfreihe rollt ein Blatt bis zum Anschlag und sieht nach, dass die
+`background-position` dieselbe geblieben ist.
+
+### Wölbung und Farbstich
+
+Zwei Zutaten sind an der Kante dazugekommen, beide aus derselben Ecke wie der
+Rest:
+
+**Wölbung** — ein weicher dunkler Ring knapp innerhalb des Randes
+(`inset 0 0 14px -6px`). Ohne ihn ist die Fläche eine Folie; mit ihm hat sie
+Dicke. Licht, das durch eine Scheibe fällt, wird am Rand schräger gebrochen und
+kommt dort dunkler an.
+
+**Farbstich** — die helle Linie oben zieht ins Kühle (`214, 233, 255`), die
+dunkle unten ins Warme (`78, 60, 38`). Das ist die sehr abgeschwächte Fassung
+dessen, was an einer echten Linsenkante passiert: die Farben laufen
+auseinander. Sichtbar wird nur, dass der Rand lebt statt grau zu sein.
 
 ### Was Glas braucht, um Glas zu sein
 
@@ -484,6 +527,10 @@ Ohne `backdrop-filter` wäre die Füllung eine halbdurchsichtige Schicht über
 scharfem Text darunter — unleserlich. Und wer sein Gerät auf weniger
 Transparenz gestellt hat, meint genau das. In beiden Fällen werden alle
 Flächen wieder deckend, der Schimmer verschwindet, die Kurve auch.
+
+`prefers-reduced-transparency` lässt sich mit diesem Playwright nicht
+nachstellen — `emulateMedia` kennt den Schalter nicht. Die Prüfreihe sieht
+deshalb für diesen Fall im Stylesheet nach, statt es im Browser zu messen.
 
 ## Der Hintergrund aus Kerzen
 
@@ -571,6 +618,13 @@ Zahlen oben als Begründung im Test; was trägt, sind der Mittelwert (stabil bei
 `kachel-test` misst die Kerzenbreite bei 390, 1024 und 1900 Pixeln, prüft die
 Deckung (Fenster + Kachel), den Umlauf auf halbem Weg (genau eine halbe Kachel)
 und dass in beiden HTML-Dateien kein gedehntes SVG mehr steht.
+
+`glanz-test` prüft, dass der Schimmer wirklich ankommt: zwei Hintergrundebenen
+auf Leiste, Blatt und Anmeldekasten, vier Linien an der Kante, keine Fläche mit
+nackter Füllung, kein `::before` mehr — und dass die `background-position` sich
+nicht bewegt, nachdem ein Blatt bis zum Anschlag gerollt wurde. Das Fenster
+wird dafür auf 320 Pixel Höhe verkleinert, sonst ist das Blatt kürzer als der
+Platz und rollt gar nicht.
 
 Bewegt wird nur das Band als Ganzes per `transform` — eine Sache fuer den
 Compositor, kein Layout, kein Skript. Gemessen mit sechsfach gedrosseltem

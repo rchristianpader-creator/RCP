@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="light">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#fafafa">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=78">
-<link rel="apple-touch-icon" href="/icon-180.png?v=78">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=79">
+<link rel="apple-touch-icon" href="/icon-180.png?v=79">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=78">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=79">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=78">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=79">
 
 <script>
 /* Im Browser oder als App?
@@ -139,17 +139,53 @@
        und hinter Saetzen soll nichts stehen, das man mitliest. */
     --glas-fuellung-fest: rgba(255, 255, 255, 0.66);
     /* Die Kante faengt Licht: oben eine helle Linie, darunter noch eine
-       schwaechere, unten eine dunkle. Drei Linien statt zwei — das ist der
-       Unterschied zwischen "durchscheinend" und "aus Glas". */
+       schwaechere, unten eine dunkle.
+
+       Zwei Zutaten sind dazugekommen, beide aus derselben Ecke wie der Rest
+       dieser Machart:
+
+       Woelbung  ein weicher dunkler Ring knapp innerhalb des Randes. Ohne
+                 ihn ist die Flaeche eine Folie; mit ihm hat sie Dicke —
+                 Licht, das durch eine Scheibe faellt, wird am Rand
+                 schraeger gebrochen und kommt dort dunkler an.
+       Farbstich die helle Linie oben zieht ins Kuehle, die dunkle unten ins
+                 Warme. Das ist die abgeschwaechte Fassung dessen, was an
+                 einer echten Linsenkante passiert: die Farben laufen
+                 auseinander. Ganz leise — sichtbar wird nur, dass der Rand
+                 lebt statt grau zu sein. */
     --glas-kante:
       inset 0 1px 0 rgba(255, 255, 255, 0.95),
-      inset 0 2px 1px -1px rgba(255, 255, 255, 0.55),
-      inset 0 -1px 0 rgba(var(--fg-rgb), 0.09);
+      inset 0 2px 1px -1px rgba(214, 233, 255, 0.62),
+      inset 0 0 14px -6px rgba(var(--fg-rgb), 0.16),
+      inset 0 -1px 0 rgba(78, 60, 38, 0.13);
     --glas-schimmer: linear-gradient(148deg,
       rgba(255, 255, 255, 0.9) 0%,
       rgba(255, 255, 255, 0.42) 22%,
       rgba(255, 255, 255, 0.06) 46%,
       rgba(255, 255, 255, 0) 64%);
+
+    /* Schimmer und Fuellung in einem, als zwei Hintergrundebenen.
+
+       Frueher lag der Schimmer in einem ::before — und genau deshalb hatte
+       ihn in der Liste keine einzige Flaeche: die Klasse .glas, die ihn
+       mitbrachte, stand im Stylesheet, aber an keinem Element. Die vier
+       echten Flaechen hatten sich die Bausteine einzeln geholt und dabei
+       den Glanz vergessen. Es war Milchglas, kein Glas.
+
+       Als Hintergrundebene ist er ausserdem dort richtig, wo ein ::before
+       falsch waere: das Blatt und die Neuheiten-Karte scrollen innen, und
+       ein absolut gesetztes Kind scrollt mit. Ein Hintergrund nicht — der
+       bleibt am Rahmen des Elements stehen.
+
+       Die Fuellung muss als Verlauf geschrieben werden, weil eine Farbe in
+       background nur als letzte Angabe stehen darf und dann unter allen
+       Ebenen laege. */
+    --glas-grund:
+      var(--glas-schimmer),
+      linear-gradient(var(--glas-fuellung), var(--glas-fuellung));
+    --glas-grund-fest:
+      var(--glas-schimmer),
+      linear-gradient(var(--glas-fuellung-fest), var(--glas-fuellung-fest));
 
     /* HEBUNG
 
@@ -165,27 +201,13 @@
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  /* Der Bauplan. Wer .glas traegt, bekommt alle vier Teile.
-
-     Der Schimmer liegt in einem ::before, weil er nicht mitscrollen und
-     nichts abfangen darf — und weil ein zweiter Verlauf im background die
-     Fuellung ueberschreiben wuerde. */
+  /* Der Bauplan. Wer .glas traegt, bekommt alle vier Teile auf einmal —
+     ohne Pseudo-Element und ohne zusaetzliche Ebene. */
   .glas {
-    position: relative;
-    isolation: isolate;
-    background: var(--glas-fuellung);
+    background: var(--glas-grund);
     -webkit-backdrop-filter: var(--glas-frost);
     backdrop-filter: var(--glas-frost);
     box-shadow: var(--glas-kante), var(--hebung);
-  }
-  .glas::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    border-radius: inherit;
-    background: var(--glas-schimmer);
   }
 
   /* Zwei Faelle, in denen es wieder deckend wird.
@@ -195,7 +217,6 @@
      weniger Transparenz gestellt hat, meint genau das. */
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     .glas, nav, .sheet-card, .install-bar, .neuheit-mitte { background: var(--card); }
-    .glas::before { display: none; }
   }
   @media (prefers-reduced-transparency: reduce) {
     .glas, nav, .sheet-card, .install-bar, .neuheit-mitte {
@@ -203,7 +224,6 @@
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
     }
-    .glas::before { display: none; }
   }
 
   /* Der Kursverlauf hinter allem.
@@ -222,7 +242,7 @@
     inset: 0;
     z-index: -1;
     pointer-events: none;
-    background: url("/kerzen-blass.svg?v=78") repeat-x;
+    background: url("/kerzen-blass.svg?v=79") repeat-x;
     background-size: min(100vw, 620px) 62%;
     background-position: center 62%;
     opacity: 0.85;
@@ -315,7 +335,7 @@
     /* Glas: die Karten ziehen sichtbar darunter durch. Das ist die Flaeche,
        an der man den Unterschied am ehesten sieht — sie liegt den ganzen Tag
        ueber bewegtem Inhalt. */
-    background: var(--glas-fuellung);
+    background: var(--glas-grund);
     -webkit-backdrop-filter: var(--glas-frost);
     backdrop-filter: var(--glas-frost);
     box-shadow: var(--glas-kante);
@@ -1121,7 +1141,7 @@
     padding: 30px 22px;
     /* Milchig, damit die Kerzen dahinter weiterlaufen und trotzdem alles
        lesbar bleibt — dieselbe Machart wie beim Anmeldekasten. */
-    background: var(--glas-fuellung-fest);
+    background: var(--glas-grund-fest);
     -webkit-backdrop-filter: var(--glas-frost);
     backdrop-filter: var(--glas-frost);
     border: 1px solid var(--line);
@@ -1401,7 +1421,7 @@
     /* Glas: das Blatt faehrt ueber die Seite, und die soll darunter
        durchscheinen statt zu verschwinden — aber gedaempft, hier wird
        gelesen. */
-    background: var(--glas-fuellung-fest);
+    background: var(--glas-grund-fest);
     -webkit-backdrop-filter: var(--glas-frost);
     backdrop-filter: var(--glas-frost);
     border-top: 1px solid var(--fg);
@@ -2053,7 +2073,7 @@
     align-items: center;
     gap: 12px;
     padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
-    background: var(--glas-fuellung);
+    background: var(--glas-grund);
     -webkit-backdrop-filter: var(--glas-frost);
     backdrop-filter: var(--glas-frost);
     box-shadow: var(--glas-kante);
@@ -2308,7 +2328,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=78");
+    background-image: url("/kerzen.svg?v=79");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -2322,7 +2342,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=78");
+    background-image: url("/kerzen-blass.svg?v=79");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -3049,7 +3069,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=78" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=79" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -3167,7 +3187,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=78" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=79" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3215,7 +3235,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=78" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=79" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -3234,7 +3254,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=78" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=79" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3351,7 +3371,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=78" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=79" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -5469,7 +5489,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=78";
+      i.src = "/icon-512.png?v=79";
     });
     return symbolBild;
   }
