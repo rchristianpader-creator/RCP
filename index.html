@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="light">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#fafafa">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=80">
-<link rel="apple-touch-icon" href="/icon-180.png?v=80">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=81">
+<link rel="apple-touch-icon" href="/icon-180.png?v=81">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=80">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=81">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=80">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=81">
 
 <script>
 /* Im Browser oder als App?
@@ -132,10 +132,10 @@
     /* Die vier Farbfelder im Grund. Sie stehen hier oben, weil sie die
        Lautstaerke regeln: an diesen vier Zeilen laesst sich das ganze Bild
        leiser oder lauter stellen, ohne irgendwo sonst etwas anzufassen. */
-    --grund-kuehl: rgba(56, 122, 255, 0.52);
-    --grund-warm: rgba(255, 138, 62, 0.46);
-    --grund-flieder: rgba(126, 84, 214, 0.46);
-    --grund-tuerkis: rgba(28, 190, 168, 0.40);
+    --grund-kuehl: rgba(47, 59, 107, 0.30);
+    --grund-warm: rgba(168, 124, 74, 0.26);
+    --grund-flieder: rgba(94, 58, 86, 0.26);
+    --grund-tuerkis: rgba(31, 95, 99, 0.24);
 
     /* Weniger Verwischen, mehr Saettigung: was man nicht erkennt, ist kein
        Glas, sondern Milch. 20 statt 28 Pixel laesst die Formen dahinter
@@ -150,6 +150,9 @@
        tragen Marken — dort darf viel durchscheinen. Ein Blatt traegt Saetze,
        und hinter Saetzen soll nichts stehen, das man mitliest. */
     --glas-fuellung-fest: rgba(255, 255, 255, 0.52);
+    /* Die Karten tragen die meiste Schrift der ganzen Seite — Namen, Zonen,
+       Ziele, Zahlen. Sie sind deshalb die dickste der drei Fuellungen. */
+    --glas-fuellung-karte: rgba(255, 255, 255, 0.74);
     /* Die Kante faengt Licht: oben eine helle Linie, darunter noch eine
        schwaechere, unten eine dunkle.
 
@@ -198,6 +201,9 @@
     --glas-grund-fest:
       var(--glas-schimmer),
       linear-gradient(var(--glas-fuellung-fest), var(--glas-fuellung-fest));
+    --glas-grund-karte:
+      var(--glas-schimmer),
+      linear-gradient(var(--glas-fuellung-karte), var(--glas-fuellung-karte));
 
     /* HEBUNG
 
@@ -228,7 +234,10 @@
      ueber scharfem Text darunter — unleserlich. Und wer sein Geraet auf
      weniger Transparenz gestellt hat, meint genau das. */
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .glas, nav, .sheet-card, .install-bar, .neuheit-mitte { background: var(--card); }
+    .glas, nav, .sheet-card, .install-bar, .neuheit-mitte,
+    header, .setup-strip, .card { background: var(--card); }
+    .news-banner { background: var(--soft); }
+    .chart { background: var(--soft); }
   }
   @media (prefers-reduced-transparency: reduce) {
     .glas, nav, .sheet-card, .install-bar, .neuheit-mitte {
@@ -236,11 +245,17 @@
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
     }
-    /* Der Kopf und der Laufstreifen tragen keinen Frost, aber sie scheinen
-       durch — auch das ist gemeint. */
+    /* Kopf, Laufstreifen und Setup-Streifen scheinen ebenfalls durch —
+       auch das ist gemeint. */
+    header, .news-banner, .setup-strip {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
     header { background: var(--card); box-shadow: none; }
     .news-banner { background: var(--soft); }
     .setup-strip { background: var(--card); }
+    .card { background: var(--card); box-shadow: var(--hebung); }
+    .chart { background: var(--soft); }
   }
 
   /* Der Grund hinter allem.
@@ -252,10 +267,19 @@
      genau dort hervor, wo Glas darueber liegt, und laesst sie auf dem
      nackten Grund kaum auffallen.
 
-     Also vier grosse, sehr weiche Farbfelder — kuehl oben links, warm oben
-     rechts, Flieder unten rechts, Tuerkis unten links — und darueber, als
-     Struktur, weiter der Kursverlauf. Alles in einem einzigen Element mit
-     mehreren Hintergrundebenen: eine Ebene, nicht fuenf.
+     Farbe allein reicht aber auch nicht. Ein Verlauf ist weich, und ein
+     20-Pixel-Blur ueber etwas Weichem ergibt wieder dasselbe Weiche: man
+     sieht keine Scheibe, man sieht eine hellere Flaeche. Was Glas sichtbar
+     macht, sind Kanten — Formen mit hohem oertlichem Kontrast, die beim
+     Verwischen zu erkennbaren Flecken zerlaufen. Auf den Vorlagen aus dem
+     Netz ist das ein Foto. Hier ist es das, was diese App ohnehin zeigt:
+     eine ganzflaechige Wand aus Kerzen, fuenf Lagen tief, in den vier
+     Farben des Grundes (grund.py erzeugt sie).
+
+     Also: vier grosse, sehr weiche Farbfelder — kuehl oben links, warm oben
+     rechts, Flieder unten rechts, Tuerkis unten links — und darueber die
+     Kerzenwand. Alles in einem einzigen Element mit mehreren
+     Hintergrundebenen: eine Ebene, nicht sechs.
 
      Die Karten bleiben deckend und decken den groessten Teil davon zu. Zu
      sehen ist die Farbe in den Luecken, an den Raendern — und durch jedes
@@ -270,7 +294,7 @@
     z-index: -1;
     pointer-events: none;
     background:
-      url("/kerzen-blass.svg?v=80") repeat-x center 62% / min(100vw, 620px) 62%,
+      url("/grund.svg?v=81") repeat-x center / min(100vw, 620px) 100%,
       radial-gradient(78% 58% at 10% 4%, var(--grund-kuehl) 0%, transparent 68%),
       radial-gradient(66% 52% at 92% 14%, var(--grund-warm) 0%, transparent 68%),
       radial-gradient(84% 62% at 74% 96%, var(--grund-flieder) 0%, transparent 70%),
@@ -317,14 +341,17 @@
 
   /* Der Kopf war eine deckende weisse Platte quer ueber den ganzen oberen
      Bildrand — und damit genau dort, wo vom Grund am meisten zu sehen sein
-     sollte, gar nichts. Jetzt traegt er dieselbe Machart wie die Blaetter:
-     Fuellung und Schimmer, aber ohne Frost. Frost verwischt, was dahinter
-     liegt; hinter dem Kopf liegt nur der Grund, und der ist schon weich. Ein
-     Filter waere hier reine Rechenzeit ohne Bild. */
+     sollte, gar nichts. Jetzt traegt er dieselbe Machart wie die Blaetter,
+     Frost eingeschlossen: seit hinter ihm die Kerzenwand steht und nicht
+     mehr nur ein weicher Verlauf, gibt es dort etwas zu verwischen — und
+     ohne das Verwischen stuenden die Kanten der Wand mitten in der
+     Ueberschrift. */
   header {
     padding: 40px 24px 28px;
     text-align: center;
     background: var(--glas-grund-fest);
+    -webkit-backdrop-filter: var(--glas-frost);
+    backdrop-filter: var(--glas-frost);
     box-shadow: var(--glas-kante);
     border-bottom: 1px solid var(--hair);
   }
@@ -417,7 +444,9 @@
     padding: 11px 16px;
     /* Auch dieser Streifen scheint durch — sonst bliebe zwischen Laufband
        und erster Karte ein letzter deckender Balken stehen. */
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.55);
+    -webkit-backdrop-filter: var(--glas-frost);
+    backdrop-filter: var(--glas-frost);
     border-bottom: 1px solid var(--hair);
     font-size: 10px;
     font-weight: 700;
@@ -568,14 +597,26 @@
     .karten { transition: none !important; }
   }
 
+  /* Auch die Karten sind Glas.
+
+     Lange stand hier das Gegenteil: Glas ueber einer flachen Flaeche ist
+     kein Glas, sondern eine hellere Flaeche mit Kosten. Das galt, solange
+     hinter den Karten nichts lag. Jetzt liegt dort der Grund, und die Karten
+     decken den groessten Teil des Bildes ab — bleiben sie weiss, sieht man
+     vom Grund nur die Fugen dazwischen.
+
+     Ohne Frost. Der Grund ist eine ruhige Zeichnung aus drei weichen
+     Kurslinien; da gibt es nichts zu verwischen, was die Schrift stoeren
+     wuerde. Zehn Karten mit backdrop-filter waeren dagegen zehn
+     Filterflaechen beim Scrollen — teuer bezahlt fuer kein Bild. */
   .card {
     margin: 16px 14px 56px;
     border: 1px solid var(--hair);
     border-radius: var(--r-karte);
     overflow: hidden;
-    background: var(--card);
+    background: var(--glas-grund-karte);
     scroll-margin-top: 80px;
-    box-shadow: var(--hebung);
+    box-shadow: var(--glas-kante), var(--hebung);
   }
 
   .card-head { padding: 18px 18px 12px; }
@@ -651,11 +692,14 @@
   }
   /* Banner */
   /* Auch der Laufstreifen laesst den Grund durch — sonst stuende zwischen
-     Kopf und Leiste wieder ein deckender Balken. */
+     Kopf und Leiste wieder ein deckender Balken. Mit Frost, aus demselben
+     Grund wie beim Kopf: hier laeuft Schrift, und darunter steht die Wand. */
   .news-banner {
     overflow: hidden;
     border-bottom: 1px solid var(--hair);
-    background: rgba(245, 245, 245, 0.5);
+    background: rgba(255, 255, 255, 0.55);
+    -webkit-backdrop-filter: var(--glas-frost);
+    backdrop-filter: var(--glas-frost);
     color: var(--fg);
   }
   .news-banner-track {
@@ -851,11 +895,55 @@
     text-align: center;
   }
 
+  /* Die Zeitraum-Knoepfe ueber dem Chart.
+
+     Sie ersetzen die obere Leiste von TradingView. Die trug denselben
+     Zweck, aber in fremder Schrift, mit Symbolfeld, Indikatoren und
+     Vollbild daneben — und liess den Chart nach eingebetteter Fremdsoftware
+     aussehen statt nach dieser Seite. */
+  .spanne {
+    display: flex;
+    gap: 4px;
+    padding: 10px 18px 12px;
+    border-top: 1px solid var(--hair);
+  }
+  .spanne-knopf {
+    flex: 1 1 0;
+    appearance: none;
+    -webkit-appearance: none;
+    border: 0;
+    background: none;
+    padding: 6px 0;
+    border-radius: var(--r-chip);
+    font: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    transition: background 0.22s var(--ease), color 0.22s var(--ease);
+  }
+  .spanne-knopf.an {
+    background: var(--fg);
+    color: var(--auf-fg);
+  }
+  @media (hover: hover) {
+    .spanne-knopf:not(.an):hover { background: var(--soft); color: var(--fg); }
+  }
+  .spanne-knopf:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) {
+    .spanne-knopf { transition: none; }
+  }
+
+  /* Durchsichtig, damit das Glas der Karte auch unter dem Chart weiterlaeuft.
+     Die Flaeche des Charts selbst wird in den Overrides auf durchsichtiges
+     Weiss gesetzt — sollte TradingView die Deckkraft verwerfen, bleibt
+     Weiss, also genau das Bild von vorher. */
   .chart {
     position: relative;
     width: 100%;
     height: 400px;
-    background: var(--soft);
     border-top: 1px solid var(--hair);
   }
   .chart iframe {
@@ -2370,7 +2458,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=80");
+    background-image: url("/kerzen.svg?v=81");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -2384,7 +2472,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=80");
+    background-image: url("/kerzen-blass.svg?v=81");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -3111,7 +3199,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=80" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=81" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -3229,7 +3317,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=80" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=81" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3277,7 +3365,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=80" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=81" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -3296,7 +3384,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=80" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=81" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3413,7 +3501,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=80" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=81" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -3524,8 +3612,12 @@
      Gitternetz. Die Werkzeuge fehlen nicht — der Knopf unter dem Chart
      oeffnet den vollen Analyse-Chart mit den Fibonacci-Marken.
 
-     Die obere Leiste bleibt: dort steht der Zeitrahmen, und den soll man
-     wechseln koennen, ohne die App zu verlassen.
+     Auch die obere Leiste faellt weg. Sie war das letzte, was den Chart nach
+     Fremdsoftware aussehen liess — Symbolfeld, Zeitrahmen, Indikatoren,
+     Vollbild, alles in TradingViews eigener Schrift. Den Zeitrahmen gibt es
+     dafuer als eigene Knoepfe ueber dem Chart, in der Schrift und den Marken
+     dieser Seite: 1T · 1W · 1M · 1J · Max. Antippen tauscht die Adresse des
+     Rahmens aus.
 
      mainSeriesProperties.style 2 ist die Linie; der Rest der Overrides holt
      die Farben in die der Seite — Linie in --fg, Achsen in --line und
@@ -3535,7 +3627,7 @@
     "mainSeriesProperties.style": 2,
     "mainSeriesProperties.lineStyle.color": "#111111",
     "mainSeriesProperties.lineStyle.linewidth": 2,
-    "paneProperties.background": "#ffffff",
+    "paneProperties.background": "rgba(255,255,255,0)",
     "paneProperties.backgroundType": "solid",
     "paneProperties.vertGridProperties.color": "rgba(0,0,0,0)",
     "paneProperties.horzGridProperties.color": "rgba(0,0,0,0)",
@@ -3544,11 +3636,31 @@
     "scalesProperties.lineColor": "#ebebeb",
     "scalesProperties.textColor": "#737373"
   };
-  var TV = "https://s.tradingview.com/widgetembed/?symbol=$SYM" +
-    "&interval=D&hidesidetoolbar=1&hidelegend=1&saveimage=0" +
-    "&theme=light&style=2&locale=de&toolbarbg=ffffff" +
-    "&timezone=Europe%2FBerlin&withdateranges=0" +
-    "&overrides=" + encodeURIComponent(JSON.stringify(TV_ART));
+  /* Die Zeitraeume. Zwei Angaben je Knopf: wie weit zurueck (range) und wie
+     fein (interval). Ein Jahr in Fuenf-Minuten-Schritten waere sinnlos, ein
+     Tag in Wochenschritten auch. */
+  var SPANNEN = [
+    { k: "1T", i: "5", r: "1D" },
+    { k: "1W", i: "30", r: "5D" },
+    { k: "1M", i: "60", r: "1M" },
+    { k: "1J", i: "D", r: "12M" },
+    { k: "Max", i: "W", r: "ALL" }
+  ];
+  /* 1T beim Aufmachen: das ist der Blick, an dem man sieht, dass der Chart
+     lebt — die Linie des laufenden Tages, die sich waehrend der Handelszeit
+     weiterschreibt. Der Jahresblick, mit dem die Zonen dieser Liste
+     arbeiten, ist einen Tipp entfernt. */
+  var SPANNE_START = 0;
+
+  function tvAdresse(sym, s) {
+    return "https://s.tradingview.com/widgetembed/?symbol=" + encodeURIComponent(sym) +
+      "&interval=" + s.i + "&range=" + s.r +
+      "&hidesidetoolbar=1&hidetoptoolbar=1&hidelegend=1&hideideas=1&saveimage=0" +
+      "&hidevolume=1&studies=%5B%5D&details=0&calendar=0&hotlist=0" +
+      "&theme=light&style=2&locale=de&toolbarbg=ffffff" +
+      "&timezone=Europe%2FBerlin&withdateranges=0" +
+      "&overrides=" + encodeURIComponent(JSON.stringify(TV_ART));
+  }
 
   function el(tag, klasse, text) {
     var n = document.createElement(tag);
@@ -3613,8 +3725,25 @@
     // Der Chart wird nicht gleich eingesetzt. Zehn TradingView-Anwendungen
     // gleichzeitig sind der teuerste Posten der Seite; geladen wird nur, was
     // in die Naehe kommt. Die Adresse steht solange am Kasten.
+    // Die Zeitraum-Knoepfe stehen ueber dem Chart, nicht darin — das ist der
+    // Unterschied zwischen "unsere Seite" und "eingebettete Fremdsoftware".
+    var spanne = el("div", "spanne");
+    spanne.setAttribute("role", "group");
+    spanne.setAttribute("aria-label", "Zeitraum");
+    SPANNEN.forEach(function (sp, i) {
+      var b = el("button", "spanne-knopf", sp.k);
+      b.type = "button";
+      b.setAttribute("data-i", sp.i);
+      b.setAttribute("data-r", sp.r);
+      b.setAttribute("aria-pressed", i === SPANNE_START ? "true" : "false");
+      if (i === SPANNE_START) b.classList.add("an");
+      spanne.appendChild(b);
+    });
+    s.appendChild(spanne);
+
     var chart = el("div", "chart");
-    chart.setAttribute("data-chart", TV.replace("$SYM", encodeURIComponent(p.tv)));
+    chart.setAttribute("data-chart", tvAdresse(p.tv, SPANNEN[SPANNE_START]));
+    chart.setAttribute("data-sym", p.tv);
     chart.setAttribute("data-badge", p.badge || "");
     s.appendChild(chart);
 
@@ -3749,6 +3878,41 @@
       f.remove();
       k.classList.remove("chart-da");
     }
+
+    /* Zeitraum wechseln.
+
+       Ein Klick tauscht nur die Adresse am Kasten aus. Haengt schon ein
+       Rahmen darin, wird er weggenommen und neu gesetzt — src im laufenden
+       iframe zu aendern hinterlaesst in Safari einen Eintrag in der
+       Zurueck-Liste, und dann fuehrt der Zurueck-Wisch nicht aus der App,
+       sondern durch die Zeitraeume.
+
+       Haengt noch keiner darin, passiert nichts weiter: der Kasten ist
+       ausser Sicht, und wenn er hereinkommt, wird ohnehin die neue Adresse
+       genommen. */
+    stapel.addEventListener("click", function (e) {
+      var knopf = e.target.closest ? e.target.closest(".spanne-knopf") : null;
+      if (!knopf) return;
+      var reihe = knopf.parentNode;
+      var karte = reihe.parentNode;
+      var kasten = karte.querySelector(".chart[data-sym]");
+      if (!kasten) return;
+
+      [].forEach.call(reihe.children, function (b) {
+        var an = b === knopf;
+        b.classList.toggle("an", an);
+        b.setAttribute("aria-pressed", an ? "true" : "false");
+      });
+
+      kasten.setAttribute("data-chart", tvAdresse(kasten.getAttribute("data-sym"), {
+        i: knopf.getAttribute("data-i"),
+        r: knopf.getAttribute("data-r")
+      }));
+      if (kasten.querySelector("iframe")) {
+        raus(kasten);
+        einsetzen(kasten);
+      }
+    });
 
     kaesten.forEach(platzhalter);
 
@@ -5565,7 +5729,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=80";
+      i.src = "/icon-512.png?v=81";
     });
     return symbolBild;
   }

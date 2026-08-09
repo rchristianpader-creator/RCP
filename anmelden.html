@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#fafafa">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=80">
-<link rel="apple-touch-icon" href="/icon-180.png?v=80">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=81">
+<link rel="apple-touch-icon" href="/icon-180.png?v=81">
 <title>Anmelden · Aktien-Liste</title>
 
 <!-- Die Vorschau beim Verschicken entsteht hier, nicht auf der Liste.
@@ -23,7 +23,7 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Geschützt, Zugang auf Anfrage">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=80">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=81">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -32,7 +32,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Geschützt, Zugang auf Anfrage">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=80">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=81">
 <style>
   :root {
     color-scheme: light;
@@ -54,10 +54,10 @@
     --r-marke: 6px;
     /* Dieselben vier Farbfelder wie in der Liste — hier liegen sie unter den
        laufenden Kerzen, und der Kasten liegt ueber beidem. */
-    --grund-kuehl: rgba(56, 122, 255, 0.52);
-    --grund-warm: rgba(255, 138, 62, 0.46);
-    --grund-flieder: rgba(126, 84, 214, 0.46);
-    --grund-tuerkis: rgba(28, 190, 168, 0.40);
+    --grund-kuehl: rgba(47, 59, 107, 0.30);
+    --grund-warm: rgba(168, 124, 74, 0.26);
+    --grund-flieder: rgba(94, 58, 86, 0.26);
+    --grund-tuerkis: rgba(31, 95, 99, 0.24);
     /* Glas — dieselbe Machart wie in der Liste. Hier liegt der Kasten ueber
        den laufenden Kerzen, also genau der Fall, fuer den es gedacht ist. */
     --glas-frost: saturate(320%) brightness(1.05) blur(20px);
@@ -160,7 +160,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=80");
+    background-image: url("/kerzen.svg?v=81");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -177,7 +177,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=80");
+    background-image: url("/kerzen-blass.svg?v=81");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {

@@ -29,7 +29,7 @@ const OFFEN = [
 /* Der laufende Hintergrund der Anmeldeseite gehoert dazu — ohne ihn stuende
    sie leer. Zwei Kacheln, die vordere und die blasse; der Anfang statt einer
    Liste, damit eine dritte nicht wieder nachgepflegt werden muss. */
-const OFFEN_ANFANG = ["/icon-", "/og-preview", "/ansicht-", "/kerzen"];
+const OFFEN_ANFANG = ["/icon-", "/og-preview", "/ansicht-", "/kerzen", "/grund"];
 
 export default async (request, context) => {
   const url = new URL(request.url);

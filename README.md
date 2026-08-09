@@ -488,12 +488,23 @@ ein hellerer Balken — man sieht ja nichts durch. Ein grauer Kursverlauf allein
 reichte auch nicht: grau auf fast weiß verwischt der Frost zu nichts. Was Glas
 zeigen kann, ist Farbe.
 
-Unter der ganzen Liste liegen deshalb **vier große, sehr weiche Farbfelder** —
-kühl oben links, warm oben rechts, Flieder unten rechts, Türkis unten links —
-und darüber, als Struktur, weiter der Kursverlauf. Alles in einem einzigen
-festen Element mit mehreren Hintergrundebenen. Der `saturate(320%)` im Frost
-hebt die Farbe genau dort hervor, wo Glas darüber liegt, und lässt sie daneben
-blass.
+Farbe allein reicht aber auch nicht. Ein Verlauf ist weich, und ein
+20-Pixel-Blur über etwas Weichem ergibt wieder dasselbe Weiche. Sichtbar wird
+Glas an **Kanten** — Formen mit hohem örtlichem Kontrast, die beim Verwischen
+zu erkennbaren Flecken zerlaufen. Auf den Vorlagen aus dem Netz ist das ein
+Foto.
+
+Unter der ganzen Liste liegen deshalb **vier große, sehr weiche Farbfelder** in
+gedeckten Tönen — Indigo oben links, Sand oben rechts, Pflaume unten rechts,
+Petrol unten links — und darüber, als Prägung, **drei große Kurslinien**
+(`grund.py`): ein feiner Strich und darunter eine sehr blasse Fläche, die nach
+unten ausblendet. Der Strich liefert die Kante, die das Glas braucht, die
+Fläche gibt Tiefe. Alles in einem einzigen festen Element mit mehreren
+Hintergrundebenen.
+
+Der erste Anlauf war etwas anderes: fünf Lagen bunter Kerzen, ganzflächig.
+Kanten hatte er reichlich — aber viele kleine Blöcke in vier kräftigen Farben
+sind laut, nicht edel. Drei ruhige Linien sagen dasselbe.
 
 Die Lautstärke hängt an vier Zeilen — `--grund-kuehl`, `--grund-warm`,
 `--grund-flieder`, `--grund-tuerkis`. Sie stehen in beiden HTML-Dateien gleich,
@@ -511,11 +522,15 @@ beiden Streifen sind halbdurchsichtig.
 durchscheinen (`0.42`). Ein Blatt trägt Sätze, und hinter Sätzen soll nichts
 stehen, das man mitliest (`0.66`).
 
-**Und die Karten bleiben deckend.** Glas über einer flachen Fläche ist kein
-Glas, es ist eine hellere Fläche mit Kosten. Karten tragen Charts und Text —
-dort wäre Durchscheinen ein Nachteil, kein Effekt. Zu sehen ist der Grund
-stattdessen in den 56 Pixeln zwischen zwei Karten, an den Rändern, im Kopf und
-durch jedes Blatt. Der Grund rahmt die Liste, er trägt sie nicht.
+**Auch die Karten sind Glas — aber ohne Frost.** Lange stand hier das
+Gegenteil: Glas über einer flachen Fläche ist kein Glas, sondern eine hellere
+Fläche mit Kosten. Das galt, solange hinter den Karten nichts lag. Jetzt liegt
+dort der Grund, und die Karten decken den größten Teil des Bildes ab — bleiben
+sie weiß, sieht man vom Grund nur die Fugen. Sie tragen deshalb die dickste der
+drei Füllungen (`0.74`, sie tragen auch die meiste Schrift) und **keinen**
+`backdrop-filter`: der Grund ist eine ruhige Zeichnung, da gibt es nichts zu
+verwischen — zehn Karten mit Filter wären dagegen zehn Filterflächen beim
+Scrollen, teuer bezahlt für kein Bild.
 
 ### Der Chart in der Karte ist eine Linie
 
@@ -527,10 +542,28 @@ dasselbe ruhiger: wo der Kurs herkommt und wo er steht. Erst damit hat das Glas
 
 `style=2` in der Widget-Adresse, dazu `mainSeriesProperties.style: 2` in den
 Overrides und Farben aus dem eigenen Regelwerk: Linie in `--fg`, Achsen in
-`--line` und `--muted`, Gitternetz unsichtbar. Weg fallen Seitenleiste,
-Legende und Zeitraum-Knöpfe. Die **obere Leiste bleibt** — dort steht der
-Zeitrahmen, und den soll man wechseln können, ohne die App zu verlassen. Die
-Zeichenwerkzeuge fehlen nicht: der Knopf unter dem Chart öffnet den vollen
+`--line` und `--muted`, Gitternetz unsichtbar. Weg fällt alles, was den Chart
+nach eingebetteter Fremdsoftware aussehen ließ: Seitenleiste, **obere Leiste**,
+Legende, Volumen, Studien, Datums- und Fußzeile.
+
+Den Zeitrahmen gibt es dafür als **eigene Knöpfe über dem Chart**, in der
+Schrift und den Marken dieser Seite: `1T · 1W · 1M · 1J · Max`. Jeder Knopf
+trägt zwei Angaben — wie weit zurück (`range`) und wie fein (`interval`); ein
+Jahr in Fünf-Minuten-Schritten wäre so sinnlos wie ein Tag in Wochenschritten.
+Beim Aufmachen steht **1T**: der Blick, an dem man sieht, dass der Chart lebt.
+
+Ein Klick tauscht nur die Adresse am Kasten aus und setzt den Rahmen neu —
+`src` im laufenden `iframe` zu ändern legt in Safari einen Eintrag in die
+Zurück-Liste, und dann führt der Zurück-Wisch durch die Zeiträume statt aus der
+App.
+
+Die Chartfläche selbst ist auf **durchsichtiges Weiß** gesetzt, damit das Glas
+der Karte darunter weiterläuft. Bewusst `rgba(255,255,255,0)` und nicht
+`rgba(0,0,0,0)`: verwirft TradingView die Deckkraft, bleibt Weiß — also genau
+das Bild von vorher. Mit durchsichtigem Schwarz wäre daraus eine schwarze
+Fläche geworden.
+
+Die Zeichenwerkzeuge fehlen nicht: der Knopf unter dem Chart öffnet den vollen
 Analyse-Chart mit den Fibonacci-Marken.
 
 Nicht hier geprüft: TradingView ist aus dieser Umgebung nicht erreichbar, die
