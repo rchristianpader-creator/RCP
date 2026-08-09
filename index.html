@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="light">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#fafafa">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=81">
-<link rel="apple-touch-icon" href="/icon-180.png?v=81">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=82">
+<link rel="apple-touch-icon" href="/icon-180.png?v=82">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=81">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=82">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=81">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=82">
 
 <script>
 /* Im Browser oder als App?
@@ -181,6 +181,11 @@
     --hebung:
       0 1px 2px rgba(var(--fg-rgb), 0.045),
       0 10px 28px -18px rgba(var(--fg-rgb), 0.12);
+    /* Steigt und faellt. Die einzigen zwei Farben, die in dieser App etwas
+       bedeuten statt zu schmuecken — bisher standen sie nur auf der
+       Anmeldeseite, seit die Charts selbst gezeichnet werden auch hier. */
+    --gut: #15803d;
+    --schlecht: #b91c1c;
     --schleier: rgba(17, 17, 17, 0.62);
     --schatten: rgba(0, 0, 0, 0.24);
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -221,7 +226,7 @@
     z-index: -1;
     pointer-events: none;
     background:
-      url("/grund.svg?v=81") repeat-x center / min(100vw, 620px) 100%,
+      url("/grund.svg?v=82") repeat-x center / min(100vw, 620px) 100%,
       radial-gradient(78% 58% at 10% 4%, var(--grund-kuehl) 0%, transparent 68%),
       radial-gradient(66% 52% at 92% 14%, var(--grund-warm) 0%, transparent 68%),
       radial-gradient(84% 62% at 74% 96%, var(--grund-flieder) 0%, transparent 70%),
@@ -840,25 +845,110 @@
   /* Durchsichtig, damit das Glas der Karte unter dem Chart weiterlaeuft.
      In den Overrides steht die Chartflaeche auf durchsichtigem Weiss —
      verwirft TradingView die Deckkraft, bleibt Weiss. */
+  /* Der Chart. Gezeichnet, nicht eingebettet.
+
+     Ein TradingView-Rahmen sieht aus wie TradingView, ignoriert die
+     Parameter zum Ausblenden seiner Leisten (hidetoptoolbar, hidelegend,
+     hidevolume sind am widgetembed wirkungslos) und bringt eine Hoehe mit,
+     die keine Karte einhaelt. Also zeichnet die Seite selbst — und kann
+     dabei etwas, das TradingView gar nicht kann: die Einkaufszone und das
+     Kursziel dieser Liste stehen im Bild. */
   .chart {
     position: relative;
     width: 100%;
-    height: 400px;
+    height: 208px;
     border-top: 1px solid var(--hair);
+    padding: 12px 48px 22px 14px;
+    opacity: 0;
+    transition: opacity 0.4s var(--ease);
   }
-  .chart iframe {
-    position: relative;
-    z-index: 1;
+  .chart.chart-da { opacity: 1; }
+  .chart svg {
+    display: block;
     width: 100%;
     height: 100%;
-    border: 0;
-    display: block;
-    /* Erst zeigen, wenn wirklich etwas gezeichnet ist — sonst blitzt
-       ein weisser Kasten auf, waehrend TradingView noch aufbaut. */
-    opacity: 0;
-    transition: opacity 0.47s ease;
+    overflow: visible;
   }
-  .chart.chart-da iframe { opacity: 1; }
+  /* Die Flaeche wird in der Breite gedehnt — der Strich darf das nicht
+     mitmachen, sonst waere er links duenner als rechts. */
+  .chart .linie {
+    fill: none;
+    stroke-width: 2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+  }
+  .chart .grundlinie {
+    stroke: var(--line);
+    stroke-width: 1;
+    stroke-dasharray: 2 4;
+    vector-effect: non-scaling-stroke;
+  }
+  .chart .zonenband { fill: rgba(var(--fg-rgb), 0.06); }
+  .chart .zielstrich {
+    stroke: rgba(var(--fg-rgb), 0.34);
+    stroke-width: 1;
+    stroke-dasharray: 5 4;
+    vector-effect: non-scaling-stroke;
+  }
+  .chart .punkt { stroke: var(--card); stroke-width: 2; }
+
+  /* Beschriftung als HTML, nicht im SVG: das SVG wird in der Breite
+     gedehnt, und gedehnte Schrift ist keine Schrift. */
+  .chart-marke {
+    position: absolute;
+    right: 6px;
+    transform: translateY(-50%);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .chart-marke.jetzt {
+    color: var(--auf-fg);
+    background: var(--fg);
+    border-radius: var(--r-marke);
+    padding: 2px 5px;
+    right: 4px;
+  }
+  .chart-marke.zone,
+  .chart-marke.ziel {
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    font-size: 8px;
+    text-transform: uppercase;
+  }
+  .chart-zeiten {
+    position: absolute;
+    left: 14px;
+    right: 48px;
+    bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--blass);
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+  }
+  .chart-quelle {
+    position: absolute;
+    left: 14px;
+    top: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+  }
+  .chart-quelle.hoch { color: var(--gut); }
+  .chart-quelle.runter { color: var(--schlecht); }
+  @media (prefers-reduced-motion: reduce) {
+    .chart { transition: none; }
+  }
 
   /* Was man sieht, solange der Chart noch nicht steht. Ein leerer weisser
      Kasten sieht aus wie ein Fehler; ein beschrifteter sieht aus wie Warten. */
@@ -904,7 +994,6 @@
   }
   @media (prefers-reduced-motion: reduce) {
     .chart-warte::after { animation: none; transform: scaleX(1); opacity: 0.5; }
-    .chart iframe { transition: none; }
   }
 
   .actions {
@@ -2358,7 +2447,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=81");
+    background-image: url("/kerzen.svg?v=82");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -2372,7 +2461,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=81");
+    background-image: url("/kerzen-blass.svg?v=82");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -2516,19 +2605,12 @@
      Zielleiste, Chart, News, Knopf. So kommt eins nach dem anderen statt
      der Karte als Block.
 
-     Der Chart war lange ausgenommen. Zuerst wurde die ganze Karte
-     verkleinert und geblendet, und das war der teuerste Posten der Seite:
-     in jeder Karte steckt ein fremdes <iframe>, und wer dessen Vorfahren
-     verwandelt, laesst es bei jedem Bild neu zeichnen. Gemessen ueber einen
-     Scrollstoss: 76 ms Stilberechnung und 358 ms Hauptfaden, ohne die
-     Verwandlung 25 ms und 259 ms.
-
-     Nun faehrt er doch mit — aber nicht mehr als Vorfahr, sondern als eines
-     der fuenf Stuecke. Der Unterschied ist wesentlich: verwandelt wird der
-     Kasten, in dem das <iframe> sitzt, waehrend die vier Geschwister ihre
-     eigenen Verwandlungen behalten. Die Karte selbst bleibt unberuehrt, und
-     jedes Stueck faehrt nur seinen Abschnitt weit. Was das kostet, misst
-     fluss-test bei jedem Lauf nach.
+     Der Chart war lange ausgenommen: solange dort ein fremdes <iframe>
+     stand, liess jede Verwandlung eines Vorfahren es bei jedem Bild neu
+     zeichnen — gemessen 76 ms Stilberechnung und 358 ms Hauptfaden je
+     Scrollstoss gegen 25 und 259 ohne. Seit der Chart ein eigenes SVG ist,
+     faellt das weg; er faehrt als eines der fuenf Stuecke mit. Was es
+     kostet, misst fluss-test bei jedem Lauf nach.
 
      Die Bewegung selbst ist gross: 140 Pixel Weg, aus 0,80 Groesse und um
      22 Grad nach hinten gekippt. Die Perspektive steht im transform selbst
@@ -3099,7 +3181,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=81" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=82" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -3217,7 +3299,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=81" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=82" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3265,7 +3347,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=81" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=82" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -3284,7 +3366,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=81" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=82" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3401,7 +3483,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=81" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=82" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -3507,42 +3589,13 @@
      Leiste, Legende, Volumen, Studien, Gitternetz, Datums- und Fusszeile.
      Den Zeitrahmen gibt es als eigene Knoepfe darueber; die Zeichenwerkzeuge
      stehen im vollen Analyse-Chart hinter dem Knopf darunter. */
-  var TV_ART = {
-    "mainSeriesProperties.priceAxisProperties.log": true,
-    "mainSeriesProperties.style": 2,
-    "mainSeriesProperties.lineStyle.color": "#111111",
-    "mainSeriesProperties.lineStyle.linewidth": 2,
-    "paneProperties.background": "rgba(255,255,255,0)",
-    "paneProperties.backgroundType": "solid",
-    "paneProperties.vertGridProperties.color": "rgba(0,0,0,0)",
-    "paneProperties.horzGridProperties.color": "rgba(0,0,0,0)",
-    "paneProperties.legendProperties.showLegend": false,
-    "paneProperties.legendProperties.showSeriesTitle": false,
-    "scalesProperties.lineColor": "#ebebeb",
-    "scalesProperties.textColor": "#737373"
-  };
-  /* Zwei Angaben je Knopf: wie weit zurueck und wie fein. Ein Jahr in
-     Fuenf-Minuten-Schritten waere so sinnlos wie ein Tag in Wochen. */
-  var SPANNEN = [
-    { k: "1T", i: "5", r: "1D" },
-    { k: "1W", i: "30", r: "5D" },
-    { k: "1M", i: "60", r: "1M" },
-    { k: "1J", i: "D", r: "12M" },
-    { k: "Max", i: "W", r: "ALL" }
-  ];
+  /* Zwei Angaben je Knopf: wie weit zurueck und wie fein. Die Zuordnung zu
+     Yahoos range/interval steht in der Function, nicht hier — die Seite muss
+     davon nichts wissen. */
+  var SPANNEN = ["1T", "1W", "1M", "1J", "Max"];
   /* 1T beim Aufmachen: der Blick, an dem man sieht, dass der Chart lebt.
      Der Jahresblick, mit dem die Zonen arbeiten, ist einen Tipp weit. */
   var SPANNE_START = 0;
-
-  function tvAdresse(sym, s) {
-    return "https://s.tradingview.com/widgetembed/?symbol=" + encodeURIComponent(sym) +
-      "&interval=" + s.i + "&range=" + s.r +
-      "&hidesidetoolbar=1&hidetoptoolbar=1&hidelegend=1&hideideas=1&saveimage=0" +
-      "&hidevolume=1&studies=%5B%5D&details=0&calendar=0&hotlist=0" +
-      "&theme=light&style=2&locale=de&toolbarbg=ffffff" +
-      "&timezone=Europe%2FBerlin&withdateranges=0" +
-      "&overrides=" + encodeURIComponent(JSON.stringify(TV_ART));
-  }
 
   function el(tag, klasse, text) {
     var n = document.createElement(tag);
@@ -3612,11 +3665,10 @@
     var spanne = el("div", "spanne");
     spanne.setAttribute("role", "group");
     spanne.setAttribute("aria-label", "Zeitraum");
-    SPANNEN.forEach(function (sp, i) {
-      var b = el("button", "spanne-knopf", sp.k);
+    SPANNEN.forEach(function (name, i) {
+      var b = el("button", "spanne-knopf", name);
       b.type = "button";
-      b.setAttribute("data-i", sp.i);
-      b.setAttribute("data-r", sp.r);
+      b.setAttribute("data-spanne", name.toUpperCase());
       b.setAttribute("aria-pressed", i === SPANNE_START ? "true" : "false");
       if (i === SPANNE_START) b.classList.add("an");
       spanne.appendChild(b);
@@ -3624,9 +3676,14 @@
     s.appendChild(spanne);
 
     var chart = el("div", "chart");
-    chart.setAttribute("data-chart", tvAdresse(p.tv, SPANNEN[SPANNE_START]));
-    chart.setAttribute("data-sym", p.tv);
+    chart.setAttribute("data-sym", p.yahoo || "");
+    chart.setAttribute("data-spanne", SPANNEN[SPANNE_START].toUpperCase());
     chart.setAttribute("data-badge", p.badge || "");
+    /* Zone und Ziel wandern mit in den Chart. Das ist der Grund, warum ein
+       eigener Chart mehr kann als ein eingebetteter: er weiss, worum es in
+       dieser Liste geht. */
+    if (p.zone) chart.setAttribute("data-zone", p.zone);
+    if (p.ziel) chart.setAttribute("data-ziel", p.ziel);
     s.appendChild(chart);
 
     if (p.frage) {
@@ -3723,52 +3780,221 @@
      Und weil TradingView selbst Sekunden braucht, steht bis dahin ein
      Platzhalter mit dem Kuerzel. Ein leerer weisser Kasten sieht aus wie ein
      Fehler; ein beschrifteter sieht aus wie Warten. */
+  /* Zeichnet den Chart. Ein SVG mit vier Dingen darin:
+
+       Flaeche   ein Verlauf unter der Linie, der nach unten ausblendet
+       Linie     der Kurs, gruen oder rot gegen den Bezugspunkt
+       Zonenband die Einkaufszone dieser Liste, als liegender Balken
+       Zielstrich das Kursziel, gestrichelt — nur wenn es ins Bild passt
+
+     Gezeichnet wird in einem viewBox von 0..100 in der Breite; das SVG wird
+     also in der Breite gedehnt. Deshalb traegt jeder Strich
+     vector-effect="non-scaling-stroke" und jede Beschriftung steht als HTML
+     daneben statt im SVG — gedehnte Schrift ist keine Schrift. */
+  var NS = "http://www.w3.org/2000/svg";
+
+  function svgEl(tag, attrs) {
+    var n = document.createElementNS(NS, tag);
+    for (var k in attrs) if (attrs.hasOwnProperty(k)) n.setAttribute(k, attrs[k]);
+    return n;
+  }
+
+  /* "42,67 – 40,75 USD" -> [42.67, 40.75]. Dieselbe Schreibweise wie in der
+     Verwaltung, deshalb dieselbe Lesart wie dort. */
+  function zahlenAus(text) {
+    var roh = String(text || "").match(/\d+(?:[.,]\d+)?/g) || [];
+    var zahlen = roh.map(function (s) { return parseFloat(s.replace(",", ".")); })
+      .filter(function (x) { return isFinite(x); });
+    return zahlen;
+  }
+
+  function zeitMarke(sek, spanne) {
+    var d = new Date(sek * 1000);
+    var opt = spanne === "1T"
+      ? { hour: "2-digit", minute: "2-digit" }
+      : (spanne === "1W" ? { weekday: "short", hour: "2-digit" }
+        : (spanne === "MAX" ? { year: "numeric" } : { day: "2-digit", month: "short" }));
+    return d.toLocaleString("de-DE", Object.assign({ timeZone: "Europe/Berlin" }, opt));
+  }
+
+  function kursMarke(x, waehrung) {
+    var stellen = Math.abs(x) >= 100 ? 0 : (Math.abs(x) >= 5 ? 2 : 3);
+    return x.toLocaleString("de-DE", {
+      minimumFractionDigits: stellen, maximumFractionDigits: stellen
+    }) + (waehrung ? " " + (waehrung === "USD" ? "$" : (waehrung === "EUR" ? "€" : "")) : "");
+  }
+
+  function zeichnen(kasten, daten) {
+    var punkte = daten.punkte || [];
+    if (punkte.length < 2) return false;
+
+    var spanne = kasten.getAttribute("data-spanne") || "1T";
+    var kurse = punkte.map(function (x) { return x[1]; });
+    var jetzt = kurse[kurse.length - 1];
+    var bezug = typeof daten.vorher === "number" ? daten.vorher : kurse[0];
+    var steigt = jetzt >= bezug;
+
+    /* Die Skala umfasst Kurse, Bezugspunkt und — wenn sie nicht zu weit weg
+       liegt — die Einkaufszone. Zu weit weg heisst: die Zone wuerde die
+       Kursbewegung zu einem Strich zusammendruecken. Dann bleibt sie drau"'"'"ssen,
+       denn der Chart zeigt zuerst den Kurs. */
+    var zone = zahlenAus(kasten.getAttribute("data-zone"));
+    var ziel = zahlenAus(kasten.getAttribute("data-ziel"))[0];
+    var tief = Math.min.apply(null, kurse.concat([bezug]));
+    var hoch = Math.max.apply(null, kurse.concat([bezug]));
+    var eigen = hoch - tief || Math.abs(hoch) * 0.01 || 1;
+
+    var zoneAn = zone.length >= 2 &&
+      Math.min(zone[0], zone[1]) > tief - eigen * 2.5 &&
+      Math.max(zone[0], zone[1]) < hoch + eigen * 2.5;
+    if (zoneAn) {
+      tief = Math.min(tief, Math.min(zone[0], zone[1]));
+      hoch = Math.max(hoch, Math.max(zone[0], zone[1]));
+    }
+    var zielAn = isFinite(ziel) && ziel > tief - eigen && ziel < hoch + eigen;
+    if (zielAn) { tief = Math.min(tief, ziel); hoch = Math.max(hoch, ziel); }
+
+    var luft = (hoch - tief) * 0.12 || 1;
+    var oben = hoch + luft;
+    var unten = tief - luft;
+    var y = function (k) { return (oben - k) / (oben - unten) * 100; };
+    var x = function (i) { return i / (punkte.length - 1) * 100; };
+
+    var svg = svgEl("svg", {
+      viewBox: "0 0 100 100",
+      preserveAspectRatio: "none",
+      "aria-hidden": "true",
+      focusable: "false"
+    });
+
+    var kennung = "verlauf-" + (kasten.getAttribute("data-badge") || "x") + "-" + spanne;
+    /* Ueber style, nicht ueber das Attribut: var() gilt in CSS-Eigenschaften,
+       nicht in XML-Attributen. Als stroke="var(--gut)" bleibt die Linie grau. */
+    var farbe = steigt ? "var(--gut)" : "var(--schlecht)";
+    var defs = svgEl("defs", {});
+    var lg = svgEl("linearGradient", { id: kennung, x1: "0", y1: "0", x2: "0", y2: "1" });
+    lg.appendChild(svgEl("stop", { offset: "0", style: "stop-color:" + farbe + ";stop-opacity:.22" }));
+    lg.appendChild(svgEl("stop", { offset: "1", style: "stop-color:" + farbe + ";stop-opacity:0" }));
+    defs.appendChild(lg);
+    svg.appendChild(defs);
+
+    if (zoneAn) {
+      var zo = y(Math.max(zone[0], zone[1]));
+      var zu = y(Math.min(zone[0], zone[1]));
+      svg.appendChild(svgEl("rect", {
+        class: "zonenband", x: "0", y: zo, width: "100", height: Math.max(zu - zo, 0.6)
+      }));
+    }
+    if (zielAn) {
+      svg.appendChild(svgEl("line", {
+        class: "zielstrich", x1: "0", x2: "100", y1: y(ziel), y2: y(ziel)
+      }));
+    }
+
+    svg.appendChild(svgEl("line", {
+      class: "grundlinie", x1: "0", x2: "100", y1: y(bezug), y2: y(bezug)
+    }));
+
+    var d = punkte.map(function (pt, i) {
+      return (i ? "L" : "M") + x(i).toFixed(2) + " " + y(pt[1]).toFixed(2);
+    }).join(" ");
+    svg.appendChild(svgEl("path", { d: d + " L100 100 L0 100 Z", fill: "url(#" + kennung + ")" }));
+    svg.appendChild(svgEl("path", { class: "linie", d: d, style: "stroke:" + farbe }));
+    svg.appendChild(svgEl("circle", {
+      class: "punkt", cx: "100", cy: y(jetzt), r: "2.4", style: "fill:" + farbe,
+      /* Der Punkt sitzt genau auf dem Rand und wuerde in der Breite zu einem
+         Ei gedehnt. Ein Kreis auf einem gedehnten viewBox ist keiner —
+         deshalb bekommt er den Dehnungsfaktor als Gegenrechnung. */
+      transform: "translate(100 0) scale(0.34 1) translate(-100 0)"
+    }));
+
+    kasten.textContent = "";
+    kasten.appendChild(svg);
+
+    /* Beschriftung. Rechts drei Kursmarken — der aktuelle hervorgehoben,
+       oben und unten die Enden der Skala. */
+    function marke(art, wert, text) {
+      var m = el("div", "chart-marke" + (art ? " " + art : ""), text);
+      m.style.top = "calc(12px + " + (y(wert) / 100) + " * (100% - 34px))";
+      kasten.appendChild(m);
+    }
+    marke("", oben - luft * 0.5, kursMarke(oben - luft * 0.5, daten.waehrung));
+    marke("", unten + luft * 0.5, kursMarke(unten + luft * 0.5, daten.waehrung));
+    if (zoneAn) marke("zone", (zone[0] + zone[1]) / 2, "Zone");
+    if (zielAn) marke("ziel", ziel, "Ziel");
+    marke("jetzt", jetzt, kursMarke(jetzt, daten.waehrung));
+
+    var zeiten = el("div", "chart-zeiten");
+    var stellen = [0, Math.floor((punkte.length - 1) / 2), punkte.length - 1];
+    stellen.forEach(function (i) {
+      zeiten.appendChild(el("span", "", zeitMarke(punkte[i][0], spanne)));
+    });
+    kasten.appendChild(zeiten);
+
+    var prozent = bezug ? (jetzt / bezug - 1) * 100 : 0;
+    var wandel = el("div", "chart-quelle" + (steigt ? " hoch" : " runter"),
+      (steigt ? "+" : "\u2212") + Math.abs(prozent).toFixed(2).replace(".", ",") + " %");
+    kasten.appendChild(wandel);
+    return true;
+  }
+
   function charts() {
     // Im Browser bleiben die Felder zu — dann muss auch nichts geladen werden
     if (document.documentElement.classList.contains("nur-web")) return;
-    var kaesten = [].slice.call(stapel.querySelectorAll(".chart[data-chart]"));
+    var kaesten = [].slice.call(stapel.querySelectorAll(".chart[data-sym]"));
     if (!kaesten.length) return;
 
     function platzhalter(k) {
       if (k.querySelector(".chart-warte")) return;
+      k.textContent = "";
       var w = el("div", "chart-warte");
       w.appendChild(el("span", "kuerzel", k.getAttribute("data-badge") || ""));
       w.appendChild(el("span", "wort", "Chart lädt …"));
       k.appendChild(w);
+      k.classList.add("chart-da");
     }
 
     function einsetzen(k) {
-      if (!k || k.querySelector("iframe")) return;
+      if (!k || k.getAttribute("data-laeuft") === "1") return;
+      var sym = k.getAttribute("data-sym");
+      var spanne = k.getAttribute("data-spanne") || "1T";
+      if (!sym) return;
+      if (k.getAttribute("data-fertig") === spanne) return;
+
+      k.setAttribute("data-laeuft", "1");
       platzhalter(k);
-      var f = document.createElement("iframe");
-      f.setAttribute("allowfullscreen", "");
-      f.setAttribute("title", "Chart " + (k.getAttribute("data-badge") || ""));
-      f.addEventListener("load", function () {
-        // Der Rahmen ist da, TradingView zeichnet noch einen Moment
-        setTimeout(function () {
-          k.classList.add("chart-da");
-        }, 400);
-      });
-      f.src = k.getAttribute("data-chart");
-      k.appendChild(f);
+      fetch("/.netlify/functions/verlauf?sym=" + encodeURIComponent(sym) +
+            "&spanne=" + encodeURIComponent(spanne))
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          k.removeAttribute("data-laeuft");
+          /* Zwischendurch umgeschaltet? Dann gehoert diese Antwort zu einem
+             Zeitraum, der nicht mehr gefragt ist. */
+          if ((k.getAttribute("data-spanne") || "1T") !== spanne) { einsetzen(k); return; }
+          if (!d || !d.ok || !zeichnen(k, d)) {
+            k.querySelector(".chart-warte .wort") &&
+              (k.querySelector(".chart-warte .wort").textContent = "Kein Kurs");
+            return;
+          }
+          k.setAttribute("data-fertig", spanne);
+        })
+        .catch(function () {
+          k.removeAttribute("data-laeuft");
+          var w = k.querySelector(".chart-warte .wort");
+          if (w) w.textContent = "Kein Kurs";
+        });
     }
 
     function raus(k) {
       if (!k) return;
-      var f = k.querySelector("iframe");
-      if (!f) return;
-      f.remove();
+      k.removeAttribute("data-fertig");
+      k.textContent = "";
       k.classList.remove("chart-da");
     }
 
-    /* Zeitraum wechseln. Ein Klick tauscht die Adresse am Kasten aus und
-       setzt einen vorhandenen Rahmen neu — src im laufenden iframe zu
-       aendern legt in Safari einen Eintrag in die Zurueck-Liste, und dann
-       fuehrt der Zurueck-Wisch durch die Zeitraeume statt aus der App.
-
-       Der Horcher haengt am Stapel, nicht an den Knoepfen. Daher die
-       Sperre: bauen() laeuft zweimal, und textContent = "" raeumt die
-       Kinder weg, nicht ihn. */
+    /* Zeitraum wechseln. Der Horcher haengt am Stapel, nicht an den
+       Knoepfen. Daher die Sperre: bauen() laeuft zweimal, und
+       textContent = "" raeumt die Kinder weg, nicht ihn. */
     if (!stapel.hasAttribute("data-spanne-horcht")) {
       stapel.setAttribute("data-spanne-horcht", "1");
       stapel.addEventListener("click", spanneKlick);
@@ -3788,14 +4014,9 @@
         b.setAttribute("aria-pressed", an ? "true" : "false");
       });
 
-      kasten.setAttribute("data-chart", tvAdresse(kasten.getAttribute("data-sym"), {
-        i: knopf.getAttribute("data-i"),
-        r: knopf.getAttribute("data-r")
-      }));
-      if (kasten.querySelector("iframe")) {
-        raus(kasten);
-        einsetzen(kasten);
-      }
+      kasten.setAttribute("data-spanne", knopf.getAttribute("data-spanne"));
+      raus(kasten);
+      einsetzen(kasten);
     }
 
     kaesten.forEach(platzhalter);
@@ -5613,7 +5834,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=81";
+      i.src = "/icon-512.png?v=82";
     });
     return symbolBild;
   }

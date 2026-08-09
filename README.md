@@ -532,42 +532,65 @@ drei Füllungen (`0.74`, sie tragen auch die meiste Schrift) und **keinen**
 verwischen — zehn Karten mit Filter wären dagegen zehn Filterflächen beim
 Scrollen, teuer bezahlt für kein Bild.
 
-### Der Chart in der Karte ist eine Linie
+### Der Chart in der Karte ist unserer
 
-Zehn Kerzencharts nebeneinander sind zehn dichte Muster aus Balken, Dochten und
-Gitternetz — die lauteste Fläche der ganzen Seite, und auf Kartengröße sagt sie
-fast nichts, weil eine Tageskerze dort drei Pixel breit ist. Eine Linie sagt
-dasselbe ruhiger: wo der Kurs herkommt und wo er steht. Erst damit hat das Glas
-überhaupt eine Chance, gesehen zu werden.
+Bis v81 stand in jeder Karte ein TradingView-Rahmen. Er hatte drei Nachteile,
+und keiner war von außen zu beheben:
 
-`style=2` in der Widget-Adresse, dazu `mainSeriesProperties.style: 2` in den
-Overrides und Farben aus dem eigenen Regelwerk: Linie in `--fg`, Achsen in
-`--line` und `--muted`, Gitternetz unsichtbar. Weg fällt alles, was den Chart
-nach eingebetteter Fremdsoftware aussehen ließ: Seitenleiste, **obere Leiste**,
-Legende, Volumen, Studien, Datums- und Fußzeile.
+1. **Er sah aus wie TradingView**, nicht wie diese Seite.
+2. **Er ignorierte die Parameter zum Ausblenden seiner Leisten.**
+   `hidetoptoolbar`, `hidelegend`, `hidevolume` sind am `widgetembed`
+   wirkungslos — Werkzeugleiste, Legende und Volumen standen weiter im Bild,
+   egal was in der Adresse stand.
+3. **Er brachte seine eigene Höhe mit**, die keine Karte einhielt. Zusammen mit
+   den eigenen Zeitraum-Knöpfen passte die Karte nicht mehr auf den Schirm.
 
-Den Zeitrahmen gibt es dafür als **eigene Knöpfe über dem Chart**, in der
-Schrift und den Marken dieser Seite: `1T · 1W · 1M · 1J · Max`. Jeder Knopf
-trägt zwei Angaben — wie weit zurück (`range`) und wie fein (`interval`); ein
-Jahr in Fünf-Minuten-Schritten wäre so sinnlos wie ein Tag in Wochenschritten.
-Beim Aufmachen steht **1T**: der Blick, an dem man sieht, dass der Chart lebt.
+Jetzt zeichnet die Seite selbst.
 
-Ein Klick tauscht nur die Adresse am Kasten aus und setzt den Rahmen neu —
-`src` im laufenden `iframe` zu ändern legt in Safari einen Eintrag in die
-Zurück-Liste, und dann führt der Zurück-Wisch durch die Zeiträume statt aus der
-App.
+**`netlify/functions/verlauf.js`** liefert die Zahlen: `?sym=NVO&spanne=1T` →
+`{ punkte: [[zeit, kurs], …], vorher, waehrung }`. Quelle ist Yahoo ohne
+Schlüssel, dieselbe wie in `status.js`. Davor liegt ein Zwischenspeicher in
+Blobs — zehn Karten mal fünf Zeiträume wären sonst fünfzig Abrufe für einen
+einzigen Blick auf die Liste. Die Frist richtet sich nach der Spanne: ein
+Tagesverlauf ist nach einer Minute alt, ein Jahresverlauf nach einer Stunde.
+Fällt die Quelle aus, gilt der alte Stand weiter — ein Chart von vorhin ist
+besser als ein leeres Feld.
 
-Die Chartfläche selbst ist auf **durchsichtiges Weiß** gesetzt, damit das Glas
-der Karte darunter weiterläuft. Bewusst `rgba(255,255,255,0)` und nicht
-`rgba(0,0,0,0)`: verwirft TradingView die Deckkraft, bleibt Weiß — also genau
-das Bild von vorher. Mit durchsichtigem Schwarz wäre daraus eine schwarze
-Fläche geworden.
+Lücken werden **übersprungen, nicht aufgefüllt**: Yahoo liefert `null`, wo
+nicht gehandelt wurde, und eine Linie, die dort waagerecht weiterläuft,
+behauptet Handel, den es nicht gab.
 
-Die Zeichenwerkzeuge fehlen nicht: der Knopf unter dem Chart öffnet den vollen
-Analyse-Chart mit den Fibonacci-Marken.
+**Gezeichnet wird als SVG** mit vier Dingen darin: die Fläche (Verlauf nach
+unten ausblendend), die Linie (grün oder rot gegen den Schlusskurs davor), das
+**Zonenband** und der **Zielstrich**. Die letzten beiden sind der eigentliche
+Grund für den eigenen Chart: *er weiß, worum es in dieser Liste geht.* Ein
+eingebetteter Chart kann das nicht — er kennt weder Einkaufszone noch Kursziel.
+Beide erscheinen nur, wenn sie in die Skala passen; eine Zone weit außerhalb
+würde die Kursbewegung zu einem Strich zusammendrücken, und der Chart zeigt
+zuerst den Kurs.
 
-Nicht hier geprüft: TradingView ist aus dieser Umgebung nicht erreichbar, die
-Prüfreihen fangen den Rahmen ab. Was sich prüfen ließ, ist die Adresse selbst.
+Der `viewBox` läuft 0…100 und wird in der Breite gedehnt. Daraus folgt zweierlei:
+jeder Strich trägt `vector-effect="non-scaling-stroke"` (sonst wäre er links
+dünner als rechts), der Punkt am Ende bekommt den Dehnungsfaktor als
+Gegenrechnung (sonst wäre er ein Ei), und **jede Beschriftung steht als HTML
+daneben** statt im SVG — gedehnte Schrift ist keine Schrift.
+
+Eine Falle beim Bauen: `var(--gut)` gilt in CSS-Eigenschaften, **nicht in
+XML-Attributen**. Als `stroke="var(--gut)"` bleibt die Linie grau. Farbe muss
+über `style` gesetzt werden.
+
+**Zeitraum-Knöpfe** `1T · 1W · 1M · 1J · Max` über dem Chart, beim Aufmachen
+1T. Ein Klick holt die Reihe neu. Eine Antwort, die zu einem inzwischen
+abgewählten Zeitraum gehört, wird verworfen statt gezeichnet.
+
+Die Zeichenwerkzeuge fehlen nicht: der Knopf unter dem Chart öffnet weiter den
+vollen Analyse-Chart mit den Fibonacci-Marken — als Knopf, nicht als
+Einbettung.
+
+**Zur Größe:** `fluss-test`s Deckel steht seither bei 275 statt 260 kB.
+Dazugekommen sind rund 8 kB eigener Code, weggefallen sind zehn eingebettete
+Fremdanwendungen, von denen jede ein Vielfaches davon nachlädt. Die Quelldatei
+ist größer geworden, die Seite deutlich leichter.
 
 ### Was fehlt, und warum
 
