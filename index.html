@@ -297,6 +297,8 @@
        naechste Karte, auch das kurze Nachsehen im Chart darueber. */
     scroll-snap-type: y proximity;
   }
+  /* Wer faehrt, bestimmt allein — siehe hinfahren(). */
+  html.fuehrt { scroll-snap-type: none; }
 
   /* Ziffern mit fester Breite, ueberall wo Zahlen stehen.
 
@@ -7551,6 +7553,14 @@ if ("serviceWorker" in navigator) {
      Das geht, weil die Hoehen feststehen: der Chart-Kasten ist 400 Pixel hoch,
      ob die Zeichnung schon drin haengt oder nicht. Nichts rutscht nach. */
   function hinfahren(el, fertig) {
+    /* Waehrend des Rundgangs rastet nichts ein.
+
+       Das Einrasten der Karten und das Hinfahren des Rundgangs sind zwei,
+       die dasselbe wollen: beide bestimmen, wo die Seite stehen bleibt. Nach
+       dem weichen Zug rueckte der Einrast-Mechanismus noch einmal um 21
+       Pixel nach — von aussen sieht das aus wie hin und wieder zurueck, und
+       rundgang-test hat genau das gemeldet. Wer faehrt, bestimmt allein. */
+    document.documentElement.classList.add("fuehrt");
     var oben = navHoehe() + 22;
     var streifen = window.innerHeight - oben - 200;   // was zwischen Leiste und Karte frei ist
     var hoehe = el.offsetHeight;
@@ -7559,7 +7569,11 @@ if ("serviceWorker" in navigator) {
     var grenze = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
     var ziel = Math.max(0, Math.min(layoutOben(el) - oben - luft, grenze));
 
-    if (Math.abs(window.scrollY - ziel) < 2) return fertig();
+    var los = function () {
+      document.documentElement.classList.remove("fuehrt");
+      fertig();
+    };
+    if (Math.abs(window.scrollY - ziel) < 2) return los();
     window.scrollTo({ top: ziel, behavior: sanft });
     steht(function () {
       // Nachfassen nur, wenn wirklich etwas dazwischenkam — im Regelfall
@@ -7567,9 +7581,9 @@ if ("serviceWorker" in navigator) {
       var r = el.getBoundingClientRect();
       if (r.top < oben - 2 || (r.bottom > window.innerHeight - 200 && r.height < streifen)) {
         window.scrollBy({ top: r.top - oben, behavior: sanft });
-        return steht(fertig);
+        return steht(los);
       }
-      fertig();
+      los();
     });
   }
 
