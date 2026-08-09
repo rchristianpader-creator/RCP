@@ -544,6 +544,49 @@ aus der Wirklichkeit:
 `--glas-kante-glanz` legt Licht ringsum statt nur oben: hell an der Oberkante,
 ein Hauch an den Seiten, unten der dunkle Abschluss, der die Dicke macht.
 
+### Das aktive Setup pulst wie Glas, nicht wie ein Fokusrahmen
+
+Steht der Kurs in der Einkaufszone, war das bisher ein **Auswahlrahmen**: eine
+deckende weiße Linie, zwei Pixel dick, und ein harter Ring, der im Takt
+herauswuchs (`box-shadow: 0 0 0 8px`). Das ist die Sprache von
+Betriebssystem-Fokus. Eine Scheibe bekommt keinen Rahmen, wenn etwas mit ihr los
+ist — sie fängt mehr Licht.
+
+Zwei echte Fehler steckten darin, beide nur zu sehen, wenn man weiß, wonach man
+sucht:
+
+1. **`beat-card` setzte `box-shadow` vollständig neu.** `box-shadow` ist eine
+   einzige Angabe — mit dem Ring waren `--glas-kante-glanz` und `--hebung` weg,
+   solange die Bewegung lief. Die aktive Karte war die einzige **ohne** Glas.
+2. **`nav a.nav-live` setzte `background: transparent`.** Der aktive Chip war
+   damit der einzige ohne Füllung und Schimmer.
+
+Jetzt: die Kante wird **heller statt weiß** (`rgba(--fg-rgb, 0.55)`, weiterhin
+1 px), und das Licht sammelt sich **innen am Rand**. Ein Schein nach innen liest
+sich als Licht *in* der Scheibe; ein Ring nach außen liest sich als Markierung
+*darum herum*.
+
+Der Puls liegt in `.card.card-live::after` und ändert **nur seine Deckkraft**
+(0,34 → 1). Damit wird bei jedem Bild nichts neu gezeichnet, sondern überblendet —
+auf der größten Fläche der Seite ist das der ganze Unterschied. Dass der Schein
+innen liegt, ist kein Zugeständnis an `overflow: hidden`, sondern das, was
+gemeint ist.
+
+**Und er kostet kein Lesen.** Gemessen auf dem Höhepunkt des Atems, 99. Perzentil:
+
+| Bereich | mit Puls | ohne |
+|---|---|---|
+| ganze Karte (der Rand dominiert) | 122 — 3,91 : 1 | 100 — 5,39 : 1 |
+| **Innenraum, wo die Schrift steht** | **87 — 6,59 : 1** | **87 — 6,59 : 1** |
+
+Die Aufhellung liegt vollständig im 22-Pixel-Rand. Genau das soll ein Randlicht
+tun.
+
+Das Abzeichen „AKTIV" ist selbst hell und deckend — es kann nicht von innen
+leuchten. Bei ihm liegt der Schein außen, aber weich: ein Schimmer, der atmet,
+kein Ring, der herauswächst. Der Takt steht als `--puls: 3.4s` an einer Stelle
+statt fünfmal als 2,7 s, und ist langsamer geworden: auffallen ohne zu drängen.
+
 ### Der Lichtzug, und warum er wieder weg ist
 
 Hier zog ein schmaler heller Streifen über die ganze Karte, während sie durchs

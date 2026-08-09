@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="dark">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#0a0d0c">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=89">
-<link rel="apple-touch-icon" href="/icon-180.png?v=89">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=90">
+<link rel="apple-touch-icon" href="/icon-180.png?v=90">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=89">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=90">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=89">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=90">
 
 <script>
 /* Im Browser oder als App?
@@ -300,6 +300,9 @@
     --schleier: rgba(0, 0, 0, 0.72);
     --schatten: rgba(0, 0, 0, 0.5);
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    /* Der Takt, in dem alle Zeichen einer aktiven Position atmen. Ein Wert
+       statt fuenfmal 2,7s, und langsamer: auffallen ohne zu draengen. */
+    --puls: 3.4s;
   }
 
   /* Zwei Faelle, in denen es wieder deckend wird: ohne backdrop-filter
@@ -353,7 +356,7 @@
        mittelt es weg und sieht einen glatten Verlauf. Die Datei dafuer ist
        370 Byte gross; das Rauschen entsteht im Browser. */
     background:
-      url("/grund.svg?v=89") repeat,
+      url("/grund.svg?v=90") repeat,
       radial-gradient(120% 90% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.55) 100%),
       radial-gradient(78% 58% at 10% 4%, var(--grund-kuehl) 0%, transparent 68%),
       radial-gradient(66% 52% at 92% 14%, var(--grund-warm) 0%, transparent 68%),
@@ -523,24 +526,14 @@
      also endet jede Reihe genau am Bildrand. Der Sortierknopf waechst nicht:
      er traegt ein Zeichen, keinen Namen, und in die Breite gezogen sieht er
      aus wie ein Fehler. */
-  /* Kein Kasten mehr um die Kuerzel.
+  /* Kein Kasten mehr um die Kuerzel: ein Rahmen um Rahmen, und weil er
+     klebte, das schwerste Stueck auf dem Schirm. Die Tasten tragen ihr Glas
+     selbst. Mit dem Kasten faellt das Kleben weg — das eine geht ohne das
+     andere nicht (Naeheres im README).
 
-     Hier stand ein zweites Fenster: eigener Hintergrund, eigene Kante,
-     eigene Rundung — und darin nochmals gerundete Tasten. Ein Rahmen um
-     Rahmen, und weil er klebte, war er ausserdem das schwerste Stueck auf
-     dem Schirm. Die Tasten tragen ihr Glas selbst; sie brauchen keine
-     Schale, um zusammenzugehoeren, das tut die Reihe.
-
-     Mit dem Kasten faellt auch das Kleben weg — das eine geht ohne das
-     andere nicht. Eine durchsichtige Reihe, die stehen bleibt, waehrend
-     Karten hinter ihr durchziehen, waere ein Schmierbild; und jede Deckung
-     dagegen waere wieder der Kasten. Also faehrt die Reihe mit, wie die
-     Ueberschrift darueber.
-
-     Geblieben ist die Reihe selbst: dieselben 14 Pixel an den Seiten wie
-     bei jeder Karte, damit die Tasten an denselben Kanten stehen, und
-     darueber wie darunter derselbe Abstand — nicht var(--luft), die wird
-     bei offener Installationsleiste aufgeblasen. */
+     Seitlich dieselben 14 Pixel wie bei jeder Karte, oben wie unten
+     derselbe Abstand — nicht var(--luft), die wird bei offener
+     Installationsleiste aufgeblasen. */
   nav {
     display: flex;
     flex-wrap: wrap;
@@ -614,35 +607,53 @@
     letter-spacing: 0.1em;
   }
 
-  /* Aktives Setup: Kurs steht in der Einkaufszone */
-  /* Aktives Setup: ein gleichmaessiger Puls, gleicher Takt fuer Knopf und Karte */
+  /* AKTIVES SETUP — der Kurs steht in der Einkaufszone.
+
+     Es war ein Auswahlrahmen: deckendes Weiss, zwei Pixel, dazu ein harter
+     Ring im Takt. Die Sprache von Betriebssystem-Fokus, nicht von Glas —
+     eine Scheibe bekommt keinen Rahmen, sie faengt mehr Licht. Jetzt wird
+     die Kante heller statt weiss, und das Licht sammelt sich innen.
+
+     Zwei Fehler steckten darin: beat-card setzte box-shadow vollstaendig
+     neu und nahm Glaskante und Hebung mit (die aktive Karte war die
+     einzige ohne Glas), und nav a.nav-live setzte background: transparent.
+     Naeheres im README. */
   nav a.nav-live {
-    background: transparent;
     color: var(--fg);
-    border: 1px solid var(--fg);
-    animation: beat-nav 2.7s ease-in-out infinite;
+    border-color: rgba(var(--fg-rgb), 0.62);
+    animation: beat-nav var(--puls) ease-in-out infinite;
   }
+  /* Nur der Schein wandert, die Fuellung des Chips bleibt stehen. */
   @keyframes beat-nav {
-    0%   { box-shadow: 0 0 0 0 rgba(var(--fg-rgb), 0.30); }
-    50%  { box-shadow: 0 0 0 6px rgba(var(--fg-rgb), 0.06); }
-    100% { box-shadow: 0 0 0 0 rgba(var(--fg-rgb), 0.30); }
+    0%, 100% { box-shadow: var(--glas-kante), inset 0 0 8px -3px rgba(var(--fg-rgb), 0.35); }
+    50%      { box-shadow: var(--glas-kante), inset 0 0 12px -1px rgba(var(--fg-rgb), 0.8); }
   }
 
-  .card.card-live {
-    border-color: var(--fg);
-    border-width: 2px;
-    animation: beat-card 2.7s ease-in-out infinite;
+  /* Der Puls liegt in einem eigenen Blatt und aendert nur seine Deckkraft:
+     nichts wird neu gezeichnet, nur ueberblendet. Der Schein liegt innen —
+     overflow: hidden schnitte einen aeusseren ohnehin ab, und innen ist es
+     ausserdem das, was gemeint ist. Gemessen: im Innenraum der Karte, wo
+     die Schrift steht, aendert er die Helligkeit um null. */
+  .card.card-live { border-color: rgba(var(--fg-rgb), 0.55); }
+  .card.card-live::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    box-shadow: inset 0 0 30px -6px rgba(var(--fg-rgb), 0.7);
+    animation: atemLicht var(--puls) ease-in-out infinite;
   }
-  @keyframes beat-card {
-    0%   { box-shadow: 0 0 0 0 rgba(var(--fg-rgb), 0.30); }
-    50%  { box-shadow: 0 0 0 8px rgba(var(--fg-rgb), 0.06); }
-    100% { box-shadow: 0 0 0 0 rgba(var(--fg-rgb), 0.30); }
+  @keyframes atemLicht {
+    0%, 100% { opacity: 0.34; }
+    50%      { opacity: 1; }
   }
 
   @media (prefers-reduced-motion: reduce) {
     nav a.nav-live,
-    .card.card-live { animation: none; }
-    nav a.nav-live { box-shadow: 0 0 0 3px rgba(var(--fg-rgb), 0.12); }
+    .card.card-live::after { animation: none; }
+    .card.card-live::after { opacity: 0.62; }
+    nav a.nav-live { box-shadow: var(--glas-kante), inset 0 0 10px -2px rgba(var(--fg-rgb), 0.5); }
   }
 
   .entry-note {
@@ -658,15 +669,14 @@
     border-color: var(--fg);
     background: var(--fg);
     color: var(--auf-fg);
-    animation: beat-badge 2.7s ease-in-out infinite;
+    animation: beat-badge var(--puls) ease-in-out infinite;
   }
-  /* Gleiche Dauer und gleiche Kurve wie beat-nav und beat-card: alle drei
-     Zeichen einer aktiven Position schlagen im Gleichtakt. Der Ring ist
-     kleiner, weil das Abzeichen selbst klein ist. */
+  /* Das Abzeichen ist selbst hell und deckend, es kann nicht von innen
+     leuchten. Bei ihm liegt der Schein aussen, aber weich: ein Schimmer,
+     der atmet, kein Ring, der herauswaechst. */
   @keyframes beat-badge {
-    0%   { box-shadow: 0 0 0 0 rgba(var(--fg-rgb), 0.30); }
-    50%  { box-shadow: 0 0 0 5px rgba(var(--fg-rgb), 0.06); }
-    100% { box-shadow: 0 0 0 0 rgba(var(--fg-rgb), 0.30); }
+    0%, 100% { box-shadow: 0 0 6px -1px rgba(var(--fg-rgb), 0.3); }
+    50%      { box-shadow: 0 0 14px 1px rgba(var(--fg-rgb), 0.6); }
   }
   @media (prefers-reduced-motion: reduce) {
     .badge.aktiv { animation: none; }
@@ -793,6 +803,8 @@
     border: 1px solid var(--hair);
     border-radius: var(--r-karte);
     overflow: hidden;
+    /* Bezug fuer das Puls-Blatt der aktiven Karte. */
+    position: relative;
     background: var(--glas-glanz-karte);
     /* Kein scroll-margin-top: der Abstand beim Sprung steht einmal an html
        als scroll-padding-top. Beides zusammen addierte sich, und der Sprung
@@ -801,24 +813,10 @@
     box-shadow: var(--glas-kante-glanz), var(--hebung);
   }
 
-  /* KEIN LICHTZUG MEHR
-
-     Hier zog ein zweiter, schmaler Streifen ueber die ganze Karte, waehrend
-     sie durchs Bild fuhr — mit der Begruendung, ein feststehendes Licht sei
-     Farbe und kein Licht.
-
-     Zwei Anlaeufe, ihn ertraeglich zu machen: erst schwaecher, dann hinter
-     den Inhalt, damit er die Schrift nicht mehr aufhellt. Beides hat das
-     Lesen gerettet und das eigentliche Problem nicht angeruehrt: etwas
-     Helles wandert ueber die ganze Flaeche, auf jeder Karte, bei jedem
-     Wisch. Das ist kein Detail, das man bemerkt — das ist Bewegung im
-     Augenwinkel, die man nicht abstellen kann.
-
-     Der Glanz bleibt, aber er bleibt stehen: der schmale Streifen in der
-     oberen Ecke, die Woelbung, der Rueckwurf, die Kante. Eine Scheibe, die
-     Licht faengt, ohne damit zu wedeln.
-
-     Nebenbei ein Element weniger, das sich bei jedem Bild bewegt. */
+  /* Hier zog ein Lichtzug ueber die ganze Karte. Er ist weg und soll nicht
+     zurueckkommen: etwas Helles, das ueber die ganze Flaeche wandert, auf
+     jeder Karte, bei jedem Wisch, ist Bewegung im Augenwinkel, die man
+     nicht abstellen kann. Der Glanz steht still. Warum, im README. */
 
   .card-head { padding: 18px 18px 12px; }
   .card-head .row {
@@ -1416,7 +1414,7 @@
     color: var(--auf-fg);
     background: var(--fg);
     border-radius: 9px;
-    animation: beat-badge 2.7s ease-in-out infinite;
+    animation: beat-badge var(--puls) ease-in-out infinite;
   }
   .glocke-btn.offen { background: var(--fg); color: var(--auf-fg); }
   .glocke-btn.offen .wartend,
@@ -1800,7 +1798,7 @@
     color: var(--auf-fg);
     background: var(--fg);
     border-color: var(--fg);
-    animation: beat-badge 2.7s ease-in-out infinite;
+    animation: beat-badge var(--puls) ease-in-out infinite;
   }
   @media (prefers-reduced-motion: reduce) {
     .kuerzel-taste.aktiv { animation: none; }
@@ -1830,7 +1828,7 @@
     color: var(--auf-fg);
     background: var(--fg);
     border-radius: 9px;
-    animation: beat-badge 2.7s ease-in-out infinite;
+    animation: beat-badge var(--puls) ease-in-out infinite;
   }
   /* Offene Anfragen: der Knopf faellt von selbst auf */
   .verwaltung-btn.offen {
@@ -2652,7 +2650,7 @@
     align-items: center;
     justify-content: center;
     background:
-      url("/grund.svg?v=89") repeat,
+      url("/grund.svg?v=90") repeat,
       radial-gradient(120% 90% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.55) 100%),
       radial-gradient(78% 58% at 10% 4%, var(--grund-kuehl) 0%, transparent 68%),
       radial-gradient(66% 52% at 92% 14%, var(--grund-warm) 0%, transparent 68%),
@@ -2831,7 +2829,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=89");
+    background-image: url("/kerzen.svg?v=90");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -2845,7 +2843,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=89");
+    background-image: url("/kerzen-blass.svg?v=90");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -3573,7 +3571,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=89" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=90" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -3691,7 +3689,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=89" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=90" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3739,7 +3737,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=89" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=90" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -3758,7 +3756,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=89" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=90" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3875,7 +3873,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=89" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=90" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -6260,7 +6258,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=89";
+      i.src = "/icon-512.png?v=90";
     });
     return symbolBild;
   }
