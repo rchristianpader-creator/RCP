@@ -29,7 +29,7 @@ const OFFEN = [
 /* Der laufende Hintergrund der Anmeldeseite gehoert dazu — ohne ihn stuende
    sie leer. Zwei Kacheln, die vordere und die blasse; der Anfang statt einer
    Liste, damit eine dritte nicht wieder nachgepflegt werden muss. */
-const OFFEN_ANFANG = ["/icon-", "/og-preview", "/ansicht-", "/kerzen", "/grund"];
+const OFFEN_ANFANG = ["/icon-", "/og-preview", "/ansicht-", "/kerzen"];
 
 /* Das Tor faellt nie mit der ganzen Seite um.
 

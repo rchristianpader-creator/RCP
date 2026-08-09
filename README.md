@@ -672,6 +672,47 @@ geprüft werden — die Entwicklungsumgebung lässt keine fremden Hosts durch
 statt eines kaputten Bildes, und deshalb das Feld an der Position, das
 unabhängig davon funktioniert.
 
+### Die Körnung war die Unschärfe
+
+Dreimal hieß es „sieht nicht so scharf aus wie auf dem Bild", und dreimal habe
+ich an der falschen Stelle gesucht: erst die Kante (die stimmte schon), dann die
+Bänder in der Karte (die halfen), dann die Farbfelder (die brachten kaum etwas).
+
+Die Körnung war es. Ein Kachelbild aus feinem Rauschen über **allem** — und seit
+die Fenster durchsichtig sind, auch mitten durch jede Karte hindurch. Von Punkt
+zu Punkt wechselnde Helligkeit ist nichts anderes als Unschärfe. Gemessen auf
+einem Stück reinem Grund:
+
+| | Flimmern (Nachbarpunkte) | Helligkeit |
+|---|---|---|
+| mit Körnung | 1,24 | 17,7 |
+| **ohne Körnung** | **0,02** | **11,8** |
+| Vorlage (Sperrbildschirm) | — | 11,3 |
+
+Sie kostete beides: Schärfe *und* Dunkelheit. Ohne sie liegt der Grund exakt auf
+dem Wert der Vorlage.
+
+Ihr Zweck war, die Bänder aufzubrechen, die dunkle Verläufe zeigen. Den gibt es
+kaum noch — die vier Farbfelder stehen bei 0,04 bis 0,05 statt 0,4 bis 0,5, der
+Grund ist fast gleichmäßig (zwei Stufen über 240 Punkte). **Wo nichts verläuft,
+streift auch nichts.** `grund.py`, `grund.svg`, der Eintrag im Vorrat des Service
+Workers und die Ausnahme im Tor sind mitgegangen; git hat sie, falls auf einem
+OLED doch Bänder auftauchen.
+
+Die Kanten danach, Karte gegen Vorlage: oben **4,24 zu 4,22**, links **1,55 zu
+1,55**, rechts 1,55 zu 1,64.
+
+### Der Rand pulst nicht mehr
+
+Ein Fenster, das atmet, ist eine ganze Bildschirmseite in Bewegung. Die aktive
+Position sagt sich woanders deutlicher: am Abzeichen und an ihrer Symboltaste —
+zwei kleine Zeichen, die schlagen, statt einer großen Fläche, die pulsiert. Der
+Karte bleibt die hellere Kante; sie steht still und sagt trotzdem, welche
+gemeint ist.
+
+Die Symboltasten sind ebenfalls Fenster geworden: durchsichtig, Kante,
+Lichtrand. Sie waren zuletzt das einzige Stück mit Füllung und Schimmer.
+
 ### Alle Kästen sind Fenster
 
 Nach Kopf und Karten trugen die übrigen Flächen noch die alte Machart und
