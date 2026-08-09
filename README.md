@@ -522,6 +522,49 @@ beiden Streifen sind halbdurchsichtig.
 viel durchscheinen (`0.42`). Ein Blatt trägt Sätze, und hinter Sätzen soll
 nichts stehen, das man mitliest (`0.66`).
 
+### Glänzende Karten
+
+Der Schimmer allein ist ein weicher Wisch von hell nach nichts — das ist mattes
+Glas. Was eine Scheibe glänzen lässt, ist nicht *mehr* Licht, sondern
+schärferes: ein schmaler Streifen mit einer Kante daran. Ein breiter Verlauf hat
+keine Kante, und ohne Kante sieht das Auge kein Licht, sondern nur eine hellere
+Fläche.
+
+`--glas-glanz-karte` hat deshalb fünf Ebenen statt zwei, jede mit einem Grund
+aus der Wirklichkeit:
+
+| Ebene | wofür |
+|---|---|
+| schmaler Lichtstreifen, 148° | harter Anstieg, weicher Abfall — so fällt Licht auf eine glatte Fläche |
+| Hotspot oben links | eine Kante ist nie ganz scharf; wo sie sich rundet, bündelt sie |
+| Rückwurf von unten | ohne ihn endet die Scheibe im Nichts statt dick zu wirken |
+| Schimmer | der breite Wisch von vorher, jetzt als Unterlage |
+| Füllung | trägt die Schrift |
+
+`--glas-kante-glanz` legt Licht ringsum statt nur oben: hell an der Oberkante,
+ein Hauch an den Seiten, unten der dunkle Abschluss, der die Dicke macht.
+
+**Der Lichtzug.** Was eine Scheibe von einem hellen Rechteck unterscheidet, ist
+nicht ihr Aussehen im Stillstand, sondern dass sich das Licht bewegt, wenn man
+sie bewegt. `.card::before` trägt einen schmalen hellen Kern mit weichem Hof und
+wandert an der `view-timeline` der Karte über die volle Strecke — von der ersten
+bis zur letzten Berührung mit dem Fenster.
+
+Er liegt **über** dem Inhalt, und das ist richtig herum: eine Spiegelung sitzt
+auf der Scheibe, nicht dahinter. Deshalb sehr schwach. Wer ihn liest, statt ihn
+zu bemerken, hat einen Fehler gefunden.
+
+Der erste Anlauf war ein einzelner breiter Verlauf über ein Drittel der
+Kartenbreite — auf einer schirmhohen Karte las sich das als heller Schmierstreifen
+quer durch den Chart, nicht als Licht.
+
+**Was es kostet: nichts.** Nur eine Verschiebung. Ein Verlauf, der seine Stellung
+ändert, müsste bei jedem Bild neu gezeichnet werden; ein Streifen, der sich
+verschiebt, wird einmal gezeichnet und danach nur noch geschoben. Gemessen bei
+sechsfach gedrosseltem Prozessor: **89 Bilder beim Scrollen, Mittel 16 ms,
+schlechtestes 17 ms, null über 32 ms.** Ein Frost wäre hier das Naheliegende und
+das Falsche — siehe die Regel weiter oben.
+
 ### Kein Kasten um die Symboltasten
 
 Um die Kürzel stand ein zweites Fenster: eigener Hintergrund, eigene Kante,
