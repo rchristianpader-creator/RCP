@@ -123,10 +123,10 @@
        mit Absicht: nur Chromium setzt sie um, auf dem iPhone kostete sie
        nur. */
     /* Hier laesst sich das ganze Bild leiser stellen. */
-    --grund-kuehl: rgba(47, 59, 107, 0.30);
-    --grund-warm: rgba(168, 124, 74, 0.26);
-    --grund-flieder: rgba(94, 58, 86, 0.26);
-    --grund-tuerkis: rgba(31, 95, 99, 0.24);
+    --grund-kuehl: rgba(47, 59, 107, 0.46);
+    --grund-warm: rgba(168, 124, 74, 0.40);
+    --grund-flieder: rgba(94, 58, 86, 0.40);
+    --grund-tuerkis: rgba(31, 95, 99, 0.36);
 
     /* Zwei Stufen guenstiger: der Aufwand eines Weichzeichners waechst mit
        dem Radius, und drei Filter kosten drei Durchgaenge. Gemessen wird auf
@@ -134,9 +134,9 @@
        gilt das Telefon. */
     --glas-frost: saturate(190%) blur(12px);
     /* Duenn — der Frost dahinter verwischt und hellt auf. */
-    --glas-fuellung: rgba(255, 255, 255, 0.26);
+    --glas-fuellung: rgba(255, 255, 255, 0.2);
     /* Dicker, wo man liest: hinter Saetzen soll nichts mitlesbar sein. */
-    --glas-fuellung-fest: rgba(255, 255, 255, 0.52);
+    --glas-fuellung-fest: rgba(255, 255, 255, 0.44);
     /* Die Karten. 0,74 war eine weisse Flaeche mit einem Hauch Grund
        darunter — kein Glas. 0,55 laesst die Zeichnung dahinter durch und
        traegt die Schrift trotzdem.
@@ -149,7 +149,7 @@
 
        Die Regel gilt also ohne Ausnahme: Frost nur, wo eine Flaeche steht.
        Was mitscrollt, bekommt keinen — egal wie wenige es sind. */
-    --glas-fuellung-karte: rgba(255, 255, 255, 0.55);
+    --glas-fuellung-karte: rgba(255, 255, 255, 0.44);
     /* Die Kante faengt Licht. Der weiche dunkle Ring knapp innerhalb des
        Randes gibt der Flaeche Dicke; hell oben zieht ins Kuehle, dunkel
        unten ins Warme — abgeschwaecht das, was an einer Linsenkante
@@ -163,10 +163,11 @@
       inset 0 2px 1px -1px rgba(214, 233, 255, 0.85),
       inset 0 -1px 0 rgba(78, 60, 38, 0.2);
     --glas-schimmer: linear-gradient(148deg,
-      rgba(255, 255, 255, 0.96) 0%,
-      rgba(255, 255, 255, 0.56) 26%,
-      rgba(255, 255, 255, 0.14) 52%,
-      rgba(255, 255, 255, 0) 74%);
+      rgba(255, 255, 255, 1) 0%,
+      rgba(255, 255, 255, 0.7) 22%,
+      rgba(255, 255, 255, 0.22) 48%,
+      rgba(255, 255, 255, 0.04) 68%,
+      rgba(255, 255, 255, 0) 82%);
 
     /* Schimmer und Fuellung in einem, als zwei Hintergrundebenen.
 
@@ -328,6 +329,7 @@
        zusammen etwa einen Schirm ergeben, steht ohnehin fast immer eine
        ganze Karte im Bild — nur eben ohne Zwang. Und die Sprungmarken der
        Kuerzel treffen weiterhin genau, dafuer sorgt scroll-padding-top. */
+  }
 
   /* Ziffern mit fester Breite, ueberall wo Zahlen stehen.
 
@@ -437,14 +439,18 @@
        sichtbar durch. Eine klebende Leiste deckt ab oder sie ist keine. Die
        Fensterform bleibt: unten rund, oben gerade. */
     top: 0;
-    margin: 0 0 12px;
+    /* Derselbe Rand wie ueberall. Beiseite kann nichts durchziehen: die
+       Karten stehen auf genau denselben 14 Pixeln, in den Streifen daneben
+       liegt nur der Grund — und der scrollt nicht. */
+    margin: 0 var(--rand) 12px;
     padding-top: calc(10px + env(safe-area-inset-top));
     /* Von Rand zu Rand, nur unten rund. Mit Abstand nach beiden Seiten sah
        man in den beiden Streifen daneben den Inhalt vorbeiziehen — dasselbe
        Loch wie oben, nur schmaler. Eine klebende Leiste deckt ab oder sie
        ist keine. */
     border-radius: 0 0 var(--r-karte) var(--r-karte);
-    border-bottom: 1px solid var(--hair);
+    border: 1px solid var(--hair);
+    border-top: 0;
     z-index: 20;
     /* Kein Frost, und das folgt aus der eigenen Regel: eine klebende Leiste
        steht still, waehrend sich darunter alles bewegt — der Filter muss
@@ -796,8 +802,13 @@
     animation: marquee 37.8s linear infinite;
     padding: 10px 0;
   }
-  .news-banner-track:hover {
-    animation-play-state: paused;
+  /* Anhalten nur, wo es einen Zeiger gibt.
+
+     Auf dem Telefon bleibt ein :hover nach einer Beruehrung haengen, bis man
+     woanders hintippt — und dann stand das Laufband einfach still. Ein
+     Verhalten fuer die Maus, das auf dem Finger zur Panne wird. */
+  @media (hover: hover) {
+    .news-banner-track:hover { animation-play-state: paused; }
   }
   .news-banner span {
     font-size: 11px;
