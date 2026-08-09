@@ -3209,13 +3209,18 @@
       margin-left: auto;
       margin-right: auto;
     }
-    /* Der Terminkasten ist ein Band und bleibt eines. Statt seinen Inhalt
-       mittig zu setzen — was ihn an seiner eigenen Innenkante ausrichten
-       wuerde, nicht an der Spalte — waechst sein Innenabstand mit, bis der
-       Text genau dort beginnt, wo auch die Karte beginnt. */
-    .wirtschaft-block {
-      padding-left: max(14px, (100% - 780px) / 2);
-      padding-right: max(14px, (100% - 780px) / 2);
+    /* Der Terminkasten war ein Band ueber die ganze Breite; da musste sein
+       Innenabstand mitwachsen, damit der Text auf der Linie der Spalte
+       begann. Seit er ein Fenster wie die Karten ist, gilt fuer ihn dieselbe
+       Regel wie fuer sie — und dasselbe fuer Kopf, Laufband und
+       Setup-Streifen. Eine Spalte, alle darin. */
+    header,
+    .news-banner,
+    .wirtschaft-block,
+    .setup-strip {
+      max-width: min(780px, 100% - 28px);
+      margin-left: auto;
+      margin-right: auto;
     }
   }
 
