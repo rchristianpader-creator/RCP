@@ -2,11 +2,11 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="dark">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
-<meta name="theme-color" content="#fafafa">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=82">
-<link rel="apple-touch-icon" href="/icon-180.png?v=82">
+<meta name="theme-color" content="#0a0d0c">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=83">
+<link rel="apple-touch-icon" href="/icon-180.png?v=83">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=82">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=83">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=82">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=83">
 
 <script>
 /* Im Browser oder als App?
@@ -74,24 +74,35 @@
                   Deckkraft: Pulsringe, Haarlinien, Rahmen, die Hebung.
        --schleier Was sich ueber die Seite legt (Rundgang, Blaetter). */
   :root {
-    color-scheme: light;
-    --bg: #fafafa;
-    --bg-rgb: 250, 250, 250;
-    --fg: #111111;
-    --fg-rgb: 17, 17, 17;
-    --auf-fg: #ffffff;
-    --muted: #737373;
-    --line: #e5e5e5;
-    --soft: #f5f5f5;
-    --card: #ffffff;
-    --hair: #ebebeb;
+    /* DUNKEL
+
+       Der Anstrich kommt von einer Vorlage: eine Glaskarte ueber einem
+       kraeftigen Bild, dunkel getoent, mit heller Schrift. Auf hellem Grund
+       ist Glas immer eine hellere Flaeche — auf dunklem ist es eine Scheibe,
+       weil das Licht an der Kante sitzt und nicht ueberall.
+
+       Umgestellt sind nur die Marken hier oben. Alles andere leitet sich
+       daraus ab: was --fg heisst, ist jetzt hell, was --auf-fg heisst,
+       dunkel. Schwarze Knoepfe mit weisser Schrift werden damit von selbst
+       zu hellen Knoepfen mit dunkler Schrift. */
+    color-scheme: dark;
+    --bg: #0a0d0c;
+    --bg-rgb: 10, 13, 12;
+    --fg: #f2f5f4;
+    --fg-rgb: 242, 245, 244;
+    --auf-fg: #0a0d0c;
+    --muted: #9aa5a2;
+    --line: rgba(255, 255, 255, 0.16);
+    --soft: rgba(255, 255, 255, 0.06);
+    --card: #131816;
+    --hair: rgba(255, 255, 255, 0.12);
     /* Schrift, die kaum da sein soll: der Platzhalter im Chart, der
        Trenner in der Kontozeile. Ein eigener Name, weil --line dafuer
        zu blass ist — mit --line waere der Platzhalter auch im hellen
        Anstrich schwaecher als vorher. */
-    --blass: #c4c4c4;
-    --glas: rgba(255, 255, 255, 0.72);
-    --glas-fest: rgba(255, 255, 255, 0.76);
+    --blass: rgba(255, 255, 255, 0.34);
+    --glas: rgba(255, 255, 255, 0.1);
+    --glas-fest: rgba(255, 255, 255, 0.14);
 
     /* RADIEN
 
@@ -123,10 +134,10 @@
        mit Absicht: nur Chromium setzt sie um, auf dem iPhone kostete sie
        nur. */
     /* Hier laesst sich das ganze Bild leiser stellen. */
-    --grund-kuehl: rgba(47, 59, 107, 0.46);
-    --grund-warm: rgba(168, 124, 74, 0.40);
-    --grund-flieder: rgba(94, 58, 86, 0.40);
-    --grund-tuerkis: rgba(31, 95, 99, 0.36);
+    --grund-kuehl: rgba(24, 92, 130, 0.85);
+    --grund-warm: rgba(150, 92, 36, 0.7);
+    --grund-flieder: rgba(78, 34, 96, 0.8);
+    --grund-tuerkis: rgba(16, 122, 96, 0.85);
 
     /* Zwei Stufen guenstiger: der Aufwand eines Weichzeichners waechst mit
        dem Radius, und drei Filter kosten drei Durchgaenge. Gemessen wird auf
@@ -134,9 +145,9 @@
        gilt das Telefon. */
     --glas-frost: saturate(190%) blur(12px);
     /* Duenn — der Frost dahinter verwischt und hellt auf. */
-    --glas-fuellung: rgba(255, 255, 255, 0.2);
+    --glas-fuellung: rgba(255, 255, 255, 0.08);
     /* Dicker, wo man liest: hinter Saetzen soll nichts mitlesbar sein. */
-    --glas-fuellung-fest: rgba(255, 255, 255, 0.44);
+    --glas-fuellung-fest: rgba(255, 255, 255, 0.1);
     /* Die Karten. 0,74 war eine weisse Flaeche mit einem Hauch Grund
        darunter — kein Glas. 0,55 laesst die Zeichnung dahinter durch und
        traegt die Schrift trotzdem.
@@ -149,7 +160,7 @@
 
        Die Regel gilt also ohne Ausnahme: Frost nur, wo eine Flaeche steht.
        Was mitscrollt, bekommt keinen — egal wie wenige es sind. */
-    --glas-fuellung-karte: rgba(255, 255, 255, 0.44);
+    --glas-fuellung-karte: rgba(255, 255, 255, 0.09);
     /* Die Kante faengt Licht. Der weiche dunkle Ring knapp innerhalb des
        Randes gibt der Flaeche Dicke; hell oben zieht ins Kuehle, dunkel
        unten ins Warme — abgeschwaecht das, was an einer Linsenkante
@@ -158,16 +169,18 @@
        ist raus. Ein weicher Schatten muss bei jedem Zeichnen neu berechnet
        werden, und sie hing an jeder Karte, jedem Streifen und jedem Blatt.
        Was bleibt, sind drei harte Linien: die kosten nichts. */
+    /* Auf dunklem Grund sitzt das Licht oben und nur dort. Eine dunkle
+       Linie unten braucht es nicht mehr — der Grund ist ohnehin dunkler als
+       die Scheibe. */
     --glas-kante:
-      inset 0 1px 0 rgba(255, 255, 255, 1),
-      inset 0 2px 1px -1px rgba(214, 233, 255, 0.85),
-      inset 0 -1px 0 rgba(78, 60, 38, 0.2);
+      inset 0 1px 0 rgba(255, 255, 255, 0.28),
+      inset 0 2px 1px -1px rgba(255, 255, 255, 0.1),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.3);
     --glas-schimmer: linear-gradient(148deg,
-      rgba(255, 255, 255, 1) 0%,
-      rgba(255, 255, 255, 0.7) 22%,
-      rgba(255, 255, 255, 0.22) 48%,
-      rgba(255, 255, 255, 0.04) 68%,
-      rgba(255, 255, 255, 0) 82%);
+      rgba(255, 255, 255, 0.22) 0%,
+      rgba(255, 255, 255, 0.12) 24%,
+      rgba(255, 255, 255, 0.04) 50%,
+      rgba(255, 255, 255, 0) 72%);
 
     /* Schimmer und Fuellung in einem, als zwei Hintergrundebenen.
 
@@ -198,14 +211,16 @@
     /* Ebenfalls guenstiger: ein Schatten mit 28 Pixeln Weichzeichnung an
        jeder Flaeche der Seite ist teuer. 12 reichen, damit die Flaeche vom
        Grund abhebt. */
+    /* Auf Dunkel hebt kein heller Schatten. Was traegt, ist ein dunkler
+       Kern unter der Scheibe. */
     --hebung:
-      0 1px 2px rgba(var(--fg-rgb), 0.05),
-      0 6px 12px -8px rgba(var(--fg-rgb), 0.14);
+      0 1px 2px rgba(0, 0, 0, 0.4),
+      0 10px 24px -12px rgba(0, 0, 0, 0.6);
     /* Steigt und faellt. Die einzigen zwei Farben, die in dieser App etwas
        bedeuten statt zu schmuecken — bisher standen sie nur auf der
        Anmeldeseite, seit die Charts selbst gezeichnet werden auch hier. */
-    --gut: #15803d;
-    --schlecht: #b91c1c;
+    --gut: #3ecf8e;
+    --schlecht: #ff6b6b;
     /* Die Hoehe der klebenden Leiste. Der Vorgabewert passt zu zwei Reihen
        Chips; das Skript misst nach, sobald die Leiste steht. */
     --leiste: 96px;
@@ -231,8 +246,8 @@
        hereinzulassen. */
     --rand: 14px;
     --luft: calc(var(--rand) * 2);
-    --schleier: rgba(17, 17, 17, 0.62);
-    --schatten: rgba(0, 0, 0, 0.24);
+    --schleier: rgba(0, 0, 0, 0.72);
+    --schatten: rgba(0, 0, 0, 0.5);
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
   }
 
@@ -268,22 +283,36 @@
      darueber drei ruhige Kurslinien (grund.py). */
   .grundkurve {
     position: fixed;
-    /* Oben und unten ueber den Rand hinaus, statt die Ebene beim Ziehen zu
-       vergroessern: eine Skalierung im transform zwingt zum Neurastern einer
-       bildschirmgrossen Flaeche, und genau daran fiel "Scrollen bleibt
-       fluessig" durch. Groesser aufgespannt und nur verschoben kostet
-       nichts. */
-    inset: -8% 0;
+    inset: 0;
     z-index: -1;
     pointer-events: none;
+    /* Vier grosse Farbfelder, eine Vignette darueber, feine Koernung
+       obenauf.
+
+       Keine Zeichnung mehr. Drei grosse Kurslinien standen hier und machten
+       den Grund zu einem Bild, statt ihn Grund sein zu lassen.
+
+       Die Vignette nimmt die Raender zurueck, damit die Fenster in der Mitte
+       stehen und nicht auf einer gleichmaessig hellen Flaeche schwimmen.
+
+       Die Koernung ist das, was einen dunklen Verlauf teuer aussehen laesst.
+       Ohne sie streift er: bei dunklen Toenen liegt zwischen zwei
+       Helligkeitsstufen weniger Abstand, als das Auge unterscheiden kann, und
+       es entstehen sichtbare Baender. Rauschen bricht sie auf — das Auge
+       mittelt es weg und sieht einen glatten Verlauf. Die Datei dafuer ist
+       370 Byte gross; das Rauschen entsteht im Browser. */
     background:
-      url("/grund.svg?v=82") repeat-x center / min(100vw, 620px) 100%,
+      url("/grund.svg?v=83") repeat,
+      radial-gradient(120% 90% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.55) 100%),
       radial-gradient(78% 58% at 10% 4%, var(--grund-kuehl) 0%, transparent 68%),
       radial-gradient(66% 52% at 92% 14%, var(--grund-warm) 0%, transparent 68%),
       radial-gradient(84% 62% at 74% 96%, var(--grund-flieder) 0%, transparent 70%),
       radial-gradient(64% 48% at 8% 88%, var(--grund-tuerkis) 0%, transparent 70%),
       var(--bg);
+    background-size: 160px 160px, auto, auto, auto, auto, auto, auto;
+    opacity: 1;
   }
+
   .nur-web .grundkurve { display: none; }
 
   /* Kein Mitziehen des Grundes.
@@ -461,7 +490,7 @@
        Tag ueber bewegtem Inhalt liegt. Dafuer deckt die Fuellung. */
     background:
       var(--glas-schimmer),
-      linear-gradient(rgba(255, 255, 255, 0.97), rgba(255, 255, 255, 0.97));
+      linear-gradient(rgba(19, 24, 22, 0.94), rgba(19, 24, 22, 0.94));
     box-shadow: var(--glas-kante);
     border-bottom: 1px solid var(--hair);
   }
@@ -488,7 +517,7 @@
        durchscheinen zu lassen. Aber das Licht faengt es genauso. */
     background:
       var(--glas-schimmer),
-      linear-gradient(rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.62));
+      linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.04));
     box-shadow: var(--glas-kante);
     -webkit-tap-highlight-color: transparent;
     transition: background 0.24s ease, color 0.24s ease, border-color 0.24s ease, transform 0.2s var(--ease);
@@ -952,7 +981,7 @@
     padding: 12px 18px;
     border-top: 1px solid var(--hair);
     /* Nicht weiss: sonst laege mitten im Glas ein deckender Balken. */
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.05);
   }
   .ziel-bar .k {
     font-size: 10px;
@@ -2618,7 +2647,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=82");
+    background-image: url("/kerzen.svg?v=83");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -2632,7 +2661,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=82");
+    background-image: url("/kerzen-blass.svg?v=83");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -3366,7 +3395,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=82" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=83" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -3484,7 +3513,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=82" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=83" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3532,7 +3561,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=82" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=83" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -3551,7 +3580,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=82" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=83" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3668,7 +3697,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=82" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=83" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -6062,7 +6091,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=82";
+      i.src = "/icon-512.png?v=83";
     });
     return symbolBild;
   }
