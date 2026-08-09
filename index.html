@@ -217,8 +217,13 @@
        96 Pixel darunter, faengt sie genau am Rand an — sichtbar ist der
        ruhige Grund, nicht die naechste Position.
 
-       Ein Wert, zwei Stellen. Sie koennen nicht auseinanderlaufen. */
-    --luft: 96px;
+       Ein Wert, zwei Stellen. Sie koennen nicht auseinanderlaufen.
+
+       Und er ist der Regler fuer die Kartengroesse: Karte plus Luft ergeben
+       zusammen immer einen Schirm — mehr Luft heisst also kleinere Karte und
+       mehr Grund darunter, weniger Luft eine groessere. 96 war noch zu
+       gross, 200 laesst die Karte auf etwa zwei Drittel des Schirms. */
+    --luft: 200px;
     --schleier: rgba(17, 17, 17, 0.62);
     --schatten: rgba(0, 0, 0, 0.24);
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -2330,7 +2335,7 @@
   /* Solange der Streifen unten steht, deckt er die letzten Pixel jeder Karte
      ab. Also wird die Luft unter der Karte um seine Hoehe groesser — und mit
      ihr, weil es derselbe Wert ist, der Abstand zur naechsten. */
-  body.has-install-bar { padding-bottom: 104px; --luft: 200px; }
+  body.has-install-bar { padding-bottom: 104px; --luft: 300px; }
   /* Das echte Symbol, keine nachgebaute Kachel — so zeigt der Streifen
      immer das, was nachher auch auf dem Home-Bildschirm steht. */
   .install-mark {
