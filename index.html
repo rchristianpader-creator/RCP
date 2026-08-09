@@ -457,11 +457,17 @@
   .karten > .card {
     margin: 0 14px 56px;
     /* Was weit weg ist, zeichnet der Browser gar nicht erst; die Hoehe ist
-       vorgegeben, damit Sprungmarken stimmen. 800 statt 760, seit die
-       Zeitraum-Knoepfe dazukamen — sonst schob jede lange Karte den Sprung
-       um 54 Pixel nach unten. */
+       vorgegeben, damit Sprungmarken und der Rundgang stimmen.
+
+       Der Wert muss der wirklichen Kartenhoehe folgen, sonst springt die
+       Seite unter dem laufenden Scrollen weg. Er stand schon zweimal
+       falsch: bei 760, als die Zeitraum-Knoepfe dazukamen (jede lange Karte
+       schob den Sprung 54 Pixel nach unten), und bei 800, als der Chart von
+       400 auf 208 schrumpfte — da verkuerzte jede Karte beim Zeichnen die
+       Seite um 180 Pixel, und der Rundgang fuhr mitten im Zug zurueck.
+       Gemessen sind es jetzt 601 bis 622. */
     content-visibility: auto;
-    contain-intrinsic-size: auto 800px;
+    contain-intrinsic-size: auto 620px;
   }
   .karten-fehler {
     margin: 0 14px 56px;
