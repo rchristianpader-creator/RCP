@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="dark">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#0a0d0c">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=98">
-<link rel="apple-touch-icon" href="/icon-180.png?v=98">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=99">
+<link rel="apple-touch-icon" href="/icon-180.png?v=99">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=98">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=99">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=98">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=99">
 
 <script>
 /* Im Browser oder als App?
@@ -217,53 +217,13 @@
     --glas-grund-fest:
       var(--glas-schimmer),
       linear-gradient(var(--glas-fuellung-fest), var(--glas-fuellung-fest));
-    /* --glas-fuellung-karte ist ein Verlauf, keine Farbe: sie steht direkt
-       da und nicht mehr in einem linear-gradient(). Zweimal geschachtelt
-       waere die ganze Angabe ungueltig — und eine ungueltige Angabe faellt
-       lautlos aus. */
-    --glas-grund-karte:
-      var(--glas-schimmer),
-      var(--glas-fuellung-karte);
 
-    /* GLANZ
-
-       Der Schimmer allein ist ein weicher Wisch von hell nach nichts —
-       das ist mattes Glas. Was eine Scheibe glaenzen laesst, ist nicht mehr
-       Licht, sondern schaerferes: ein schmaler Streifen mit einer Kante
-       daran. Ein breiter Verlauf hat keine Kante, und ohne Kante sieht das
-       Auge kein Licht, sondern nur eine hellere Flaeche.
-
-       Drei Dinge kommen dazu, jedes mit einem Grund aus der Wirklichkeit:
-       der schmale Lichtstreifen (harter Anstieg, weicher Abfall — so faellt
-       Licht auf Glattes), die Woelbung oben links (eine Kante ist nie ganz
-       scharf; wo sie sich rundet, buendelt sie) und der Rueckwurf von unten
-       (ohne ihn endet die Scheibe im Nichts statt dick zu wirken).
-
-       Alles Hintergrundebenen: einmal gezeichnet, danach nur verschoben.
-       Ein Frost waere hier das Naheliegende und das Falsche.
-
-       Wie hell: die Form macht den Glanz, nicht die Helligkeit — ein
-       breiter Wisch ist kein Licht, sondern eine aufgehellte Flaeche.
-       Deshalb ist der Streifen schmal geblieben, waehrend Schimmer und
-       Fuellung wieder die vollen Werte der Symboltasten tragen. Eine
-       Weile stand hier ein halbierter Schimmer; das war die Antwort auf
-       einen wandernden Lichtzug, den es nicht mehr gibt, und ohne ihn war
-       es nur noch leise. Zahlen im README. */
-    --glas-glanz-karte:
-      linear-gradient(148deg,
-        rgba(255, 255, 255, 0) 5%,
-        rgba(255, 255, 255, 0.15) 7.8%,
-        rgba(255, 255, 255, 0.035) 10.5%,
-        rgba(255, 255, 255, 0) 13.5%),
-      radial-gradient(66% 40% at 4% -10%,
-        rgba(255, 255, 255, 0.1) 0%,
-        rgba(255, 255, 255, 0.02) 30%,
-        rgba(255, 255, 255, 0) 50%),
-      radial-gradient(150% 46% at 50% 124%,
-        rgba(255, 255, 255, 0.06) 0%,
-        rgba(255, 255, 255, 0) 46%),
-      var(--glas-schimmer),
-      var(--glas-fuellung-karte);
+    /* Hier stand --glas-glanz-karte: ein schmaler Lichtstreifen, die
+       Woelbung oben links, der Rueckwurf von unten. Sie hat kein Element
+       mehr — die Fenster sind durchsichtig geworden, und die Symboltasten
+       tragen Schimmer und Fuellung einzeln. Eine Marke, die niemand
+       benutzt, ist keine Marke; warum es sie gab und warum sie ging, steht
+       im README. */
 
     /* EIN FENSTER — und es ist wirklich durchsichtig.
 
@@ -357,7 +317,7 @@
        schwimmen. Die Koernung bricht die Baender auf, die dunkle Verlaeufe
        sonst zeigen. */
     --grund-flaeche:
-      url("/grund.svg?v=98") repeat,
+      url("/grund.svg?v=99") repeat,
       radial-gradient(120% 90% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.55) 100%),
       radial-gradient(78% 58% at 10% 4%, var(--grund-kuehl) 0%, transparent 68%),
       radial-gradient(66% 52% at 92% 14%, var(--grund-warm) 0%, transparent 68%),
@@ -503,14 +463,9 @@
      Jetzt tragen sie dieselbe: derselbe Aussenabstand wie eine Karte,
      dieselbe Rundung, dieselbe Kante, dieselbe Hebung. Der Grund laeuft
      links und rechts an ihnen vorbei, wie an den Karten auch. */
-  .flaeche {
-    margin: 0 14px 12px;
-    border-radius: var(--r-karte);
-    border: 1px solid var(--hair);
-    background: var(--glas-grund-karte);
-    box-shadow: var(--glas-kante), var(--hebung);
-    overflow: hidden;
-  }
+  /* .flaeche stand hier als gemeinsame Machart fuer die Kaesten — und kein
+     einziges Element trug sie. Ein Bauplan, den niemand befolgt, ist kein
+     Bauplan; dasselbe war schon einmal mit .glas passiert. */
 
   header {
     /* Dieselben Masse wie ueberall: die halbe Luft nach oben zum Bildrand,
@@ -635,9 +590,9 @@
     /* Scheint durch, sonst bliebe hier ein deckender Balken. */
     margin: 0 14px 12px;
     border-radius: var(--r-karte);
-    border: 1px solid var(--hair);
-    box-shadow: var(--glas-kante), var(--hebung);
-    background: var(--glas-grund-karte);
+    border: 1px solid var(--line);
+    box-shadow: var(--glas-kante-glanz), var(--hebung);
+    background: var(--glas-fenster);
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.16em;
@@ -970,16 +925,15 @@
     padding: 2px 4px;
     background: var(--muted);
   }
-  /* Banner */
-  /* Laesst den Grund durch, ohne Frost. Und traegt jetzt dieselbe Form wie
-     eine Karte — siehe .flaeche. */
+  /* Banner — dieselbe Machart wie jedes Fenster: durchsichtig, Kante,
+     Lichtrand. */
   .news-banner {
     margin: 0 14px 12px;
     border-radius: var(--r-karte);
-    border: 1px solid var(--hair);
-    box-shadow: var(--glas-kante), var(--hebung);
+    border: 1px solid var(--line);
+    box-shadow: var(--glas-kante-glanz), var(--hebung);
     overflow: hidden;
-    background: var(--glas-grund-karte);
+    background: var(--glas-fenster);
     color: var(--fg);
   }
   .news-banner-track {
@@ -1027,9 +981,9 @@
   .wirtschaft-block {
     margin: 0 14px 12px;
     border-radius: var(--r-karte);
-    border: 1px solid var(--hair);
-    box-shadow: var(--glas-kante), var(--hebung);
-    background: var(--glas-grund-karte);
+    border: 1px solid var(--line);
+    box-shadow: var(--glas-kante-glanz), var(--hebung);
+    background: var(--glas-fenster);
     padding: 12px 16px 13px;
     -webkit-tap-highlight-color: transparent;
     cursor: pointer;
@@ -2966,7 +2920,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=98");
+    background-image: url("/kerzen.svg?v=99");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -2980,7 +2934,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=98");
+    background-image: url("/kerzen-blass.svg?v=99");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -3537,11 +3491,13 @@
 
   .fg-box {
     margin: 14px 14px 0;
-    border: 1px solid var(--hair);
+    /* Er war als einziger Kasten deckend (var(--card)) und stand damit als
+       dunkle Platte zwischen lauter Fenstern. */
+    border: 1px solid var(--line);
     border-radius: var(--r-karte);
-    background: var(--card);
+    background: var(--glas-fenster);
     padding: 14px 16px 16px;
-    box-shadow: var(--hebung);
+    box-shadow: var(--glas-kante-glanz), var(--hebung);
   }
   .fg-box .fg-top {
     display: flex;
@@ -3709,7 +3665,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=98" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=99" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -3827,7 +3783,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=98" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=99" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3875,7 +3831,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=98" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=99" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -3894,7 +3850,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=98" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=99" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -4011,7 +3967,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=98" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=99" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -6437,7 +6393,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=98";
+      i.src = "/icon-512.png?v=99";
     });
     return symbolBild;
   }

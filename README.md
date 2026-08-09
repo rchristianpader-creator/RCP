@@ -672,6 +672,30 @@ geprüft werden — die Entwicklungsumgebung lässt keine fremden Hosts durch
 statt eines kaputten Bildes, und deshalb das Feld an der Position, das
 unabhängig davon funktioniert.
 
+### Alle Kästen sind Fenster
+
+Nach Kopf und Karten trugen die übrigen Flächen noch die alte Machart und
+standen als graue Platten dazwischen. Jetzt tragen sie alle dieselbe:
+`--glas-fenster` (durchsichtig), `--line` als Kante, `--glas-kante-glanz` als
+Lichtrand.
+
+| | vorher |
+|---|---|
+| Laufband | `--glas-grund-karte` |
+| Setup-Streifen | `--glas-grund-karte` |
+| Wirtschaftstermine | `--glas-grund-karte` |
+| Fear & Greed | **`--card`** — als einziger ganz deckend |
+
+Dabei zwei Stück toter Code weggeräumt, dieselbe Sorte wie damals `.glas`:
+
+- **`.flaeche`** stand als gemeinsame Machart für die Kästen im Stylesheet —
+  und kein einziges Element trug sie.
+- **`--glas-glanz-karte`**, die ganze Glanz-Machart (Lichtstreifen, Wölbung,
+  Rückwurf), hat kein Element mehr, seit die Fenster durchsichtig sind. Die
+  Symboltasten setzen ihren Schimmer aus `--glas-schimmer` und
+  `--glas-fuellung-taste` selbst zusammen. Ein Bauplan, den niemand befolgt,
+  ist kein Bauplan.
+
 ### Warum es trotzdem nicht scharf aussah
 
 „Sieht nicht so scharf aus wie auf dem Bild." Der Verdacht lag auf der Kante —
