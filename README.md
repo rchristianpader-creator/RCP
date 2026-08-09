@@ -425,6 +425,66 @@ niemanden aufhaelt. Dazu ein Notausgang direkt im Markup, der ihn auch dann
 wegnimmt, wenn weiter unten ein Skript stolpert.
 
 
+## Glas
+
+Flächen, die über etwas liegen, sind nicht mehr deckend: die klebende Leiste,
+die Blätter, der Streifen unten, der Neuheiten-Schirm und der Anmeldekasten.
+Vier Teile machen aus Milchglas Glas:
+
+| | |
+|---|---|
+| **Frost** | `saturate(210%) blur(28px)` — die Sättigung muss hoch, sonst wird alles dahinter grau statt farbig verwischt |
+| **Füllung** | eine helle Schicht darauf, sonst wäre Schrift auf bewegtem Grund nicht zu lesen |
+| **Kante** | drei Linien: eine helle oben, eine schwächere darunter, eine dunkle unten. Das ist der Unterschied zwischen „durchscheinend" und „aus Glas" |
+| **Schimmer** | ein schräger Glanz über die obere Hälfte, in einem `::before` hinter dem Inhalt |
+
+### Was Glas braucht, um Glas zu sein
+
+**Etwas dahinter.** Über flachem `#fafafa` bleibt jedes Glas ein hellerer
+Balken — man sieht ja nichts durch. Deshalb liegt der laufende Kursverlauf
+jetzt nicht mehr nur auf der Anmeldeseite und hinter dem Ladebildschirm,
+sondern **unter der ganzen Liste**: fest am Fenster, sehr blass, ohne eigene
+Bewegung. Sichtbar wird er vor allem dort, wo Glas darüber liegt — der
+`saturate(210%)` im Frost hebt ihn hervor, während er auf dem nackten
+Hintergrund kaum auffällt.
+
+**Zwei Dicken.** Die Leiste und der Streifen tragen Marken; dort darf viel
+durchscheinen (`0.42`). Ein Blatt trägt Sätze, und hinter Sätzen soll nichts
+stehen, das man mitliest (`0.66`).
+
+**Und die Karten bleiben deckend.** Glas über einer flachen Fläche ist kein
+Glas, es ist eine hellere Fläche mit Kosten. Karten tragen Charts und Text —
+dort wäre Durchscheinen ein Nachteil, kein Effekt.
+
+### Was fehlt, und warum
+
+Die **echte Brechung** — ein SVG-`feDisplacementMap` als `backdrop-filter` —
+ist bewusst nicht drin. Nur Chromium reicht SVG-Filter an `backdrop-filter`
+durch; auf dem iPhone, wo diese App läuft, täte sie nichts außer kosten.
+
+### Was es kostet
+
+Nichts Messbares. A/B beim Scrollen, sechsfach gedrosselter Prozessor,
+frischer Browser je Messung, fünf Durchgänge — Bilder über 32 ms je Lauf:
+
+| | Mittel | lange Bilder |
+|---|---|---|
+| ohne Glas | 17,0 ms | 0 · 2 · 0 · 8 · 3 |
+| Glas, erste Fassung | 17,0 ms | 1 · 0 · 0 · 0 · 0 |
+| Glas laut **plus** Kurve dahinter | **17,0 ms** | **0 · 0 · 0 · 0 · 0** |
+
+Das schlimmste Einzelbild lag in allen fünf Durchgängen bei 17 ms. Der Grund
+ist, dass nichts davon Layout anfasst: der Frost ist eine Sache für den
+Compositor, und die Kurve ist ein festes Hintergrundbild ohne eigene
+Animation.
+
+### Zwei Rückwege
+
+Ohne `backdrop-filter` wäre die Füllung eine halbdurchsichtige Schicht über
+scharfem Text darunter — unleserlich. Und wer sein Gerät auf weniger
+Transparenz gestellt hat, meint genau das. In beiden Fällen werden alle
+Flächen wieder deckend, der Schimmer verschwindet, die Kurve auch.
+
 ## Der Hintergrund aus Kerzen
 
 Anmeldeseite und Auftakt haben denselben Hintergrund: ein Kursverlauf aus

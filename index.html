@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="light">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#fafafa">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=77">
-<link rel="apple-touch-icon" href="/icon-180.png?v=77">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=78">
+<link rel="apple-touch-icon" href="/icon-180.png?v=78">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=77">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=78">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=77">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=78">
 
 <script>
 /* Im Browser oder als App?
@@ -106,6 +106,51 @@
     --r-chip: 11px;    /* die kleinen Marken in der Leiste */
     --r-marke: 6px;    /* Abzeichen, Punkte, Zaehler */
 
+    /* GLAS
+
+       Flaechen, die ueber etwas liegen — die klebende Leiste, die Blaetter,
+       der Streifen unten —, sind nicht mehr deckend, sondern durchscheinend.
+       Vier Teile machen aus Milchglas Glas:
+
+         Frost    das Verwischen dahinter, mit hochgezogener Saettigung.
+                  Ohne die Saettigung wird alles dahinter grau.
+         Fuellung eine helle Schicht darauf, sonst waere die Schrift auf
+                  bewegtem Grund nicht zu lesen.
+         Kante    eine Lichtlinie oben, eine dunkle unten. Das ist der
+                  Unterschied zwischen einer milchigen Scheibe und einer
+                  Kante, die Licht faengt.
+         Glanz    ein schraeger Schimmer ueber die obere Haelfte.
+
+       Was nicht ueber etwas liegt, bleibt deckend. Glas ueber einer flachen
+       Flaeche ist kein Glas, es ist nur eine hellere Flaeche mit Kosten. Die
+       Karten behalten deshalb ihren vollen Grund — sie tragen Charts und
+       Text, dort waere Durchscheinen ein Nachteil.
+
+       Die echte Brechung — ein SVG-Verschiebungsfilter im backdrop-filter —
+       fehlt mit Absicht: die setzt nur Chromium um. Auf dem iPhone, wo diese
+       App laeuft, wuerde sie nichts tun ausser kosten. */
+    --glas-frost: saturate(210%) blur(28px);
+    /* Duenner als zuvor: was man nicht durchscheinen sieht, ist kein Glas.
+       0,42 statt 0,62 — die Schrift traegt das, weil der Frost dahinter
+       alles zu Flaechen verwischt. */
+    --glas-fuellung: rgba(255, 255, 255, 0.42);
+    /* Dicker fuer Flaechen, auf denen man liest. Die Leiste und der Streifen
+       tragen Marken — dort darf viel durchscheinen. Ein Blatt traegt Saetze,
+       und hinter Saetzen soll nichts stehen, das man mitliest. */
+    --glas-fuellung-fest: rgba(255, 255, 255, 0.66);
+    /* Die Kante faengt Licht: oben eine helle Linie, darunter noch eine
+       schwaechere, unten eine dunkle. Drei Linien statt zwei — das ist der
+       Unterschied zwischen "durchscheinend" und "aus Glas". */
+    --glas-kante:
+      inset 0 1px 0 rgba(255, 255, 255, 0.95),
+      inset 0 2px 1px -1px rgba(255, 255, 255, 0.55),
+      inset 0 -1px 0 rgba(var(--fg-rgb), 0.09);
+    --glas-schimmer: linear-gradient(148deg,
+      rgba(255, 255, 255, 0.9) 0%,
+      rgba(255, 255, 255, 0.42) 22%,
+      rgba(255, 255, 255, 0.06) 46%,
+      rgba(255, 255, 255, 0) 64%);
+
     /* HEBUNG
 
        Die Haarlinie bleibt die Handschrift — sie zeichnet die Kante. Darunter
@@ -118,6 +163,73 @@
     --schleier: rgba(17, 17, 17, 0.62);
     --schatten: rgba(0, 0, 0, 0.24);
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* Der Bauplan. Wer .glas traegt, bekommt alle vier Teile.
+
+     Der Schimmer liegt in einem ::before, weil er nicht mitscrollen und
+     nichts abfangen darf — und weil ein zweiter Verlauf im background die
+     Fuellung ueberschreiben wuerde. */
+  .glas {
+    position: relative;
+    isolation: isolate;
+    background: var(--glas-fuellung);
+    -webkit-backdrop-filter: var(--glas-frost);
+    backdrop-filter: var(--glas-frost);
+    box-shadow: var(--glas-kante), var(--hebung);
+  }
+  .glas::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: inherit;
+    background: var(--glas-schimmer);
+  }
+
+  /* Zwei Faelle, in denen es wieder deckend wird.
+
+     Ohne backdrop-filter waere die Fuellung eine halbdurchsichtige Schicht
+     ueber scharfem Text darunter — unleserlich. Und wer sein Geraet auf
+     weniger Transparenz gestellt hat, meint genau das. */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glas, nav, .sheet-card, .install-bar, .neuheit-mitte { background: var(--card); }
+    .glas::before { display: none; }
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    .glas, nav, .sheet-card, .install-bar, .neuheit-mitte {
+      background: var(--card);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+    .glas::before { display: none; }
+  }
+
+  /* Der Kursverlauf hinter allem.
+
+     Ohne ihn bleibt jedes Glas ein hellerer Balken: durchscheinend ist nur
+     zu sehen, wenn darunter etwas ist. Der Verlauf lag bisher nur auf der
+     Anmeldeseite und hinter dem Ladebildschirm — jetzt liegt er unter der
+     ganzen Liste, sehr blass, und wird ueberall dort sichtbar, wo Glas
+     darueber liegt: in der klebenden Leiste, in den Blaettern, im Streifen
+     unten.
+
+     Fest am Fenster, nicht mitscrollend, und ohne eigene Bewegung: was
+     hinter zehn Charts liegt, soll nichts kosten. */
+  .grundkurve {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: url("/kerzen-blass.svg?v=78") repeat-x;
+    background-size: min(100vw, 620px) 62%;
+    background-position: center 62%;
+    opacity: 0.85;
+  }
+  .nur-web .grundkurve { display: none; }
+  @media (prefers-reduced-transparency: reduce) {
+    .grundkurve { display: none; }
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -199,8 +311,14 @@
     justify-content: center;
     position: sticky;
     top: 0;
-    background: var(--bg);
     z-index: 20;
+    /* Glas: die Karten ziehen sichtbar darunter durch. Das ist die Flaeche,
+       an der man den Unterschied am ehesten sieht — sie liegt den ganzen Tag
+       ueber bewegtem Inhalt. */
+    background: var(--glas-fuellung);
+    -webkit-backdrop-filter: var(--glas-frost);
+    backdrop-filter: var(--glas-frost);
+    box-shadow: var(--glas-kante);
     border-bottom: 1px solid var(--hair);
   }
   nav a {
@@ -1003,9 +1121,9 @@
     padding: 30px 22px;
     /* Milchig, damit die Kerzen dahinter weiterlaufen und trotzdem alles
        lesbar bleibt — dieselbe Machart wie beim Anmeldekasten. */
-    background: var(--glas-fest);
-    -webkit-backdrop-filter: saturate(130%) blur(16px);
-    backdrop-filter: saturate(130%) blur(16px);
+    background: var(--glas-fuellung-fest);
+    -webkit-backdrop-filter: var(--glas-frost);
+    backdrop-filter: var(--glas-frost);
     border: 1px solid var(--line);
     border-radius: var(--r-karte);
     transition: transform 0.54s var(--weich, cubic-bezier(0.32, 0.72, 0, 1));
@@ -1280,12 +1398,18 @@
   .sheet-card {
     width: 100%;
     max-width: 520px;
-    background: var(--card);
+    /* Glas: das Blatt faehrt ueber die Seite, und die soll darunter
+       durchscheinen statt zu verschwinden — aber gedaempft, hier wird
+       gelesen. */
+    background: var(--glas-fuellung-fest);
+    -webkit-backdrop-filter: var(--glas-frost);
+    backdrop-filter: var(--glas-frost);
     border-top: 1px solid var(--fg);
     border-radius: var(--r-blatt) var(--r-blatt) 0 0;
     padding: 22px 22px 28px;
     max-height: 88vh;
     overflow-y: auto;
+    box-shadow: var(--glas-kante), 0 -18px 50px -30px rgba(var(--fg-rgb), 0.4);
     animation: sheet-up 0.38s var(--ease) both;
   }
   @keyframes sheet-up {
@@ -1929,7 +2053,10 @@
     align-items: center;
     gap: 12px;
     padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
-    background: var(--card);
+    background: var(--glas-fuellung);
+    -webkit-backdrop-filter: var(--glas-frost);
+    backdrop-filter: var(--glas-frost);
+    box-shadow: var(--glas-kante);
     border-top: 1px solid var(--fg);
   }
   body.has-install-bar { padding-bottom: 104px; }
@@ -2181,7 +2308,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=77");
+    background-image: url("/kerzen.svg?v=78");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -2195,7 +2322,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=77");
+    background-image: url("/kerzen-blass.svg?v=78");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -2906,6 +3033,7 @@
  </div>
 </header>
 
+<div class="grundkurve" aria-hidden="true"></div>
 <div class="web-kerzen" id="webKerzen" aria-hidden="true"></div>
 <script>
 /* Im Browser bekommt die Installationsseite den laufenden Hintergrund.
@@ -2921,7 +3049,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=77" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=78" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -3039,7 +3167,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=77" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=78" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3087,7 +3215,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=77" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=78" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -3106,7 +3234,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=77" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=78" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3223,7 +3351,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=77" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=78" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -5341,7 +5469,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=77";
+      i.src = "/icon-512.png?v=78";
     });
     return symbolBild;
   }
