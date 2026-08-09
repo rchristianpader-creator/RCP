@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="dark">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#0a0d0c">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=101">
-<link rel="apple-touch-icon" href="/icon-180.png?v=101">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=102">
+<link rel="apple-touch-icon" href="/icon-180.png?v=102">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=101">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=102">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=101">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=102">
 
 <script>
 /* Im Browser oder als App?
@@ -378,6 +378,10 @@
     inset: 0;
     z-index: -1;
     pointer-events: none;
+    /* Die Lichtfelder ragen absichtlich ueber den Rand hinaus, damit nie
+       eine Kante ins Bild kommt. Ohne diese Zeile bekaeme die Seite dadurch
+       eine Rollflaeche, die niemand haben will. */
+    overflow: hidden;
     /* Keine Zeichnung mehr. Drei grosse Kurslinien standen hier und machten
        den Grund zu einem Bild, statt ihn Grund sein zu lassen. Die Flaeche
        selbst steht als Marke oben — sie gilt auch fuer den
@@ -389,34 +393,76 @@
 
   /* ETWAS, DAS DURCH DAS GLAS ZU SEHEN IST
 
-     Der Grund war schwarz und glatt. Schwarz soll er bleiben — aber eine
-     Scheibe, hinter der nichts ist, sieht nicht aus wie Glas, sondern wie
-     ein Loch. Auf dem Sperrbildschirm, der Vorlage fuer dieses ganze
-     Aussehen, laufen Kerzen dahinter; genau deshalb wirkt der Kasten dort
-     wie Glas.
+     Der Grund ist schwarz und soll es bleiben. Aber eine Scheibe, hinter
+     der nichts ist, sieht nicht aus wie Glas, sondern wie ein Loch — durch
+     Glas muss etwas zu sehen sein, sonst ist es keins.
 
-     Also dieselben Kerzen unter der Liste, aber:
+     Hier liefen zuerst die Kerzen von der Anmeldeseite. Sie sind das
+     Zeichen dieser App, aber als Hintergrund sind sie eine Kachel, die
+     sich alle 620 Pixel wiederholt: man sieht das Muster, und ein
+     sichtbares Muster ist das Gegenteil von edel.
 
-     - sehr blass. Beide Baender nehmen die blasse Kachel, nicht nur das
-       hintere. Sichtbar sein soll, dass sich dort etwas bewegt, nicht was.
-     - sehr langsam. 96 und 150 Sekunden fuer einen Umlauf statt 8 und 20.
-       Was in acht Sekunden durchs Bild zieht, zieht den Blick mit; was
-       zweieinhalb Minuten braucht, bemerkt man nur, wenn man hinsieht.
-     - nur verschoben, nie neu gezeichnet: eine Bewegung des Compositors,
-       kein Bild, das jedes Mal neu entsteht.
+     Jetzt drei grosse Lichtfelder, die langsam uebereinander hinwegziehen.
+     Sie haben keine Form, die man wiedererkennt, keine Kante, keine
+     Wiederholung — nur eine Helligkeit, die wandert. Genau das, was eine
+     polierte dunkle Flaeche unter bewegtem Licht tut.
 
-     Bei "weniger Bewegung" steht es still. */
-  /* Blasser ueber eine eigene Kachel, nicht ueber opacity: Deckkraft an
-     einer bewegten Ebene zwingt den Compositor, sie bei jedem Bild zu
-     ueberblenden. Gemessen kostete das hier 5 lange Bilder je Lauf statt
-     0 — bei genau demselben Aussehen. */
-  .grundkerzen .kerzen-band {
-    background-image: url("/kerzen-grund.svg?v=101");
+     Drei Regeln, alle aus Schaden gelernt:
+
+     1. Verschiedene Umlaufzeiten (73, 101, 139 Sekunden), und zwar
+        teilerfremde. Bei gleichen oder vielfachen Zeiten steht nach kurzer
+        Zeit wieder dasselbe Bild da — dann ist es doch ein Muster, nur ein
+        langsames.
+     2. Kein opacity. Deckkraft an einer bewegten Ebene zwingt den
+        Compositor, sie bei jedem Bild zu ueberblenden; das kostete hier
+        schon einmal 5 lange Bilder je Lauf. Die Schwaeche steckt in der
+        Farbe des Verlaufs selbst.
+     3. Nur translate3d. Ein Verlauf, der seine Stellung aendert, muesste
+        neu gezeichnet werden; eine Ebene, die sich verschiebt, wird
+        geschoben.
+
+     Bei "weniger Bewegung" stehen sie still — dann ist es ein ruhiger
+     Schimmer statt keiner. */
+  .lichtfeld {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    will-change: transform;
   }
-  .grundkerzen .kerzen-band.hinten { animation-duration: 150s; }
-  .grundkerzen .kerzen-band.vorn { animation-duration: 96s; }
+  /* Die Felder sind groesser als der Schirm und starten ausserhalb: so
+     kommt nie eine Kante ins Bild. */
+  .lichtfeld.eins {
+    left: -60%; top: -45%; width: 150%; height: 105%;
+    background: radial-gradient(closest-side,
+      rgba(64, 108, 138, 0.2) 0%, rgba(64, 108, 138, 0.07) 46%, rgba(64, 108, 138, 0) 72%);
+    animation: feldEins 73s ease-in-out infinite alternate;
+  }
+  .lichtfeld.zwei {
+    right: -55%; top: 8%; width: 135%; height: 90%;
+    background: radial-gradient(closest-side,
+      rgba(126, 96, 62, 0.17) 0%, rgba(126, 96, 62, 0.06) 46%, rgba(126, 96, 62, 0) 72%);
+    animation: feldZwei 101s ease-in-out infinite alternate;
+  }
+  .lichtfeld.drei {
+    left: -35%; bottom: -50%; width: 160%; height: 100%;
+    background: radial-gradient(closest-side,
+      rgba(78, 62, 104, 0.18) 0%, rgba(78, 62, 104, 0.06) 46%, rgba(78, 62, 104, 0) 72%);
+    animation: feldDrei 139s ease-in-out infinite alternate;
+  }
+  @keyframes feldEins {
+    from { transform: translate3d(0, 0, 0); }
+    to   { transform: translate3d(38%, 26%, 0); }
+  }
+  @keyframes feldZwei {
+    from { transform: translate3d(0, 0, 0); }
+    to   { transform: translate3d(-30%, 34%, 0); }
+  }
+  @keyframes feldDrei {
+    from { transform: translate3d(0, 0, 0); }
+    to   { transform: translate3d(26%, -40%, 0); }
+  }
   @media (prefers-reduced-motion: reduce) {
-    .grundkerzen .kerzen-band { animation: none; }
+    .lichtfeld { animation: none; }
   }
 
   .nur-web .grundkurve { display: none; }
@@ -2759,10 +2805,18 @@
     justify-content: center;
     background: var(--grund-flaeche);
     background-size: var(--grund-kacheln);
+    overflow: hidden;   /* die Lichtfelder ragen hinaus, wie bei .grundkurve */
     text-align: center;
     padding: 32px 28px;
     transition: opacity 0.61s var(--ease), visibility 0.61s;
   }
+  /* Hier stehen sie still. Drei bewegte Ebenen mehr kosten messbar, und
+     zwar genau waehrend die Liste gebaut wird. Laufen muessen sie auch
+     nicht: ease-in-out beginnt fast flach, nach sechs Sekunden — laenger
+     liegt der Deckel nie — ist das grosse Feld vier Pixel gewandert.
+     Stillstehend zeigen sie dasselbe Bild wie die laufenden darunter.
+     Zahlen dazu in auftaktlicht.mjs und in der README. */
+  .auftakt .lichtfeld { animation: none; }
   /* Die Kerzen bleiben im Markup — sie werden spaeter in den
      Neuheiten-Schirm und in die Browsersperre verschoben, und dorthin
      gehoeren sie weiterhin. Auf dem Ladebildschirm stehen sie still und
@@ -2954,7 +3008,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=101");
+    background-image: url("/kerzen.svg?v=102");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -2968,7 +3022,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=101");
+    background-image: url("/kerzen-blass.svg?v=102");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -3648,6 +3702,10 @@
      deckt die Sekunden zu, in denen Liste und Charts entstehen. -->
 <div id="auftakt" class="auftakt" role="status" aria-live="polite">
   <div class="kerzen" aria-hidden="true"><div class="kerzen-band hinten"></div><div class="kerzen-band vorn"></div></div>
+  <!-- Dieselben Lichtfelder wie unter der Liste, noch einmal: der
+       Ladebildschirm deckt die Liste ab und damit auch deren Licht,
+       durchscheinen koennen sie nicht. -->
+  <i class="lichtfeld eins"></i><i class="lichtfeld zwei"></i><i class="lichtfeld drei"></i>
   <div class="auftakt-mitte">
     <div class="label">Geschützt</div>
     <h1>Aktien-Liste</h1>
@@ -3692,7 +3750,7 @@
 </header>
 
 <div class="grundkurve" aria-hidden="true">
-  <div class="kerzen grundkerzen"><div class="kerzen-band hinten"></div><div class="kerzen-band vorn"></div></div>
+  <i class="lichtfeld eins"></i><i class="lichtfeld zwei"></i><i class="lichtfeld drei"></i>
 </div>
 <div class="web-kerzen" id="webKerzen" aria-hidden="true"></div>
 <script>
@@ -3709,7 +3767,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=101" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=102" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -3827,7 +3885,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=101" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=102" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3875,7 +3933,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=101" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=102" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -3894,7 +3952,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=101" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=102" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -4011,7 +4069,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=101" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=102" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -6437,7 +6495,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=101";
+      i.src = "/icon-512.png?v=102";
     });
     return symbolBild;
   }

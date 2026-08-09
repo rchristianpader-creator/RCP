@@ -681,28 +681,61 @@ Genau das fehlte, und es steht sogar in der Vorlage: auf dem Sperrbildschirm
 laufen **Kerzen** hinter dem Kasten — deshalb wirkt er dort wie Glas. Eine
 Scheibe, hinter der nichts ist, sieht nicht aus wie Glas, sondern wie ein Loch.
 
-Also dieselben Kerzen unter der Liste, mit drei Auflagen:
+Der erste Anlauf waren dieselben Kerzen unter der Liste, sehr blass und sehr
+langsam. Das trug, aber es blieb eine Zeichnung — und eine Zeichnung, die sich
+wiederholt: eine Kachel, die durchläuft, kommt irgendwann wieder. Auf die
+Rückmeldung „edleres Live-Hintergrund" ist sie ganz weggefallen.
+
+### Drei wandernde Lichtfelder
+
+Was jetzt unter der Liste liegt, hat keine Form mehr, sondern nur noch Licht:
+drei sehr große, sehr weiche Farbfelder, die langsam über den Schirm ziehen.
 
 | | |
 |---|---|
-| sehr blass | eigene Kachel `kerzen-grund.svg`, halb so stark wie die blasse |
-| sehr langsam | **96 s** und **150 s** je Umlauf statt 8 s und 20 s |
-| nur verschoben | `translate3d`, kein Bild, das neu entsteht |
+| Farben | gedecktes Blau, warmes Braun, Flieder — je ein `radial-gradient` |
+| Umläufe | **73 s**, **101 s**, **139 s** |
+| Bewegung | nur `translate3d`, `ease-in-out … alternate` |
 
-Was in acht Sekunden durchs Bild zieht, zieht den Blick mit; was zweieinhalb
-Minuten braucht, bemerkt man nur, wenn man hinsieht.
+Die drei Zeiten sind absichtlich teilerfremd. Zwei Felder mit 60 s und 120 s
+stünden alle zwei Minuten wieder gleich; 73, 101 und 139 treffen sich erst nach
+Tagen wieder. Es gibt damit kein Muster, das man wiedererkennt — genau das
+unterscheidet Licht von einer Kachel.
 
-**Der Preis, und wie er wieder verschwand.** Erster Anlauf mit
-`opacity: 0.5` am Band: **5 lange Bilder im Stillstand** (vorher 0), 4 beim
-Scrollen. Deckkraft an einer bewegten Ebene zwingt den Compositor, sie bei jedem
-Bild zu überblenden — dieselbe Falle, die schon einmal 3,0 statt 0,3 gekostet
-hat. Mit einer blasseren Kachel statt Deckkraft: **0 lange Bilder**, im
-Stillstand wie beim Scrollen, bei genau demselben Aussehen.
+**Keine Deckkraft.** Die Schwäche steckt in den Farben selbst (0,17 bis 0,20 im
+Kern, auf 0 auslaufend), nicht in einem `opacity` an der Ebene. Das ist die
+Lehre aus dem Kerzen-Anlauf: Deckkraft an einer bewegten Ebene zwingt den
+Compositor, sie bei jedem Bild zu überblenden — damals 5 lange Bilder im
+Stillstand statt 0. So gemessen: **0 lange Bilder**, Mittel 16 ms.
 
-`kerzen.py` leitet die beiden blasseren Kacheln jetzt aus `kerzen.svg` ab statt
-sie nebenher entstehen zu lassen. Die Formen werden gewürfelt — ein zweiter
-Aufruf ergäbe andere Kerzen, und die drei Kacheln müssen übereinanderpassen.
-Deshalb ist `kerzen.svg` die Vorlage und wird nur neu gewürfelt, wenn sie fehlt.
+`.grundkurve` bekommt dafür `overflow: hidden`. Die Felder ragen absichtlich
+über den Rand hinaus, damit nie eine Kante ins Bild kommt; ohne die Zeile
+bekäme die Seite dadurch eine Rollfläche.
+
+### Im Ladebildschirm steht das Licht still
+
+Der Ladebildschirm liegt über der Liste und deckt damit auch deren Licht ab. Er
+braucht die Felder also selbst — durchscheinen können sie nicht.
+
+Zuerst liefen sie dort mit. Das kostet, und `auftaktlicht.mjs` rechnet nach: drei
+bewegte Ebenen mehr kosten in vier Durchgängen **4,5 / 1,0 / 4,5 / 4,5 ms je
+Bild** (sechsfach gedrosselt). Der Betrag schwankt, das Vorzeichen nicht —
+sechs Ebenen waren in keinem Lauf schneller als drei. Und bezahlt wird genau in
+den Sekunden, in denen die Liste gebaut wird und die ersten Charts laden.
+
+Laufen müssen sie aber gar nicht. `ease-in-out` beginnt fast flach: nach sechs
+Sekunden — länger liegt der Deckel nie — ist das große Feld rund **vier Pixel**
+gewandert. Stillstehend zeigen sie dasselbe Bild wie die laufenden darunter.
+`uebergang-test` misst das an sechs Punkten des Grundes und findet über den
+ganzen Übergang keinen Unterschied.
+
+**Wie diese Zahl zustande kam.** Der erste Vergleich sagte 1 ms, der zweite
+4,5 — bei derselben Seite. Zwischen zwei Läufen rauscht mehr, als innerhalb
+eines Laufs sichtbar wird. Deshalb misst `auftaktlicht.mjs` jede Aufstellung
+**zweimal**: was drei Felder von drei Feldern trennt, ist der Nullwert, und erst
+was darüber hinausgeht, ist ein Preis. Geprüft wird am Ende nur noch die
+Richtung und eine weite Obergrenze — auf einen Betrag, der sich nicht
+reproduzieren lässt, gehört kein Deckel.
 
 ### Kein weißer Rand mehr
 
@@ -1177,8 +1210,11 @@ Prosa komprimiert sich fast vollständig weg. Ein Deckel auf der rohen Datei
 bestraft also Erklärungen und lässt Nutzlast durch — genau verkehrt herum.
 
 Deshalb jetzt zwei Werte: **gzip unter 84 kB** ist der scharfe (das ist die
-Ladezeit), **roh unter 300 kB** bleibt als weiter Riegel gegen ein
-Davonlaufen. Gemessen wird die Datei selbst, nicht die Antwort des Servers —
+Ladezeit), **roh unter 320 kB** bleibt als weiter Riegel gegen ein
+Davonlaufen. (Der rohe Riegel stand bei 300 und ist aus demselben Grund
+gestiegen wie der gzip-Deckel von 80 auf 84: bei 301 kB roh sind es 79 kB
+gzip — die Leitung merkt von den 300 nichts, und abgeschnitten würden nur
+Erklärungen.) Gemessen wird die Datei selbst, nicht die Antwort des Servers —
 der lokale Prüfserver komprimiert nicht, und der Wert soll überall derselbe
 sein.
 

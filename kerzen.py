@@ -119,5 +119,9 @@ if __name__ == "__main__":
         open("kerzen.svg", "w", encoding="utf-8").write(s)
 
     blasser("kerzen.svg", 0.41, "kerzen-blass.svg")
-    blasser("kerzen-blass.svg", 0.5, "kerzen-grund.svg")
-    print("abgeleitet: kerzen-blass.svg (41 %), kerzen-grund.svg (halb davon)")
+    print("abgeleitet: kerzen-blass.svg (41 %)")
+
+# Eine dritte, noch blassere Kachel lag hier kurz: sie war fuer die Kerzen
+# unter der Liste gedacht. Die sind durch wandernde Lichtfelder ersetzt —
+# eine Kachel wiederholt sich, und ein sichtbares Muster ist das Gegenteil
+# von edel. blasser() bleibt, es ist der Weg zu jeder weiteren Stufe.
