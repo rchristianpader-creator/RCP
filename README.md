@@ -653,6 +653,46 @@ Ein Fehler dabei, der fast durchgegangen wäre: die Messung hängte eine Scheibe
 ein, in der das Kantenlicht **fehlte** — gemessen wurden zwei Bewegungen statt
 drei, und ausgerechnet die, deretwegen gemessen wurde, war nicht dabei.
 
+### Der Einzug: was unter dem Deckel lag, kommt herein
+
+Rückmeldung: „Übergang vom Laden zur App laut, Karten und so weiter, flüssig,
+liquid, laute Animation." Der Übergang war bis dahin **halb**: der Deckel löste
+sich auf, und darunter stand alles schon fertig da. Das war sogar Absicht — „was
+danach kommt, war die ganze Zeit an derselben Stelle". Nur sieht das nach Schnitt
+aus, nicht nach Bewegung: vier Sekunden Glas, und dann ist auf einmal alles da.
+
+Jetzt kommen die Blöcke gestaffelt herein — Kopf, Kürzel, Banner, Termine,
+Setup-Streifen, Fear & Greed, und dann Karte für Karte. Von unten, leicht
+kleiner, mit einer Kurve, die überschwingt: etwas, das ankommt und sich setzt,
+nicht etwas, das eingeblendet wird.
+
+**Die Staffel ist der eigentliche Trick.** Alle zugleich wären ein Block, der
+sich bewegt; nacheinander wird daraus ein Zug, der durch die Seite läuft. 55 ms
+Abstand, fünfzehn Elemente.
+
+Die Nummer steht als `--n` am Element, nicht als `nth-child` im Stylesheet: die
+Zahl der Karten steht erst zur Laufzeit fest, und Blöcke können ausgeblendet sein
+(der Wirtschaftskasten ist es oft). Gezählt wird deshalb, was **wirklich zu sehen
+ist**. Zuerst standen dort alle Kinder von `#app` — darin sind aber der
+Kartenbehälter und der Fuß, die gar nicht mitfahren. Sie hätten Nummern
+verbraucht, und der Zug hätte an ihrer Stelle Lücken gehabt. `einzug-test` prüft
+genau das: lückenlos von 0 hoch, jede Nummer nur einmal.
+
+**Und ein Licht läuft mit hinunter.** Eine Wellenfront über die ganze Seite — im
+Ladebildschirm ging das Licht quer, hier läuft es der Staffel hinterher nach
+unten. Damit ist der Übergang *eine* Bewegung und nicht zwei. Der erste Anlauf
+lief weich aus und war im Bild kaum zu finden; jetzt steht die Spitze schmal und
+hell kurz vor der Unterkante und fällt dahinter fast senkrecht ab. So liest es
+sich als Kante, die durchs Bild läuft — und eine Kante sieht man.
+
+**Ausgelöst wird der Einzug in demselben Bild, in dem der Deckel zu gehen
+beginnt.** Nacheinander wären es zwei Bewegungen. `einzug-test` prüft, dass der
+Auftakt in diesem Moment noch da ist *und* schon `.weg` trägt.
+
+**Aufgeräumt wird hinterher**: Klasse, Nummern und Lichtband verschwinden, sobald
+die Bewegung durch ist. Bliebe die Klasse stehen, würde jede später gebaute Karte
+noch einmal hereinfahren — auch das steht als Prüfung drin.
+
 **Der Übergang.** Die Scheibe geht zuerst und schneller als der Schirm um sie
 herum: sie hebt sich 12 px ab, wird auf 0,97 kleiner und löst sich auf. Kein
 Schirm, der weggeschoben wird, sondern ein Deckel, der abgenommen wird — was
@@ -1311,7 +1351,7 @@ Roh **+22,6 kB**, über die Leitung **+7,4**. Der Unterschied ist Prosa, und
 Prosa komprimiert sich fast vollständig weg. Ein Deckel auf der rohen Datei
 bestraft also Erklärungen und lässt Nutzlast durch — genau verkehrt herum.
 
-Deshalb jetzt zwei Werte: **gzip unter 88 kB** ist der scharfe (das ist die
+Deshalb jetzt zwei Werte: **gzip unter 95 kB** ist der scharfe (das ist die
 Ladezeit), **roh unter 320 kB** bleibt als weiter Riegel gegen ein
 Davonlaufen. (Der rohe Riegel stand bei 300 und ist aus demselben Grund
 gestiegen wie der gzip-Deckel von 80 auf 84: bei 301 kB roh sind es 79 kB
@@ -1327,9 +1367,26 @@ wiederholte die Geometrie von `.lichtfeld` (jetzt tragen die Elemente beide
 Klassen — eine Quelle statt zweier, die auseinanderlaufen können).
 
 Trotzdem: ein Deckel, der dreimal nachgibt, ist kein Deckel mehr, sondern ein
-Nachlauf. Deshalb steht es als Notiz im Test und hier: **reißt er das nächste
-Mal, gehört nicht der Deckel angehoben, sondern die Datei angesehen.** 88 kB gzip
-sind auf einer langsamen Verbindung rund 1,3 Sekunden. Gemessen wird die Datei selbst, nicht die Antwort des Servers —
+Nachlauf. Deshalb stand als Notiz im Test und hier: **reißt er das nächste Mal,
+gehört nicht der Deckel angehoben, sondern die Datei angesehen.**
+
+Er riss beim nächsten Mal — der Einzug. Also angesehen. Gefunden: drei Keyframes,
+die von nichts benutzt wurden (`fadeUp`, `lineIn`, `shakeX`), und ein doppelter
+Einzug im Ladebildschirm (`auftaktRein` neben `scheibeRein` — die Scheibe fährt
+als Ganzes herein, was darin noch einmal einzeln steigt, sieht niemand). Beides
+ist raus. **Gebracht hat es 0,1 kB.**
+
+Das ist das Ergebnis, und es ist eins: in dieser Datei steckt kein Kilobyte
+Speck. Sie ist groß, weil sie viel kann und weil danebensteht, warum sie es so
+kann — und gzip bestraft nicht Wiederholung, sondern *einmaligen* Text. Vier
+gleiche `animation:`-Zeilen zu löschen bringt fast nichts; ein Satz Erklärung
+kostet mehr als sie alle.
+
+**Wer die Datei kleiner will, muss sie teilen** — das CSS in eine eigene Datei,
+die der Service Worker getrennt vorhält. Das ist ein Umbau, keine Kürzung, und er
+gehört an einen Anfang, nicht ans Ende einer langen Runde. Bis dahin steht der
+Deckel bei **95 kB** statt bei 88: einmal mit Luft, damit er nicht jede Runde
+nachgibt. Reißt er wieder, ist die Teilung fällig — nicht die nächste Zahl. Gemessen wird die Datei selbst, nicht die Antwort des Servers —
 der lokale Prüfserver komprimiert nicht, und der Wert soll überall derselbe
 sein.
 

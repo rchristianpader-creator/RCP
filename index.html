@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="dark">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#0a0d0c">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=104">
-<link rel="apple-touch-icon" href="/icon-180.png?v=104">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=105">
+<link rel="apple-touch-icon" href="/icon-180.png?v=105">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=104">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=105">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=104">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=105">
 
 <script>
 /* Im Browser oder als App?
@@ -2780,17 +2780,10 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* fadeUp, lineIn und shakeX sind weg — von nichts benutzt. */
   @keyframes riseIn {
     from { opacity: 0; transform: translate3d(0, 12px, 0); }
     to { opacity: 1; transform: translate3d(0, 0, 0); }
-  }
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translate3d(0, 10px, 0); }
-    to { opacity: 1; transform: translate3d(0, 0, 0); }
-  }
-  @keyframes lineIn {
-    from { transform: scaleX(0); opacity: 0; }
-    to { transform: scaleX(1); opacity: 0.3; }
   }
   /* DER AUFTAKT
      Wer die App vom Home-Bildschirm oeffnet und angemeldet bleibt, sieht
@@ -2977,13 +2970,11 @@
     color: var(--muted);
     font-weight: 600;
     margin-bottom: 12px;
-    animation: auftaktRein 0.68s var(--ease) 0.07s both;
   }
   .auftakt h1 {
     font-size: 26px;
     font-weight: 700;
     letter-spacing: -0.4px;
-    animation: auftaktRein 0.68s var(--ease) 0.16s both;
   }
   .auftakt .wer {
     font-size: 13px;
@@ -3020,7 +3011,6 @@
     margin: 28px auto 0;
     overflow: hidden;
     position: relative;
-    animation: auftaktRein 0.68s var(--ease) 0.27s both;
   }
   /* Ein Licht, das immer laeuft — auch bei Ladestand null.
 
@@ -3081,12 +3071,9 @@
     color: var(--muted);
     font-weight: 600;
     margin-top: 14px;
-    animation: auftaktRein 0.68s var(--ease) 0.35s both;
   }
-  @keyframes auftaktRein {
-    from { opacity: 0; transform: translate3d(0, 8px, 0); }
-    to   { opacity: 1; transform: none; }
-  }
+  /* auftaktRein ist weg: die Scheibe faehrt jetzt als Ganzes herein, und was
+     darin noch einmal einzeln steigt, sieht niemand. */
 
   /* An der Scheibe: sie kommt aus 0,94 herein, mit einem Hauch
      Ueberschwung, damit sie sich setzt statt aufzupoppen. Ein Lichtzug
@@ -3102,6 +3089,82 @@
      Zug ueber den ganzen Schirm faehrt ohnehin ueber sie mit, und zwei
      Lichter, die dasselbe tun, sind kein doppelter Glanz, sondern
      Verwaschung. */
+
+  /* DER EINZUG: WAS UNTER DEM DECKEL LAG, KOMMT HEREIN
+
+     Bisher war der Uebergang halb: der Deckel loeste sich auf, und darunter
+     stand die Liste schon fertig da. Das war der Punkt der alten Bauweise —
+     "was danach kommt, war die ganze Zeit an derselben Stelle". Nur sieht
+     das nach Schnitt aus, nicht nach Bewegung: vier Sekunden Glas, und dann
+     ist auf einmal alles da.
+
+     Jetzt kommen die Bloecke herein, einer nach dem anderen. Von unten,
+     leicht kleiner, und mit einer Kurve, die ueberschwingt — das ist das
+     Fluessige daran: etwas, das ankommt und sich setzt, nicht etwas, das
+     eingeblendet wird.
+
+     Die Staffel ist der eigentliche Trick. Alle zugleich waeren ein Block,
+     der sich bewegt; nacheinander wird daraus ein Zug, der durch die Seite
+     laeuft. 55 ms Abstand, und die Karten setzen ihn fort. */
+  body.einzug #app > header,
+  body.einzug #app > nav,
+  body.einzug #app > .news-banner,
+  body.einzug #app > .wirtschaft-block,
+  body.einzug #app > .setup-strip,
+  body.einzug #app > .fg-box,
+  body.einzug .karten > .card {
+    animation: einzugRein 0.78s cubic-bezier(0.22, 1.02, 0.3, 1) both;
+    animation-delay: calc(var(--n, 0) * 0.055s);
+  }
+  @keyframes einzugRein {
+    from { opacity: 0; transform: translate3d(0, 34px, 0) scale(0.955); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  /* Und ein Licht, das mit hinunterlaeuft.
+
+     Es haengt nicht an einem einzelnen Block, sondern faehrt ueber die ganze
+     Seite — dieselbe Bewegung wie im Ladebildschirm, nur andersherum: dort
+     ging das Licht quer, hier laeuft es der Staffel hinterher nach unten.
+     Damit ist der Uebergang eine Bewegung und nicht zwei. */
+  .einzug-licht {
+    position: fixed;
+    left: -20%;
+    right: -20%;
+    top: -45%;
+    height: 45%;
+    z-index: 250;
+    pointer-events: none;
+    /* Eine Wellenfront, kein Nebel. Der erste Anlauf lief weich aus und war
+       im Bild kaum zu finden; jetzt steht die Spitze schmal und hell kurz
+       vor der Unterkante, faellt dahinter fast senkrecht ab und zieht einen
+       langen Schweif nach oben. So liest es sich als Kante, die durchs Bild
+       laeuft — und eine Kante sieht man. */
+    background: linear-gradient(180deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.06) 40%,
+      rgba(255, 255, 255, 0.20) 66%,
+      rgba(255, 255, 255, 0.42) 83%,
+      rgba(226, 240, 255, 0.72) 92%,
+      rgba(226, 240, 255, 0.30) 97%,
+      rgba(255, 255, 255, 0) 100%);
+    animation: einzugLicht 1.15s cubic-bezier(0.42, 0, 0.24, 1) both;
+  }
+  @keyframes einzugLicht {
+    from { transform: translate3d(0, 0, 0); }
+    to   { transform: translate3d(0, 330%, 0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    body.einzug #app > header,
+    body.einzug #app > nav,
+    body.einzug #app > .news-banner,
+    body.einzug #app > .wirtschaft-block,
+    body.einzug #app > .setup-strip,
+    body.einzug #app > .fg-box,
+    body.einzug .karten > .card { animation: none; }
+    .einzug-licht { display: none; }
+  }
 
   /* Das Kantenlicht: ein gedrehtes Quadrat, kein gedrehter Verlauf.
 
@@ -3148,10 +3211,6 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .auftakt .label,
-    .auftakt h1,
-    .auftakt .balken,
-    .auftakt .tun { animation: none; }
     .auftakt-mitte,
     .auftakt-liquid,
     .auftakt-flut,
@@ -3197,7 +3256,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=104");
+    background-image: url("/kerzen.svg?v=105");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -3211,7 +3270,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=104");
+    background-image: url("/kerzen-blass.svg?v=105");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -3622,13 +3681,6 @@
     nav { transition: none; }
   }
 
-  @keyframes shakeX {
-    0%, 100% { transform: translate3d(0, 0, 0); }
-    20% { transform: translate3d(-8px, 0, 0); }
-    40% { transform: translate3d(8px, 0, 0); }
-    60% { transform: translate3d(-5px, 0, 0); }
-    80% { transform: translate3d(5px, 0, 0); }
-  }
 
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
@@ -3967,7 +4019,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=104" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=105" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -4085,7 +4137,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=104" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=105" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -4133,7 +4185,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=104" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=105" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -4152,7 +4204,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=104" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=105" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -4269,7 +4321,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=104" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=105" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -6538,6 +6590,50 @@ if ("serviceWorker" in navigator) {
     zeichnen();
   }
 
+  /* Der Einzug. Wird genau in dem Bild ausgeloest, in dem der Deckel zu
+     gehen beginnt — beides zusammen ist eine Bewegung, nacheinander waeren
+     es zwei.
+
+     Die Nummer je Block steht als --n am Element und nicht als nth-child im
+     Stylesheet: die Zahl der Karten steht erst zur Laufzeit fest, und
+     Bloecke koennen ausgeblendet sein (der Wirtschaftskasten ist es oft).
+     Gezaehlt wird deshalb, was wirklich zu sehen ist — sonst haette die
+     dritte Karte die Verzoegerung der fuenften und der Zug bekaeme Luecken.
+
+     Aufgeraeumt wird hinterher: die Klasse bleibt nur, solange die Bewegung
+     laeuft. Sonst faengt jede spaeter gebaute Karte noch einmal von vorn an
+     hereinzufahren. */
+  function einzug() {
+    var app = document.getElementById("app");
+    if (!app) return;
+    /* Genau die, die das Stylesheet auch bewegt. Zuerst stand hier "alle
+       Kinder von #app" — darin sind aber der Kartenbehaelter und der Fuss,
+       die nicht mitfahren. Sie haetten Nummern verbraucht, und der Zug
+       haette an ihrer Stelle Luecken gehabt. */
+    var WELCHE = "#app > header, #app > nav, #app > .news-banner," +
+                 "#app > .wirtschaft-block, #app > .setup-strip, #app > .fg-box";
+    var sichtbar = function (e) {
+      return e && !e.hidden && getComputedStyle(e).display !== "none";
+    };
+    var alle = [].slice.call(document.querySelectorAll(WELCHE)).filter(sichtbar)
+      .concat([].slice.call(document.querySelectorAll(".karten > .card")));
+    alle.forEach(function (e, i) { e.style.setProperty("--n", i); });
+
+    document.body.classList.add("einzug");
+
+    var licht = document.createElement("i");
+    licht.className = "einzug-licht";
+    licht.setAttribute("aria-hidden", "true");
+    document.body.appendChild(licht);
+
+    var dauer = 780 + alle.length * 55 + 200;
+    setTimeout(function () {
+      document.body.classList.remove("einzug");
+      alle.forEach(function (e) { e.style.removeProperty("--n"); });
+      if (licht.parentNode) licht.parentNode.removeChild(licht);
+    }, Math.min(dauer, 3000));
+  }
+
   function schluss() {
     if (fertig) return;
     fertig = true;
@@ -6549,6 +6645,7 @@ if ("serviceWorker" in navigator) {
     setTimeout(function () {
       clearInterval(takt);
       if (balken) balken.style.transform = "scaleX(1)";
+      einzug();
       kasten.classList.add("weg");
       setTimeout(function () {
         /* Die Kerzen ueberleben den Auftakt: der Schirm mit dem, was
@@ -6754,7 +6851,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=104";
+      i.src = "/icon-512.png?v=105";
     });
     return symbolBild;
   }
