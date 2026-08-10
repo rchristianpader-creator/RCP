@@ -605,6 +605,54 @@ Damit fällt auch der Grund für die dunkle Lage unter der Textscheibe weg — s
 war gegen die laufenden Kerzen. Die Scheibe trägt jetzt denselben Glanz und
 dieselbe Kante wie eine Karte.
 
+### Vier Sekunden Liquid, laut und im Vollbild
+
+Rückmeldung: „Ladebildschirm edles lautes Liquid Glass, 4 Sekunden." Der
+Ladebildschirm war bis dahin eine Überbrückung — **900 ms** Mindestdauer, gerade
+genug, damit es nicht zuckt. Jetzt ist er ein Auftritt.
+
+**Die Dauer.** `MINDESTENS` steht auf **4000 ms**, die obere Grenze auf 5200 (sie
+muss über den vier Sekunden liegen, sonst schneidet sie den Auftritt ab) und der
+Notausgang ganz oben auf 7000. Der Preis ist ehrlich zu nennen: liegt alles im
+Zwischenspeicher, wartet man jetzt länger als vorher. Das ist der Handel.
+
+**Der Balken zeigt den kleineren von zwei Werten** — was geladen ist und wie viel
+von den vier Sekunden herum ist. Nur nach Schritten wäre er nach zwei Sekunden
+voll und stünde dann still: ein Hänger, kein Auftritt. Nur nach der Zeit wäre er
+eine Lüge. So ist er genau dann voll, wenn der Deckel abgeht.
+
+**Was sich bewegt.** Ein erster Anlauf hielt sich an der Scheibe fest — ein
+Lichtzug von 133 px auf einem Schirm von 390. Zu leise. Jetzt Vollbild:
+
+| | |
+|---|---|
+| drei Farbfelder | Blau, Bernstein, Flieder — kräftig statt geahnt, weit statt kaum, 4 s statt 73 |
+| eine Flut | ein Puls aus der Mitte nach außen, zweimal |
+| ein Lichtzug | über den ganzen Schirm, über die Scheibe mit, zweimal |
+| die Scheibe | aus 0,94 herein, mit einem Hauch Überschwung |
+| ein Kantenlicht | läuft zweimal um den Rand der Scheibe |
+
+**Alles Laute liegt auf einer eigenen Lage**, die in der letzten Sekunde
+zerfällt. Ohne diese Trennung wäre der Übergang ein Sprung: oben kräftige
+Farben, darunter die geahnten der Liste, und im Moment des Abnehmens würde es
+sichtbar dunkler. Was zurückbleibt, ist der Grund der Liste, unverändert —
+`uebergang-test` misst weiterhin an sechs Punkten dieselben Werte vor und nach
+dem Übergang.
+
+**Das Kantenlicht ist ein gedrehtes Quadrat, kein gedrehter Verlauf.** Naheliegend
+wäre ein `conic-gradient`, dessen Anfangswinkel wandert — das zeichnet die
+Scheibe bei jedem Bild neu. Ob das teuer ist, war hier **nicht feststellbar**:
+der Ladebildschirm rauscht mit 78 ms, die fertige Liste noch mit 27, und der
+gesuchte Unterschied liegt darunter. Was man nicht messen kann, baut man besser
+nicht ein. Stattdessen ein Quadrat mit festem Verlauf, das sich dreht —
+quadratisch, damit die Drehung keine Kante ins Bild bringt, per `transform`,
+damit nichts neu gezeichnet wird. Eine Maske schneidet den 1 px breiten Rand
+heraus. Danach: **2,5 ms bei 42 ms Rauschen**, also unter der Nachweisgrenze.
+
+Ein Fehler dabei, der fast durchgegangen wäre: die Messung hängte eine Scheibe
+ein, in der das Kantenlicht **fehlte** — gemessen wurden zwei Bewegungen statt
+drei, und ausgerechnet die, deretwegen gemessen wurde, war nicht dabei.
+
 **Der Übergang.** Die Scheibe geht zuerst und schneller als der Schirm um sie
 herum: sie hebt sich 12 px ab, wird auf 0,97 kleiner und löst sich auf. Kein
 Schirm, der weggeschoben wird, sondern ein Deckel, der abgenommen wird — was
@@ -1263,12 +1311,25 @@ Roh **+22,6 kB**, über die Leitung **+7,4**. Der Unterschied ist Prosa, und
 Prosa komprimiert sich fast vollständig weg. Ein Deckel auf der rohen Datei
 bestraft also Erklärungen und lässt Nutzlast durch — genau verkehrt herum.
 
-Deshalb jetzt zwei Werte: **gzip unter 86 kB** ist der scharfe (das ist die
+Deshalb jetzt zwei Werte: **gzip unter 88 kB** ist der scharfe (das ist die
 Ladezeit), **roh unter 320 kB** bleibt als weiter Riegel gegen ein
 Davonlaufen. (Der rohe Riegel stand bei 300 und ist aus demselben Grund
 gestiegen wie der gzip-Deckel von 80 auf 84: bei 301 kB roh sind es 79 kB
 gzip — die Leitung merkt von den 300 nichts, und abgeschnitten würden nur
-Erklärungen.) Gemessen wird die Datei selbst, nicht die Antwort des Servers —
+Erklärungen.)
+
+**Drei Anhebungen in einer Sitzung — und das ist eine zu viel.** 80 → 84 (Prosa),
+84 → 86 (die Scheibe mit dem Kürzel), 86 → 88 (die vier Sekunden Liquid). Jedes
+Mal war der Grund echt, jedes Mal ist vorher gekürzt worden, und beim letzten Mal
+ist dabei sogar echter Ballast gefunden worden: der zweite Lichtzug über der
+Scheibe war neben dem über den ganzen Schirm überflüssig, und `.liquidfeld`
+wiederholte die Geometrie von `.lichtfeld` (jetzt tragen die Elemente beide
+Klassen — eine Quelle statt zweier, die auseinanderlaufen können).
+
+Trotzdem: ein Deckel, der dreimal nachgibt, ist kein Deckel mehr, sondern ein
+Nachlauf. Deshalb steht es als Notiz im Test und hier: **reißt er das nächste
+Mal, gehört nicht der Deckel angehoben, sondern die Datei angesehen.** 88 kB gzip
+sind auf einer langsamen Verbindung rund 1,3 Sekunden. Gemessen wird die Datei selbst, nicht die Antwort des Servers —
 der lokale Prüfserver komprimiert nicht, und der Wert soll überall derselbe
 sein.
 

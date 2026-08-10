@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="dark">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#0a0d0c">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=103">
-<link rel="apple-touch-icon" href="/icon-180.png?v=103">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=104">
+<link rel="apple-touch-icon" href="/icon-180.png?v=104">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=103">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=104">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=103">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=104">
 
 <script>
 /* Im Browser oder als App?
@@ -2823,13 +2823,124 @@
     padding: 32px 28px;
     transition: opacity 0.61s var(--ease), visibility 0.61s;
   }
-  /* Hier stehen sie still. Drei bewegte Ebenen mehr kosten messbar, und
-     zwar genau waehrend die Liste gebaut wird. Laufen muessen sie auch
-     nicht: ease-in-out beginnt fast flach, nach sechs Sekunden — laenger
-     liegt der Deckel nie — ist das grosse Feld vier Pixel gewandert.
-     Stillstehend zeigen sie dasselbe Bild wie die laufenden darunter.
-     Zahlen dazu in auftaktlicht.mjs und in der README. */
-  .auftakt .lichtfeld { animation: none; }
+  /* VIER SEKUNDEN LIQUID, UND DANN DER GRUND DER LISTE
+
+     Die stillen Felder bleiben still und leise — sie sind das, was nach dem
+     Auftritt uebrig bleibt, und muessen deshalb aussehen wie die unter der
+     Liste. Alles Laute liegt auf einer eigenen Lage darueber und zerfaellt
+     in der letzten Sekunde. Ohne diese Trennung waere der Uebergang ein
+     Sprung: oben kraeftige Farben, darunter geahnte.
+
+     Die Deckkraft bewegt sich nur in dieser letzten Sekunde. Ueberblenden
+     bei jedem Bild ist teuer, das ist mehrfach gemessen; hier ist es der
+     Preis fuer einen Uebergang ohne Kante, faellig genau dann, wenn die
+     Liste ohnehin fertig ist. Naeheres in der README. */
+  /* Nur die unmittelbaren: die drei in der lauten Lage tragen dieselbe
+     Klasse fuer die Geometrie und sollen sehr wohl laufen. */
+  .auftakt > .lichtfeld { animation: none; }
+  .auftakt-liquid {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+    animation: liquidAus 4s linear both;
+  }
+  @keyframes liquidAus {
+    0%, 78% { opacity: 1; }
+    100%    { opacity: 0; }
+  }
+
+  /* Lage und Groesse kommen von .lichtfeld — die Elemente tragen beide
+     Klassen. Hier steht nur, was anders ist: kraeftigere Farbe und die
+     Bewegung der vier Sekunden. Zweimal dieselbe Geometrie zu schreiben
+     waeren zwei Stellen, die auseinanderlaufen. */
+  .liquidfeld.eins {
+    background: radial-gradient(closest-side,
+      rgba(74, 138, 186, 0.50) 0%, rgba(74, 138, 186, 0.19) 44%, rgba(74, 138, 186, 0) 72%);
+    animation: zugFeldEins 4s cubic-bezier(0.32, 0.08, 0.18, 1) both;
+  }
+  .liquidfeld.zwei {
+    background: radial-gradient(closest-side,
+      rgba(196, 138, 76, 0.44) 0%, rgba(196, 138, 76, 0.17) 44%, rgba(196, 138, 76, 0) 72%);
+    animation: zugFeldZwei 4s cubic-bezier(0.32, 0.08, 0.18, 1) both;
+  }
+  .liquidfeld.drei {
+    background: radial-gradient(closest-side,
+      rgba(126, 90, 190, 0.46) 0%, rgba(126, 90, 190, 0.18) 44%, rgba(126, 90, 190, 0) 72%);
+    animation: zugFeldDrei 4s cubic-bezier(0.32, 0.08, 0.18, 1) both;
+  }
+  @keyframes zugFeldEins {
+    0%   { transform: translate3d(-34%, -26%, 0) scale(0.62); }
+    55%  { transform: translate3d(30%, 26%, 0) scale(1.34); }
+    100% { transform: none; }
+  }
+  @keyframes zugFeldZwei {
+    0%   { transform: translate3d(38%, 30%, 0) scale(0.58); }
+    55%  { transform: translate3d(-28%, -22%, 0) scale(1.28); }
+    100% { transform: none; }
+  }
+  @keyframes zugFeldDrei {
+    0%   { transform: translate3d(-8%, 40%, 0) scale(1.42); }
+    55%  { transform: translate3d(22%, -30%, 0) scale(0.66); }
+    100% { transform: none; }
+  }
+
+  /* Der Lichtzug ueber den ganzen Schirm. Der an der Scheibe allein war zu
+     leise: 133 Pixel auf einem Schirm von 390. Dieser faehrt ueber alles,
+     ueber die Scheibe mit, zweimal in den vier Sekunden. Ueber der Schrift
+     wird es einen Wimpernschlag lang heller — genau das macht eine Scheibe
+     aus, ueber die Licht streicht. Laenger als ein Wimpernschlag waere
+     Blendung, deshalb 0,42 in der Spitze. */
+  .auftakt-zug {
+    position: absolute;
+    top: -40%;
+    bottom: -40%;
+    left: -70%;
+    width: 55%;
+    pointer-events: none;
+    z-index: 5;
+    background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.05) 26%,
+      rgba(255, 255, 255, 0.22) 44%,
+      rgba(255, 255, 255, 0.42) 50%,
+      rgba(255, 255, 255, 0.22) 56%,
+      rgba(255, 255, 255, 0.05) 74%,
+      rgba(255, 255, 255, 0) 100%);
+    transform: rotate(14deg) translate3d(0, 0, 0);
+    animation: vollZug 1.85s cubic-bezier(0.5, 0, 0.3, 1) 0.22s 2 both;
+  }
+  @keyframes vollZug {
+    from { transform: rotate(14deg) translate3d(0, 0, 0); }
+    to   { transform: rotate(14deg) translate3d(430%, 0, 0); }
+  }
+
+  /* Und eine Flut aus der Mitte: ein Puls, der nach aussen laeuft und
+     ausklingt — die Bewegung, die man von Fluessigkeit erwartet, wenn etwas
+     hineinfaellt. Nur skaliert, nicht gezeichnet. */
+  .auftakt-flut {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 150%;
+    aspect-ratio: 1;
+    margin: -75% 0 0 -75%;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    background: radial-gradient(closest-side,
+      rgba(255, 255, 255, 0) 52%,
+      rgba(214, 232, 255, 0.30) 68%,
+      rgba(214, 232, 255, 0.10) 82%,
+      rgba(214, 232, 255, 0) 100%);
+    animation: auftaktFlut 2.6s cubic-bezier(0.22, 0.7, 0.2, 1) 0.15s 2 both;
+  }
+  @keyframes auftaktFlut {
+    0%   { transform: scale(0.12); opacity: 0; }
+    18%  { opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+  }
   /* Die Kerzen bleiben im Markup — sie werden spaeter in den
      Neuheiten-Schirm und in die Browsersperre verschoben, und dorthin
      gehoeren sie weiterhin. Auf dem Ladebildschirm stehen sie still und
@@ -2977,11 +3088,76 @@
     to   { opacity: 1; transform: none; }
   }
 
+  /* An der Scheibe: sie kommt aus 0,94 herein, mit einem Hauch
+     Ueberschwung, damit sie sich setzt statt aufzupoppen. Ein Lichtzug
+     faehrt schraeg darueber. Und ein Licht wandert um die Kante — der Zug,
+     an dem man Glas erkennt: eine Kante, die Licht faengt und abgibt. */
+  @keyframes scheibeRein {
+    0%   { opacity: 0; transform: translate3d(0, 14px, 0) scale(0.94); }
+    64%  { opacity: 1; transform: translate3d(0, -2px, 0) scale(1.006); }
+    100% { opacity: 1; transform: none; }
+  }
+
+  /* Hier lag ein zweiter Lichtzug, nur ueber der Scheibe. Er ist weg: der
+     Zug ueber den ganzen Schirm faehrt ohnehin ueber sie mit, und zwei
+     Lichter, die dasselbe tun, sind kein doppelter Glanz, sondern
+     Verwaschung. */
+
+  /* Das Kantenlicht: ein gedrehtes Quadrat, kein gedrehter Verlauf.
+
+     Ein conic-gradient mit wanderndem Anfangswinkel zeichnet die Scheibe bei
+     jedem Bild neu, und ob das teuer ist, war hier nicht feststellbar — das
+     Rauschen liegt ueber dem gesuchten Unterschied. Was man nicht messen
+     kann, baut man besser nicht ein. Stattdessen ein Quadrat mit festem
+     Verlauf, das sich dreht: quadratisch, damit die Drehung keine Kante ins
+     Bild bringt, per transform, damit nichts neu gezeichnet wird. Die Maske
+     schneidet den ein Pixel breiten Rand heraus. */
+  .kantenlicht {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 3;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  }
+  .kantenlicht i {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    /* Quadratisch und gross genug, dass es die Scheibe in jeder Drehlage
+       ganz ueberdeckt: die Diagonale ist laenger als jede Seite. */
+    width: 160%;
+    aspect-ratio: 1;
+    margin: -80% 0 0 -80%;
+    background: conic-gradient(
+      rgba(255, 255, 255, 0) 0deg,
+      rgba(255, 255, 255, 0) 186deg,
+      rgba(255, 255, 255, 0.55) 250deg,
+      rgba(255, 255, 255, 0.95) 272deg,
+      rgba(255, 255, 255, 0.55) 294deg,
+      rgba(255, 255, 255, 0) 356deg);
+    animation: kantenlicht 2s linear 0.3s 2 both;
+  }
+  @keyframes kantenlicht {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .auftakt .label,
     .auftakt h1,
     .auftakt .balken,
     .auftakt .tun { animation: none; }
+    .auftakt-mitte,
+    .auftakt-liquid,
+    .auftakt-flut,
+    .auftakt-zug,
+    .kantenlicht i { animation: none; }
+    .auftakt-liquid { opacity: 0; }
     .auftakt,
     .auftakt .wer,
     .auftakt .balken i { transition: none; }
@@ -3021,7 +3197,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=103");
+    background-image: url("/kerzen.svg?v=104");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -3035,7 +3211,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=103");
+    background-image: url("/kerzen-blass.svg?v=104");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -3072,6 +3248,9 @@
        jedes andere auf der Seite, ausgerechnet das erste, das man sieht. */
     background: var(--glas-fenster);
     box-shadow: var(--glas-kante-glanz), var(--hebung);
+    /* Haelt Lichtzug und Kantenlicht in der Form der Scheibe. */
+    overflow: hidden;
+    animation: scheibeRein 0.86s var(--ease) both;
     max-width: 340px;
     width: 100%;
   }
@@ -3719,7 +3898,15 @@
        Ladebildschirm deckt die Liste ab und damit auch deren Licht,
        durchscheinen koennen sie nicht. -->
   <i class="lichtfeld eins"></i><i class="lichtfeld zwei"></i><i class="lichtfeld drei"></i>
+  <!-- Alles Laute auf einer Lage, die am Schluss zerfaellt. Was darunter
+       bleibt, ist genau der Grund der Liste. -->
+  <div class="auftakt-liquid" aria-hidden="true">
+    <i class="lichtfeld liquidfeld eins"></i><i class="lichtfeld liquidfeld zwei"></i><i class="lichtfeld liquidfeld drei"></i>
+    <i class="auftakt-flut"></i>
+    <i class="auftakt-zug"></i>
+  </div>
   <div class="auftakt-mitte">
+    <i class="kantenlicht" aria-hidden="true"><i></i></i>
     <div class="label">Geschützt</div>
     <h1>Aktien-Liste</h1>
     <p class="wer" id="auftaktWer">&nbsp;</p>
@@ -3734,7 +3921,7 @@
   setTimeout(function () {
     var a = document.getElementById("auftakt");
     if (a) a.classList.add("weg");
-  }, 6000);
+  }, 7000);
 </script>
 
 <div id="app" class="visible">
@@ -3780,7 +3967,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=103" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=104" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -3898,7 +4085,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=103" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=104" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -3946,7 +4133,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=103" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=104" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -3965,7 +4152,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=103" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=104" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -4082,7 +4269,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=103" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=104" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -6304,8 +6491,15 @@ if ("serviceWorker" in navigator) {
   var begonnen = Date.now();
   var fertig = false;
 
-  var MINDESTENS = 900;
-  var HOECHSTENS = 3000;
+  /* Vier Sekunden, so gewollt. Vorher 900 ms — gerade genug, damit es nicht
+     zuckt. Jetzt ist der Ladebildschirm ein Auftritt: liegt alles im
+     Zwischenspeicher, wartet man laenger als vorher. Das ist der Handel, und
+     er ist so bestellt.
+
+     Die obere Grenze muss ueber den vier Sekunden liegen, sonst schneidet
+     sie den Auftritt ab, und unter dem Notausgang oben (7 s). */
+  var MINDESTENS = 4000;
+  var HOECHSTENS = 5200;
 
   // Was der Auftakt abwartet, in der Reihenfolge, in der es eintrifft
   var schritte = [
@@ -6314,13 +6508,28 @@ if ("serviceWorker" in navigator) {
     { name: "kurse", wort: "Kurse werden geholt", da: false }
   ];
 
+  /* Der Balken zeigt den kleineren von zwei Werten: was geladen ist und wie
+     viel von den vier Sekunden herum ist. Nur nach Schritten waere er nach
+     zwei Sekunden voll und stuende dann still — ein Haenger, kein Auftritt.
+     Nur nach der Zeit waere er eine Luege. So ist er voll, wenn geladen ist
+     UND die Zeit herum ist: genau wenn der Deckel abgeht. */
+  function anteil() {
+    var geladen = schritte.filter(function (s) { return s.da; }).length / schritte.length;
+    var zeit = Math.min(1, (Date.now() - begonnen) / MINDESTENS);
+    return Math.min(geladen, zeit);
+  }
+
   function zeichnen() {
-    var da = schritte.filter(function (s) { return s.da; }).length;
-    if (balken) balken.style.transform = "scaleX(" + (da / schritte.length).toFixed(3) + ")";
+    if (balken) balken.style.transform = "scaleX(" + anteil().toFixed(3) + ")";
     var offen = schritte.filter(function (s) { return !s.da; })[0];
     if (tun && offen) tun.textContent = offen.wort;
     if (!offen) schluss();
   }
+
+  /* Alle 120 ms nachziehen: der Balken traegt einen Uebergang von 0,68 s,
+     33 Schritte ueber vier Sekunden reichen also voellig. Ein Takt je Bild
+     waere hier Verschwendung — daneben wird die Liste gebaut. */
+  var takt = setInterval(zeichnen, 120);
 
   function erledigt(name) {
     var s = schritte.filter(function (x) { return x.name === name; })[0];
@@ -6333,9 +6542,13 @@ if ("serviceWorker" in navigator) {
     if (fertig) return;
     fertig = true;
     if (tun) tun.textContent = "Fertig";
-    if (balken) balken.style.transform = "scaleX(1)";
+    /* Den Balken hier NICHT auf voll setzen. Er waere sonst schon voll,
+       waehrend die Scheibe noch ihren Auftritt hat — der Takt oben schiebt
+       ihn stattdessen bis zum letzten Bild weiter. */
     var warten = Math.max(0, MINDESTENS - (Date.now() - begonnen));
     setTimeout(function () {
+      clearInterval(takt);
+      if (balken) balken.style.transform = "scaleX(1)";
       kasten.classList.add("weg");
       setTimeout(function () {
         /* Die Kerzen ueberleben den Auftakt: der Schirm mit dem, was
@@ -6541,7 +6754,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=103";
+      i.src = "/icon-512.png?v=104";
     });
     return symbolBild;
   }
