@@ -813,6 +813,18 @@ steht der Inhalt mittig; sonst hätte man das Loch *im* Kasten statt darunter.
 Auf 844, 667 und 932 Pixeln gemessen: Karte immer unter der Kante, unten kein
 Loch, Abstände überall 26–28 px.
 
+**Und der sichere Rand.** Mit bloßem `100svh` endete der letzte Kasten exakt auf
+der letzten Bildzeile — und damit *unter* dem Home-Indikator: seine Rundung war
+nicht mehr zu sehen, der Kasten wirkte abgeschnitten. `svh` meint das ganze
+Fenster, nicht den Teil davon, den man auch sieht. Die Hülle zieht deshalb
+`env(safe-area-inset-bottom)` ab; im Browser und auf Geräten ohne Indikator ist
+der 0, dann ändert sich nichts.
+
+Das lässt sich hier **nicht** nachstellen — `env()` ist im Testbrowser 0, und
+Playwright kann keinen Home-Indikator vortäuschen. Geprüft wird deshalb zweierlei:
+geometrisch, dass der letzte Kasten nie *über* die Kante hinausragt, und an der
+Quelle, dass der Abzug dasteht.
+
 **Und ein Folgefehler, der lehrreich ist.** `lauf-test` meldete „der Kopf bleibt
 zu wenig zurück". Die Parallaxe hat nämlich *zwei* Höhen: die Strecke ist die des
 Kopf-**Kastens** (`--kopf-hoehe`), die Bewegung dagegen 92 % der Höhe des
