@@ -741,15 +741,32 @@ und Monat stehen weiterhin im Fuß, wo sie hingehören.
    hier und auf dem Home-Bildschirm dasselbe steht — steigende hohl, fallende
    gefüllt.
 
-**Und sie leben.** Jede Kerze atmet einzeln: sie wächst und schrumpft um ihre
-Mitte und wandert dabei ein wenig. Die vier Zeiten sind teilerfremd — **7,3 /
-9,1 / 11,7 / 13,9 s** —, also treffen sie sich nie wieder im selben Bild. Kein
-Takt, den man wiedererkennt, sondern ein Verlauf, der einfach läuft. Dieselbe
-Regel wie bei den Lichtfeldern unter der Liste.
+**Und sie leben** — als Welle, die durch die vier Kerzen läuft. Dieselbe
+Bewegung, nur zeitversetzt gestartet (negative `animation-delay`). Das ist das
+Flüssige daran: nicht vier Dinge, die zappeln, sondern eine Bewegung, die
+durchgeht. Die vier Zeiten (4,6 / 5,1 / 5,6 / 6,1 s) bleiben verschieden, damit
+die Welle nie exakt dasselbe Bild wiederholt.
 
 Bewegt wird nur `transform`, und der Bezug ist die Form selbst
 (`transform-box: fill-box`) — ohne das drehte sich alles um die Ecke des
-Bildes statt um die eigene Mitte.
+Bildes statt um die eigene Mitte. Gerechnet wird in **Einheiten des Bildes**,
+nicht in Prozent: Prozent bezöge sich auf die eigene Höhe jeder Kerze, und die
+ist bei jeder anders — die kurze hätte sich kaum gerührt, die lange weit.
+
+**Zwei Fehlversuche bei der Bewegung selbst**, beide lehrreich:
+
+*Zu leise.* Der erste Anlauf war `scaleY` von 1 auf 0,82 über 7,3 Sekunden. Auf
+einem Zeichen von 38 Pixeln sind das **zwei Pixel in sieben Sekunden**. Die
+Rückmeldung war „Es bewegt sich nicht" — und sie stimmte. Der Test war trotzdem
+grün: er verglich zwei `transform`-Werte und fand sie verschieden. **Verschieden
+ist nicht sichtbar.** `marke-test` misst jetzt Bildpunkte — die Kerze wird über
+ihren Umlauf abgetastet, und zwischen höchster und tiefster Lage müssen
+mindestens fünf Punkte liegen.
+
+*Zu laut.* Der zweite ging auf `scaleY` 1,34 ↔ 0,68 — sichtbar, aber die Kerzen
+wurden dabei zu Klumpen, und das Zeichen war keins mehr. Jetzt tragen Wanderung
+und Versatz die Bewegung, nicht die Verzerrung: **9,8 px Hub, 4,9 px
+Längenänderung**, und die Form bleibt eine Kerze.
 
 **Der Preis:** vier Dauerläufer mehr, also fünfzehn statt elf. Sie sind so
 billig, wie eine Bewegung sein kann — vier kleine SVG-Formen auf zusammen 43 × 38
@@ -1409,7 +1426,7 @@ Prosa komprimiert sich fast vollständig weg. Ein Deckel auf der rohen Datei
 bestraft also Erklärungen und lässt Nutzlast durch — genau verkehrt herum.
 
 Deshalb jetzt zwei Werte: **gzip unter 95 kB** ist der scharfe (das ist die
-Ladezeit), **roh unter 320 kB** bleibt als weiter Riegel gegen ein
+Ladezeit), **roh unter 360 kB** bleibt als weiter Riegel gegen ein
 Davonlaufen. (Der rohe Riegel stand bei 300 und ist aus demselben Grund
 gestiegen wie der gzip-Deckel von 80 auf 84: bei 301 kB roh sind es 79 kB
 gzip — die Leitung merkt von den 300 nichts, und abgeschnitten würden nur
