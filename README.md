@@ -785,6 +785,23 @@ trägt die Haltung. Die Verzerrung bleibt in allen Fassungen moderat (`scaleY`
 Hub, damit „bewegt sich nicht" nicht zurückkommt, und höchstens 22 px, damit
 „zu unruhig" nicht zurückkommt. Dazu mindestens 4,5 s je Umlauf.
 
+### Die Knöpfe im Kopf tragen dasselbe Glas
+
+Rückmeldung: „Meldungen-Button sollte gleichen Liquid-Stil haben." Stimmte —
+`Meldungen`, `Verwaltung`, `App installieren` und `Benachrichtigungen` hatten
+einen **harten weißen Rahmen auf gar keiner Fläche** (`border: 1px solid
+var(--fg)`), während ringsum alles aus Glas ist. Ein Rest aus der Zeit vor dem
+Umbau — und ausgerechnet in der ersten Zeile der Seite.
+
+Jetzt dieselbe Machart wie die Symboltasten: durchsichtiges Fenster,
+Haarlinie (`--line`) statt weißem Strich, Lichtkante obenauf. Gedrückt bleibt es
+deutlich — gefüllt, nicht nur eingedrückt —, und dann fällt die Lichtkante weg:
+was gefüllt ist, fängt kein Licht mehr, sondern gibt es ab.
+
+`kopfknopf-test` prüft **gegen die Symboltaste, nicht gegen feste Werte**: Fläche,
+Randfarbe, Randbreite und Lichtkante müssen übereinstimmen. Ändert sich die
+Marke, ändern sich beide — der Test kann nicht veralten.
+
 ### Der Name gehört in den Kopf
 
 Beim Aufräumen war er mitgegangen — die alte Verfasserzeile trug den Monat und
