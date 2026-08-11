@@ -785,30 +785,40 @@ trägt die Haltung. Die Verzerrung bleibt in allen Fassungen moderat (`scaleY`
 Hub, damit „bewegt sich nicht" nicht zurückkommt, und höchstens 22 px, damit
 „zu unruhig" nicht zurückkommt. Dazu mindestens 4,5 s je Umlauf.
 
-### Zwei Anläufe für die erste Karte — beide zurückgenommen
+### Die erste Karte fängt an der Kante an — die Blöcke wachsen dafür
 
-Beim Öffnen schaute die erste Karte unten schon herein: ein Streifen Kartenkopf
-unter dem Fear-&-Greed-Kasten. Das liest sich nicht als „hier geht es weiter",
-sondern als abgeschnitten.
+Beim Öffnen schaute die erste Karte unten herein: ein Streifen Kartenkopf unter
+dem Fear-&-Greed-Kasten. Das liest sich nicht als „hier geht es weiter", sondern
+als abgeschnitten.
 
-Zwei Versuche, und beide waren schlechter als das Problem:
+**Zwei Anläufe waren schlechter als das Problem**, und beide sind zurückgenommen:
 
-1. **`min-height: 100svh`** auf einer Hülle um alles vor der Liste. Die Karte war
-   weg — dafür standen die Blöcke oben zusammen und darunter klaffte bis zur Kante
-   ein Loch. *„Der leere Platz muss gefüllt sein."* Richtig.
-2. **Dazu `justify-content: space-between`.** Der Platz wanderte in die Abstände
-   zwischen den Blöcken. Bei fünf Blöcken sieht das großzügig aus, bei dreien
-   werden daraus Schluchten von 100 px. *„Nicht so."* Auch richtig.
+1. **`min-height: 100svh`** auf einer Hülle. Die Karte war weg — dafür standen die
+   Blöcke oben zusammen und darunter klaffte bis zur Kante ein Loch. *„Der leere
+   Platz muss gefüllt sein."*
+2. **Dazu `justify-content: space-between`.** Der Platz wanderte in die Abstände.
+   Bei fünf Blöcken großzügig, bei dreien Schluchten von 100 px. *„Nicht so."*
 
-Beides ist zurückgenommen. Die Hülle `.erste-seite` bleibt als Halterung stehen —
-die Einzug-Staffel hängt an ihren Selektoren, und die soll nicht zweimal umgebaut
-werden —, hat aber keine eigene Wirkung mehr.
+**Jetzt wächst, was ohnehin da ist.** Die übrige Höhe geht in die Kästen selbst,
+nicht in den Raum dazwischen: Kopf, Wirtschaftstermine und Fear & Greed werden
+höher, bis die Seite den Schirm füllt. Die Abstände bleiben bei 28 px — dieselben
+wie überall.
 
-**Was daraus zu lernen ist:** „die Karte darf nicht zu sehen sein" und „es darf
-kein leerer Platz entstehen" sind zusammen nur zu haben, wenn der Inhalt über der
-Liste den Schirm von sich aus füllt. Jede Lösung, die Höhe *hinzufügt*, erzeugt
-entweder ein Loch oder Schluchten. Der nächste Anlauf muss deshalb am Inhalt
-ansetzen, nicht am Abstand.
+Wer wächst und wer nicht, ist eine Entscheidung: **die Symboltasten nicht** — eine
+Reihe Knöpfe, die sich dehnt, sieht nach Fehler aus. **Der Setup-Streifen nicht** —
+er trägt eine Zeile, und eine Zeile in einem hohen Kasten wäre wieder ein Loch,
+nur kleiner. Und weil ein gewachsener Kasten seinen Inhalt sonst oben behielte,
+steht der Inhalt mittig; sonst hätte man das Loch *im* Kasten statt darunter.
+
+Auf 844, 667 und 932 Pixeln gemessen: Karte immer unter der Kante, unten kein
+Loch, Abstände überall 26–28 px.
+
+**Und ein Folgefehler, der lehrreich ist.** `lauf-test` meldete „der Kopf bleibt
+zu wenig zurück". Die Parallaxe hat nämlich *zwei* Höhen: die Strecke ist die des
+Kopf-**Kastens** (`--kopf-hoehe`), die Bewegung dagegen 92 % der Höhe des
+**Inhalts** (`translate` in Prozent bezieht sich aufs eigene Element). Solange der
+Kasten genau um seinen Inhalt herum saß, war das dasselbe — seit er wächst, ist es
+409 gegen 237. **Zu wenig war die Bezugsgröße, nicht die Bewegung.**
 
 ### Kein Laufband, kein Aushang
 
