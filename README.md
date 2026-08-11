@@ -794,8 +794,27 @@ abgeschnitten.
 Alles über der Liste steckt jetzt in einer Hülle (`.erste-seite`) mit
 `min-height: 100svh`. Damit fängt die erste Karte genau an der unteren Kante an:
 sichtbar wird sie erst beim Scrollen. **Kein fester Abstand** — die Höhe kommt vom
-Bildschirm, also stimmt sie auf jedem Gerät. Auf 844, 667 und 932 Pixeln gemessen:
-Kartenkante immer bei Schirmhöhe + 80 px.
+Bildschirm, also stimmt sie auf jedem Gerät.
+
+**Der erste Anlauf war damit noch falsch.** Nur `min-height` heißt: die Blöcke
+stehen oben zusammen, und darunter klafft bis zur Kante ein Loch. Die Rückmeldung
+— „der leere Platz muss gefüllt sein" — war richtig: **ein Loch ist schlimmer als
+der Streifen, den es zu beheben galt.**
+
+Die Hülle ist deshalb eine Spalte mit `justify-content: space-between`. Die
+übrige Höhe wandert in die Abstände *zwischen* den Blöcken, statt sich unten zu
+sammeln. Der letzte Kasten sitzt an der unteren Kante, die erste Karte fängt
+gleich darunter an, und dazwischen steht nirgends Leere.
+
+`ersteseite-test` misst auf 844, 667 und 932 Pixeln beides: dass unten kein Loch
+bleibt (Unterkante des letzten Kastens < 60 px von der Schirmkante) **und** dass
+die Abstände gleichmäßig sind (Größter minus Kleinster < 30 px). Die zweite
+Prüfung ist die wichtigere — sie fängt den Fall, dass sich der Platz doch wieder
+an einer Stelle sammelt.
+
+**Eine Eigenschaft, keine Schwäche:** je weniger Blöcke da sind (kein
+Wirtschaftskasten, kein Nachrichtenband), desto größer werden die Abstände. Das
+ist der Preis dafür, dass der Platz verteilt wird statt zu klaffen.
 
 `svh` und nicht `vh`: `vh` rechnet mit dem Bildschirm *ohne* Browserleisten und
 ist im Browser deshalb zu groß — dort schöbe es die Karte unnötig weit weg. `svh`
