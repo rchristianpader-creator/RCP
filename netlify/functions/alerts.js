@@ -3,8 +3,12 @@
 
    Automatisch, ohne Konfiguration:
    - Zonen und Symbole liest die Function direkt aus der veroeffentlichten index.html
-   - Zonen stehen in USD (Fib 0,5-0,618 aus den Charts); verglichen wird in USD,
-     die Meldung zeigt zusaetzlich den live umgerechneten Euro-Wert
+   - Zonen stehen in der Waehrung ihrer Position (Fib 0,5-0,618 aus den
+     Charts). Verglichen wird ohne Umrechnung: der Kurs von Yahoo kommt in
+     derselben Waehrung wie die Notierung, und der Ausloeser soll nicht am
+     Wechselkurs haengen. Nur wenn beides in Dollar steht, zeigt die Meldung
+     zusaetzlich den live umgerechneten Euro-Wert — eine Position, die schon
+     in Euro notiert, braucht ihn nicht
    - Empfaenger kommen aus Netlify Blobs (dort landen sie beim Tippen auf "Benachrichtigungen")
    - VAPID-Schluessel werden beim ersten Aufruf erzeugt und gespeichert
 
@@ -62,8 +66,8 @@ export default async () => {
       continue;
     }
 
-    // Zonen und Kurs stehen beide in USD: verglichen wird ohne Umrechnung,
-    // damit der Ausloeser nicht am Wechselkurs haengt.
+    // Zone und Kurs stehen in derselben Waehrung: verglichen wird ohne
+    // Umrechnung, damit der Ausloeser nicht am Wechselkurs haengt.
     const cur = q.currency || "";
     const price = q.price;
     const inZone = price <= item.high && price >= item.low;
