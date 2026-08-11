@@ -716,6 +716,63 @@ Kopfkarte**. Beide Male meldete die Messung pflichtgemäß eine Änderung, und
 beide Male hatte sich nicht der Grund geändert, sondern die Stelle war falsch
 gewählt.
 
+### Der oberste Kasten: Zeichen und Name
+
+Rückmeldung: „Obersten Kasten bearbeiten, App-Symbol aber bewegend modern,
+Symbol und nur Name, Symbol live bewegend Liquid App-Logo." Und danach, kürzer:
+„Ohne App-Kasten, die Kerzen liquid bewegen, live durchgängig, edel."
+
+**Vier Zeilen sind entfallen.** Über der ersten Position standen „Watchlist", der
+Name, „Live-Charts · Technische Analyse", eine Trennlinie und die Verfasserzeile
+mit Monat — rund 115 Pixel, und keine davon sagte etwas, das man nach dem zweiten
+Öffnen noch braucht. Geblieben ist eine Zeile: **Zeichen und Name.** Verfasser
+und Monat stehen weiterhin im Fuß, wo sie hingehören.
+
+**Drei Anläufe für das Zeichen**, und die ersten zwei waren falsch:
+
+1. **Ein erfundenes Zeichen** — eine Kachel mit drehendem Farbverlauf. Sah aus
+   wie Liquid Glass und hatte mit dieser App nichts zu tun. Die Rückmeldung
+   darauf war kurz und richtig: „Das ist nicht das App-Logo."
+2. **Das Symbol als Bild** (`icon-192.png`) — richtig, aber mitsamt seiner
+   Kachel. Die Kachel ist die Fassung für den Home-Bildschirm; hier braucht es
+   sie nicht.
+3. **Die Kerzen selbst**, als Inline-SVG, ohne Kasten. Dieselben Maße wie in
+   `logo.py` (`KOERPER` 66, `LUECKE` 24, `DOCHT` 24, `KANTE` 18 auf 512), damit
+   hier und auf dem Home-Bildschirm dasselbe steht — steigende hohl, fallende
+   gefüllt.
+
+**Und sie leben.** Jede Kerze atmet einzeln: sie wächst und schrumpft um ihre
+Mitte und wandert dabei ein wenig. Die vier Zeiten sind teilerfremd — **7,3 /
+9,1 / 11,7 / 13,9 s** —, also treffen sie sich nie wieder im selben Bild. Kein
+Takt, den man wiedererkennt, sondern ein Verlauf, der einfach läuft. Dieselbe
+Regel wie bei den Lichtfeldern unter der Liste.
+
+Bewegt wird nur `transform`, und der Bezug ist die Form selbst
+(`transform-box: fill-box`) — ohne das drehte sich alles um die Ecke des
+Bildes statt um die eigene Mitte.
+
+**Der Preis:** vier Dauerläufer mehr, also fünfzehn statt elf. Sie sind so
+billig, wie eine Bewegung sein kann — vier kleine SVG-Formen auf zusammen 43 × 38
+Pixeln, kein `opacity`, keine Füllung, die sich ändert. Der Beleg steht in
+derselben Testreihe: „im Ruhezustand läuft es rund" und „Scrollen bleibt flüssig"
+sind mit ihnen grün geblieben. Das ist die Messung, der hier zu trauen ist — sie
+hat einen Grundwert, der stimmt, und eine Lastschranke davor. Eigene
+Kleinmessungen an einzelnen Bewegungen haben in dieser Sitzung dreimal mehr
+gerauscht als gemessen.
+
+**Zwei Testreihen mussten mit.** `monat-test` erwartete den Monat an zwei Stellen
+— jetzt ist es eine. Und `lauf-test` maß die Parallaxe des Kopfes bei festen 100,
+200 und 300 Pixeln; das ging gut, solange der Kopf 280 Pixel hoch war. Beim
+kürzeren Kopf war die Parallaxe bei 300 längst am Anschlag, und der Test meldete
+„die Strecke ist ungleichmäßig" — ungleichmäßig war nicht die Strecke, sondern
+die Wahl der Punkte. Gemessen wird jetzt bei einem Viertel, der Hälfte und drei
+Vierteln **der Kopfhöhe**.
+
+**Und ein Rundungsfehler, zum zweiten Mal.** Der rohe Größenriegel rundete vor
+dem Vergleich: bei 319,76 kB stand da 320, und die Prüfung gegen 320 fiel durch,
+obwohl die Datei darunter lag. Genau derselbe Fehler war beim gzip-Deckel schon
+einmal behoben worden — eine Zeile weiter unten stand er noch.
+
 ### Das Logo neben dem Namen
 
 Links vom Firmennamen sitzt das Logo auf einer runden Glasscheibe — dieselbe

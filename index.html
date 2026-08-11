@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="dark">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#0a0d0c">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=105">
-<link rel="apple-touch-icon" href="/icon-180.png?v=105">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=106">
+<link rel="apple-touch-icon" href="/icon-180.png?v=106">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=105">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=106">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=105">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=106">
 
 <script>
 /* Im Browser oder als App?
@@ -576,13 +576,15 @@
     text-align: center;
     background: var(--glas-fenster);
   }
-  header .label {
-    font-size: 10px;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--muted);
-    font-weight: 600;
-    margin-bottom: 14px;
+  /* Symbol und Name in einer Zeile. .label, .sub, .rule und .author sind
+     hier entfallen — vier Zeilen, die ueber der ersten Position standen und
+     nach dem zweiten Oeffnen nichts mehr sagten. Verfasser und Monat stehen
+     weiterhin im Fuss. */
+  .kopf-marke {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 13px;
   }
   header h1 {
     font-size: 26px;
@@ -590,23 +592,66 @@
     letter-spacing: -0.3px;
     line-height: 1.15;
   }
-  header .sub {
-    margin-top: 8px;
-    font-size: 13px;
-    color: var(--muted);
+
+  /* DAS ZEICHEN, LEBENDIG — UND OHNE KASTEN
+
+     Zwei Anlaeufe stehen davor. Der erste war ein erfundenes Zeichen: eine
+     Kachel mit drehendem Farbverlauf, die aussah wie Liquid Glass und nichts
+     mit dieser App zu tun hatte. Der zweite war das Symbol selbst als Bild —
+     richtig, aber mitsamt seiner Kachel, und die Kachel ist nur die Fassung
+     fuer den Home-Bildschirm. Hier braucht es sie nicht.
+
+     Geblieben ist das Zeichen: vier Kerzen, steigende hohl, fallende
+     gefuellt. Dieselben Masse wie in logo.py (KOERPER 66, LUECKE 24,
+     DOCHT 24, KANTE 18 auf 512), damit hier und auf dem Home-Bildschirm
+     dasselbe steht — nur dass es hier lebt.
+
+     Jede Kerze atmet einzeln: sie waechst und schrumpft um ihre Mitte und
+     wandert dabei ein wenig. Die vier Zeiten sind teilerfremd (7,3 / 9,1 /
+     11,7 / 13,9 s), also treffen sie sich nie wieder im selben Bild — kein
+     Takt, den man wiedererkennt, sondern ein Verlauf, der einfach laeuft.
+     Bewegt wird nur transform, und der Bezug ist die Form selbst
+     (transform-box: fill-box), sonst drehte sich alles um die Ecke des
+     Bildes. */
+  .marke-kerzen {
+    flex: 0 0 auto;
+    width: 43px;
+    height: 38px;
+    overflow: visible;
+    fill: var(--fg);
   }
-  header .rule {
-    width: 28px;
-    height: 1px;
-    background: var(--fg);
-    margin: 18px auto 0;
-    opacity: 0.3;
+  .marke-kerzen .hohl {
+    fill: none;
+    stroke: var(--fg);
+    stroke-width: 18;
   }
-  header .author {
-    margin-top: 14px;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
+  .marke-kerzen .kerze {
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+    will-change: transform;
+  }
+  .marke-kerzen .k1 { animation: kerzeAtem1 7.3s ease-in-out infinite alternate; }
+  .marke-kerzen .k2 { animation: kerzeAtem2 9.1s ease-in-out infinite alternate; }
+  .marke-kerzen .k3 { animation: kerzeAtem3 11.7s ease-in-out infinite alternate; }
+  .marke-kerzen .k4 { animation: kerzeAtem4 13.9s ease-in-out infinite alternate; }
+  @keyframes kerzeAtem1 {
+    from { transform: translateY(0) scaleY(1); }
+    to   { transform: translateY(6%) scaleY(0.82); }
+  }
+  @keyframes kerzeAtem2 {
+    from { transform: translateY(0) scaleY(1); }
+    to   { transform: translateY(-7%) scaleY(1.18); }
+  }
+  @keyframes kerzeAtem3 {
+    from { transform: translateY(0) scaleY(1); }
+    to   { transform: translateY(5%) scaleY(1.14); }
+  }
+  @keyframes kerzeAtem4 {
+    from { transform: translateY(0) scaleY(1); }
+    to   { transform: translateY(-6%) scaleY(0.86); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .marke-kerzen .kerze { animation: none; }
   }
 
   /* Die Chips fuellen die Breite aus. Vorher standen sie mittig und liessen
@@ -3256,7 +3301,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=105");
+    background-image: url("/kerzen.svg?v=106");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -3270,7 +3315,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=105");
+    background-image: url("/kerzen-blass.svg?v=106");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -3979,11 +4024,36 @@
 <div id="app" class="visible">
 <header>
  <div class="kopf-lauf">
-  <div class="label">Watchlist</div>
-  <h1>Aktien-Liste</h1>
-  <p class="sub">Live-Charts · Technische Analyse</p>
-  <div class="rule"></div>
-  <div class="author">Ralph Christian Pader · <span class="monat">Juli 2026</span></div>
+  <!-- Symbol und Name, sonst nichts.
+
+       Hier standen vier Zeilen ueber der Liste: "Watchlist", der Name,
+       "Live-Charts · Technische Analyse", eine Trennlinie und die
+       Verfasserzeile mit Monat. Zusammen ein halber Bildschirm, bevor die
+       erste Position kam — und keine davon sagte etwas, das man nach dem
+       zweiten Oeffnen noch braucht. Der Name steht jetzt neben dem Symbol,
+       und das Symbol ist dasselbe wie auf dem Home-Bildschirm, nur lebendig.
+       Verfasser und Monat stehen weiterhin im Fuss. -->
+  <div class="kopf-marke">
+    <svg class="marke-kerzen" viewBox="80 90 352 308" aria-hidden="true">
+      <g class="kerze k1">
+        <rect x="109" y="128" width="24" height="154" rx="12"/>
+        <rect x="88" y="172" width="66" height="80" rx="9"/>
+      </g>
+      <g class="kerze k2">
+        <rect x="199" y="228" width="24" height="160" rx="12"/>
+        <rect x="178" y="252" width="66" height="90" rx="9"/>
+      </g>
+      <g class="kerze k3">
+        <rect x="289" y="310" width="24" height="74" rx="12"/>
+        <rect class="hohl" x="277" y="259" width="48" height="74" rx="7"/>
+      </g>
+      <g class="kerze k4">
+        <rect x="379" y="98" width="24" height="186" rx="12"/>
+        <rect class="hohl" x="367" y="133" width="48" height="108" rx="7"/>
+      </g>
+    </svg>
+    <h1>Aktien-Liste</h1>
+  </div>
   <div class="header-actions">
     <button class="install-btn" id="installBtn" type="button" hidden>App installieren</button>
     <button class="install-btn" id="pushBtn" type="button" hidden>Benachrichtigungen</button>
@@ -4019,7 +4089,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=105" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=106" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -4137,7 +4207,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=105" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=106" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -4185,7 +4255,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=105" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=106" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -4204,7 +4274,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=105" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=106" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -4321,7 +4391,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=105" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=106" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -6851,7 +6921,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=105";
+      i.src = "/icon-512.png?v=106";
     });
     return symbolBild;
   }
