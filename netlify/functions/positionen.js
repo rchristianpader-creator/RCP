@@ -22,7 +22,7 @@
    einmal raus. */
 
 import { getStore } from "@netlify/blobs";
-import { START } from "./positionen-start.js";
+import { START, NACHTRAG } from "./positionen-start.js";
 import { keys } from "./vapid.js";
 import { kontoLesen, chefLesen, geheimnis, notieren } from "./sitzung.js";
 
@@ -96,7 +96,17 @@ export default async (request) => {
     // sonst: ohne Zeitpunkt, also weiter mit vollem Rueckblick
   }
 
-  await store.setJSON(EINTRAG, { zeit: jetzt, von: chef.mail, liste: gepruft.liste });
+  /* Die Nachtrag-Vermerke muessen mit. Ohne sie waere ein Speichern in der
+     Verwaltung genug, um sie zu verlieren — und beim naechsten Lesen kaeme
+     eine geloeschte Position wieder.
+
+     Sie stehen im gespeicherten Objekt, nicht in der Liste; lesen() gibt nur
+     die Liste zurueck. Deshalb hier noch einmal direkt nachgesehen. Beim
+     ersten Anlauf stand an dieser Stelle alt.nachgetragen — alt ist aber
+     eine Map der Positionen, und der Ausdruck war still undefined: die
+     Vermerke waeren beim ersten Speichern verschwunden. */
+  await store.setJSON(EINTRAG, { zeit: jetzt, von: chef.mail, liste: gepruft.liste,
+                                 nachgetragen: await vermerke(store) });
 
   /* Drei Anlaesse, und jede Position hoechstens in einem — sonst bekaeme man
      fuer denselben Handgriff zwei Meldungen:
@@ -150,6 +160,64 @@ export default async (request) => {
   });
 };
 
+/* Die Nachtrag-Vermerke aus dem Speicher, ohne die Liste. */
+async function vermerke(store) {
+  try {
+    const da = await store.get(EINTRAG, { type: "json", consistency: "strong" });
+    return Array.isArray(da && da.nachgetragen) ? da.nachgetragen : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+/* Nachtragen, was im Code steht und im Speicher fehlt.
+
+   Geschrieben wird beim Lesen — dieselbe Ausnahme wie beim allerersten
+   Aufruf weiter unten, und aus demselben Grund: ein Handgriff, den niemand
+   kennt, ist keine Loesung. Die Position soll dastehen, sobald der Code
+   ausgeliefert ist, nicht erst wenn jemand zufaellig etwas speichert.
+
+   Gemeldet wird wie bei jeder neuen Position auch. Der Vermerk wird VOR der
+   Meldung gesetzt: lieber eine Meldung, die einmal ausfaellt, als eine, die
+   bei jedem Aufruf noch einmal rausgeht. */
+async function nachtragen(store, da) {
+  if (!Array.isArray(NACHTRAG) || !NACHTRAG.length) return da;
+
+  const getan = new Set(Array.isArray(da.nachgetragen) ? da.nachgetragen : []);
+  const daIds = new Set(da.liste.map((p) => p && p.id));
+  const offen = NACHTRAG.filter((n) =>
+    n && n.position && n.schluessel &&
+    !getan.has(n.schluessel) && !daIds.has(n.position.id));
+  if (!offen.length) return da;
+
+  /* Durch dieselbe Pruefung wie alles andere. Ein Nachtrag ist kein
+     Freifahrtschein — was hier nicht besteht, gehoert nicht in die Liste. */
+  const gepruft = pruefen(offen.map((n) => n.position));
+  if (!gepruft.liste.length) return da;
+
+  const zeit = new Date().toISOString();
+  const neue = gepruft.liste.map((p) => Object.assign({}, p, { seit: zeit }));
+  const liste = da.liste.concat(neue);
+  const vermerke = Array.from(getan).concat(offen.map((n) => n.schluessel));
+
+  try {
+    await store.setJSON(EINTRAG, { zeit: zeit, von: "nachtrag", liste: liste,
+                                   nachgetragen: vermerke });
+  } catch (e) {
+    /* Nicht schreiben zu koennen heisst: beim naechsten Mal noch einmal
+       versuchen. Geliefert wird trotzdem schon die ergaenzte Liste. */
+    return { zeit: zeit, liste: liste, nachgetragen: vermerke };
+  }
+
+  try {
+    await melden("Neu in der Liste", kuerzel(neue), neue[0].id, "neu", zeichen(neue));
+  } catch (e) {
+    /* Die Position steht — dass die Meldung nicht rausging, macht sie nicht
+       ungeschehen. */
+  }
+  return { zeit: zeit, liste: liste, nachgetragen: vermerke };
+}
+
 export async function lesen(store) {
   let da = null;
   try {
@@ -162,13 +230,28 @@ export async function lesen(store) {
   } catch (e) {
     da = null;
   }
-  if (da && Array.isArray(da.liste)) return mitSeit(da.liste, da.zeit);
+  if (da && Array.isArray(da.liste)) {
+    const ergaenzt = await nachtragen(store, da);
+    return mitSeit(ergaenzt.liste, ergaenzt.zeit);
+  }
 
-  // Erster Aufruf: Bestand uebernehmen
+  /* Erster Aufruf: Bestand uebernehmen — Startliste UND Nachtraege.
+
+     Die Nachtraege muessen hier mit hinein, sonst haengt der Bestand davon
+     ab, wie alt eine Installation ist: ein Speicher, der schon steht,
+     bekommt sie ueber nachtragen(), ein frischer bekaeme nur die Startliste.
+     Zwei Wege, zwei Ergebnisse — genau das faengt der Test, der die Zahl der
+     Karten aus Startliste plus Nachtraegen ableitet.
+
+     Die Vermerke werden gleich mitgeschrieben. Sonst wuerde nachtragen()
+     beim naechsten Lesen dieselben Eintraege noch einmal anfuegen. */
   const zeit = new Date().toISOString();
-  const start = (pruefen(START).liste || []).map((p) => Object.assign({}, p, { seit: zeit }));
+  const roh = START.concat(NACHTRAG.map((n) => n && n.position).filter(Boolean));
+  const start = (pruefen(roh).liste || []).map((p) => Object.assign({}, p, { seit: zeit }));
+  const vermerkt = NACHTRAG.map((n) => n && n.schluessel).filter(Boolean);
   try {
-    await store.setJSON(EINTRAG, { zeit: zeit, von: "start", liste: start });
+    await store.setJSON(EINTRAG, { zeit: zeit, von: "start", liste: start,
+                                   nachgetragen: vermerkt });
   } catch (e) {
     // nicht schreiben zu koennen ist kein Grund, nichts zu liefern
   }

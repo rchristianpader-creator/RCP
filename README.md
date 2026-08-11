@@ -1519,6 +1519,56 @@ Flächen wieder deckend, der Schimmer verschwindet, die Kurve auch.
 nachstellen — `emulateMedia` kennt den Schalter nicht. Die Prüfreihe sieht
 deshalb für diesen Fall im Stylesheet nach, statt es im Browser zu messen.
 
+## Positionen aus dem Code nachtragen
+
+Die Startliste in `positionen-start.js` gilt **nur beim allerersten Aufruf**.
+Danach ist der Blobs-Speicher die Wahrheit, und was im Code steht, hat keine
+Wirkung mehr. Das war richtig gedacht — und hatte eine Lücke: es gab damit
+**keinen Weg mehr, eine Position aus dem Code hinzuzufügen**. Wer eine ergänzen
+wollte, musste sie von Hand in der Verwaltung eintippen.
+
+`NACHTRAG` schließt die Lücke. Jeder Eintrag trägt einen Schlüssel; steht der im
+Speicher vermerkt, passiert nichts mehr:
+
+```js
+export const NACHTRAG = [
+  { schluessel: "ftg-2026-08", position: { id: "ftg", name: "FIT Group AG", … } }
+];
+```
+
+| | |
+|---|---|
+| wirkt | genau einmal, egal wie oft gelesen wird |
+| gelöscht | kommt **nicht** zurück — der Vermerk bleibt |
+| doppelt | unmöglich: steht die `id` schon in der Liste, wird nichts angefügt |
+| geprüft | durch dieselbe `pruefen()`-Schranke wie alles andere |
+| meldet | „Neu in der Liste" an alle, wie bei jeder neuen Position |
+
+Geschrieben wird **beim Lesen** — dieselbe Ausnahme wie beim allerersten Aufruf,
+und aus demselben Grund: die Position soll dastehen, sobald der Code ausgeliefert
+ist, nicht erst wenn jemand zufällig etwas speichert. Der Vermerk wird **vor** der
+Meldung gesetzt: lieber eine Meldung, die einmal ausfällt, als eine, die bei jedem
+Aufruf noch einmal rausgeht.
+
+**Drei Fehler beim Bauen**, alle vom Test gefangen:
+
+1. **`alt.nachgetragen`** — `alt` ist eine `Map` der Positionen, nicht das
+   gespeicherte Objekt. Der Ausdruck war still `undefined`, und die Vermerke wären
+   beim ersten Speichern in der Verwaltung verschwunden — womit eine gelöschte
+   Position beim nächsten Lesen wiedergekommen wäre. `nachtrag-test` hat dafür eine
+   **Gegenprobe**: ohne Vermerk kommt sie wirklich wieder.
+2. **Der erste Aufruf übersprang den Nachtrag.** Ein bestehender Speicher bekam
+   FIT Group, ein frischer nur die Startliste — zwei Wege, zwei Ergebnisse.
+   Gefangen hat es `karten-test`, weil er die Zahl der Karten aus Startliste *plus*
+   Nachträgen ableitet.
+3. **Feste Zahlen in den Testreihen.** `=== 10`, `=== 11`, eine feste Kette von
+   zehn Kürzeln, `nth(10)` für die neu angelegte Position. Sieben rote Zusicherungen,
+   von denen keine einen Fehler zeigte. Alle leiten sich jetzt aus dem Bestand ab.
+
+**Was ich nicht erfunden habe:** die Branche. Das Feld ist optional, die Karte lässt
+es einfach weg. Eine erfundene Branche stünde dauerhaft und falsch auf der Karte;
+eine fehlende ist in der Verwaltung in zehn Sekunden nachgetragen.
+
 ## Der Hintergrund aus Kerzen
 
 Anmeldeseite und Auftakt haben denselben Hintergrund: ein Kursverlauf aus

@@ -170,6 +170,54 @@ export const START = [
   }
 ];
 
+/* NACHTRAG: Positionen, die aus dem Code dazukommen sollen.
+
+   Die Liste oben gilt nur beim allerersten Aufruf — danach ist der Speicher
+   die Wahrheit, und was hier steht, hat keine Wirkung mehr. Das war richtig
+   gedacht und hatte eine Luecke: es gab keinen Weg mehr, eine Position aus
+   dem Code hinzuzufuegen. Wer eine ergaenzen wollte, musste sie von Hand in
+   der Verwaltung eintippen.
+
+   Diese Liste schliesst die Luecke. Jeder Eintrag traegt einen Schluessel;
+   ist er im Speicher vermerkt, passiert nichts mehr. Damit gilt:
+
+   - Ein Nachtrag wirkt genau einmal, egal wie oft die Liste gelesen wird.
+   - Eine Position, die spaeter in der Verwaltung geloescht wird, kommt NICHT
+     zurueck — der Schluessel bleibt vermerkt.
+   - Steht die id schon in der Liste, wird nichts angefuegt. Zwei Aufrufe im
+     selben Augenblick koennen also hoechstens eine Meldung doppelt schicken,
+     nie eine Position doppelt anlegen.
+
+   Der Schluessel gehoert zum Nachtrag, nicht zur Position: wer denselben
+   Eintrag spaeter noch einmal nachtragen will, gibt ihm einen neuen. */
+export const NACHTRAG = [
+  {
+    "schluessel": "ftg-2026-08",
+    "position": {
+      "id": "ftg",
+      "name": "FIT Group AG",
+      "badge": "FTG",
+      "chip": "FTG",
+      "neu": true,
+      /* Keine Branche: ich weiss sie nicht, und das Feld ist optional — die
+         Karte laesst es dann einfach weg. Eine erfundene Branche stuende
+         dauerhaft und falsch auf der Karte; eine fehlende ist in der
+         Verwaltung in zehn Sekunden nachgetragen. */
+      "branche": "",
+      /* Preise stehen in Euro und bleiben es — FIT Group notiert in
+         Deutschland. Die Umrechnung der Liste greift nur bei USD. */
+      "zone": "16,15 – 15,15 EUR",
+      "ziel": "27,30 – 32,90 EUR",
+      "tv": "XETR:FTG",
+      "yahoo": "FTG.DE",
+      "frage": "FIT Group AG Aktie",
+      "fn": "https://www.finanzen.net/suchergebnis.asp?_search=FIT+Group",
+      "keys": "FIT Group|FTG",
+      "fibo": "https://de.tradingview.com/chart/WaxXaF87/"
+    }
+  }
+];
+
 export default async () => {
   return new Response(JSON.stringify({ ok: false, fehler: "kein Endpunkt" }), {
     status: 404,
