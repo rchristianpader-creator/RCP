@@ -151,24 +151,59 @@ async function pruefen(sym) {
     zeilen.push(z);
   }
 
-  /* Und eine zweite Quelle, falls Yahoo dieses Segment gar nicht fuehrt.
-     Stooq liefert Tagesschluesse als CSV, ohne Schluessel. */
-  for (const k of [basis.toLowerCase() + ".at", basis.toLowerCase() + ".de", basis.toLowerCase()]) {
-    const adresse = "https://stooq.com/q/l/?s=" + encodeURIComponent(k) + "&f=sd2t2ohlcv&h&e=csv";
-    const z = { quelle: "Stooq", symbol: k };
+  /* Zweite Quelle: Stooq, Tagesreihe als CSV, ohne Schluessel. */
+  for (const k of [basis.toLowerCase() + ".at", basis.toLowerCase() + ".de", basis.toLowerCase() + ".f"]) {
+    const adresse = "https://stooq.com/q/d/l/?s=" + encodeURIComponent(k) + "&i=d";
+    const z = { quelle: "Stooq", symbol: k, adresse };
     try {
       const res = await fetch(adresse, { headers: { "User-Agent": "Mozilla/5.0 (compatible; AktienListe/1.0)" } });
       z.status = res.status;
       const text = (await res.text()).trim();
-      z.antwort = text.split("\n").slice(0, 2).join(" | ").slice(0, 160);
-      z.urteil = /N\/D/.test(text) ? "kennt es nicht" : (text.split("\n").length > 1 ? "brauchbar" : "leer");
+      const reihen = text.split("\n");
+      z.zeilen = reihen.length;
+      z.probe = reihen.slice(0, 2).join("  ||  ").slice(0, 200);
+      z.urteil = /N\/D|Exceeded|^$/i.test(text) ? "kennt es nicht"
+        : (reihen.length > 2 ? "brauchbar" : "leer");
     } catch (e) {
       z.urteil = "nicht erreichbar: " + (e && e.message ? e.message : "unbekannt");
     }
     zeilen.push(z);
   }
 
-  return { sym, gefunden: zeilen.filter((z) => z.urteil === "brauchbar").map((z) => z.quelle + " " + z.symbol), zeilen };
+  /* Dritte Quelle: die Wiener Boerse selbst. Sie hat die Reihe mit
+     Sicherheit — ihre eigene Seite zeigt sie. Eine dokumentierte
+     Schnittstelle gibt es nicht, deshalb wird hier nur nachgesehen, WAS
+     zurueckkommt: Status, Typ und die ersten Zeichen. Daraus laesst sich
+     entscheiden, ob und wie sich daraus eine Reihe lesen laesst — statt es
+     blind zu versuchen. */
+  const isin = (new URL("https://x/?i=" + encodeURIComponent(sym))).searchParams.get("i");
+  for (const adresse of [
+    "https://www.wienerborse.at/en/stock-direct-market-plus/fit-group-ag-DE000A426PD9/historical-data/",
+    "https://www.wienerborse.at/api/instruments/DE000A426PD9/chart",
+    "https://www.wienerborse.at/en/_Resources/quotes/DE000A426PD9.json"
+  ]) {
+    const z = { quelle: "Wiener Boerse", adresse };
+    try {
+      const res = await fetch(adresse, {
+        headers: { "User-Agent": "Mozilla/5.0 (compatible; AktienListe/1.0)", Accept: "application/json, text/html" }
+      });
+      z.status = res.status;
+      z.typ = (res.headers.get("content-type") || "").split(";")[0];
+      const text = (await res.text()).slice(0, 400);
+      z.probe = text.replace(/\s+/g, " ").slice(0, 300);
+      z.urteil = res.ok ? "antwortet" : "Status nicht ok";
+    } catch (e) {
+      z.urteil = "nicht erreichbar: " + (e && e.message ? e.message : "unbekannt");
+    }
+    zeilen.push(z);
+  }
+
+  return {
+    sym,
+    isin,
+    gefunden: zeilen.filter((z) => z.urteil === "brauchbar").map((z) => z.quelle + " " + (z.symbol || z.adresse)),
+    zeilen
+  };
 }
 
 async function holenMitRueckfall(sym, plan) {
