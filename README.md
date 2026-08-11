@@ -785,6 +785,28 @@ trägt die Haltung. Die Verzerrung bleibt in allen Fassungen moderat (`scaleY`
 Hub, damit „bewegt sich nicht" nicht zurückkommt, und höchstens 22 px, damit
 „zu unruhig" nicht zurückkommt. Dazu mindestens 4,5 s je Umlauf.
 
+### Die erste Karte fängt an der Kante an
+
+Beim Öffnen schaute sie unten schon herein — ein Streifen Kartenkopf unter dem
+Fear-&-Greed-Kasten. Das liest sich nicht als „hier geht es weiter", sondern als
+abgeschnitten.
+
+Alles über der Liste steckt jetzt in einer Hülle (`.erste-seite`) mit
+`min-height: 100svh`. Damit fängt die erste Karte genau an der unteren Kante an:
+sichtbar wird sie erst beim Scrollen. **Kein fester Abstand** — die Höhe kommt vom
+Bildschirm, also stimmt sie auf jedem Gerät. Auf 844, 667 und 932 Pixeln gemessen:
+Kartenkante immer bei Schirmhöhe + 80 px.
+
+`svh` und nicht `vh`: `vh` rechnet mit dem Bildschirm *ohne* Browserleisten und
+ist im Browser deshalb zu groß — dort schöbe es die Karte unnötig weit weg. `svh`
+ist die kleinste sichere Höhe; in der App als eigenes Fenster sind beide gleich.
+
+**Ein Testfehler beim Bauen:** die Schranke „nicht unnötig hoch" lag bei 40 px,
+gemessen waren es 80. Das ist kein Leerlauf, sondern der normale Abstand der Liste
+(`--luft`) plus der Außenabstand der Karte — derselbe, der zwischen allen Karten
+steht. Ein Wert, der auf drei Schirmhöhen konstant ist, ist eine Eigenschaft und
+kein Fehler.
+
 ### Kein Laufband, kein Aushang
 
 Im Nachrichtenband lief der Text von rechts nach links durch, in vier Kopien

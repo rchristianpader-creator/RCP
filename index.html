@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="dark">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#0a0d0c">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=119">
-<link rel="apple-touch-icon" href="/icon-180.png?v=119">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=120">
+<link rel="apple-touch-icon" href="/icon-180.png?v=120">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=119">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=120">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=119">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=120">
 
 <script>
 /* Im Browser oder als App?
@@ -367,6 +367,15 @@
     .chart { background: var(--soft); }
     .ziel-bar, .chart-warte { background: var(--soft); }
   }
+
+  /* Die erste Seite: alles ueber der Liste, mindestens einen Bildschirm
+     hoch. Beim Oeffnen schaute sonst die erste Karte schon herein.
+
+     svh und nicht vh: vh rechnet mit dem Bildschirm ohne Browserleisten und
+     ist im Browser deshalb zu gross — dort schoebe es die Karte unnoetig
+     weit weg. svh ist die kleinste sichere Hoehe; in der App als eigenes
+     Fenster sind beide gleich. */
+  .erste-seite { min-height: 100svh; }
 
   /* Der Grund hinter allem. Grau auf fast weiss verwischt der Frost zu
      nichts, Farbe hebt er hervor — aber Farbe allein reicht nicht, denn ein
@@ -3242,12 +3251,12 @@
      Die Staffel ist der eigentliche Trick. Alle zugleich waeren ein Block,
      der sich bewegt; nacheinander wird daraus ein Zug, der durch die Seite
      laeuft. 55 ms Abstand, und die Karten setzen ihn fort. */
-  body.einzug #app > header,
-  body.einzug #app > nav,
-  body.einzug #app > .news-banner,
-  body.einzug #app > .wirtschaft-block,
-  body.einzug #app > .setup-strip,
-  body.einzug #app > .fg-box,
+  body.einzug .erste-seite > header,
+  body.einzug .erste-seite > nav,
+  body.einzug .erste-seite > .news-banner,
+  body.einzug .erste-seite > .wirtschaft-block,
+  body.einzug .erste-seite > .setup-strip,
+  body.einzug .erste-seite > .fg-box,
   body.einzug .karten > .card {
     animation: einzugRein 0.78s cubic-bezier(0.22, 1.02, 0.3, 1) both;
     animation-delay: calc(var(--n, 0) * 0.055s);
@@ -3292,12 +3301,12 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    body.einzug #app > header,
-    body.einzug #app > nav,
-    body.einzug #app > .news-banner,
-    body.einzug #app > .wirtschaft-block,
-    body.einzug #app > .setup-strip,
-    body.einzug #app > .fg-box,
+    body.einzug .erste-seite > header,
+    body.einzug .erste-seite > nav,
+    body.einzug .erste-seite > .news-banner,
+    body.einzug .erste-seite > .wirtschaft-block,
+    body.einzug .erste-seite > .setup-strip,
+    body.einzug .erste-seite > .fg-box,
     body.einzug .karten > .card { animation: none; }
     .einzug-licht { display: none; }
   }
@@ -3392,7 +3401,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=119");
+    background-image: url("/kerzen.svg?v=120");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -3406,7 +3415,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=119");
+    background-image: url("/kerzen-blass.svg?v=120");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -4113,6 +4122,17 @@
 </script>
 
 <div id="app" class="visible">
+<!-- Alles, was vor der Liste steht, als eine Seite.
+
+     Beim Oeffnen schaute die erste Karte unten schon herein — ein Streifen
+     Kartenkopf unter dem Fear-&-Greed-Kasten. Das liest sich nicht als
+     "hier geht es weiter", sondern als abgeschnitten.
+
+     Diese Huelle ist mindestens einen Bildschirm hoch. Damit faengt die
+     erste Karte genau an der Kante an: sichtbar wird sie erst, wenn man
+     scrollt. Kein fester Abstand — die Hoehe kommt vom Bildschirm, also
+     stimmt sie auf jedem Geraet. -->
+<div class="erste-seite">
 <header>
  <div class="kopf-lauf">
   <!-- Symbol und Name, sonst nichts.
@@ -4181,7 +4201,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=119" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=120" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -4234,6 +4254,8 @@
     </div>
   </div>
   <div class="fg-sub" id="fg-sub">Marktstimmung 0–100</div>
+</div>
+
 </div>
 
 <div class="karten" id="karten"></div>
@@ -4306,7 +4328,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=119" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=120" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -4354,7 +4376,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=119" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=120" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -4373,7 +4395,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=119" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=120" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -4490,7 +4512,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=119" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=120" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -6816,8 +6838,8 @@ if ("serviceWorker" in navigator) {
        Kinder von #app" — darin sind aber der Kartenbehaelter und der Fuss,
        die nicht mitfahren. Sie haetten Nummern verbraucht, und der Zug
        haette an ihrer Stelle Luecken gehabt. */
-    var WELCHE = "#app > header, #app > nav, #app > .news-banner," +
-                 "#app > .wirtschaft-block, #app > .setup-strip, #app > .fg-box";
+    var WELCHE = ".erste-seite > header, .erste-seite > nav, .erste-seite > .news-banner," +
+                 ".erste-seite > .wirtschaft-block, .erste-seite > .setup-strip, .erste-seite > .fg-box";
     var sichtbar = function (e) {
       return e && !e.hidden && getComputedStyle(e).display !== "none";
     };
@@ -7057,7 +7079,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=119";
+      i.src = "/icon-512.png?v=120";
     });
     return symbolBild;
   }
