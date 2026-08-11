@@ -300,7 +300,22 @@ function pruefen(roh) {
     if (gesehen[id]) return { fehler: "Das Kürzel „" + id + "“ kommt zweimal vor." };
     gesehen[id] = true;
 
-    for (const feld of ["name", "badge", "chip", "zone", "tv", "yahoo"]) {
+    /* Pflicht ist, was die Karte wirklich braucht.
+
+       tv und yahoo standen hier mit drin, und beides ist ueberholt:
+
+       - tv wird seit dem Umbau auf eigene Charts von nichts mehr benutzt.
+         Es steht noch im Formular und wird auf seine Form geprueft, aber
+         gezeichnet wird daraus nichts.
+       - yahoo gibt es nicht fuer jede Notierung. FIT Group steht im direct
+         market plus der Wiener Boerse, und Yahoo fuehrt unter FTG eine
+         kanadische Firma. Ein erfundenes Symbol waere schlimmer als keins:
+         die Karte zeigte dann still den Kurs eines fremden Papiers und
+         koennte damit sogar eine Zonen-Meldung ausloesen.
+
+       Ohne yahoo hat die Position keinen Live-Kurs und keinen Chart — sie
+       zeigt Einkaufszone und Ziel, und das ist der Kern dieser Liste. */
+    for (const feld of ["name", "badge", "chip", "zone"]) {
       if (!String(p[feld] || "").trim()) return { fehler: wo + ": „" + feld + "“ fehlt." };
     }
 
@@ -311,7 +326,9 @@ function pruefen(roh) {
       };
     }
 
-    if (!/^[A-Za-z0-9_.]+:[A-Za-z0-9_.!-]+$/.test(String(p.tv).trim())) {
+    /* Wenn eins dasteht, muss es stimmen — leer darf es bleiben. */
+    if (String(p.tv || "").trim() &&
+        !/^[A-Za-z0-9_.]+:[A-Za-z0-9_.!-]+$/.test(String(p.tv).trim())) {
       return { fehler: wo + ": TradingView-Symbol muss so aussehen: NASDAQ:INTC." };
     }
 

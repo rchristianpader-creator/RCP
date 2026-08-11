@@ -199,20 +199,32 @@ export const NACHTRAG = [
       "badge": "FTG",
       "chip": "FTG",
       "neu": true,
-      /* Keine Branche: ich weiss sie nicht, und das Feld ist optional — die
-         Karte laesst es dann einfach weg. Eine erfundene Branche stuende
-         dauerhaft und falsch auf der Karte; eine fehlende ist in der
-         Verwaltung in zehn Sekunden nachgetragen. */
-      "branche": "",
-      /* Preise stehen in Euro und bleiben es — FIT Group notiert in
-         Deutschland. Die Umrechnung der Liste greift nur bei USD. */
+      "branche": "Gesundheitsprodukte",
+      /* Preise stehen in Euro und bleiben es — FIT Group notiert im direct
+         market plus der Wiener Boerse (ISIN DE000A426PD9, WKN A426PD). Die
+         Umrechnung der Liste greift nur bei USD. */
       "zone": "16,15 – 15,15 EUR",
       "ziel": "27,30 – 32,90 EUR",
-      "tv": "XETR:FTG",
-      "yahoo": "FTG.DE",
+      /* Kein Yahoo-Symbol, und das ist Absicht.
+
+         Yahoo fuehrt unter FTG eine kanadische Firma (Firan Technology
+         Group) und unter FIT.VN eine vietnamesische; die Wiener Notierung
+         ist dort nicht zu finden. Ein geratenes Symbol waere schlimmer als
+         keins: die Karte zeigte still den Kurs eines fremden Papiers und
+         koennte damit sogar eine Zonen-Meldung ausloesen.
+
+         Ohne Symbol hat die Karte keinen Live-Kurs und keinen Chart — sie
+         zeigt Einkaufszone und Ziel. Findet sich spaeter ein Symbol, das
+         wirklich diese Aktie liefert, ist es in der Verwaltung in zehn
+         Sekunden nachgetragen.
+
+         Dasselbe gilt fuer tv: seit dem Umbau auf eigene Charts benutzt es
+         niemand mehr. */
+      "tv": "",
+      "yahoo": "",
       "frage": "FIT Group AG Aktie",
-      "fn": "https://www.finanzen.net/suchergebnis.asp?_search=FIT+Group",
-      "keys": "FIT Group|FTG",
+      "fn": "https://www.finanzen.net/aktien/fit_group-aktie",
+      "keys": "FIT Group|FTG|FitGun",
       "fibo": "https://de.tradingview.com/chart/WaxXaF87/"
     }
   }

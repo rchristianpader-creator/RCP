@@ -1565,9 +1565,32 @@ Aufruf noch einmal rausgeht.
    zehn Kürzeln, `nth(10)` für die neu angelegte Position. Sieben rote Zusicherungen,
    von denen keine einen Fehler zeigte. Alle leiten sich jetzt aus dem Bestand ab.
 
-**Was ich nicht erfunden habe:** die Branche. Das Feld ist optional, die Karte lässt
-es einfach weg. Eine erfundene Branche stünde dauerhaft und falsch auf der Karte;
-eine fehlende ist in der Verwaltung in zehn Sekunden nachgetragen.
+### Lieber kein Kurs als ein fremder
+
+FIT Group AG steht im **direct market plus der Wiener Börse** (ISIN DE000A426PD9,
+WKN A426PD) — nicht auf Xetra, wie zuerst angenommen. Und Yahoo führt unter `FTG`
+eine **kanadische** Firma (Firan Technology Group), unter `FIT.VN` eine
+vietnamesische. Die Wiener Notierung ist dort nicht zu finden.
+
+Ein geratenes Symbol wäre hier nicht „vielleicht kein Chart", sondern **falsche
+Zahlen**: die Karte zeigte still den Kurs eines fremden Papiers und könnte damit
+sogar eine Zonen-Meldung auslösen. Deshalb bleibt das Feld leer.
+
+Damit das überhaupt geht, sind zwei Pflichtfelder gefallen:
+
+- **`yahoo`** — nicht jede Notierung hat einen Kurs bei Yahoo. Ohne Symbol hat die
+  Position keinen Live-Kurs und keinen Chart; sie zeigt Einkaufszone und Ziel, und
+  das ist der Kern dieser Liste.
+- **`tv`** — seit dem Umbau auf eigene Charts benutzt es niemand mehr. Steht eins
+  da, muss es weiter stimmen; leer darf es bleiben.
+
+Dazu ein ehrlicher Zustand im Chart: ohne Symbol stand dort **„Chart lädt …" für
+immer**. Jetzt steht da „Kein Live-Kurs".
+
+**Was ich nicht erfunden habe:** anfangs die Branche — bis die Recherche sie
+lieferte (Gesundheitsprodukte: „FitGun"-Massagepistolen, „FGN"-Supplements). Eine
+erfundene Branche stünde dauerhaft und falsch auf der Karte; eine fehlende ist in
+der Verwaltung in zehn Sekunden nachgetragen.
 
 ## Der Hintergrund aus Kerzen
 
