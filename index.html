@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="dark">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#0a0d0c">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=117">
-<link rel="apple-touch-icon" href="/icon-180.png?v=117">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=119">
+<link rel="apple-touch-icon" href="/icon-180.png?v=119">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=117">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=119">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=117">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=119">
 
 <script>
 /* Im Browser oder als App?
@@ -1110,11 +1110,23 @@
     background: var(--glas-fenster);
     color: var(--fg);
   }
+  /* KEIN LAUFBAND MEHR
+
+     Der Text lief von rechts nach links durch, in vier Kopien
+     hintereinander. Zwei Dinge stimmten daran nicht: man konnte ihn nie ganz
+     lesen — an beiden Raendern war er abgeschnitten, und wer den Anfang
+     verpasst hatte, wartete 38 Sekunden —, und die Bewegung war ein
+     Selbstzweck. Laufschrift ist die lauteste Art, etwas zu zeigen, und die
+     unruhigste.
+
+     Jetzt steht der Text still und ist ganz zu lesen. Bewegt wird das Licht:
+     ein Zug geht darueber hinweg, so wie ueber dem Ladebildschirm und ueber
+     der Symbolscheibe. Dieselbe Sprache, nur leiser — und er kommt nur alle
+     paar Sekunden. */
   .news-banner-track {
-    display: flex;
-    width: max-content;
-    animation: marquee 37.8s linear infinite;
-    padding: 10px 0;
+    position: relative;
+    padding: 11px 16px;
+    text-align: center;
   }
   /* Anhalten nur, wo es einen Zeiger gibt.
 
@@ -1122,15 +1134,16 @@
      woanders hintippt — und dann stand das Laufband einfach still. Ein
      Verhalten fuer die Maus, das auf dem Finger zur Panne wird. */
   @media (hover: hover) {
-    .news-banner-track:hover { animation-play-state: paused; }
+    .news-banner:hover .banner-zug { animation-play-state: paused; }
   }
   .news-banner span {
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    white-space: nowrap;
-    padding: 0 40px;
+    /* Umbrechen statt abschneiden: der Satz ist laenger als der Schirm breit
+       ist, und lieber zwei Zeilen als ein halber Satz. */
+    line-height: 1.55;
     color: var(--fg);
   }
   .news-banner a {
@@ -1139,12 +1152,35 @@
     border-bottom: 1px solid rgba(var(--fg-rgb), 0.35);
     font-weight: 700;
   }
-  @keyframes marquee {
-    from { transform: translate3d(0, 0, 0); }
-    to { transform: translate3d(-50%, 0, 0); }
+  /* Der Lichtzug ueber dem Band.
+
+     Er faehrt in den ersten anderthalb Sekunden durch und ruht dann bis zum
+     naechsten Umlauf. Ohne die Pause waere es ein Blinken; mit ihr ist es
+     ein Aufblitzen, das man bemerkt, wenn man hinsieht, und sonst nicht —
+     dieselbe Machart wie am App-Zeichen. */
+  .banner-zug {
+    position: absolute;
+    top: -60%;
+    bottom: -60%;
+    left: -40%;
+    width: 26%;
+    pointer-events: none;
+    background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.06) 30%,
+      rgba(255, 255, 255, 0.26) 50%,
+      rgba(255, 255, 255, 0.06) 70%,
+      rgba(255, 255, 255, 0) 100%);
+    transform: rotate(14deg) translate3d(0, 0, 0);
+    animation: bannerZug 7.4s cubic-bezier(0.45, 0, 0.3, 1) infinite;
+  }
+  @keyframes bannerZug {
+    0%   { transform: rotate(14deg) translate3d(0, 0, 0); }
+    22%  { transform: rotate(14deg) translate3d(600%, 0, 0); }
+    100% { transform: rotate(14deg) translate3d(600%, 0, 0); }
   }
   @media (prefers-reduced-motion: reduce) {
-    .news-banner-track { animation: none; }
+    .banner-zug { animation: none; opacity: 0; }
   }
 
   /* Wirtschaftstermine: ein Termin steht still, der Kasten wechselt.
@@ -3356,7 +3392,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=117");
+    background-image: url("/kerzen.svg?v=119");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -3370,7 +3406,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=117");
+    background-image: url("/kerzen-blass.svg?v=119");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -4145,7 +4181,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=117" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=119" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -4160,12 +4196,19 @@
           title="Nach Nähe zur Einkaufszone sortieren"><span class="zeichen">⇅</span></button>
 </nav>
 
-<div class="news-banner" aria-label="Neuigkeit">
+<!-- Das Nachrichtenband. Leer, bis es etwas zu sagen gibt.
+
+     Hier stand fest verdrahtet "Neu — Energie-These: KI ist kein
+     Chip-Problem · PDF herunterladen". Zwei Dinge daran waren falsch: der
+     Text lief als Laufschrift durch und war nie ganz zu lesen, und er stand
+     auch dann noch da, wenn der Beitrag laengst nicht mehr neu war — ein
+     Aushang, den niemand abnimmt.
+
+     Jetzt zeigt das Band nur noch, was wirklich neu ist, und ist sonst gar
+     nicht da. Der Beitrag selbst ist ueber den Knopf im Fuss erreichbar. -->
+<div class="news-banner" aria-label="Neuigkeit" hidden>
   <div class="news-banner-track">
-    <span>Neu — Energie-These: KI ist kein Chip-Problem · <a href="energie-these.pdf" download>PDF herunterladen</a></span>
-    <span>Neu — Energie-These: KI ist kein Chip-Problem · <a href="energie-these.pdf" download>PDF herunterladen</a></span>
-    <span>Neu — Energie-These: KI ist kein Chip-Problem · <a href="energie-these.pdf" download>PDF herunterladen</a></span>
-    <span>Neu — Energie-These: KI ist kein Chip-Problem · <a href="energie-these.pdf" download>PDF herunterladen</a></span>
+    <i class="banner-zug" aria-hidden="true"></i>
   </div>
 </div>
 
@@ -4263,7 +4306,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=117" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=119" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -4311,7 +4354,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=117" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=119" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -4330,7 +4373,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=117" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=119" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -4447,7 +4490,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=117" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=119" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -7014,7 +7057,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=117";
+      i.src = "/icon-512.png?v=119";
     });
     return symbolBild;
   }
@@ -7288,21 +7331,27 @@ if ("serviceWorker" in navigator) {
   }
 
   function bandSetzen() {
-    if (!band || !stand.length) return;
+    if (!band) return;
+    /* Nichts Neues, kein Band. Es kommt erst herein, wenn es etwas traegt —
+       vorher steht dort kein leerer Kasten. */
+    if (!stand.length) { band.hidden = true; return; }
+    band.hidden = false;
     var neuester = stand[0];
     var spur = band.querySelector(".news-banner-track");
     if (!spur) return;
-    spur.textContent = "";
-    for (var i = 0; i < 4; i++) {
-      var s = document.createElement("span");
-      s.appendChild(document.createTextNode("Neu — " + neuester.titel + " · "));
-      var a = document.createElement("a");
-      a.href = "#";
-      a.textContent = "lesen";
-      a.setAttribute("data-beitrag", neuester.id);
-      s.appendChild(a);
-      spur.appendChild(s);
-    }
+    /* Nur den Text austauschen — der Lichtzug bleibt stehen. Frueher wurden
+       hier vier Kopien gebaut, weil das Laufband nahtlos wiederholen musste;
+       ohne Laufband genuegt eine. */
+    var alt = spur.querySelector("span");
+    if (alt) alt.remove();
+    var s = document.createElement("span");
+    s.appendChild(document.createTextNode("Neu — " + neuester.titel + " · "));
+    var a = document.createElement("a");
+    a.href = "#";
+    a.textContent = "lesen";
+    a.setAttribute("data-beitrag", neuester.id);
+    s.appendChild(a);
+    spur.appendChild(s);
   }
 
   function zeichnen() {

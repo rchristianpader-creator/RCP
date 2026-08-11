@@ -785,6 +785,37 @@ trägt die Haltung. Die Verzerrung bleibt in allen Fassungen moderat (`scaleY`
 Hub, damit „bewegt sich nicht" nicht zurückkommt, und höchstens 22 px, damit
 „zu unruhig" nicht zurückkommt. Dazu mindestens 4,5 s je Umlauf.
 
+### Kein Laufband, kein Aushang
+
+Im Nachrichtenband lief der Text von rechts nach links durch, in vier Kopien
+hintereinander. Zwei Dinge stimmten daran nicht:
+
+- **Man konnte ihn nie ganz lesen.** An beiden Rändern abgeschnitten, und wer den
+  Anfang verpasst hatte, wartete 38 Sekunden. Auf dem Gerät stand meist ein
+  Fragment wie „…OBLEM · PDF HERUNTERLADEN".
+- **Er stand fest verdrahtet im Markup** — „Neu — Energie-These · PDF
+  herunterladen" — und damit auch dann noch da, wenn der Beitrag längst nicht mehr
+  neu war. Ein Aushang, den niemand abnimmt.
+
+**Der Text steht jetzt still und ganz da**, über zwei Zeilen wenn nötig. Bewegt
+wird das Licht: ein Zug geht darüber hinweg, dieselbe Machart wie über dem
+Ladebildschirm und der Symbolscheibe — 7,4 s Umlauf, davon 1,6 s Bewegung und der
+Rest Ruhe. Ohne die Pause wäre es ein Blinken.
+
+**Und der feste Aushang ist weg.** Das Band zeigt nur noch, was wirklich neu ist,
+und ist sonst gar nicht da (`hidden`). Der Beitrag bleibt über den Knopf im Fuß
+erreichbar.
+
+**Zwei Folgefehler, die der Umbau ausgelöst hätte:**
+
+1. **`on-publish.js` liest den Bandtext per Ausdruck** aus der ausgelieferten
+   Datei — er erwartete den `<span>` direkt hinter der Spur. Seit dort der Lichtzug
+   als `<i>` davorsteht, traf er nicht mehr, und die Meldung beim Veröffentlichen
+   wäre **still ohne Text** rausgegangen.
+2. **`bandSetzen()` baute vier Kopien** für die nahtlose Laufschrift. Ohne
+   Laufschrift genügt eine — und der Lichtzug darf beim Austauschen des Textes
+   nicht mitgelöscht werden.
+
 ### Die Knöpfe im Kopf tragen dasselbe Glas
 
 Rückmeldung: „Meldungen-Button sollte gleichen Liquid-Stil haben." Stimmte —
