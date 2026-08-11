@@ -205,23 +205,32 @@ export const NACHTRAG = [
          Umrechnung der Liste greift nur bei USD. */
       "zone": "16,15 – 15,15 EUR",
       "ziel": "27,30 – 32,90 EUR",
-      /* Kein Yahoo-Symbol, und das ist Absicht.
+      /* Wien, nicht Xetra — und deshalb .VI.
 
-         Yahoo fuehrt unter FTG eine kanadische Firma (Firan Technology
-         Group) und unter FIT.VN eine vietnamesische; die Wiener Notierung
-         ist dort nicht zu finden. Ein geratenes Symbol waere schlimmer als
-         keins: die Karte zeigte still den Kurs eines fremden Papiers und
-         koennte damit sogar eine Zonen-Meldung ausloesen.
+         Der erste Anlauf hier war FTG.DE, aus der Annahme, eine deutsche
+         ISIN heisse Handel in Deutschland. Falsch: die Aktie notiert im
+         direct market plus der WIENER Boerse, in Deutschland ist sie nur
+         ausserboerslich ueber Lang & Schwarz handelbar. Auf der Karte stand
+         entsprechend "Kein Kurs".
 
-         Ohne Symbol hat die Karte keinen Live-Kurs und keinen Chart — sie
-         zeigt Einkaufszone und Ziel. Findet sich spaeter ein Symbol, das
-         wirklich diese Aktie liefert, ist es in der Verwaltung in zehn
-         Sekunden nachgetragen.
+         Danach stand das Feld leer, weil Yahoo unter FTG eine kanadische
+         Firma fuehrt (Firan Technology Group) — ein blankes FTG haette still
+         den Kurs eines fremden Papiers gezeigt.
 
-         Dasselbe gilt fuer tv: seit dem Umbau auf eigene Charts benutzt es
+         Jetzt FTG.VI: TradingView fuehrt die Aktie als VIE:FTG, und .VI ist
+         Yahoos Kuerzel fuer die Wiener Boerse. Das ist keine Vermutung mehr,
+         sondern die Konvention zur bestaetigten Boerse — und ein Suffix
+         zeigt immer auf genau diese Boerse, kann also nicht versehentlich
+         eine andere Firma treffen.
+
+         Bleibt es trotzdem bei "Kein Kurs", fuehrt Yahoo dieses
+         MTF-Segment nicht. Dann ist der Analyse-Chart der Chart, und das
+         Feld gehoert wieder geleert.
+
+         tv bleibt leer: seit dem Umbau auf eigene Charts benutzt es
          niemand mehr. */
-      "tv": "",
-      "yahoo": "",
+      "tv": "VIE:FTG",
+      "yahoo": "FTG.VI",
       "frage": "FIT Group AG Aktie",
       "fn": "https://www.finanzen.net/aktien/fit_group-aktie",
       "keys": "FIT Group|FTG|FitGun",

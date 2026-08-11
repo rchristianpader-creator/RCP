@@ -1565,16 +1565,27 @@ Aufruf noch einmal rausgeht.
    zehn Kürzeln, `nth(10)` für die neu angelegte Position. Sieben rote Zusicherungen,
    von denen keine einen Fehler zeigte. Alle leiten sich jetzt aus dem Bestand ab.
 
-### Lieber kein Kurs als ein fremder
+### Ein Symbol ohne Börse trifft irgendwas
 
 FIT Group AG steht im **direct market plus der Wiener Börse** (ISIN DE000A426PD9,
-WKN A426PD) — nicht auf Xetra, wie zuerst angenommen. Und Yahoo führt unter `FTG`
-eine **kanadische** Firma (Firan Technology Group), unter `FIT.VN` eine
-vietnamesische. Die Wiener Notierung ist dort nicht zu finden.
+WKN A426PD). In Deutschland ist die Aktie nur außerbörslich über Lang & Schwarz
+handelbar — **kein Xetra, kein Frankfurt.**
 
-Ein geratenes Symbol wäre hier nicht „vielleicht kein Chart", sondern **falsche
-Zahlen**: die Karte zeigte still den Kurs eines fremden Papiers und könnte damit
-sogar eine Zonen-Meldung auslösen. Deshalb bleibt das Feld leer.
+Der Weg zum richtigen Symbol ging über zwei Fehler, und beide sind derselbe in
+zwei Richtungen:
+
+1. **`FTG.DE`** — aus der Annahme, eine deutsche ISIN heiße Handel in Deutschland.
+   Auf der Karte stand „Kein Kurs".
+2. **Leer** — weil Yahoo unter blankem `FTG` eine *kanadische* Firma führt (Firan
+   Technology Group) und unter `FIT.VN` eine vietnamesische. Ein blankes Kürzel
+   hätte still den Kurs eines fremden Papiers gezeigt und könnte damit sogar eine
+   Zonen-Meldung auslösen.
+
+**Ein Symbol ohne Börse trifft irgendwas, eins mit falscher Börse trifft nichts.**
+Jetzt `FTG.VI`: TradingView führt die Aktie als `VIE:FTG`, und `.VI` ist Yahoos
+Kürzel für die Wiener Börse. Ein Suffix zeigt immer auf genau eine Börse — es kann
+also nicht versehentlich eine andere Firma treffen. `nachtrag-test` verlangt
+deshalb, dass ein Symbol *eine Börse trägt*, statt nur „ist gesetzt" zu prüfen.
 
 Damit das überhaupt geht, sind zwei Pflichtfelder gefallen:
 
