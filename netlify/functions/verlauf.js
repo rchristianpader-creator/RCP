@@ -74,7 +74,14 @@ export default async (request) => {
     return json(Object.assign({ ok: true, aus: "speicher" }, alt), 200, plan.frisch);
   }
 
-  const frisch = await holenMitRueckfall(sym, plan);
+  /* Was die Karte ueber sich weiss, kommt mit — damit ein gefundener Kurs
+     geprueft werden kann, statt geglaubt zu werden. */
+  const erwartet = {
+    waehrung: (url.searchParams.get("waehrung") || "").toUpperCase(),
+    name: (url.searchParams.get("name") || "").trim()
+  };
+
+  const frisch = await holenMitRueckfall(sym, plan, erwartet);
   if (!frisch) {
     // Lieber alt als nichts: ein Chart von vorhin ist besser als ein leeres Feld
     if (alt) return json(Object.assign({ ok: true, aus: "speicher-alt" }, alt), 200, 60);
@@ -206,15 +213,72 @@ async function pruefen(sym) {
   };
 }
 
-async function holenMitRueckfall(sym, plan) {
+/* SUCHEN STATT RATEN
+
+   Bei FIT Group ist das Symbol viermal von Hand geraten worden — FTG.DE,
+   leer, FTG.VI, und jedes Mal stand "Kein Kurs" auf der Karte. Der Grund:
+   hier laesst sich keine einzige Kursquelle erreichen (zehn Hosts geprueft,
+   alle gesperrt). Auf Netlify laufen sie, nur sehen kann ich es nicht.
+
+   Also sucht die Function selbst. Erst das eingetragene Symbol, dann
+   dasselbe Kuerzel an den Boersen, an denen ein europaeisches Papier
+   notieren kann, zuletzt Stooq.
+
+   Der springende Punkt ist die Pruefung. Ein Kuerzel wie FTG traegt an jeder
+   Boerse eine andere Firma — bei Yahoo blank sogar eine kanadische. Ein
+   Fund wird deshalb nur genommen, wenn er zu der Position passt:
+
+     - die Waehrung stimmt (eine Zone in Euro braucht einen Kurs in Euro)
+     - der Name passt (ein Wort des Firmennamens muss vorkommen)
+
+   Damit ist automatisches Suchen nicht gefaehrlicher als ein Symbol von
+   Hand, sondern sicherer: von Hand wird nichts geprueft. */
+const SUCH_SUFFIXE = [".VI", ".DE", ".F", ".SG", ".BE", ".MU", ".DU", ".HM"];
+
+function passt(meta, erwartet) {
+  if (!erwartet) return true;
+  if (erwartet.waehrung && meta.currency &&
+      String(meta.currency).toUpperCase() !== erwartet.waehrung) return false;
+  if (erwartet.name) {
+    const wer = String(meta.longName || meta.shortName || "").toLowerCase();
+    if (wer) {
+      /* Ein tragendes Wort genuegt: "FIT Group AG" gegen "FIT GROUP AG NA
+         EO -,08" soll passen, gegen "Firan Technology Group" nicht. Woerter
+         wie AG oder Inc. sagen nichts und bleiben draussen. */
+      const leer = ["ag", "inc", "corp", "sa", "nv", "plc", "se", "group", "the"];
+      const woerter = erwartet.name.toLowerCase().split(/[^a-z0-9äöüß]+/)
+        .filter((w) => w.length > 2 && leer.indexOf(w) < 0);
+      if (woerter.length && !woerter.some((w) => wer.indexOf(w) >= 0)) return false;
+    }
+  }
+  return true;
+}
+
+async function holenMitRueckfall(sym, plan, erwartet) {
   for (const [range, interval] of plan.versuche) {
-    const d = await holen(sym, range, interval);
+    const d = await holen(sym, range, interval, erwartet);
     if (d) return d;
+  }
+
+  /* Nichts unter dem eingetragenen Symbol. Dasselbe Kuerzel an den anderen
+     Boersen versuchen — aber nur mit Suffix, nie blank. */
+  const basis = sym.split(".")[0].toUpperCase();
+  if (basis && basis.indexOf("=") < 0 && basis.indexOf("-") < 0 && basis.charAt(0) !== "^") {
+    for (const suffix of SUCH_SUFFIXE) {
+      const kandidat = basis + suffix;
+      if (kandidat === sym.toUpperCase()) continue;
+      for (const [range, interval] of plan.versuche) {
+        const d = await holen(kandidat, range, interval, erwartet);
+        /* Wo sie fuendig wurde, gehoert in die Antwort — sonst weiss
+           niemand, welches Symbol wirklich getragen hat. */
+        if (d) { d.symbol = kandidat; return d; }
+      }
+    }
   }
   return null;
 }
 
-async function holen(sym, range, interval) {
+async function holen(sym, range, interval, erwartet) {
   try {
     const url =
       "https://query1.finance.yahoo.com/v8/finance/chart/" +
@@ -232,6 +296,9 @@ async function holen(sym, range, interval) {
     const ergebnis = daten && daten.chart && daten.chart.result && daten.chart.result[0];
     const meta = ergebnis && ergebnis.meta;
     if (!meta) return null;
+    /* Passt der Fund ueberhaupt zu dieser Position? Ein fremdes Papier mit
+       demselben Kuerzel waere schlimmer als kein Chart. */
+    if (!passt(meta, erwartet)) return null;
 
     const zeiten = ergebnis.timestamp || [];
     const schluss =

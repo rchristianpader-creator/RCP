@@ -1593,6 +1593,44 @@ keine Auskunft — und der Grund, warum ich raten musste: die Entwicklungsumgebu
 kommt an keinen fremden Host heran, also ist jede Antwort erst auf dem Gerät zu
 sehen.
 
+### Die Function sucht das Symbol selbst
+
+Viermal ist das Symbol für FIT Group von Hand geraten worden — `FTG.DE`, leer,
+`FTG.VI` —, viermal stand „Kein Kurs" auf der Karte. Der Grund liegt nicht am
+Raten, sondern daran, **warum** geraten werden musste: aus der
+Entwicklungsumgebung ist keine einzige Kursquelle erreichbar. Systematisch
+geprüft — **zehn Hosts per curl, drei per WebFetch, alle gesperrt** (Yahoo,
+Stooq, stockanalysis, marketscreener, finanzen.net, wallstreet-online,
+boerse-frankfurt, onvista, eodhd, FMP). Suchen geht, Daten holen nicht.
+
+Auf Netlify laufen diese Quellen. Also sucht **die Function**, nicht ich:
+
+1. das eingetragene Symbol
+2. dasselbe Kürzel an den Börsen, an denen ein europäisches Papier notieren kann
+   (`.VI .DE .F .SG .BE .MU .DU .HM`) — **nie blank**
+3. (Diagnose: Stooq und die Wiener Börse, siehe unten)
+
+**Der springende Punkt ist nicht das Suchen, sondern das Prüfen.** Ein Kürzel
+trägt an jeder Börse eine andere Firma; blank bei Yahoo sogar eine kanadische.
+Ein Fund wird deshalb nur genommen, wenn er zur Position passt:
+
+| | |
+|---|---|
+| Währung | eine Zone in Euro braucht einen Kurs in Euro |
+| Name | ein tragendes Wort des Firmennamens muss vorkommen (`AG`, `Inc`, `Group` zählen nicht) |
+
+Damit ist automatisches Suchen **nicht gefährlicher als ein Symbol von Hand,
+sondern sicherer** — von Hand wird gar nichts geprüft. `suche-test` stellt das
+Netz nach und prüft beide Wachposten einzeln: „Firan Technology Group Corp" unter
+`FTG.DE` wird abgelehnt, ein Kurs in CAD wird abgelehnt, das blanke Kürzel wird
+nie gefragt, und Futures (`GC=F`) wie Krypto (`BTC-USD`) bleiben unangetastet.
+
+**Ein Testfehler dabei, der lehrreich war:** alle Fälle hießen `FTG.VI`, und der
+Zwischenspeicher der Function machte daraus einen einzigen — die späteren
+Prüfungen lasen das Ergebnis der früheren und meldeten `aus: speicher`. Drei rote
+Zeilen, von denen keine einen Fehler zeigte. Jeder Fall hat jetzt sein eigenes
+Kürzel.
+
 ### Der Chart erklärt sich selbst
 
 ```
