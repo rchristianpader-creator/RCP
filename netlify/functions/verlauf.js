@@ -45,6 +45,24 @@ export default async (request) => {
   const spanne = (url.searchParams.get("spanne") || "1T").toUpperCase();
 
   if (!sym) return json({ ok: false, fehler: "kein Symbol" }, 400);
+
+  /* Warum hat dieses Papier keinen Chart?
+
+     Aufruf: /.netlify/functions/verlauf?sym=FTG&pruef=1
+
+     Bei FIT Group ist dieselbe Frage dreimal falsch beantwortet worden —
+     FTG.DE (falsche Boerse), leer (zu vorsichtig), FTG.VI (richtige Boerse,
+     aber Yahoo fuehrt das MTF-Segment offenbar nicht). Jedes Mal war die
+     Rueckmeldung dieselbe: "Kein Kurs". Das ist keine Auskunft, das ist ein
+     Ergebnis.
+
+     Hier steht die Auskunft: jede Schreibweise, jede Quelle, mit Status und
+     dem, was zurueckkam. Damit ist beim naechsten Mal nicht zu raten,
+     sondern nachzulesen. Kein Schluessel noetig, alles oeffentlich. */
+  if (url.searchParams.get("pruef")) {
+    return json(await pruefen(sym), 200);
+  }
+
   const plan = SPANNEN[spanne];
   if (!plan) return json({ ok: false, fehler: "unbekannte Spanne" }, 400);
 
@@ -93,6 +111,66 @@ async function gespeichert(speicher, schluessel) {
 }
 
 /* Der Reihe nach, bis eine Reihe herauskommt. */
+/* Die Schreibweisen, die es zu versuchen lohnt: das Kuerzel, wie es
+   ankommt, und dazu die Boersen-Suffixe, die fuer eine europaeische
+   Notierung in Frage kommen. Ein Suffix zeigt auf genau eine Boerse — ein
+   blankes Kuerzel dagegen auf irgendeine Firma, die es zufaellig traegt. */
+const SUFFIXE = [".VI", ".DE", ".F", ".SG", ".BE", ".MU", ".DU", ".HM", ".VIE"];
+
+async function pruefen(sym) {
+  const basis = sym.split(".")[0].toUpperCase();
+  const kandidaten = [sym].concat(SUFFIXE.map((x) => basis + x))
+    .filter((v, i, a) => a.indexOf(v) === i);
+
+  const zeilen = [];
+  for (const k of kandidaten) {
+    const adresse = "https://query1.finance.yahoo.com/v8/finance/chart/" +
+      encodeURIComponent(k) + "?range=5d&interval=1d";
+    const z = { quelle: "Yahoo", symbol: k };
+    try {
+      const res = await fetch(adresse, {
+        headers: { "User-Agent": "Mozilla/5.0 (compatible; AktienListe/1.0)", Accept: "application/json" }
+      });
+      z.status = res.status;
+      const d = await res.json().catch(() => null);
+      const e = d && d.chart && d.chart.result && d.chart.result[0];
+      const m = e && e.meta;
+      if (d && d.chart && d.chart.error) z.urteil = "Yahoo kennt es nicht: " + (d.chart.error.code || "");
+      else if (!m) z.urteil = "keine Daten";
+      else {
+        z.waehrung = m.currency;
+        z.boerse = m.exchangeName || m.fullExchangeName;
+        z.name = m.longName || m.shortName;
+        z.kurs = m.regularMarketPrice;
+        z.punkte = (e.timestamp || []).length;
+        z.urteil = z.punkte ? "brauchbar" : "kennt es, liefert aber keine Reihe";
+      }
+    } catch (e) {
+      z.urteil = "nicht erreichbar: " + (e && e.message ? e.message : "unbekannt");
+    }
+    zeilen.push(z);
+  }
+
+  /* Und eine zweite Quelle, falls Yahoo dieses Segment gar nicht fuehrt.
+     Stooq liefert Tagesschluesse als CSV, ohne Schluessel. */
+  for (const k of [basis.toLowerCase() + ".at", basis.toLowerCase() + ".de", basis.toLowerCase()]) {
+    const adresse = "https://stooq.com/q/l/?s=" + encodeURIComponent(k) + "&f=sd2t2ohlcv&h&e=csv";
+    const z = { quelle: "Stooq", symbol: k };
+    try {
+      const res = await fetch(adresse, { headers: { "User-Agent": "Mozilla/5.0 (compatible; AktienListe/1.0)" } });
+      z.status = res.status;
+      const text = (await res.text()).trim();
+      z.antwort = text.split("\n").slice(0, 2).join(" | ").slice(0, 160);
+      z.urteil = /N\/D/.test(text) ? "kennt es nicht" : (text.split("\n").length > 1 ? "brauchbar" : "leer");
+    } catch (e) {
+      z.urteil = "nicht erreichbar: " + (e && e.message ? e.message : "unbekannt");
+    }
+    zeilen.push(z);
+  }
+
+  return { sym, gefunden: zeilen.filter((z) => z.urteil === "brauchbar").map((z) => z.quelle + " " + z.symbol), zeilen };
+}
+
 async function holenMitRueckfall(sym, plan) {
   for (const [range, interval] of plan.versuche) {
     const d = await holen(sym, range, interval);

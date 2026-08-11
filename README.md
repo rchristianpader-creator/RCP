@@ -1582,10 +1582,38 @@ zwei Richtungen:
    Zonen-Meldung auslösen.
 
 **Ein Symbol ohne Börse trifft irgendwas, eins mit falscher Börse trifft nichts.**
-Jetzt `FTG.VI`: TradingView führt die Aktie als `VIE:FTG`, und `.VI` ist Yahoos
+Dann `FTG.VI`: TradingView führt die Aktie als `VIE:FTG`, und `.VI` ist Yahoos
 Kürzel für die Wiener Börse. Ein Suffix zeigt immer auf genau eine Börse — es kann
 also nicht versehentlich eine andere Firma treffen. `nachtrag-test` verlangt
 deshalb, dass ein Symbol *eine Börse trägt*, statt nur „ist gesetzt" zu prüfen.
+
+**Auch das war „Kein Kurs".** Damit ist dieselbe Frage dreimal falsch beantwortet
+worden, und jedes Mal kam als Antwort dasselbe Wort zurück. Das ist ein Ergebnis,
+keine Auskunft — und der Grund, warum ich raten musste: die Entwicklungsumgebung
+kommt an keinen fremden Host heran, also ist jede Antwort erst auf dem Gerät zu
+sehen.
+
+### Der Chart erklärt sich selbst
+
+```
+/.netlify/functions/verlauf?sym=FTG&pruef=1
+```
+
+Antwortet mit **jeder** Schreibweise und **jeder** Quelle: Yahoo mit den Suffixen
+`.VI .DE .F .SG .BE .MU .DU .HM`, dazu Stooq — je mit Status, Börse, Name,
+Währung, Kurs, Zahl der Punkte und einem Urteil („brauchbar", „Yahoo kennt es
+nicht", „kennt es, liefert aber keine Reihe", „nicht erreichbar").
+
+Zwei Dinge sind dabei Absicht:
+
+- **Yahoo wird nie blank befragt.** Ein Kürzel ohne Suffix trifft irgendeine Firma,
+  die es zufällig trägt — genau die Falle von Anlauf 2.
+- **Eine zweite Quelle**, falls Yahoo das MTF-Segment gar nicht führt.
+
+Die Mechanik ist lokal geprüft (`verlaufpruef-test`, mit nachgestelltem Netz):
+alle Schreibweisen werden versucht, ein Fund wird mit Name und Börse erkannt, und
+ein Ausfall nimmt die Auskunft nicht mit. **Die Antwort selbst kommt vom echten
+Netz** — dafür ist sie ja da.
 
 Damit das überhaupt geht, sind zwei Pflichtfelder gefallen:
 
