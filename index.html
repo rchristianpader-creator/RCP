@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="dark">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#0a0d0c">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=124">
-<link rel="apple-touch-icon" href="/icon-180.png?v=124">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=125">
+<link rel="apple-touch-icon" href="/icon-180.png?v=125">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=124">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=125">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=124">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=125">
 
 <script>
 /* Im Browser oder als App?
@@ -389,16 +389,23 @@
      steht der Inhalt mittig. Sonst haette man das Loch im Kasten statt
      darunter. */
   .erste-seite {
-    /* Minus dem sicheren Rand unten.
+    /* Hier stehen zwei Forderungen, die ich einmal verwechselt hatte:
 
-       Mit blossem 100svh endete der letzte Kasten exakt auf der letzten
-       Bildzeile — und damit unter dem Home-Indikator: seine Rundung war
-       nicht mehr zu sehen, der Kasten wirkte abgeschnitten. svh meint das
-       ganze Fenster, nicht den Teil davon, den man auch sieht.
+         - der letzte Kasten soll UEBER dem Home-Indikator enden, damit
+           seine Rundung zu sehen ist;
+         - die erste Karte soll erst UNTER der Falte beginnen, also ab
+           100svh.
 
-       env(safe-area-inset-bottom) ist genau dieser Streifen. Im Browser und
-       auf Geraeten ohne Indikator ist er 0, dann aendert sich nichts. */
-    min-height: calc(100svh - env(safe-area-inset-bottom, 0px));
+       Der erste Anlauf zog den sicheren Rand von der Hoehe ab. Damit war
+       zwar der Kasten frei, aber die Huelle selbst wurde kuerzer — und die
+       Karte rutschte um denselben Streifen nach oben ins Bild.
+
+       Der Streifen gehoert deshalb in den Innenabstand, nicht in die
+       Hoehe: die Huelle bleibt volle 100svh hoch, die Bloecke fuellen
+       100svh minus Streifen. Beide Forderungen zugleich. Im Browser und auf
+       Geraeten ohne Indikator ist env() 0, dann aendert sich nichts. */
+    min-height: 100svh;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
     display: flex;
     flex-direction: column;
   }
@@ -900,8 +907,15 @@
   .karten {
     display: flex;
     flex-direction: column;
-    /* Die halbe Luft — die andere Haelfte liegt unter der Karte. */
-    margin-top: calc(var(--luft) / 2);
+    /* Die halbe Luft — die andere Haelfte liegt unter der Karte.
+
+       Dazu der Unterschied zwischen dem groessten und dem kleinsten
+       Fenster. Die Huelle darueber ist 100svh hoch, also so hoch wie das
+       Fenster MIT Adressleiste. Faehrt die Leiste beim Rollen ein, wird
+       sichtbar, was vorher unter ihr lag — und das waere die Oberkante der
+       ersten Karte. Auf dem Home-Bildschirm gibt es keine Leiste, dann sind
+       beide Masse gleich und dieser Zusatz ist null. */
+    margin-top: calc(var(--luft) / 2 + (100lvh - 100svh));
   }
   .karten > .card {
     margin: 0 var(--rand) var(--luft);
@@ -3438,7 +3452,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=124");
+    background-image: url("/kerzen.svg?v=125");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -3452,7 +3466,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=124");
+    background-image: url("/kerzen-blass.svg?v=125");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -4238,7 +4252,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=124" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=125" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -4365,7 +4379,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=124" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=125" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -4413,7 +4427,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=124" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=125" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -4432,7 +4446,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=124" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=125" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -4549,7 +4563,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=124" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=125" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -7116,7 +7130,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=124";
+      i.src = "/icon-512.png?v=125";
     });
     return symbolBild;
   }
