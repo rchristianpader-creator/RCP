@@ -763,10 +763,20 @@ ist nicht sichtbar.** `marke-test` misst jetzt Bildpunkte — die Kerze wird üb
 ihren Umlauf abgetastet, und zwischen höchster und tiefster Lage müssen
 mindestens fünf Punkte liegen.
 
-*Zu laut.* Der zweite ging auf `scaleY` 1,34 ↔ 0,68 — sichtbar, aber die Kerzen
-wurden dabei zu Klumpen, und das Zeichen war keins mehr. Jetzt tragen Wanderung
-und Versatz die Bewegung, nicht die Verzerrung: **9,8 px Hub, 4,9 px
-Längenänderung**, und die Form bleibt eine Kerze.
+*Zu verzerrt.* Der zweite ging auf `scaleY` 1,34 ↔ 0,68 — sichtbar, aber die
+Kerzen wurden dabei zu Klumpen, und das Zeichen war keins mehr.
+
+**Die Lösung war, die Bewegung von der Verzerrung zu trennen.** Auf „lauter, viel
+lauter" ist der Hub auf **28,2 px** gegangen (bei 42 px Zeichenhöhe) und die
+Umläufe auf 3,1–4,3 s — die Kerzen wandern jetzt weit und zügig. Die Verzerrung
+blieb dabei moderat (`scaleY` 1,26 ↔ 0,80, **9,6 px** Längenänderung), und genau
+deshalb bleibt die Form eine Kerze: laut wird es durch Weg und Tempo, nicht
+durch Quetschen.
+
+Die Kerzen ragen dabei absichtlich über ihren Kasten hinaus (`overflow: visible`) —
+sonst wären sie mitten in der Bewegung abgeschnitten. `marke-test` tastet den
+ganzen Umlauf ab und prüft, dass sie dabei nichts anfassen: nicht den Namen
+daneben, nicht die Knopfreihe darunter (10 px Luft), nicht den Rand des Kastens.
 
 **Der Preis:** vier Dauerläufer mehr, also fünfzehn statt elf. Sie sind so
 billig, wie eine Bewegung sein kann — vier kleine SVG-Formen auf zusammen 43 × 38
