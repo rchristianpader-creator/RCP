@@ -785,46 +785,30 @@ trägt die Haltung. Die Verzerrung bleibt in allen Fassungen moderat (`scaleY`
 Hub, damit „bewegt sich nicht" nicht zurückkommt, und höchstens 22 px, damit
 „zu unruhig" nicht zurückkommt. Dazu mindestens 4,5 s je Umlauf.
 
-### Die erste Karte fängt an der Kante an
+### Zwei Anläufe für die erste Karte — beide zurückgenommen
 
-Beim Öffnen schaute sie unten schon herein — ein Streifen Kartenkopf unter dem
-Fear-&-Greed-Kasten. Das liest sich nicht als „hier geht es weiter", sondern als
-abgeschnitten.
+Beim Öffnen schaute die erste Karte unten schon herein: ein Streifen Kartenkopf
+unter dem Fear-&-Greed-Kasten. Das liest sich nicht als „hier geht es weiter",
+sondern als abgeschnitten.
 
-Alles über der Liste steckt jetzt in einer Hülle (`.erste-seite`) mit
-`min-height: 100svh`. Damit fängt die erste Karte genau an der unteren Kante an:
-sichtbar wird sie erst beim Scrollen. **Kein fester Abstand** — die Höhe kommt vom
-Bildschirm, also stimmt sie auf jedem Gerät.
+Zwei Versuche, und beide waren schlechter als das Problem:
 
-**Der erste Anlauf war damit noch falsch.** Nur `min-height` heißt: die Blöcke
-stehen oben zusammen, und darunter klafft bis zur Kante ein Loch. Die Rückmeldung
-— „der leere Platz muss gefüllt sein" — war richtig: **ein Loch ist schlimmer als
-der Streifen, den es zu beheben galt.**
+1. **`min-height: 100svh`** auf einer Hülle um alles vor der Liste. Die Karte war
+   weg — dafür standen die Blöcke oben zusammen und darunter klaffte bis zur Kante
+   ein Loch. *„Der leere Platz muss gefüllt sein."* Richtig.
+2. **Dazu `justify-content: space-between`.** Der Platz wanderte in die Abstände
+   zwischen den Blöcken. Bei fünf Blöcken sieht das großzügig aus, bei dreien
+   werden daraus Schluchten von 100 px. *„Nicht so."* Auch richtig.
 
-Die Hülle ist deshalb eine Spalte mit `justify-content: space-between`. Die
-übrige Höhe wandert in die Abstände *zwischen* den Blöcken, statt sich unten zu
-sammeln. Der letzte Kasten sitzt an der unteren Kante, die erste Karte fängt
-gleich darunter an, und dazwischen steht nirgends Leere.
+Beides ist zurückgenommen. Die Hülle `.erste-seite` bleibt als Halterung stehen —
+die Einzug-Staffel hängt an ihren Selektoren, und die soll nicht zweimal umgebaut
+werden —, hat aber keine eigene Wirkung mehr.
 
-`ersteseite-test` misst auf 844, 667 und 932 Pixeln beides: dass unten kein Loch
-bleibt (Unterkante des letzten Kastens < 60 px von der Schirmkante) **und** dass
-die Abstände gleichmäßig sind (Größter minus Kleinster < 30 px). Die zweite
-Prüfung ist die wichtigere — sie fängt den Fall, dass sich der Platz doch wieder
-an einer Stelle sammelt.
-
-**Eine Eigenschaft, keine Schwäche:** je weniger Blöcke da sind (kein
-Wirtschaftskasten, kein Nachrichtenband), desto größer werden die Abstände. Das
-ist der Preis dafür, dass der Platz verteilt wird statt zu klaffen.
-
-`svh` und nicht `vh`: `vh` rechnet mit dem Bildschirm *ohne* Browserleisten und
-ist im Browser deshalb zu groß — dort schöbe es die Karte unnötig weit weg. `svh`
-ist die kleinste sichere Höhe; in der App als eigenes Fenster sind beide gleich.
-
-**Ein Testfehler beim Bauen:** die Schranke „nicht unnötig hoch" lag bei 40 px,
-gemessen waren es 80. Das ist kein Leerlauf, sondern der normale Abstand der Liste
-(`--luft`) plus der Außenabstand der Karte — derselbe, der zwischen allen Karten
-steht. Ein Wert, der auf drei Schirmhöhen konstant ist, ist eine Eigenschaft und
-kein Fehler.
+**Was daraus zu lernen ist:** „die Karte darf nicht zu sehen sein" und „es darf
+kein leerer Platz entstehen" sind zusammen nur zu haben, wenn der Inhalt über der
+Liste den Schirm von sich aus füllt. Jede Lösung, die Höhe *hinzufügt*, erzeugt
+entweder ein Loch oder Schluchten. Der nächste Anlauf muss deshalb am Inhalt
+ansetzen, nicht am Abstand.
 
 ### Kein Laufband, kein Aushang
 
