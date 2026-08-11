@@ -766,12 +766,32 @@ mindestens fünf Punkte liegen.
 *Zu verzerrt.* Der zweite ging auf `scaleY` 1,34 ↔ 0,68 — sichtbar, aber die
 Kerzen wurden dabei zu Klumpen, und das Zeichen war keins mehr.
 
-**Die Lösung war, die Bewegung von der Verzerrung zu trennen.** Auf „lauter, viel
-lauter" ist der Hub auf **28,2 px** gegangen (bei 42 px Zeichenhöhe) und die
-Umläufe auf 3,1–4,3 s — die Kerzen wandern jetzt weit und zügig. Die Verzerrung
-blieb dabei moderat (`scaleY` 1,26 ↔ 0,80, **9,6 px** Längenänderung), und genau
-deshalb bleibt die Form eine Kerze: laut wird es durch Weg und Tempo, nicht
-durch Quetschen.
+**Die Lösung war, die Bewegung von der Verzerrung zu trennen** — und danach das
+Maß in drei Anläufen zu finden:
+
+| Hub | Rückmeldung |
+|---|---|
+| 2 px | „Es bewegt sich nicht." Richtig. |
+| 9,8 px | sichtbar, aber noch zaghaft — „lauter, viel lauter" |
+| 28,2 px | zu unruhig. Ein Zeichen, das hüpft, sieht nicht teuer aus, sondern unfertig |
+| **17,6 px** | man sieht es, ohne dass es einen anspringt |
+
+Dazu **langsamer**: 5,2–7,0 s je Umlauf statt 3,1–4,3. Edel heißt hier *langsam
+und weit*, nicht *schnell und weit* — die Strecke trägt die Bewegung, das Tempo
+trägt die Haltung. Die Verzerrung bleibt in allen Fassungen moderat (`scaleY`
+1,18 ↔ 0,85), und genau deshalb bleibt die Form eine Kerze.
+
+`marke-test` hat deshalb jetzt **zwei** Schranken statt einer: mindestens 12 px
+Hub, damit „bewegt sich nicht" nicht zurückkommt, und höchstens 22 px, damit
+„zu unruhig" nicht zurückkommt. Dazu mindestens 4,5 s je Umlauf.
+
+### Der Name gehört in den Kopf
+
+Beim Aufräumen war er mitgegangen — die alte Verfasserzeile trug den Monat und
+hatte eine Trennlinie über sich, und mit ihr fiel auch der Name weg. Das war zu
+viel des Aufräumens. Er steht jetzt allein unter dem Titel: kleiner Grad, weiter
+Satz, gedeckte Farbe. **Der Monat bleibt im Fuß** — er gehört nicht in den Kopf,
+und `monat-test` prüft weiterhin, dass er genau einmal auf der Seite steht.
 
 Die Kerzen ragen dabei absichtlich über ihren Kasten hinaus (`overflow: visible`) —
 sonst wären sie mitten in der Bewegung abgeschnitten. `marke-test` tastet den
