@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="dark">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#0a0d0c">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=129">
-<link rel="apple-touch-icon" href="/icon-180.png?v=129">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=130">
+<link rel="apple-touch-icon" href="/icon-180.png?v=130">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=129">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=130">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=129">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=130">
 
 <script>
 /* Im Browser oder als App?
@@ -335,11 +335,6 @@
       radial-gradient(64% 48% at 8% 88%, var(--grund-tuerkis) 0%, transparent 70%),
       var(--bg);
     --grund-kacheln: auto, auto, auto, auto, auto, auto;
-    /* Wie lange der Ladebildschirm steht. Vier Sekunden waren als Auftritt
-       gedacht, sind aber bei zehn Starts am Tag Wartezeit. Alles darin
-       haengt an dieser Marke, auch das Skript — vorher stand die 4 an
-       sieben Stellen. */
-    --auftakt-dauer: 2s;
     --schleier: rgba(0, 0, 0, 0.72);
     --schatten: rgba(0, 0, 0, 0.5);
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -430,9 +425,14 @@
 
      Bei 667 Pixeln stand der Inhalt auf der Kante; mit der zwoelften
      Position ging die Kuerzelreihe auf drei Zeilen, und mit dem sicheren
-     Rand lief die Seite ueber. Platz gibt der Kopf zurueck — der groesste
-     Block, und er verliert nur Innenabstaende. Rund 50 Pixel, gebraucht
-     wurden 31. Grenze 720, damit knappe Geraete mit darunterfallen. */
+     Rand lief die Seite ueber — die erste Karte schaute wieder herein.
+     Platz gibt der Kopf zurueck, der groesste Block, und er verliert nur
+     Innenabstaende. Rund 50 Pixel, gebraucht wurden 31. Grenze 720, damit
+     knappe Geraete mit darunterfallen.
+
+     Diese Regel gehoerte zur zurueckgenommenen Runde und ist einzeln
+     wiedergekommen: sie hat mit dem Ladebildschirm nichts zu tun, und ohne
+     sie steht auf kleinen Telefonen wieder eine Karte im Bild. */
   @media (max-height: 720px) {
     .erste-seite > header {
       padding: 22px 24px 18px;
@@ -3032,12 +3032,9 @@
     overflow: hidden;   /* die Lichtfelder ragen hinaus, wie bei .grundkurve */
     text-align: center;
     padding: 32px 28px;
-    /* Der Schirm geht NACH der Scheibe: erst hebt sich der Deckel, 0,12 s
-       spaeter klart der Grund auf. Vorher liefen beide parallel und damit
-       als ein Verblassen. */
-    transition: opacity 0.62s ease 0.12s, visibility 0s linear 0.74s;
+    transition: opacity 0.61s var(--ease), visibility 0.61s;
   }
-  /* DIE LAUTE LAGE, UND DANN DER GRUND DER LISTE
+  /* VIER SEKUNDEN LIQUID, UND DANN DER GRUND DER LISTE
 
      Die stillen Felder bleiben still und leise — sie sind das, was nach dem
      Auftritt uebrig bleibt, und muessen deshalb aussehen wie die unter der
@@ -3058,7 +3055,7 @@
     overflow: hidden;
     pointer-events: none;
     z-index: 0;
-    animation: liquidAus var(--auftakt-dauer) linear both;
+    animation: liquidAus 4s linear both;
   }
   @keyframes liquidAus {
     0%, 78% { opacity: 1; }
@@ -3067,22 +3064,22 @@
 
   /* Lage und Groesse kommen von .lichtfeld — die Elemente tragen beide
      Klassen. Hier steht nur, was anders ist: kraeftigere Farbe und die
-     Bewegung ueber die ganze Auftaktdauer. Zweimal dieselbe Geometrie zu
-     schreiben waeren zwei Stellen, die auseinanderlaufen. */
+     Bewegung der vier Sekunden. Zweimal dieselbe Geometrie zu schreiben
+     waeren zwei Stellen, die auseinanderlaufen. */
   .liquidfeld.eins {
     background: radial-gradient(closest-side,
       rgba(74, 138, 186, 0.50) 0%, rgba(74, 138, 186, 0.19) 44%, rgba(74, 138, 186, 0) 72%);
-    animation: zugFeldEins var(--auftakt-dauer) cubic-bezier(0.32, 0.08, 0.18, 1) both;
+    animation: zugFeldEins 4s cubic-bezier(0.32, 0.08, 0.18, 1) both;
   }
   .liquidfeld.zwei {
     background: radial-gradient(closest-side,
       rgba(196, 138, 76, 0.44) 0%, rgba(196, 138, 76, 0.17) 44%, rgba(196, 138, 76, 0) 72%);
-    animation: zugFeldZwei var(--auftakt-dauer) cubic-bezier(0.32, 0.08, 0.18, 1) both;
+    animation: zugFeldZwei 4s cubic-bezier(0.32, 0.08, 0.18, 1) both;
   }
   .liquidfeld.drei {
     background: radial-gradient(closest-side,
       rgba(126, 90, 190, 0.46) 0%, rgba(126, 90, 190, 0.18) 44%, rgba(126, 90, 190, 0) 72%);
-    animation: zugFeldDrei var(--auftakt-dauer) cubic-bezier(0.32, 0.08, 0.18, 1) both;
+    animation: zugFeldDrei 4s cubic-bezier(0.32, 0.08, 0.18, 1) both;
   }
   @keyframes zugFeldEins {
     0%   { transform: translate3d(-34%, -26%, 0) scale(0.62); }
@@ -3102,7 +3099,7 @@
 
   /* Der Lichtzug ueber den ganzen Schirm. Der an der Scheibe allein war zu
      leise: 133 Pixel auf einem Schirm von 390. Dieser faehrt ueber alles,
-     ueber die Scheibe mit. Ueber der Schrift
+     ueber die Scheibe mit, zweimal in den vier Sekunden. Ueber der Schrift
      wird es einen Wimpernschlag lang heller — genau das macht eine Scheibe
      aus, ueber die Licht streicht. Laenger als ein Wimpernschlag waere
      Blendung, deshalb 0,42 in der Spitze. */
@@ -3117,16 +3114,13 @@
     background: linear-gradient(90deg,
       rgba(255, 255, 255, 0) 0%,
       rgba(255, 255, 255, 0.05) 26%,
-      rgba(255, 255, 255, 0.26) 44%,
-      rgba(255, 255, 255, 0.54) 50%,
-      rgba(255, 255, 255, 0.26) 56%,
+      rgba(255, 255, 255, 0.22) 44%,
+      rgba(255, 255, 255, 0.42) 50%,
+      rgba(255, 255, 255, 0.22) 56%,
       rgba(255, 255, 255, 0.05) 74%,
       rgba(255, 255, 255, 0) 100%);
     transform: rotate(14deg) translate3d(0, 0, 0);
-    /* Einmal statt zweimal: zwei Zuege in zwei Sekunden waeren gehetzt.
-       Dafuer heller in der Spitze. */
-    animation: vollZug calc(var(--auftakt-dauer) * 0.75)
-               cubic-bezier(0.5, 0, 0.3, 1) calc(var(--auftakt-dauer) * 0.1) 1 both;
+    animation: vollZug 1.85s cubic-bezier(0.5, 0, 0.3, 1) 0.22s 2 both;
   }
   @keyframes vollZug {
     from { transform: rotate(14deg) translate3d(0, 0, 0); }
@@ -3151,8 +3145,7 @@
       rgba(214, 232, 255, 0.30) 68%,
       rgba(214, 232, 255, 0.10) 82%,
       rgba(214, 232, 255, 0) 100%);
-    animation: auftaktFlut calc(var(--auftakt-dauer) * 0.5)
-               cubic-bezier(0.22, 0.7, 0.2, 1) calc(var(--auftakt-dauer) * 0.05) 2 both;
+    animation: auftaktFlut 2.6s cubic-bezier(0.22, 0.7, 0.2, 1) 0.15s 2 both;
   }
   @keyframes auftaktFlut {
     0%   { transform: scale(0.12); opacity: 0; }
@@ -3178,13 +3171,10 @@
      ein Deckel, der abgenommen wird — was danach kommt, war die ganze Zeit
      an derselben Stelle. */
   .auftakt-mitte {
-    transition: transform 0.62s cubic-bezier(0.32, 0, 0.16, 1), opacity 0.42s ease;
+    transition: transform 0.52s var(--ease), opacity 0.34s ease;
   }
-  /* Nach AUSSEN. Vorher schrumpfte die Scheibe auf 0,97 und entfernte sich
-     damit; jetzt waechst sie ueber den Rand und loest sich auf — der Deckel
-     wird abgehoben. Gleiche Kosten, entgegengesetzte Aussage. */
   .auftakt.weg .auftakt-mitte {
-    transform: translate3d(0, -8px, 0) scale(1.14);
+    transform: translate3d(0, -12px, 0) scale(0.97);
     opacity: 0;
   }
   @media (prefers-reduced-motion: reduce) {
@@ -3280,9 +3270,7 @@
     box-shadow: 0 0 12px rgba(255, 255, 255, 0.35);
     transform: scaleX(0);
     transform-origin: 0 50%;
-    /* 0,68 s waren ein Sechstel der alten Dauer, jetzt waeren es ein
-       Drittel — der Balken kaeme sichtbar zu spaet an. */
-    transition: transform 0.34s var(--ease);
+    transition: transform 0.68s var(--ease);
     animation: balkenLicht 1.9s linear infinite;
   }
   /* Der Streifen laeuft von links nach rechts durch das Licht. Bewegt wird
@@ -3325,7 +3313,7 @@
      Bisher war der Uebergang halb: der Deckel loeste sich auf, und darunter
      stand die Liste schon fertig da. Das war der Punkt der alten Bauweise —
      "was danach kommt, war die ganze Zeit an derselben Stelle". Nur sieht
-     das nach Schnitt aus, nicht nach Bewegung: erst Glas, und dann
+     das nach Schnitt aus, nicht nach Bewegung: vier Sekunden Glas, und dann
      ist auf einmal alles da.
 
      Jetzt kommen die Bloecke herein, einer nach dem anderen. Von unten,
@@ -3343,17 +3331,11 @@
   body.einzug .erste-seite > .setup-strip,
   body.einzug .erste-seite > .fg-box,
   body.einzug .karten > .card {
-    animation: einzugRein 0.92s cubic-bezier(0.16, 1.14, 0.28, 1) both;
-    animation-delay: calc(var(--n, 0) * 0.072s);
+    animation: einzugRein 0.78s cubic-bezier(0.22, 1.02, 0.3, 1) both;
+    animation-delay: calc(var(--n, 0) * 0.055s);
   }
-  /* Lauter an drei Stellen: 62 Pixel Weg statt 34, eine Kurve, die
-     ueberschiesst (1,14 statt 1,02 — der Unterschied zwischen
-     "eingeblendet" und "angekommen"), und eine Quetsche beim Losfahren.
-     Kein Weichzeichner: die naheliegende Zutat fuer "liquid" und die
-     teuerste. Quetschen sieht fluessig aus und ist eine Matrix. */
   @keyframes einzugRein {
-    from { opacity: 0; transform: translate3d(0, 62px, 0) scale3d(0.97, 1.06, 1); }
-    58%  { opacity: 1; }
+    from { opacity: 0; transform: translate3d(0, 34px, 0) scale(0.955); }
     to   { opacity: 1; transform: none; }
   }
 
@@ -3378,13 +3360,13 @@
        laeuft — und eine Kante sieht man. */
     background: linear-gradient(180deg,
       rgba(255, 255, 255, 0) 0%,
-      rgba(255, 255, 255, 0.09) 40%,
-      rgba(255, 255, 255, 0.28) 66%,
-      rgba(255, 255, 255, 0.58) 83%,
-      rgba(226, 240, 255, 0.95) 92%,
-      rgba(226, 240, 255, 0.42) 97%,
+      rgba(255, 255, 255, 0.06) 40%,
+      rgba(255, 255, 255, 0.20) 66%,
+      rgba(255, 255, 255, 0.42) 83%,
+      rgba(226, 240, 255, 0.72) 92%,
+      rgba(226, 240, 255, 0.30) 97%,
       rgba(255, 255, 255, 0) 100%);
-    animation: einzugLicht 1.3s cubic-bezier(0.42, 0, 0.24, 1) both;
+    animation: einzugLicht 1.15s cubic-bezier(0.42, 0, 0.24, 1) both;
   }
   @keyframes einzugLicht {
     from { transform: translate3d(0, 0, 0); }
@@ -3492,7 +3474,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=129");
+    background-image: url("/kerzen.svg?v=130");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -3506,7 +3488,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=129");
+    background-image: url("/kerzen-blass.svg?v=130");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -4330,7 +4312,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=129" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=130" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -4457,7 +4439,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=129" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=130" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -4505,7 +4487,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=129" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=130" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -4524,7 +4506,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=129" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=130" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -4641,7 +4623,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=129" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=130" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -6921,22 +6903,15 @@ if ("serviceWorker" in navigator) {
   var begonnen = Date.now();
   var fertig = false;
 
-  /* Die Dauer sagt --auftakt-dauer im Stylesheet. Stand sie hier ein
-     zweites Mal, ging der Deckel ab, waehrend die laute Lage noch
-     ausklang. Der Notausgang haengt mit dran; eine dritte Grenze hatte
-     danach keine Aufgabe mehr. */
-  function marke(name, ersatz) {
-    try {
-      var roh = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-      var zahl = parseFloat(roh);
-      if (!isFinite(zahl) || zahl <= 0) return ersatz;
-      return /ms$/.test(roh) ? zahl : zahl * 1000;
-    } catch (e) {
-      return ersatz;
-    }
-  }
-  var MINDESTENS = marke("--auftakt-dauer", 2000);
-  var NOTAUSGANG = Math.round(MINDESTENS * 1.75) + 1200;
+  /* Vier Sekunden, so gewollt. Vorher 900 ms — gerade genug, damit es nicht
+     zuckt. Jetzt ist der Ladebildschirm ein Auftritt: liegt alles im
+     Zwischenspeicher, wartet man laenger als vorher. Das ist der Handel, und
+     er ist so bestellt.
+
+     Die obere Grenze muss ueber den vier Sekunden liegen, sonst schneidet
+     sie den Auftritt ab, und unter dem Notausgang oben (7 s). */
+  var MINDESTENS = 4000;
+  var HOECHSTENS = 5200;
 
   // Was der Auftakt abwartet, in der Reihenfolge, in der es eintrifft
   var schritte = [
@@ -6946,8 +6921,8 @@ if ("serviceWorker" in navigator) {
   ];
 
   /* Der Balken zeigt den kleineren von zwei Werten: was geladen ist und wie
-     viel von der Auftaktdauer herum ist. Nur nach Schritten waere er auf
-     der Haelfte voll und stuende dann still — ein Haenger, kein Auftritt.
+     viel von den vier Sekunden herum ist. Nur nach Schritten waere er nach
+     zwei Sekunden voll und stuende dann still — ein Haenger, kein Auftritt.
      Nur nach der Zeit waere er eine Luege. So ist er voll, wenn geladen ist
      UND die Zeit herum ist: genau wenn der Deckel abgeht. */
   function anteil() {
@@ -6963,10 +6938,10 @@ if ("serviceWorker" in navigator) {
     if (!offen) schluss();
   }
 
-  /* Alle 90 ms nachziehen: der Balken traegt 0,34 s Uebergang, gut zwanzig
-     Schritte reichen fuer eine Linie, die sich fuellt. Ein Takt je Bild
-     waere Verschwendung — daneben wird die Liste gebaut. */
-  var takt = setInterval(zeichnen, 90);
+  /* Alle 120 ms nachziehen: der Balken traegt einen Uebergang von 0,68 s,
+     33 Schritte ueber vier Sekunden reichen also voellig. Ein Takt je Bild
+     waere hier Verschwendung — daneben wird die Liste gebaut. */
+  var takt = setInterval(zeichnen, 120);
 
   function erledigt(name) {
     var s = schritte.filter(function (x) { return x.name === name; })[0];
@@ -7011,7 +6986,7 @@ if ("serviceWorker" in navigator) {
     licht.setAttribute("aria-hidden", "true");
     document.body.appendChild(licht);
 
-    var dauer = 920 + alle.length * 72 + 200;
+    var dauer = 780 + alle.length * 55 + 200;
     setTimeout(function () {
       document.body.classList.remove("einzug");
       alle.forEach(function (e) { e.style.removeProperty("--n"); });
@@ -7046,7 +7021,7 @@ if ("serviceWorker" in navigator) {
   }
 
   // Notausgang: haengt irgendetwas, geht der Auftakt trotzdem
-  setTimeout(schluss, NOTAUSGANG);
+  setTimeout(schluss, HOECHSTENS);
 
   // 1. Die Liste steht
   document.addEventListener("rcp:karten", function () {
@@ -7236,7 +7211,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=129";
+      i.src = "/icon-512.png?v=130";
     });
     return symbolBild;
   }
