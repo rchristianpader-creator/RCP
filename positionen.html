@@ -4,36 +4,68 @@
 <meta charset="UTF-8">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#0a0d0c">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=127">
-<link rel="apple-touch-icon" href="/icon-180.png?v=127">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=128">
+<link rel="apple-touch-icon" href="/icon-180.png?v=128">
 <title>Positionen · Aktien-Liste</title>
 <style>
   :root {
-    color-scheme: light;
-    --bg: #fafafa;
-    --bg-rgb: 250, 250, 250;
-    --fg: #111111;
-    --fg-rgb: 17, 17, 17;
-    --auf-fg: #ffffff;
-    --muted: #737373;
-    --line: #e5e5e5;
-    --soft: #f5f5f5;
-    --card: #ffffff;
-    --hair: #ebebeb;
-    /* Dieselben Marken wie in der Liste — die Seiten sollen sich nicht
-       unterscheiden, nur weil sie ein eigenes Regelwerk haben. */
+    /* Dieselben Marken wie in der Liste — Wort fuer Wort. Die Verwaltung
+       war als einzige Seite noch hell: weisse Kaesten auf Grauweiss,
+       waehrend die Liste, die Anmeldung und der Ladebildschirm dunkles Glas
+       auf wanderndem Licht zeigen. Wer aus der Liste hierher kam, kam in
+       eine andere App.
+
+       Umgestellt sind nur diese Marken und ein paar Flaechen darunter. Der
+       Rest der Seite hat schon immer ueber --fg, --muted, --line und
+       --card gearbeitet und zieht deshalb von selbst mit. */
+    color-scheme: dark;
+    --bg: #0a0d0c;
+    --bg-rgb: 10, 13, 12;
+    --fg: #f2f5f4;
+    --fg-rgb: 242, 245, 244;
+    --auf-fg: #0a0d0c;
+    --muted: #9aa5a2;
+    --line: rgba(255, 255, 255, 0.16);
+    --soft: rgba(255, 255, 255, 0.06);
+    --card: #131816;
+    --hair: rgba(255, 255, 255, 0.12);
     --r-karte: 16px;
     --r-feld: 12px;
     --r-chip: 11px;
     --r-marke: 6px;
+    /* Der Grund: dieselben vier Farbfelder wie drueben, darueber die drei
+       wandernden Lichtfelder. Ohne ihn waere das Glas darauf nur graue
+       Fuellung — es braucht etwas, das hindurchscheint. */
+    --grund-kuehl: rgba(38, 74, 96, 0.05);
+    --grund-warm: rgba(112, 82, 52, 0.04);
+    --grund-flieder: rgba(64, 44, 78, 0.045);
+    --grund-tuerkis: rgba(28, 88, 78, 0.05);
+    --grund-flaeche:
+      radial-gradient(120% 90% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.55) 100%),
+      radial-gradient(78% 58% at 10% 4%, var(--grund-kuehl) 0%, transparent 68%),
+      radial-gradient(66% 52% at 92% 14%, var(--grund-warm) 0%, transparent 68%),
+      radial-gradient(84% 62% at 74% 96%, var(--grund-flieder) 0%, transparent 70%),
+      radial-gradient(64% 48% at 8% 88%, var(--grund-tuerkis) 0%, transparent 70%),
+      var(--bg);
+    /* Glas. Die Kaesten hier scrollen mit, deshalb kein Frost — ein
+       mitscrollender backdrop-filter wird bei jedem Bild neu gefiltert und
+       hat drueben schon einmal das Scrollen traege gemacht. Was ein Fenster
+       ausmacht, ist ohnehin die Kante, nicht die Fuellung. */
+    --glas-fenster: transparent;
+    --glas-kante-glanz:
+      inset 0 1px 0 rgba(255, 255, 255, 0.36),
+      inset 0 2px 1px -1px rgba(255, 255, 255, 0.12),
+      inset 1px 0 0 rgba(255, 255, 255, 0.08),
+      inset -1px 0 0 rgba(255, 255, 255, 0.05),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.34);
     --hebung:
-      0 1px 2px rgba(17, 17, 17, 0.045),
-      0 10px 28px -18px rgba(17, 17, 17, 0.12);
-    --glas: rgba(255, 255, 255, 0.72);
-    --gut: #15803d;
-    --schlecht: #b91c1c;
+      0 1px 2px rgba(0, 0, 0, 0.4),
+      0 10px 24px -12px rgba(0, 0, 0, 0.6);
+    --glas: rgba(255, 255, 255, 0.1);
+    --gut: #3ecf8e;
+    --schlecht: #ff6b6b;
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
   }
 
@@ -44,8 +76,85 @@
     color: var(--fg);
     line-height: 1.45;
     -webkit-font-smoothing: antialiased;
+    /* Oben der sichere Rand, wie in der Verwaltung: hier faengt gleich der
+       Kopf an. Unten bleibt Platz fuer die feste Leiste. */
+    padding-top: env(safe-area-inset-top, 0px);
     padding-bottom: 100px;
   }
+  /* DER GRUND — dieselbe Flaeche wie in der Liste.
+
+     Fest hinter allem, nicht am Body: die Lichtfelder ragen absichtlich
+     ueber den Rand hinaus, damit nie eine Kante ins Bild kommt, und ohne
+     overflow bekaeme die Seite dadurch eine Rollflaeche, die niemand haben
+     will. */
+  .grundkurve {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+    background: var(--grund-flaeche);
+  }
+  .lichtfeld {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    will-change: transform;
+  }
+  /* Groesser als der Schirm und ausserhalb beginnend; teilerfremde
+     Umlaufzeiten, damit nie wieder dasselbe Bild dasteht; keine Deckkraft
+     an einer bewegten Ebene, die Schwaeche steckt in der Farbe. Alles wie
+     drueben — die Begruendungen stehen dort ausfuehrlich. */
+  .lichtfeld.eins {
+    left: -60%; top: -45%; width: 150%; height: 105%;
+    background: radial-gradient(closest-side,
+      rgba(64, 108, 138, 0.2) 0%, rgba(64, 108, 138, 0.07) 46%, rgba(64, 108, 138, 0) 72%);
+    animation: feldEins 73s ease-in-out infinite alternate;
+  }
+  .lichtfeld.zwei {
+    right: -55%; top: 8%; width: 135%; height: 90%;
+    background: radial-gradient(closest-side,
+      rgba(126, 96, 62, 0.17) 0%, rgba(126, 96, 62, 0.06) 46%, rgba(126, 96, 62, 0) 72%);
+    animation: feldZwei 101s ease-in-out infinite alternate;
+  }
+  .lichtfeld.drei {
+    left: -35%; bottom: -50%; width: 160%; height: 100%;
+    background: radial-gradient(closest-side,
+      rgba(78, 62, 104, 0.18) 0%, rgba(78, 62, 104, 0.06) 46%, rgba(78, 62, 104, 0) 72%);
+    animation: feldDrei 139s ease-in-out infinite alternate;
+  }
+  @keyframes feldEins {
+    from { transform: translate3d(0, 0, 0); }
+    to   { transform: translate3d(38%, 26%, 0); }
+  }
+  @keyframes feldZwei {
+    from { transform: translate3d(0, 0, 0); }
+    to   { transform: translate3d(-30%, 34%, 0); }
+  }
+  @keyframes feldDrei {
+    from { transform: translate3d(0, 0, 0); }
+    to   { transform: translate3d(26%, -40%, 0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lichtfeld { animation: none; }
+  }
+
+  /* Der Streifen hinter der Statuszeile — wie in der Liste, aus demselben
+     Grund: mit viewport-fit=cover laeuft die Seite unter die Uhr. */
+  .statusdecke {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: env(safe-area-inset-top, 0px);
+    z-index: 50;
+    pointer-events: none;
+    background: linear-gradient(to bottom,
+      rgba(var(--bg-rgb), 0.98) 0%,
+      rgba(var(--bg-rgb), 0.96) 62%,
+      rgba(var(--bg-rgb), 0) 100%);
+  }
+
   @keyframes riseIn {
     from { opacity: 0; transform: translate3d(0, 10px, 0); }
     to   { opacity: 1; transform: translate3d(0, 0, 0); }
@@ -53,10 +162,18 @@
 
   header {
     position: relative;
-    padding: 36px 24px 26px;
+    /* Ein Fenster wie in der Liste und in der Verwaltung, keine Platte. */
+    max-width: 612px;
+    margin: 14px auto;
+    padding: 34px 24px 24px;
     text-align: center;
-    background: var(--card);
-    border-bottom: 1px solid var(--hair);
+    background: var(--glas-fenster);
+    border: 1px solid var(--line);
+    border-radius: var(--r-karte);
+    box-shadow: var(--glas-kante-glanz), var(--hebung);
+  }
+  @media (max-width: 640px) {
+    header { margin: 14px; }
   }
   header .zurueck {
     position: absolute;
@@ -83,10 +200,72 @@
   header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
   header .sub { font-size: 13px; color: var(--muted); margin-top: 6px; }
 
-  main { max-width: 640px; margin: 0 auto; padding: 20px 14px 0; }
+  /* Die Marke: dieselben vier Kerzen wie im Kopf der Liste, in derselben
+     Geometrie (logo.py), zwei davon hohl. Sie wogen weiter — der Kopf ist
+     hier kleiner, also wogen sie kleiner. */
+  .kopf-marke {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+  .marke-kerzen {
+    flex: 0 0 auto;
+    width: 40px;
+    height: 35px;
+    overflow: visible;
+    fill: var(--fg);
+  }
+  .marke-kerzen .hohl { fill: none; stroke: var(--fg); stroke-width: 18; }
+  .marke-kerzen .kerze {
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+    will-change: transform;
+  }
+  .marke-kerzen .k1 { animation: kerzeWoge 5.2s ease-in-out -0.0s infinite alternate; }
+  .marke-kerzen .k2 { animation: kerzeWoge 5.8s ease-in-out -1.3s infinite alternate; }
+  .marke-kerzen .k3 { animation: kerzeWoge 6.4s ease-in-out -2.6s infinite alternate; }
+  .marke-kerzen .k4 { animation: kerzeWoge 7.0s ease-in-out -3.9s infinite alternate; }
+  @keyframes kerzeWoge {
+    from { transform: translateY(-38px) scaleY(1.18); }
+    to   { transform: translateY(38px) scaleY(0.85); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .marke-kerzen .kerze { animation: none; }
+  }
+  header .zurueck {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 6px 10px 6px 4px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  header .zurueck::before { content: "‹"; margin-right: 5px; font-size: 14px; }
+  header .label {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+  header .sub { font-size: 13px; color: var(--muted); margin-top: 6px; }
 
+  main { max-width: 640px; margin: 0 auto; padding: 8px 14px 0; }
+
+  /* Jede Position ist ein Fenster — dieselbe Machart wie die Karten in
+     der Liste: durchsichtig, mit Kante, Lichtrand und Hebung. */
   .pos {
-    background: var(--card);
+    background: var(--glas-fenster);
+    box-shadow: var(--glas-kante-glanz), var(--hebung);
     border: 1px solid var(--line);
     border-radius: var(--r-karte);
     margin-bottom: 10px;
@@ -186,7 +365,8 @@
     text-transform: uppercase;
     font-weight: 600;
     color: var(--fg);
-    background: var(--card);
+    background: var(--glas-fenster);
+    box-shadow: var(--glas-kante-glanz);
     border: 1px solid var(--line);
     border-radius: var(--r-feld);
     padding: 8px 12px;
@@ -208,7 +388,7 @@
     text-transform: uppercase;
     font-weight: 600;
     color: var(--fg);
-    background: var(--card);
+    background: var(--glas-fenster);
     border: 1px dashed var(--line);
     border-radius: var(--r-marke);
     padding: 14px;
@@ -222,10 +402,13 @@
     position: fixed;
     left: 0; right: 0; bottom: 0;
     z-index: 50;
-    background: rgba(255, 255, 255, 0.94);
-    -webkit-backdrop-filter: saturate(140%) blur(8px);
-    backdrop-filter: saturate(140%) blur(8px);
-    border-top: 1px solid var(--hair);
+    /* Die einzige Flaeche der App, die stehen bleibt statt mitzuscrollen
+       — also die einzige, die Frost tragen darf. Weiss stand hier fest im
+       Text und blieb beim Umstellen weiss. */
+    background: rgba(var(--bg-rgb), 0.82);
+    -webkit-backdrop-filter: saturate(190%) blur(12px);
+    backdrop-filter: saturate(190%) blur(12px);
+    border-top: 1px solid var(--line);
     padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px));
   }
   .leiste .innen {
@@ -287,10 +470,35 @@
 </head>
 <body>
 
+<div class="grundkurve" aria-hidden="true">
+  <i class="lichtfeld eins"></i><i class="lichtfeld zwei"></i><i class="lichtfeld drei"></i>
+</div>
+<div class="statusdecke" aria-hidden="true"></div>
+
 <header>
   <a class="zurueck" href="/verwaltung.html">Verwaltung</a>
   <div class="label">Watchlist</div>
-  <h1>Positionen</h1>
+  <div class="kopf-marke">
+    <svg class="marke-kerzen" viewBox="80 90 352 308" aria-hidden="true">
+      <g class="kerze k1">
+        <rect x="109" y="128" width="24" height="154" rx="12"/>
+        <rect x="88" y="172" width="66" height="80" rx="9"/>
+      </g>
+      <g class="kerze k2">
+        <rect x="199" y="228" width="24" height="160" rx="12"/>
+        <rect x="178" y="252" width="66" height="90" rx="9"/>
+      </g>
+      <g class="kerze k3">
+        <rect x="289" y="310" width="24" height="74" rx="12"/>
+        <rect class="hohl" x="277" y="259" width="48" height="74" rx="7"/>
+      </g>
+      <g class="kerze k4">
+        <rect x="379" y="98" width="24" height="186" rx="12"/>
+        <rect class="hohl" x="367" y="133" width="48" height="108" rx="7"/>
+      </g>
+    </svg>
+    <h1>Positionen</h1>
+  </div>
   <p class="sub" id="untertitel">wird geladen …</p>
 </header>
 
