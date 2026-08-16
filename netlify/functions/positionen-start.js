@@ -236,6 +236,41 @@ export const NACHTRAG = [
       "keys": "FIT Group|FTG|FitGun",
       "fibo": "https://de.tradingview.com/chart/WaxXaF87/"
     }
+  },
+  {
+    "schluessel": "arm-2026-08",
+    "position": {
+      "id": "arm",
+      "name": "ARM Holdings plc",
+      "badge": "ARM",
+      "chip": "ARM",
+      "neu": true,
+      "branche": "Halbleiter",
+      /* Beide Spannen aus dem Analyse-Chart abgelesen:
+
+           Kaufzone   das untere graue Band, 50,0 % (189,43) bis
+                      61,8 % (154,49) — hoeherer Wert zuerst, wie ueberall
+           Kursziel   das obere Band mit dem C, 161,8 % (764,15) bis
+                      200,0 % (1.301,48)
+
+         Notiert in Dollar, also rechnet die Liste die Euro-Zeile darunter
+         selbst — anders als bei FIT Group, wo die Preise fest in Euro
+         stehen. */
+      "zone": "189,43 – 154,49 USD",
+      "ziel": "764,15 – 1.301,48 USD",
+      "tv": "NASDAQ:ARM",
+      /* Blank, und das ist hier richtig: ARM notiert als Sponsored ADR an
+         der NASDAQ, Yahoo fuehrt genau diese Aktie unter ARM (ISIN
+         US0420682058). Bei FIT Group war ein blankes Kuerzel die Falle,
+         weil dort eine fremde Firma daruntersteht; ein US-Papier an seiner
+         Heimatboerse braucht kein Suffix — dieselbe Schreibweise wie UAA,
+         TSLA oder NVO. */
+      "yahoo": "ARM",
+      "frage": "ARM Holdings Aktie",
+      "fn": "https://www.finanzen.net/aktien/arm_holdings-aktie",
+      "keys": "ARM Holdings|Arm Ltd",
+      "fibo": "https://de.tradingview.com/chart/WntJnQFq/"
+    }
   }
 ];
 
