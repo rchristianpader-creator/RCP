@@ -5,7 +5,7 @@
    - everything else (TradingView, /.netlify/functions/*): straight to network, never cached
    Bump CACHE on every deploy so old shells are dropped. */
 
-const CACHE = "aktien-liste-v138";
+const CACHE = "aktien-liste-v139";
 
 /* Ohne Sitzung liefert das Tor statt der Seite eine Weiterleitung zur
    Anmeldung — deshalb wird das Dokument hier nicht vorgeladen, sondern
@@ -17,13 +17,13 @@ const CACHE = "aktien-liste-v138";
    Kein Kommentar zwischen den Zeilen: die Pruefreihe liest diese Liste als
    JSON aus der Datei, und daran waere sie eben zerbrochen. */
 const PRECACHE = [
-  "/stil.css?v=138",
+  "/stil.css?v=139",
   "/manifest.webmanifest",
-  "/icon-180.png?v=138",
-  "/icon-192.png?v=138",
-  "/icon-512.png?v=138",
-  "/kerzen.svg?v=138",
-  "/kerzen-blass.svg?v=138"
+  "/icon-180.png?v=139",
+  "/icon-192.png?v=139",
+  "/icon-512.png?v=139",
+  "/kerzen.svg?v=139",
+  "/kerzen-blass.svg?v=139"
 ];
 
 /* css dazu: seit v137 liegt das Aussehen in stil.css. Sie traegt ?v=NN,
@@ -32,8 +32,21 @@ const PRECACHE = [
 const STATIC = /\.(?:css|png|jpg|jpeg|svg|webp|ico|pdf|webmanifest)$/i;
 
 self.addEventListener("install", (event) => {
+  /* Jede Datei einzeln, und ein Fehlschlag zaehlt nicht.
+
+     addAll() ist alles oder nichts: schlaegt eine einzige Anfrage fehl —
+     ein Symbol, das gerade nicht ausgeliefert wird, eine Datei, die der
+     Tuersteher abweist —, wird der Zwischenspeicher gar nicht erst
+     angelegt, der neue Service Worker wird nie aktiv, und das Geraet
+     bleibt beim alten Stand. Das ist genau die Art Fehler, die man nicht
+     sieht: die App laeuft, nur eben von gestern.
+
+     Vorhalten ist eine Bequemlichkeit, keine Bedingung. Was fehlt, wird
+     spaeter aus dem Netz geholt. */
   event.waitUntil(
-    caches.open(CACHE).then((c) => c.addAll(PRECACHE)).then(() => self.skipWaiting())
+    caches.open(CACHE).then((c) =>
+      Promise.all(PRECACHE.map((u) => c.add(u).catch(() => null)))
+    ).then(() => self.skipWaiting())
   );
 });
 

@@ -3755,7 +3755,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=138");
+    background-image: url("/kerzen.svg?v=139");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -3769,7 +3769,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=138");
+    background-image: url("/kerzen-blass.svg?v=139");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -4473,3 +4473,6 @@
     }
   }
 
+/* Der Hinweis aus index.html gilt nur, solange DIESE Datei fehlt. Steht
+   sie, verschwindet er — das ist der ganze Mechanismus. */
+#stilfehlt { display: none; }

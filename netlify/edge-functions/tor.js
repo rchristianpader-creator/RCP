@@ -19,6 +19,15 @@ const KEKS = "rcp_sitz";
    - on-publish: das ist der Webhook, den Netlify nach jedem Deploy ruft */
 const OFFEN = [
   "/anmelden.html",
+  /* Das Aussehen. Es steht seit v137 in einer eigenen Datei, und darin ist
+     nichts, was nicht ohnehin jeder sehen kann, der die Anmeldeseite
+     aufruft — es sind Farben und Abstaende.
+
+     Offen sein MUSS sie: der Service Worker legt sie beim Einrichten in
+     seinen Zwischenspeicher, und schlaegt dabei eine einzige Anfrage fehl,
+     wird der ganze Speicher nicht angelegt. Eine Datei, ohne die die Seite
+     nackt dasteht, darf nicht am Tuersteher haengen. */
+  "/stil.css",
   "/.netlify/functions/konto",
   "/.netlify/functions/on-publish",
   "/manifest.webmanifest",
