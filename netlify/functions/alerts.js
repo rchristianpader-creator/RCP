@@ -161,6 +161,10 @@ async function zonen() {
   for (const p of liste) {
     const z = zonenZahlen(p.zone);
     if (!z || !p.yahoo) continue;
+    /* Was nur der Verwaltung gehoert, meldet sich nicht. Ein Zonenalarm
+       geht an alle Geraete und nennt das Kuerzel — das waere genau die
+       Position, die niemand sehen soll, nur eben als Mitteilung. */
+    if (p.nurchef) continue;
     out.push({
       anchor: p.id,
       badge: (p.badge || p.yahoo).trim(),
