@@ -1284,12 +1284,34 @@
      ist. In den Kindern bleibt so nur, was sie mit sich selbst tun —
      wachsen, atmen, aufflammen. Wohin es geht, sagt allein die Huelle.
 
-     Die Bahn: von weit unten rechts herein, quer nach oben links, ueber
-     die Gegenseite ausgeholt, noch einmal zurueck — und dann oben hinaus.
-     Gedreht wird leicht mit, sonst sieht Fliegen aus wie Schieben. Die
-     Ausschlaege sind in vw/vh gerechnet und so gewaehlt, dass die Marke
-     (132 Punkte breit) auch auf einem schmalen Telefon ganz im Bild
-     bleibt. */
+     DIE BAHN GEHT NUR IN EINE RICHTUNG — und das war der zweite Anlauf.
+
+     Der erste hat den Stern nach oben links gezogen, ueber die Gegenseite
+     ausgeholt, wieder zurueck. Vier Wendepunkte. Auf dem Telefon war das
+     kein Flug, sondern Zappeln: "es bewegt sich hin und her statt episch".
+
+     Etwas wirkt gross, wenn es sich nicht umentscheidet. Deshalb faellt
+     jede Umkehr weg: die Bahn laeuft von unten rechts nach oben links,
+     durchgehend, ohne einen einzigen Richtungswechsel — quer und hoch
+     immer dasselbe Vorzeichen. Auch der Abflug geht dorthin weiter, wo der
+     Stern ohnehin schon hinwollte.
+
+     Was die Groesse macht, ist stattdessen das Tempo, in drei Stuecken:
+
+       bis 26 %   der Anflug — schnell aus der Ferne, dann bremsend
+       bis 76 %   der Zug — LINEAR, gleichmaessig, ohne Zwischenhalt
+       ab  76 %   der Absprung — beschleunigend nach oben aus dem Bild
+
+     Das mittlere Stueck ist bewusst linear und ohne Stuetzpunkt. Jeder
+     zusaetzliche Punkt haette sein eigenes ease bekommen, und das heisst:
+     abbremsen und wieder anfahren. Genau daraus entsteht das Ruckeln, das
+     wie hin und her aussieht, auch wenn die Richtung stimmt.
+
+     Gedreht wird ebenfalls durchgehend in eine Richtung — von -18 auf +8
+     Grad. Ein Koerper, der langsam einrollt, fliegt; einer, der zurueck
+     dreht, wackelt. Die Ausschlaege sind in vw/vh gerechnet und so
+     gewaehlt, dass die Marke (132 Punkte breit) auch auf einem schmalen
+     Telefon ganz im Bild bleibt. */
   .vorstellung .stern {
     left: 50%;
     top: 50%;
@@ -1301,22 +1323,17 @@
   }
   .vorstellung .stern > * { position: absolute; left: 50%; top: 50%; }
   @keyframes sternBahn {
-    /* Weit weg, unten rechts */
-    0%   { transform: translate3d(33vw, 30vh, 0) rotate(-14deg);
-           animation-timing-function: cubic-bezier(0.4, 0, 0.25, 1); }
-    /* Der Durchzug nach oben links */
-    27%  { transform: translate3d(-21vw, -13vh, 0) rotate(7deg);
-           animation-timing-function: ease-in-out; }
-    /* Ausholen ueber die Gegenseite */
-    47%  { transform: translate3d(19vw, 10vh, 0) rotate(-6deg);
-           animation-timing-function: ease-in-out; }
-    64%  { transform: translate3d(-15vw, -11vh, 0) rotate(5deg);
-           animation-timing-function: ease-in-out; }
-    /* Sammeln vor dem Absprung */
-    78%  { transform: translate3d(5vw, 7vh, 0) rotate(-2deg);
-           animation-timing-function: cubic-bezier(0.62, 0, 0.9, 0.15); }
-    /* Und oben hinaus */
-    93%, 100% { transform: translate3d(-2vw, -158vh, 0) rotate(0deg); }
+    /* Weit weg, unten rechts — und schon unterwegs */
+    0%   { transform: translate3d(42vw, 36vh, 0) rotate(-18deg);
+           animation-timing-function: cubic-bezier(0.12, 0.62, 0.3, 1); }
+    /* Angekommen, und von hier an gleichmaessig */
+    26%  { transform: translate3d(20vw, 16vh, 0) rotate(-9deg);
+           animation-timing-function: linear; }
+    /* Der lange Zug quer durchs Bild. Kein Stuetzpunkt dazwischen. */
+    76%  { transform: translate3d(-18vw, -14vh, 0) rotate(2deg);
+           animation-timing-function: cubic-bezier(0.66, 0, 0.86, 0.18); }
+    /* Und weiter in dieselbe Richtung, oben aus dem Bild */
+    93%, 100% { transform: translate3d(-26vw, -172vh, 0) rotate(8deg); }
   }
 
   .vorstellung .logo {
@@ -1330,18 +1347,20 @@
     will-change: transform;
     animation: sternMarke 7s both;
   }
+  /* Auch die Groesse geht nur in eine Richtung. Hier stand ein Atmen —
+     1,22 auf 1,00 auf 1,07 auf 1,00 —, und das ist dasselbe Zappeln noch
+     einmal, nur in der Groesse statt im Ort. Was von weit her kommt, wird
+     durchgehend groesser; ein Pochen macht daraus ein Ding, das auf der
+     Stelle steht. */
   @keyframes sternMarke {
     /* Ein ferner Punkt */
     0%   { transform: scale(0.04); opacity: 0; animation-timing-function: ease-in; }
-    9%   { transform: scale(0.1); opacity: 1; animation-timing-function: cubic-bezier(0.6, 0, 0.2, 1); }
-    /* Ankunft, mit Ueberschuss */
-    26%  { transform: scale(1.22); animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1); }
-    34%  { transform: scale(1); animation-timing-function: ease-in-out; }
-    /* Brennen und atmen */
-    52%  { transform: scale(1.07); animation-timing-function: ease-in-out; }
-    66%  { transform: scale(1); animation-timing-function: ease-in-out; }
-    /* Zusammenziehen — nur noch stauchen, das Absacken macht die Huelle */
-    78%  { transform: scale3d(1.12, 0.84, 1);
+    9%   { transform: scale(0.11); opacity: 1; animation-timing-function: cubic-bezier(0.5, 0, 0.25, 1); }
+    /* Da — und von hier an nur noch langsam naeher */
+    30%  { transform: scale(1.02); animation-timing-function: linear; }
+    76%  { transform: scale(1.24); animation-timing-function: cubic-bezier(0.5, 0, 0.9, 0.2); }
+    /* Einmal Luft holen vor dem Absprung */
+    82%  { transform: scale3d(1.34, 0.9, 1);
            animation-timing-function: cubic-bezier(0.6, 0, 0.88, 0.1); }
     /* Und weg — der Koerper wird zum Strich */
     93%, 100% { transform: scale3d(0.6, 3.6, 1); }
@@ -1364,12 +1383,14 @@
   }
   @keyframes sternHof {
     0%   { transform: scale(0.02); opacity: 0; animation-timing-function: ease-in; }
-    9%   { transform: scale(0.06); opacity: 0.9; animation-timing-function: cubic-bezier(0.2, 0, 0.1, 1); }
-    26%  { transform: scale(1.15); opacity: 1; animation-timing-function: ease-in-out; }
-    38%  { transform: scale(0.82); opacity: 0.8; animation-timing-function: ease-in-out; }
-    58%  { transform: scale(1.02); opacity: 1; animation-timing-function: ease-in-out; }
-    78%  { transform: scale(0.5); opacity: 0.7; animation-timing-function: ease-out; }
-    92%, 100% { transform: scale(2.4); opacity: 0; }
+    9%   { transform: scale(0.07); opacity: 0.85; animation-timing-function: cubic-bezier(0.35, 0, 0.2, 1); }
+    30%  { transform: scale(0.95); opacity: 1; animation-timing-function: linear; }
+    76%  { transform: scale(1.32); opacity: 1; animation-timing-function: cubic-bezier(0.55, 0, 0.9, 0.2); }
+    /* Der eine Akzent, den es geben darf: das Zusammenziehen unmittelbar
+       vor dem Ausbruch. Er sitzt auf dem Hoehepunkt, nicht mittendrin —
+       das ist der Unterschied zwischen Betonung und Wackeln. */
+    84%  { transform: scale(0.55); opacity: 0.8; animation-timing-function: cubic-bezier(0.2, 0, 0.4, 1); }
+    93%, 100% { transform: scale(2.6); opacity: 0; }
   }
 
   /* Zwei Bewegungen an einem Element, aber an verschiedenen Eigenschaften:
@@ -3818,7 +3839,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=141");
+    background-image: url("/kerzen.svg?v=142");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -3832,7 +3853,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=141");
+    background-image: url("/kerzen-blass.svg?v=142");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
