@@ -271,40 +271,6 @@ export const NACHTRAG = [
       "keys": "ARM Holdings|Arm Ltd",
       "fibo": "https://de.tradingview.com/chart/WntJnQFq/"
     }
-  },
-  {
-    "schluessel": "fet-2026-08",
-    "position": {
-      "id": "fet",
-      "name": "Fetch.ai",
-      "badge": "FETUSD",
-      "chip": "FET",
-      "neu": true,
-      /* NUR FUER DIE VERWALTUNG.
-
-         Sie steht in der Liste des Chefs und in der Verwaltung, sonst
-         nirgends: nicht bei den anderen Zugaengen, nicht im Statusabruf,
-         und sie loest keine Meldung aus — weder beim Nachtragen noch, wenn
-         der Kurs ihre Zone erreicht. Eine Zonenmeldung geht an jedes Geraet
-         und nennt das Kuerzel; das waere die Position, nur eben als
-         Mitteilung. */
-      "nurchef": true,
-      "branche": "Kryptowährung",
-      /* Aus dem Wochenchart abgelesen: die Kaufzone ist das graue Band
-         zwischen 50,0 % (0,08014477) und 61,8 % (0,04562110). Fuenf
-         Stellen reichen — darunter geht es um Bruchteile eines Cents, und
-         die Zone ist eine Spanne, keine Marke. */
-      "zone": "0,08014 – 0,04562 USD",
-      "ziel": "10,00 USD",
-      "tv": "BINANCE:FETUSDT",
-      "yahoo": "FET-USD",
-      "frage": "Fetch.ai Kurs",
-      "fn": "https://www.finanzen.net/devisen/fetch.ai-dollar-kurs",
-      "keys": "Fetch.ai|FET"
-      /* Kein fibo: zu dieser Position kam ein Bild, kein Link. Das Feld
-         leer zu lassen ist richtiger, als eine Adresse zu erfinden — der
-         Knopf bleibt dann einfach weg. */
-    }
   }
 ];
 

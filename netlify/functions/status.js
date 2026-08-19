@@ -9,10 +9,9 @@
 
 import { getStore } from "@netlify/blobs";
 import { lesen, zonenZahlen, LADEN } from "./positionen.js";
-import { chefLesen } from "./sitzung.js";
 
-export default async (request) => {
-  const watch = await zonen(await chefLesen(request));
+export default async () => {
+  const watch = await zonen();
   if (!watch.length) {
     return json({ ok: false, fehler: "keine Zonen in index.html gefunden" }, 500);
   }
@@ -71,16 +70,12 @@ export default async (request) => {
 };
 
 /* Zonen und Symbole kommen aus der gespeicherten Watchlist. */
-async function zonen(chef) {
+async function zonen() {
   const liste = await lesen(getStore(LADEN));
   const out = [];
   for (const p of liste) {
     const z = zonenZahlen(p.zone);
     if (!z || !p.yahoo) continue;
-    /* Nur fuer die Verwaltung heisst auch hier: nur fuer sie. Die Karte
-       waere bei den anderen ohnehin nicht da, aber das Kuerzel stuende in
-       der Antwort — sichtbar fuer jeden, der nachsieht. */
-    if (p.nurchef && !chef) continue;
     out.push({
       anchor: p.id,
       badge: (p.badge || p.yahoo).trim(),

@@ -46,15 +46,7 @@ export default async (request) => {
     if (!(await kontoLesen(request))) {
       return json({ ok: false, fehler: "nicht angemeldet" }, 401);
     }
-    /* Was nur der Verwaltung gehoert, geht auch nur an sie.
-
-       Gefiltert wird hier und nicht in lesen(): lesen() ist die Wahrheit
-       fuer alles Innere — Nachtrag, Statusabruf, Zonenwache — und die
-       braucht die vollstaendige Liste. Wer sie beschneidet, verliert die
-       Position auch fuer den Chef. */
-    const alles = await lesen(store);
-    const chef = await chefLesen(request);
-    const liste = chef ? alles : alles.filter((p) => !p.nurchef);
+    const liste = await lesen(store);
     return json({ ok: true, anzahl: liste.length, positionen: liste });
   }
 
@@ -217,18 +209,11 @@ async function nachtragen(store, da) {
     return { zeit: zeit, liste: liste, nachgetragen: vermerke };
   }
 
-  /* Gemeldet wird nur, was auch alle sehen duerfen. Eine Meldung geht an
-     jedes Geraet und nennt das Kuerzel — eine Position "nur fuer die
-     Verwaltung" waere damit angekuendigt, bevor sie jemand sehen kann.
-     Bleibt nichts uebrig, bleibt es still. */
-  const laut = neue.filter((p) => !p.nurchef);
-  if (laut.length) {
-    try {
-      await melden("Neu in der Liste", kuerzel(laut), laut[0].id, "neu", zeichen(laut));
-    } catch (e) {
-      /* Die Position steht — dass die Meldung nicht rausging, macht sie nicht
-         ungeschehen. */
-    }
+  try {
+    await melden("Neu in der Liste", kuerzel(neue), neue[0].id, "neu", zeichen(neue));
+  } catch (e) {
+    /* Die Position steht — dass die Meldung nicht rausging, macht sie nicht
+       ungeschehen. */
   }
   return { zeit: zeit, liste: liste, nachgetragen: vermerke };
 }
@@ -367,15 +352,6 @@ function pruefen(roh) {
       // gleichzeitig ist erlaubt — angezeigt wird dann NEU, denn was gerade
       // erst dazugekommen ist, ist nicht auch schon ueberarbeitet.
       update: p.update === true || p.update === "1",
-      /* Nur fuer die Verwaltung.
-
-         Eine Position, die noch nicht fuer alle gedacht ist: sie steht in
-         der Verwaltung und in der Liste des Chefs, sonst nirgends. Ohne
-         diese Zeile faellt die Marke beim ersten Speichern aus dem
-         Formular heraus — pruefen() nimmt nur, was hier steht — und die
-         Position waere ploetzlich fuer alle sichtbar. Genau die Art
-         stiller Fehler, die man erst bemerkt, wenn es zu spaet ist. */
-      nurchef: p.nurchef === true || p.nurchef === "1",
       branche: text(p.branche, GRENZEN.branche),
       zone: text(zone, GRENZEN.zone),
       ziel: text(p.ziel, GRENZEN.ziel),
