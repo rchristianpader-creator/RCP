@@ -5,7 +5,7 @@
    - everything else (TradingView, /.netlify/functions/*): straight to network, never cached
    Bump CACHE on every deploy so old shells are dropped. */
 
-const CACHE = "aktien-liste-v136";
+const CACHE = "aktien-liste-v138";
 
 /* Ohne Sitzung liefert das Tor statt der Seite eine Weiterleitung zur
    Anmeldung — deshalb wird das Dokument hier nicht vorgeladen, sondern
@@ -17,15 +17,19 @@ const CACHE = "aktien-liste-v136";
    Kein Kommentar zwischen den Zeilen: die Pruefreihe liest diese Liste als
    JSON aus der Datei, und daran waere sie eben zerbrochen. */
 const PRECACHE = [
+  "/stil.css?v=138",
   "/manifest.webmanifest",
-  "/icon-180.png?v=136",
-  "/icon-192.png?v=136",
-  "/icon-512.png?v=136",
-  "/kerzen.svg?v=136",
-  "/kerzen-blass.svg?v=136"
+  "/icon-180.png?v=138",
+  "/icon-192.png?v=138",
+  "/icon-512.png?v=138",
+  "/kerzen.svg?v=138",
+  "/kerzen-blass.svg?v=138"
 ];
 
-const STATIC = /\.(?:png|jpg|jpeg|svg|webp|ico|pdf|webmanifest)$/i;
+/* css dazu: seit v137 liegt das Aussehen in stil.css. Sie traegt ?v=NN,
+   ist also je Stand unveraenderlich — genau der Fall, fuer den
+   "Zwischenspeicher zuerst" gedacht ist. */
+const STATIC = /\.(?:css|png|jpg|jpeg|svg|webp|ico|pdf|webmanifest)$/i;
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
