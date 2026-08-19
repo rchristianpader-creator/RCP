@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="dark">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#0a0d0c">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=130">
-<link rel="apple-touch-icon" href="/icon-180.png?v=130">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=131">
+<link rel="apple-touch-icon" href="/icon-180.png?v=131">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=130">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=131">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=130">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=131">
 
 <script>
 /* Im Browser oder als App?
@@ -335,6 +335,12 @@
       radial-gradient(64% 48% at 8% 88%, var(--grund-tuerkis) 0%, transparent 70%),
       var(--bg);
     --grund-kacheln: auto, auto, auto, auto, auto, auto;
+    /* Wie lange der Ladebildschirm steht. Sechs Sekunden, so bestellt.
+
+       Die Zahl stand an sieben Stellen — sechsmal im Stylesheet, einmal im
+       Skript — und musste jetzt zum zweiten Mal geaendert werden. Deshalb
+       eine Marke: alles darin haengt daran, auch das Skript. */
+    --auftakt-dauer: 6s;
     --schleier: rgba(0, 0, 0, 0.72);
     --schatten: rgba(0, 0, 0, 0.5);
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -3055,7 +3061,7 @@
     overflow: hidden;
     pointer-events: none;
     z-index: 0;
-    animation: liquidAus 4s linear both;
+    animation: liquidAus var(--auftakt-dauer) linear both;
   }
   @keyframes liquidAus {
     0%, 78% { opacity: 1; }
@@ -3069,17 +3075,17 @@
   .liquidfeld.eins {
     background: radial-gradient(closest-side,
       rgba(74, 138, 186, 0.50) 0%, rgba(74, 138, 186, 0.19) 44%, rgba(74, 138, 186, 0) 72%);
-    animation: zugFeldEins 4s cubic-bezier(0.32, 0.08, 0.18, 1) both;
+    animation: zugFeldEins var(--auftakt-dauer) cubic-bezier(0.32, 0.08, 0.18, 1) both;
   }
   .liquidfeld.zwei {
     background: radial-gradient(closest-side,
       rgba(196, 138, 76, 0.44) 0%, rgba(196, 138, 76, 0.17) 44%, rgba(196, 138, 76, 0) 72%);
-    animation: zugFeldZwei 4s cubic-bezier(0.32, 0.08, 0.18, 1) both;
+    animation: zugFeldZwei var(--auftakt-dauer) cubic-bezier(0.32, 0.08, 0.18, 1) both;
   }
   .liquidfeld.drei {
     background: radial-gradient(closest-side,
       rgba(126, 90, 190, 0.46) 0%, rgba(126, 90, 190, 0.18) 44%, rgba(126, 90, 190, 0) 72%);
-    animation: zugFeldDrei 4s cubic-bezier(0.32, 0.08, 0.18, 1) both;
+    animation: zugFeldDrei var(--auftakt-dauer) cubic-bezier(0.32, 0.08, 0.18, 1) both;
   }
   @keyframes zugFeldEins {
     0%   { transform: translate3d(-34%, -26%, 0) scale(0.62); }
@@ -3120,7 +3126,8 @@
       rgba(255, 255, 255, 0.05) 74%,
       rgba(255, 255, 255, 0) 100%);
     transform: rotate(14deg) translate3d(0, 0, 0);
-    animation: vollZug 1.85s cubic-bezier(0.5, 0, 0.3, 1) 0.22s 2 both;
+    animation: vollZug calc(var(--auftakt-dauer) * 0.46) cubic-bezier(0.5, 0, 0.3, 1)
+               calc(var(--auftakt-dauer) * 0.055) 2 both;
   }
   @keyframes vollZug {
     from { transform: rotate(14deg) translate3d(0, 0, 0); }
@@ -3145,7 +3152,8 @@
       rgba(214, 232, 255, 0.30) 68%,
       rgba(214, 232, 255, 0.10) 82%,
       rgba(214, 232, 255, 0) 100%);
-    animation: auftaktFlut 2.6s cubic-bezier(0.22, 0.7, 0.2, 1) 0.15s 2 both;
+    animation: auftaktFlut calc(var(--auftakt-dauer) * 0.65) cubic-bezier(0.22, 0.7, 0.2, 1)
+               calc(var(--auftakt-dauer) * 0.04) 2 both;
   }
   @keyframes auftaktFlut {
     0%   { transform: scale(0.12); opacity: 0; }
@@ -3384,6 +3392,163 @@
     .einzug-licht { display: none; }
   }
 
+
+  /* DAS ZEICHEN FLIEGT
+
+     Gross in der Mitte, und am Ende schiesst es nach oben aus dem Bild.
+     Drei Teile machen den Eindruck von Geschwindigkeit, und keiner davon
+     kostet mehr als ein transform:
+
+       STREIFEN  Senkrechte Lichtlinien, die von unten nach oben durchs Bild
+                 jagen — sieben Stueck, jede mit eigener Laenge, Lage und
+                 Geschwindigkeit. Gleich lange Streifen in gleichem Takt
+                 waeren ein Zaun, kein Sog.
+       AUSHOLEN  Kurz vor dem Start sinkt das Zeichen ein Stueck und wird
+                 flacher. Ohne dieses Ausholen wirkt der Abflug wie ein
+                 Schnitt; mit ihm wie ein Absprung.
+       STRECKEN  Beim Abflug wird es hoch und schmal (scaleY 2,6 /
+                 scaleX 0,82). Das ist der Trick, der Tempo macht — ein
+                 Koerper, der schneller ist als das Auge, wird zum Strich.
+
+     Kein Weichzeichner: ein Filter ueber einer bewegten Flaeche wird bei
+     jedem Bild neu gerechnet. Strecken sieht schnell aus und ist eine
+     Matrix. */
+  .flugfeld {
+    position: absolute;
+    inset: -10% -20%;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .flugfeld i {
+    position: absolute;
+    top: 100%;
+    width: 2px;
+    border-radius: 2px;
+    background: linear-gradient(180deg,
+      rgba(226, 240, 255, 0) 0%,
+      rgba(226, 240, 255, 0.55) 38%,
+      rgba(255, 255, 255, 0.9) 72%,
+      rgba(255, 255, 255, 0) 100%);
+    will-change: transform;
+    animation-name: streifenFlug;
+    animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
+    animation-iteration-count: infinite;
+  }
+  /* Vierzehn Bahnen in zwei Schwaermen — und das ist der Punkt, an dem aus
+     "es zieht etwas vorbei" ein Sog wird.
+
+     Der erste Schwarm laeuft von Anfang an, ruhig und einzeln: sieben
+     Linien, teilerfremde Zeiten, negative Verzoegerungen, damit vom ersten
+     Bild an etwas unterwegs ist und sich nie sichtbar wiederholt.
+
+     Der zweite startet erst bei 58 % der Auftaktdauer, ist doppelt so
+     schnell und dichter. Er ist der Grund, warum es beschleunigt wirkt:
+     eine Bewegung kann ihre eigene Dauer nicht aendern, wohl aber koennen
+     mehr und schnellere dazukommen. Bis dahin steht er unten ausserhalb
+     des Bildes (both haelt den Anfangswert), er ist also nicht zu sehen,
+     bevor er losfaehrt. */
+  .flugfeld i:nth-child(1)  { left: 8%;  height: 26%; animation-duration: 0.72s; animation-delay: -0.10s; }
+  .flugfeld i:nth-child(2)  { left: 19%; height: 15%; animation-duration: 0.53s; animation-delay: -0.31s; }
+  .flugfeld i:nth-child(3)  { left: 33%; height: 34%; animation-duration: 0.89s; animation-delay: -0.52s; }
+  .flugfeld i:nth-child(4)  { left: 47%; height: 19%; animation-duration: 0.61s; animation-delay: -0.17s; }
+  .flugfeld i:nth-child(5)  { left: 61%; height: 29%; animation-duration: 0.79s; animation-delay: -0.44s; }
+  .flugfeld i:nth-child(6)  { left: 76%; height: 13%; animation-duration: 0.47s; animation-delay: -0.05s; }
+  .flugfeld i:nth-child(7)  { left: 91%; height: 23%; animation-duration: 0.67s; animation-delay: -0.38s; }
+  .flugfeld i.schnell {
+    width: 3px;
+    animation-fill-mode: both;
+    animation-timing-function: linear;
+  }
+  .flugfeld i:nth-child(8)  { left: 4%;  height: 46%; animation-duration: 0.30s; animation-delay: calc(var(--auftakt-dauer) * 0.58); }
+  .flugfeld i:nth-child(9)  { left: 15%; height: 38%; animation-duration: 0.26s; animation-delay: calc(var(--auftakt-dauer) * 0.60); }
+  .flugfeld i:nth-child(10) { left: 29%; height: 52%; animation-duration: 0.34s; animation-delay: calc(var(--auftakt-dauer) * 0.62); }
+  .flugfeld i:nth-child(11) { left: 52%; height: 41%; animation-duration: 0.28s; animation-delay: calc(var(--auftakt-dauer) * 0.59); }
+  .flugfeld i:nth-child(12) { left: 66%; height: 55%; animation-duration: 0.32s; animation-delay: calc(var(--auftakt-dauer) * 0.63); }
+  .flugfeld i:nth-child(13) { left: 79%; height: 36%; animation-duration: 0.24s; animation-delay: calc(var(--auftakt-dauer) * 0.61); }
+  .flugfeld i:nth-child(14) { left: 96%; height: 48%; animation-duration: 0.29s; animation-delay: calc(var(--auftakt-dauer) * 0.64); }
+  @keyframes streifenFlug {
+    from { transform: translate3d(0, 0, 0); }
+    to   { transform: translate3d(0, -240%, 0); }
+  }
+
+  /* Der Blitz im Absprung. Einmal, kurz, und aus dem Punkt heraus, an dem
+     das Zeichen steht — nicht ueber die ganze Flaeche: ein Aufblitzen hat
+     einen Ort. */
+  .flugblitz {
+    position: absolute;
+    top: 42%;
+    left: 50%;
+    width: 110%;
+    aspect-ratio: 1;
+    margin: -55% 0 0 -55%;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 2;
+    background: radial-gradient(closest-side,
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(255, 255, 255, 0.55) 14%,
+      rgba(214, 232, 255, 0.16) 30%,
+      rgba(214, 232, 255, 0) 52%);
+    animation: flugBlitz var(--auftakt-dauer) both;
+  }
+  /* Der Blitz sitzt AUF dem Absprung, nicht davor. Beim ersten Anlauf
+     leuchtete er bei 82 % und das Zeichen ging danach — zwei Ereignisse
+     statt einem. Jetzt: Ausholen bei 72 %, Blitz auf 78 %, Abflug in
+     denselben Zehnteln, und ab 90 % ist der Himmel leer. */
+  @keyframes flugBlitz {
+    0%, 71%   { transform: scale(0.15); opacity: 0; }
+    78%       { transform: scale(0.85); opacity: 1; animation-timing-function: cubic-bezier(0.2, 0, 0.6, 1); }
+    90%, 100% { transform: scale(1.8); opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .flugblitz { display: none; }
+  }
+
+  .marke-flug {
+    display: block;
+    width: 168px;
+    height: 148px;
+    margin: 0 auto 18px;
+    overflow: visible;
+    fill: var(--fg);
+    transform-origin: 50% 60%;
+    will-change: transform;
+    animation: markeFlug var(--auftakt-dauer) both;
+  }
+  .marke-flug .hohl { fill: none; stroke: var(--fg); stroke-width: 18; }
+  @keyframes markeFlug {
+    0%   { transform: translate3d(0, 14px, 0) scale(0.94); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+    20%  { transform: none; animation-timing-function: ease-in-out; }
+    58%  { transform: translate3d(0, -10px, 0) scale(1.03); animation-timing-function: ease-in-out; }
+    /* Ausholen */
+    72%  { transform: translate3d(0, 18px, 0) scale3d(1.08, 0.88, 1); animation-timing-function: cubic-bezier(0.55, 0, 0.86, 0.12); }
+    /* Und weg. Der Strich ist der Koerper: was schneller ist als das Auge,
+       wird lang und duenn.
+
+       Der Abflug endet bei 90 %, nicht bei 100 %. Vorher lag die schnellste
+       Strecke in den letzten Zehnteln und war kaum zu sehen — der Deckel
+       ging, waehrend das Zeichen noch flog. So bleibt eine halbe Sekunde
+       leerer Himmel, bevor die Liste kommt. */
+    90%, 100% { transform: translate3d(0, -150vh, 0) scale3d(0.68, 3.6, 1); }
+  }
+  /* Die vier Kerzen wogen weiter, solange das Zeichen steht — dieselbe
+     Bewegung wie im Kopf der Liste, nur groesser. */
+  .marke-flug .kerze {
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+  }
+  .marke-flug .k1 { animation: kerzeWoge 5.2s ease-in-out -0.0s infinite alternate; }
+  .marke-flug .k2 { animation: kerzeWoge 5.8s ease-in-out -1.3s infinite alternate; }
+  .marke-flug .k3 { animation: kerzeWoge 6.4s ease-in-out -2.6s infinite alternate; }
+  .marke-flug .k4 { animation: kerzeWoge 7.0s ease-in-out -3.9s infinite alternate; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .flugfeld { display: none; }
+    .marke-flug { animation: none; }
+    .marke-flug .kerze { animation: none; }
+  }
+
   /* Das Kantenlicht: ein gedrehtes Quadrat, kein gedrehter Verlauf.
 
      Ein conic-gradient mit wanderndem Anfangswinkel zeichnet die Scheibe bei
@@ -3474,7 +3639,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=130");
+    background-image: url("/kerzen.svg?v=131");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -3488,7 +3653,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=130");
+    background-image: url("/kerzen-blass.svg?v=131");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -4213,8 +4378,20 @@
     <i class="auftakt-flut"></i>
     <i class="auftakt-zug"></i>
   </div>
+  <div class="flugfeld" aria-hidden="true">
+    <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+    <i class="schnell"></i><i class="schnell"></i><i class="schnell"></i><i class="schnell"></i>
+    <i class="schnell"></i><i class="schnell"></i><i class="schnell"></i>
+  </div>
+  <i class="flugblitz" aria-hidden="true"></i>
   <div class="auftakt-mitte">
     <i class="kantenlicht" aria-hidden="true"><i></i></i>
+    <svg class="marke-flug" viewBox="80 90 352 308" aria-hidden="true">
+      <g class="kerze k1"><rect x="109" y="128" width="24" height="154" rx="12"/><rect x="88" y="172" width="66" height="80" rx="9"/></g>
+      <g class="kerze k2"><rect x="199" y="228" width="24" height="160" rx="12"/><rect x="178" y="252" width="66" height="90" rx="9"/></g>
+      <g class="kerze k3"><rect x="289" y="310" width="24" height="74" rx="12"/><rect class="hohl" x="277" y="259" width="48" height="74" rx="7"/></g>
+      <g class="kerze k4"><rect x="379" y="98" width="24" height="186" rx="12"/><rect class="hohl" x="367" y="133" width="48" height="108" rx="7"/></g>
+    </svg>
     <div class="label">Geschützt</div>
     <h1>Aktien-Liste</h1>
     <p class="wer" id="auftaktWer">&nbsp;</p>
@@ -4312,7 +4489,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=130" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=131" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -4439,7 +4616,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=130" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=131" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -4487,7 +4664,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=130" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=131" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -4506,7 +4683,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=130" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=131" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -4623,7 +4800,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=130" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=131" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -6910,8 +7087,21 @@ if ("serviceWorker" in navigator) {
 
      Die obere Grenze muss ueber den vier Sekunden liegen, sonst schneidet
      sie den Auftritt ab, und unter dem Notausgang oben (7 s). */
-  var MINDESTENS = 4000;
-  var HOECHSTENS = 5200;
+  /* Die Dauer sagt --auftakt-dauer im Stylesheet; hier wird sie gelesen,
+     nicht ein zweites Mal gewusst. Der Notausgang haengt mit dran, damit
+     er immer ueber der Dauer liegt — sonst schnitte er den Auftritt ab. */
+  function marke(name, ersatz) {
+    try {
+      var roh = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      var zahl = parseFloat(roh);
+      if (!isFinite(zahl) || zahl <= 0) return ersatz;
+      return /ms$/.test(roh) ? zahl : zahl * 1000;
+    } catch (e) {
+      return ersatz;
+    }
+  }
+  var MINDESTENS = marke("--auftakt-dauer", 6000);
+  var HOECHSTENS = Math.round(MINDESTENS * 1.55) + 800;
 
   // Was der Auftakt abwartet, in der Reihenfolge, in der es eintrifft
   var schritte = [
@@ -7211,7 +7401,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=130";
+      i.src = "/icon-512.png?v=131";
     });
     return symbolBild;
   }

@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#0a0d0c">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=130">
-<link rel="apple-touch-icon" href="/icon-180.png?v=130">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=131">
+<link rel="apple-touch-icon" href="/icon-180.png?v=131">
 <title>Positionen · Aktien-Liste</title>
 <style>
   :root {
@@ -311,6 +311,14 @@
   }
   /* Ueberarbeitet ist leiser als neu — grau statt schwarz, wie in der Liste */
   .kopf .neu.update { background: var(--muted); letter-spacing: 0.08em; }
+  /* Nicht gefuellt, sondern umrandet: es ist kein Zustand der Position,
+     sondern eine Einschraenkung ihrer Sichtbarkeit. */
+  .kopf .neu.nurchef {
+    background: none;
+    color: var(--fg);
+    border: 1px solid var(--fg);
+    letter-spacing: 0.08em;
+  }
   .kopf .pfeil { color: var(--muted); font-size: 13px; transition: transform 0.27s var(--ease); }
   .pos.offen .kopf .pfeil { transform: rotate(90deg); }
 
@@ -596,6 +604,9 @@
     kopf.appendChild(el("span", "wie", p.name || "Ohne Namen"));
     if (p.neu) kopf.appendChild(el("span", "neu", "NEU"));
     else if (p.update) kopf.appendChild(el("span", "neu update", "UPDATE"));
+    /* Zugeklappt sieht man sonst nicht, dass diese Position nur hier steht
+       — und genau das ist die Angabe, bei der ein Irrtum weh taete. */
+    if (p.nurchef) kopf.appendChild(el("span", "neu nurchef", "NUR HIER"));
     kopf.appendChild(el("span", "pfeil", "›"));
     kopf.addEventListener("click", function () {
       p._offen = !p._offen;
@@ -610,14 +621,17 @@
     /* Zwei Kennzeichen fuers Menue. Beide gleichzeitig ergaeben keinen Sinn —
        was gerade erst dazugekommen ist, ist nicht auch schon ueberarbeitet.
        Deshalb schaltet das eine das andere aus. */
-    function schalter(feldName, text) {
+    function schalter(feldName, text, allein) {
       var s = el("label", "schalter");
       var c = document.createElement("input");
       c.type = "checkbox";
       c.checked = p[feldName] === true;
       c.addEventListener("change", function () {
         p[feldName] = c.checked;
-        if (c.checked) p[feldName === "neu" ? "update" : "neu"] = false;
+        /* NEU und UPDATE schliessen einander aus. "Nur hier" nicht — es
+           sagt etwas ueber die Sichtbarkeit, nicht ueber den Zustand, und
+           eine neue Position darf sehr wohl zuerst nur hier stehen. */
+        if (c.checked && !allein) p[feldName === "neu" ? "update" : "neu"] = false;
         zeichnen();
       });
       s.appendChild(c);
@@ -626,6 +640,8 @@
     }
     schalter("neu", "Im Menü als NEU markieren");
     schalter("update", "Im Menü als UPDATE markieren — überarbeitet");
+    schalter("nurchef", "Nur für die Verwaltung — andere sehen sie nicht, "
+      + "sie meldet sich nicht und steht in keinem Statusabruf", true);
 
     var w = el("div", "werkzeug");
 
@@ -680,7 +696,7 @@
 
   document.getElementById("neuKnopf").addEventListener("click", function () {
     daten.push({
-      id: "", name: "", badge: "", chip: "", neu: true, update: false, branche: "",
+      id: "", name: "", badge: "", chip: "", neu: true, update: false, nurchef: false, branche: "",
       zone: "", ziel: "", tv: "", yahoo: "", frage: "", fn: "", keys: "", fibo: "",
       logo: "",
       _offen: true
