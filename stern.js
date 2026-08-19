@@ -27,8 +27,24 @@
    Ruckelei.
 
    Die Sterne sind die Ausnahme — sie sind Striche, und Striche sind
-   billig. Sie werden in drei Farbtoepfe sortiert und als drei Pfade
-   gezogen, nicht als zweihundertfuenfzig.
+   billig. Vierhundert Stueck werden in vier Farbtoepfe zu je drei
+   Helligkeitsstufen sortiert und als ein Dutzend Pfade gezogen, nicht als
+   vierhundert.
+
+   WAS EINEN HIMMEL ECHT MACHT
+
+   Die erste Fassung hatte Sterne, aber alle gleich: gleiche Breite, gleiche
+   Farbe, harte Enden. Drei Dinge unterscheiden ein Feld von gestreutem
+   Konfetti, und alle drei stehen weiter unten im Einzelnen:
+
+     Helligkeit  wenige helle, viele schwache — aber keiner unsichtbar
+     Farbe       vier Sterntemperaturen von blauweiss bis orange
+     Tiefe       ein Fernfeld, das fast steht, und ein rasendes Nahfeld
+
+   Dazu, was eine Kamera hinzufuegt und ein Gegenstand nicht hat: eine
+   Beugungsspinne am hellsten Stern, unscharfe Scheiben mit hellerem Rand
+   im Vordergrund, und ein Gegenlichtsaum an der Marke, der aus der Scheibe
+   eine Kugel macht.
 
    DIE DRAMATURGIE
 
@@ -113,6 +129,59 @@
     return c;
   }
 
+  /* DIE BEUGUNGSSPINNE — das Kreuz, das ein heller Stern im Objektiv wirft.
+
+     Nicht vier gezeichnete Balken, sondern vier Verlaeufe, die zur Spitze
+     hin ausgehen, plus ein Kern. Zwei lange Arme waagerecht und senkrecht,
+     zwei kurze schraeg: eine gleichmaessige Spinne sieht gezeichnet aus,
+     eine ungleiche wie Optik. */
+  function spinne(gr) {
+    var c = tafel(gr, gr), x = c.getContext("2d");
+    var m = gr / 2;
+    x.globalCompositeOperation = "lighter";
+    var arme = [[0, 1, 0.028], [1.5708, 0.86, 0.024], [0.7854, 0.42, 0.016], [-0.7854, 0.42, 0.016]];
+    for (var i = 0; i < arme.length; i++) {
+      x.save();
+      x.translate(m, m);
+      x.rotate(arme[i][0]);
+      var l = m * arme[i][1], b = gr * arme[i][2];
+      var v = x.createLinearGradient(-l, 0, l, 0);
+      v.addColorStop(0, "rgba(190,214,255,0)");
+      v.addColorStop(0.34, "rgba(214,232,255,0.36)");
+      v.addColorStop(0.5, "rgba(255,255,255,0.9)");
+      v.addColorStop(0.66, "rgba(214,232,255,0.36)");
+      v.addColorStop(1, "rgba(190,214,255,0)");
+      x.fillStyle = v;
+      x.fillRect(-l, -b / 2, l * 2, b);
+      x.restore();
+    }
+    var kv = x.createRadialGradient(m, m, 0, m, m, gr * 0.14);
+    kv.addColorStop(0, "rgba(255,255,255,0.95)");
+    kv.addColorStop(1, "rgba(255,255,255,0)");
+    x.fillStyle = kv;
+    x.fillRect(0, 0, gr, gr);
+    return c;
+  }
+
+  /* EIN UNSCHARFER LICHTPUNKT.
+
+     Ein Objektiv macht aus einem Punkt ausserhalb der Schaerfeebene keine
+     weiche Wolke, sondern eine SCHEIBE mit hellerem Rand — die Form der
+     Blende. Das ist der Unterschied zwischen "verwaschen" und "unscharf",
+     und das Auge kennt ihn, ohne ihn benennen zu koennen. */
+  function bokeh(gr, farbe) {
+    var c = tafel(gr, gr), x = c.getContext("2d");
+    var m = gr / 2, r = m * 0.82;
+    var v = x.createRadialGradient(m, m, 0, m, m, r);
+    v.addColorStop(0, "rgba(" + farbe + ",0.34)");
+    v.addColorStop(0.72, "rgba(" + farbe + ",0.4)");
+    v.addColorStop(0.9, "rgba(" + farbe + ",0.82)");
+    v.addColorStop(1, "rgba(" + farbe + ",0)");
+    x.fillStyle = v;
+    x.beginPath(); x.arc(m, m, r, 0, 6.2832); x.fill();
+    return c;
+  }
+
   /* DER HIMMEL als eine einzige Vorlage.
 
      Achtzig weiche Flecken in den Farben des Grundes unter der Liste —
@@ -133,18 +202,33 @@
       [70, 132, 196], [46, 150, 150], [96, 84, 168],
       [54, 104, 178], [38, 138, 122], [120, 108, 190]
     ];
+    /* GEZOGENE FLECKEN, NICHT RUNDE.
+
+       Achtzig Kreise ergeben Watte. Gas steht in Faeden: es wird von
+       Strahlung weggeblasen und von Schwerkraft gezogen, und deshalb ist
+       fast alles daran laenglich und in eine Richtung gekaemmt. Jeder
+       Fleck bekommt deshalb ein Seitenverhaeltnis und einen Winkel, der um
+       eine gemeinsame Vorzugsrichtung streut — das ist der ganze
+       Unterschied zwischen "Nebel" und "Weichzeichner". */
+    var richtung = 0.5;
     x.globalCompositeOperation = "lighter";
-    for (var i = 0; i < 84; i++) {
+    for (var i = 0; i < 96; i++) {
       var t = toene[(wuerfel() * toene.length) | 0];
       var r = gr * (0.03 + wuerfel() * wuerfel() * 0.26);
       var px = wuerfel() * gr, py = wuerfel() * gr;
       var a = 0.05 + wuerfel() * 0.13;
-      var v = x.createRadialGradient(px, py, 0, px, py, r);
+      var lang = 1.6 + wuerfel() * wuerfel() * 3.4;
+      x.save();
+      x.translate(px, py);
+      x.rotate(richtung + (wuerfel() - 0.5) * 1.5);
+      x.scale(lang, 1 / Math.sqrt(lang));
+      var v = x.createRadialGradient(0, 0, 0, 0, 0, r);
       v.addColorStop(0, "rgba(" + t[0] + "," + t[1] + "," + t[2] + "," + a.toFixed(3) + ")");
       v.addColorStop(0.55, "rgba(" + t[0] + "," + t[1] + "," + t[2] + "," + (a * 0.35).toFixed(3) + ")");
       v.addColorStop(1, "rgba(0,0,0,0)");
       x.fillStyle = v;
-      x.fillRect(px - r, py - r, r * 2, r * 2);
+      x.fillRect(-r, -r, r * 2, r * 2);
+      x.restore();
     }
     /* Die Staubbahnen. */
     x.globalCompositeOperation = "source-over";
@@ -158,15 +242,19 @@
       x.fillStyle = dv;
       x.fillRect(dx - rr, dy - rr, rr * 2, rr * 2);
     }
-    /* Und die feinen Sterne. */
+    /* Nur noch ein feiner Staub, kein Sternenfeld mehr.
+
+       Hier standen vierhundert Punkte. Sie waren an dieser Stelle falsch
+       aufgehoben: die Vorlage wird seit dem Umbau auf halber Aufloesung
+       gemalt und aufgezogen, und ein Punkt von unter zwei Bildpunkten wird
+       dabei zu Matsch. Die Sterne stehen jetzt im Strichfeld, wo sie scharf
+       bleiben und sich mitbewegen. Was hier bleibt, ist Gasstaub, der dem
+       Nebel Koernung gibt — bewusst schwach. */
     x.globalCompositeOperation = "lighter";
-    for (var s = 0; s < 420; s++) {
-      var sr = 0.35 + wuerfel() * wuerfel() * 1.5;
-      var sa = 0.25 + wuerfel() * 0.7;
-      var warm = wuerfel() > 0.82;
-      x.fillStyle = warm
-        ? "rgba(255,228,198," + sa.toFixed(3) + ")"
-        : "rgba(" + (206 + ((wuerfel() * 40) | 0)) + ",226,255," + sa.toFixed(3) + ")";
+    for (var s = 0; s < 150; s++) {
+      var sr = 0.8 + wuerfel() * wuerfel() * 2.2;
+      var sa = 0.06 + wuerfel() * 0.16;
+      x.fillStyle = "rgba(" + (196 + ((wuerfel() * 50) | 0)) + ",220,255," + sa.toFixed(3) + ")";
       x.beginPath();
       x.arc(wuerfel() * gr, wuerfel() * gr, sr, 0, 6.2832);
       x.fill();
@@ -224,6 +312,24 @@
     gv.addColorStop(1, "rgba(255,255,255,0)");
     x.fillStyle = gv;
     x.beginPath(); x.arc(m, m, r, 0, 6.2832); x.fill();
+
+    /* GEGENLICHT — ein schmaler kalter Saum auf der Schattenseite.
+
+       Das ist der Griff, mit dem aus einer Scheibe eine Kugel wird. Eine
+       Flaeche hat eine Lichtseite und eine dunkle; ein KOERPER faengt auf
+       der dunklen Seite noch Licht von hinten und zeigt dort eine helle
+       Kante. Ohne sie klebt die Marke im Bild, mit ihr steht sie darin. */
+    x.save();
+    x.beginPath(); x.arc(m, m, r, 0, 6.2832); x.clip();
+    x.globalCompositeOperation = "lighter";
+    var sv = x.createRadialGradient(m + r * 0.52, m + r * 0.6, r * 0.1,
+                                    m + r * 0.52, m + r * 0.6, r * 1.15);
+    sv.addColorStop(0, "rgba(150,196,255,0.5)");
+    sv.addColorStop(0.4, "rgba(120,170,255,0.12)");
+    sv.addColorStop(1, "rgba(0,0,0,0)");
+    x.fillStyle = sv;
+    x.fillRect(0, 0, gr, gr);
+    x.restore();
 
     if (bild) {
       var s = gr * 0.6;
@@ -341,12 +447,21 @@
       [0.66, "rgba(72,96,220,0.05)"],
       [1, "rgba(0,0,0,0)"]
     ]);
-    var WARM = glut(128, [
-      [0, "rgba(255,246,232,0.9)"],
-      [0.3, "rgba(255,206,150,0.3)"],
-      [1, "rgba(0,0,0,0)"]
-    ]);
     var STREIF = streifen(512, 48, "rgba(150,200,255,0.55)");
+    var SPINNE = spinne(128);
+    var BOKEH = bokeh(96, "150,186,255");
+    var BOKEHWARM = bokeh(96, "255,208,158");
+    /* Ein Lichtpunkt je Sternfarbe — der Kopf des Strichs. */
+    var FUNKE = [];
+    for (var tf = 0; tf < 4; tf++) {
+      var farbe = ["199,216,255", "255,255,255", "255,241,206", "255,206,158"][tf];
+      FUNKE.push(glut(64, [
+        [0, "rgba(255,255,255,1)"],
+        [0.16, "rgba(" + farbe + ",0.8)"],
+        [0.44, "rgba(" + farbe + ",0.2)"],
+        [1, "rgba(0,0,0,0)"]
+      ]));
+    }
     var BLITZ = glut(256, [
       [0, "rgba(255,255,255,0.95)"],
       [0.1, "rgba(226,238,255,0.62)"],
@@ -415,22 +530,80 @@
 
        Gezeichnet wird von der vorigen zur jetzigen Stelle. Der Strich IST
        die Bewegungsunschaerfe: kein Nachtraeglicher Effekt, sondern
-       schlicht die Strecke, die der Stern in diesem Bild zurueckgelegt hat. */
-    var ANZ = Math.round(klemm((B * H) / 1500, 150, 320));
+       schlicht die Strecke, die der Stern in diesem Bild zurueckgelegt hat.
+
+       DREI DINGE, DIE EIN FELD ECHT MACHEN — und die vorher alle fehlten.
+
+       ERSTENS: Sterne sind NICHT gleich hell. Am Himmel steht auf einen
+       hellen ein Dutzend schwacher. Gleichverteilt wirkt das wie
+       gestreutes Konfetti; die Verteilung hier ist deshalb eine Potenz,
+       und das Ergebnis ist ein Feld mit wenigen Kerlen und viel Staub.
+
+       ZWEITENS: Sterne haben FARBEN, und zwar nach ihrer Temperatur —
+       blauweiss, weiss, gelblich, orange. Vorher waren es drei Toepfe, von
+       denen zwei fast dasselbe Weiss waren.
+
+       DRITTENS: sie stehen in verschiedener TIEFE. Ein ferner Stern zieht
+       kaum vorbei und bleibt ein scharfer Punkt, ein naher wird zum langen
+       Strich. Vorher lag das Tempo zwischen 0,45 und 1,45 — alle etwa
+       gleich weit weg, also alle etwa gleich lang. Jetzt reicht es von
+       0,06 bis 1,7: ein ruhiges Fernfeld und ein rasendes Nahfeld im
+       selben Bild.
+
+       Die feinen Sterne waren bis eben in die Nebelvorlage gemalt, und die
+       wird seit dem Umbau auf halbe Aufloesung mitverkleinert — pinselige
+       Punkte werden dabei zu Matsch. Sie sind jetzt hier, wo sie scharf
+       bleiben, und das Fernfeld ersetzt sie eins zu eins. */
+    var ANZ = Math.round(klemm((B * H) / 1050, 220, 400));
     var sterne = [];
     for (var i = 0; i < ANZ; i++) {
+      /* Tiefe: ein Drittel Fernfeld, das fast steht. */
+      var fern = wuerfel();
+      var tief = fern < 0.34 ? 0.06 + wuerfel() * 0.16
+        : (fern < 0.82 ? 0.3 + wuerfel() * 0.55 : 0.95 + wuerfel() * 0.75);
+      /* Helligkeit als Potenz: viele schwache, wenige starke — aber mit
+         einem Boden. Ohne ihn ("h = pow(zufall, 2,3)") lag die Haelfte des
+         Feldes unter der Sichtbarkeit, und in der ruhigen Phase, wo die
+         Striche kurz sind, stand der Himmel fast leer da. Eine Verteilung
+         darf steil sein; sie darf nicht unter die Wahrnehmungsschwelle
+         reichen, sonst hat man die Sterne nur gerechnet. */
+      var h = 0.2 + 0.8 * Math.pow(wuerfel(), 2.3);
       sterne.push({
         w: wuerfel() * 6.2832,
-        d: 8 + wuerfel() * WEIT,
-        v: wuerfel(),
-        topf: (wuerfel() * 3) | 0
+        /* Die Wurzel ist keine Zierde. Ein gleichverteilter Abstand heisst
+           in der FLAECHE dicht in der Mitte: die Ringe um den Fluchtpunkt
+           werden nach aussen immer groesser, bekommen aber gleich viele
+           Sterne ab. Zu sehen war das als Klumpen genau dort, wo der Stern
+           steht — wie ein Spritzer, nicht wie ein Himmel. Mit der Wurzel
+           ist die Dichte ueberall gleich. */
+        d: 8 + WEIT * Math.sqrt(wuerfel()),
+        v: tief,
+        h: h,
+        topf: (wuerfel() * 4) | 0,
+        /* Funkeln: eigene Geschwindigkeit und eigener Anfang, sonst blinkt
+           das ganze Feld im Gleichschritt wie eine Lichterkette. */
+        fs: 1.6 + wuerfel() * 4.2,
+        fp: wuerfel() * 6.2832
       });
     }
+    /* Nach Helligkeit sortiert: die hellsten stehen hinten und bekommen
+       weiter unten ihren Lichtpunkt, ohne dass dafuer gesucht werden muss. */
+    sterne.sort(function (a, b) { return a.h - b.h; });
+
+    /* Vier Farbtoepfe nach Sterntemperatur. Die Zahlen sind keine Erfindung,
+       sondern ungefaehr das, was ein Auge bei O-, F-, G- und K-Sternen
+       sieht. */
     var TOPF = [
-      { farbe: "rgba(214,228,255,", breit: 1.0 },
-      { farbe: "rgba(255,236,214,", breit: 1.3 },
-      { farbe: "rgba(255,255,255,", breit: 1.7 }
+      { farbe: "199,216,255", breit: 1.0 },   /* blauweiss */
+      { farbe: "255,255,255", breit: 1.15 },  /* weiss     */
+      { farbe: "255,241,206", breit: 1.05 },  /* gelblich  */
+      { farbe: "255,206,158", breit: 0.95 }   /* orange    */
     ];
+    /* Drei Helligkeitsstufen je Topf, und jede Stufe zweimal gezogen: erst
+       breit und schwach, dann schmal und hell. Das ist ein weicher Rand fuer
+       den Preis eines zweiten Zuges — ein einzelner Strich hat harte
+       Kanten und sieht aus wie ein Stoeckchen. */
+    var STUFEN = 3;
 
     function tempo(t) {
       return 0.35
@@ -607,54 +780,107 @@
       g.globalAlpha = blenden;
       g.drawImage(grund, 0, 0, B, H);
 
-      /* Das Strichfeld. */
+      /* Das Strichfeld. Erst rechnen und in Toepfe sortieren, dann je Topf
+         und Stufe EIN Zug — nicht vierhundert. */
       g.globalCompositeOperation = "lighter";
-      var pfade = [[], [], []];
+      var pfade = [[], [], [], []];
+      var funken = null;
       for (var i = 0; i < sterne.length; i++) {
         var s = sterne[i];
         var alt = s.d;
-        s.d += (s.d * 0.055 + 1.1) * (0.45 + s.v) * v * (dt / 16.667);
+        s.d += (s.d * 0.055 + 1.1) * s.v * v * (dt / 16.667);
         if (s.d > WEIT) {
           s.w = wuerfel() * 6.2832;
-          s.d = 3 + wuerfel() * 26;
+          s.d = 3 + wuerfel() * 22;
           alt = s.d;
         }
         var co = Math.cos(s.w), si = Math.sin(s.w);
-        pfade[s.topf].push(px + co * alt, py + si * alt, px + co * s.d, py + si * s.d,
-                           klemm(s.d / (WEIT * 0.55), 0.06, 1));
+        /* Helligkeit: die eigene, mal dem Abstand (nah am Fluchtpunkt ist
+           ein Stern noch weit weg und darf nicht hell sein), mal dem
+           Funkeln. */
+        /* Frisch gesetzte Sterne muessen bei NULL anfangen, nicht bei
+           einem Rest. Wer aus dem Bild faellt, wird am Fluchtpunkt neu
+           gesetzt — und mit einem Boden in der Helligkeit sammelte sich
+           dort ein sichtbarer Haufen an, wie ein Spritzer genau hinter der
+           Marke. Jetzt blenden sie auf, waehrend sie herauskommen. */
+        var hell = s.h * klemm((s.d - 14) / (WEIT * 0.3), 0, 1) *
+          (0.78 + 0.22 * Math.sin(t * 0.001 * s.fs + s.fp));
+        pfade[s.topf].push(px + co * alt, py + si * alt, px + co * s.d, py + si * s.d, hell);
+        /* Die hellsten bekommen einen Lichtpunkt am Kopf: ein Stern ist
+           kein Strich, sondern eine Lichtquelle MIT einem Strich dahinter.
+           Nur die letzten Prozent der sortierten Liste, also ein gutes
+           Dutzend, nicht vierhundert. */
+        if (i > sterne.length - 26 && hell > 0.45) {
+          (funken || (funken = [])).push(px + co * s.d, py + si * s.d, hell, s.topf);
+        }
       }
-      for (var k = 0; k < 3; k++) {
+      g.lineCap = "round";
+      for (var k = 0; k < TOPF.length; k++) {
         var liste = pfade[k];
         if (!liste.length) continue;
         var art = TOPF[k];
-        g.lineWidth = art.breit;
-        g.lineCap = "round";
-        /* Drei Helligkeitsstufen je Topf statt einer Farbe je Stern: ein
-           Pfad pro Stufe, also neun Zuege im Bild — nicht zweihundertfuenfzig. */
-        for (var st = 0; st < 3; st++) {
+        for (var st = 0; st < STUFEN; st++) {
           g.beginPath();
           var leer = true;
           for (var j = 0; j < liste.length; j += 5) {
             var h = liste[j + 4];
-            if (((h * 3) | 0) !== st && !(st === 2 && h >= 1)) continue;
+            if (Math.min(STUFEN - 1, (h * STUFEN) | 0) !== st) continue;
             g.moveTo(liste[j], liste[j + 1]);
             g.lineTo(liste[j + 2], liste[j + 3]);
             leer = false;
           }
           if (leer) continue;
-          g.strokeStyle = art.farbe + (blenden * (0.2 + st * 0.32)).toFixed(3) + ")";
+          var kraftS = blenden * (0.26 + st * 0.3);
+          /* Zweimal: breit und schwach als Saum, schmal und hell als Kern.
+
+             Den Saum bekommt nur, wer hell genug ist, um einen zu haben.
+             Ein schwacher Stern ist ohnehin nur ein Hauch; ein zweiter Zug
+             darunter ist an ihm nicht zu sehen — und die schwachen sind die
+             grosse Mehrheit. Mit Saum fuer alle waren es bei vierfach
+             gedrosselter Rechenleistung zwanzig Bilder je Sekunde, ohne
+             wieder dreissig, und im Bild ist der Unterschied nicht zu
+             finden. */
+          if (st > 0) {
+            g.lineWidth = art.breit * 2.6;
+            g.strokeStyle = "rgba(" + art.farbe + "," + (kraftS * 0.24).toFixed(3) + ")";
+            g.stroke();
+          }
+          g.lineWidth = art.breit;
+          g.strokeStyle = "rgba(" + art.farbe + "," + kraftS.toFixed(3) + ")";
           g.stroke();
         }
       }
+      if (funken) {
+        for (var f2 = 0; f2 < funken.length; f2 += 4) {
+          var fg = 7 + funken[f2 + 2] * 16;
+          g.globalAlpha = blenden * funken[f2 + 2] * 0.5;
+          g.drawImage(FUNKE[funken[f2 + 3]], funken[f2] - fg / 2, funken[f2 + 1] - fg / 2, fg, fg);
+        }
+        /* Und den allerhellsten eine Beugungsspinne. Ein einziger Stern mit
+           Kreuz sagt "durch ein Objektiv gesehen"; vier Dutzend davon sagen
+           "Weihnachten". */
+        if (funken.length >= 4) {
+          var sg = 26 + funken[2] * 46;
+          g.globalAlpha = blenden * 0.34;
+          g.drawImage(SPINNE, funken[0] - sg / 2, funken[1] - sg / 2, sg, sg);
+        }
+        g.globalAlpha = 1;
+      }
 
-      /* Ein paar warme Staubkoerner dicht an der Kamera — sie geben dem
-         Feld einen Vordergrund. */
-      for (var m = 0; m < 7; m++) {
-        var mw = (m / 7) * 6.2832 + gefahren * 0.11;
-        var md = WEIT * (0.3 + 0.5 * ((m * 0.37) % 1));
-        var mg = 26 + m * 5;
-        g.globalAlpha = blenden * 0.16;
-        g.drawImage(WARM, px + Math.cos(mw) * md - mg / 2, py + Math.sin(mw) * md - mg / 2, mg, mg);
+      /* UNSCHARFE VORDERGRUNDPUNKTE.
+
+         Staub so dicht vor der Linse, dass er nicht mehr scharf wird: eine
+         weiche Scheibe mit hellerem Rand — genau das, was ein Objektiv aus
+         einem Lichtpunkt ausserhalb der Schaerfeebene macht. Es ist der
+         billigste Weg, einem Bild Tiefe zu geben, und einer der wenigen
+         Effekte, die man nicht bewusst wahrnimmt und trotzdem vermisst. */
+      for (var m = 0; m < 6; m++) {
+        var mw = (m / 6) * 6.2832 + gefahren * 0.09 + m;
+        var md = WEIT * (0.34 + 0.52 * ((m * 0.41) % 1));
+        var mg = 38 + m * 13;
+        g.globalAlpha = blenden * (0.1 - m * 0.008);
+        g.drawImage(m % 2 ? BOKEH : BOKEHWARM,
+          px + Math.cos(mw) * md - mg / 2, py + Math.sin(mw) * md - mg / 2, mg, mg);
       }
       g.globalAlpha = 1;
 
