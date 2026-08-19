@@ -235,11 +235,30 @@ async function pruefen(sym) {
    Hand, sondern sicherer: von Hand wird nichts geprueft. */
 const SUCH_SUFFIXE = [".VI", ".DE", ".F", ".SG", ".BE", ".MU", ".DU", ".HM"];
 
-function passt(meta, erwartet) {
+/* Symbole, die fuer sich sprechen: Kryptopaare (FET-USD), Rohstoffe (GC=F)
+   und Indizes (^GSPC). Bei ihnen benennt das Kuerzel das Papier eindeutig —
+   es gibt kein zweites FET-USD an einer anderen Boerse. */
+function eindeutig(sym) {
+  return /(-USD|-EUR|=F|=X)$/i.test(sym) || String(sym).charAt(0) === "^";
+}
+
+function passt(meta, erwartet, sym) {
   if (!erwartet) return true;
   if (erwartet.waehrung && meta.currency &&
       String(meta.currency).toUpperCase() !== erwartet.waehrung) return false;
-  if (erwartet.name) {
+  /* Der Namensvergleich gilt nur, wo das Kuerzel mehrdeutig ist.
+
+     Fetch.ai hat gezeigt, warum: Yahoo fuehrt FET-USD seit dem
+     Zusammenschluss unter "Artificial Superintelligence Alliance". Das Wort
+     "fetch" steht dort nicht mehr — der Kurs kam an, wurde geprueft und
+     verworfen, und zwar bei jedem einzelnen Versuch. Auf der Karte stand
+     "Kein Kurs", und bis dahin dauerte es lange, weil alle Zeitraeume
+     nacheinander durchliefen.
+
+     Bei einem Paar schuetzt der Name auch vor nichts: FET-USD ist FET-USD.
+     Die Wache bleibt fuer Aktien, wo genau das schon einmal die falsche
+     Firma getroffen haette. */
+  if (erwartet.name && !eindeutig(sym)) {
     const wer = String(meta.longName || meta.shortName || "").toLowerCase();
     if (wer) {
       /* Ein tragendes Wort genuegt: "FIT Group AG" gegen "FIT GROUP AG NA
@@ -257,6 +276,11 @@ function passt(meta, erwartet) {
 async function holenMitRueckfall(sym, plan, erwartet) {
   for (const [range, interval] of plan.versuche) {
     const d = await holen(sym, range, interval, erwartet);
+    /* "fremd" heisst: Yahoo hat geliefert, aber es gehoert nicht zu dieser
+       Position. Ein anderer Zeitraum aendert daran nichts — es ist dasselbe
+       Papier. Weitersuchen waere reine Wartezeit, und genau die war auf der
+       Karte zu spueren. */
+    if (d === "fremd") break;
     if (d) return d;
   }
 
@@ -267,12 +291,19 @@ async function holenMitRueckfall(sym, plan, erwartet) {
     for (const suffix of SUCH_SUFFIXE) {
       const kandidat = basis + suffix;
       if (kandidat === sym.toUpperCase()) continue;
+      let fremd = false;
       for (const [range, interval] of plan.versuche) {
         const d = await holen(kandidat, range, interval, erwartet);
+        /* Auch hier: ein fremdes Papier bleibt fremd, egal in welchem
+           Zeitraum. Ohne diese Abfrage waere "fremd" ein wahrer Wert und
+           wuerde als Kursreihe zurueckgegeben — die Wache haette sich
+           selbst ausgehebelt. */
+        if (d === "fremd") { fremd = true; break; }
         /* Wo sie fuendig wurde, gehoert in die Antwort — sonst weiss
            niemand, welches Symbol wirklich getragen hat. */
         if (d) { d.symbol = kandidat; return d; }
       }
+      if (fremd) continue;
     }
   }
   return null;
@@ -298,7 +329,7 @@ async function holen(sym, range, interval, erwartet) {
     if (!meta) return null;
     /* Passt der Fund ueberhaupt zu dieser Position? Ein fremdes Papier mit
        demselben Kuerzel waere schlimmer als kein Chart. */
-    if (!passt(meta, erwartet)) return null;
+    if (!passt(meta, erwartet, sym)) return "fremd";
 
     const zeiten = ergebnis.timestamp || [];
     const schluss =
