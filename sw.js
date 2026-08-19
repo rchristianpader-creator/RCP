@@ -5,7 +5,7 @@
    - everything else (TradingView, /.netlify/functions/*): straight to network, never cached
    Bump CACHE on every deploy so old shells are dropped. */
 
-const CACHE = "aktien-liste-v142";
+const CACHE = "aktien-liste-v143";
 
 /* Ohne Sitzung liefert das Tor statt der Seite eine Weiterleitung zur
    Anmeldung — deshalb wird das Dokument hier nicht vorgeladen, sondern
@@ -17,19 +17,26 @@ const CACHE = "aktien-liste-v142";
    Kein Kommentar zwischen den Zeilen: die Pruefreihe liest diese Liste als
    JSON aus der Datei, und daran waere sie eben zerbrochen. */
 const PRECACHE = [
-  "/stil.css?v=142",
+  "/stil.css?v=143",
   "/manifest.webmanifest",
-  "/icon-180.png?v=142",
-  "/icon-192.png?v=142",
-  "/icon-512.png?v=142",
-  "/kerzen.svg?v=142",
-  "/kerzen-blass.svg?v=142"
+  "/icon-180.png?v=143",
+  "/icon-192.png?v=143",
+  "/icon-512.png?v=143",
+  "/kerzen.svg?v=143",
+  "/kerzen-blass.svg?v=143"
 ];
 
 /* css dazu: seit v137 liegt das Aussehen in stil.css. Sie traegt ?v=NN,
    ist also je Stand unveraenderlich — genau der Fall, fuer den
-   "Zwischenspeicher zuerst" gedacht ist. */
-const STATIC = /\.(?:css|png|jpg|jpeg|svg|webp|ico|pdf|webmanifest)$/i;
+   "Zwischenspeicher zuerst" gedacht ist.
+
+   js seit v143 fuer stern.js. Vorgeladen wird die Datei NICHT: sie wird nur
+   von der Verwaltung gebraucht, und allen anderen bei jedem neuen Stand
+   vierzehn Kilobyte in den Speicher zu legen, die niemand abruft, waere
+   verkehrt herum. Beim ersten Mal kommt sie aus dem Netz und liegt danach
+   da. Der eigene Service Worker geht hier nicht durch — sein Skript holt
+   der Browser an ihm vorbei. */
+const STATIC = /\.(?:css|js|png|jpg|jpeg|svg|webp|ico|pdf|webmanifest)$/i;
 
 self.addEventListener("install", (event) => {
   /* Jede Datei einzeln, und ein Fehlschlag zaehlt nicht.
