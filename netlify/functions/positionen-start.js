@@ -300,10 +300,8 @@ export const NACHTRAG = [
       "yahoo": "FET-USD",
       "frage": "Fetch.ai Kurs",
       "fn": "https://www.finanzen.net/devisen/fetch.ai-dollar-kurs",
-      "keys": "Fetch.ai|FET"
-      /* Kein fibo: zu dieser Position kam ein Bild, kein Link. Das Feld
-         leer zu lassen ist richtiger, als eine Adresse zu erfinden — der
-         Knopf bleibt dann einfach weg. */
+      "keys": "Fetch.ai|FET",
+      "fibo": "https://de.tradingview.com/chart/DWzdvP7E/"
     }
   }
 ];
