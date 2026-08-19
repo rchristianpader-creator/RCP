@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="dark">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#0a0d0c">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=135">
-<link rel="apple-touch-icon" href="/icon-180.png?v=135">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=136">
+<link rel="apple-touch-icon" href="/icon-180.png?v=136">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -19,14 +19,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=135">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=136">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=135">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=136">
 
 <script>
 /* Im Browser oder als App?
@@ -1160,6 +1160,10 @@
   .vorstellung {
     position: fixed;
     inset: 0;
+    /* Die Kamera. Ohne perspective bliebe translateZ wirkungslos. Der
+       Fluchtpunkt liegt dort, wo der Stern steht. */
+    perspective: 520px;
+    perspective-origin: 50% 46%;
     z-index: 260;
     pointer-events: none;
     display: flex;
@@ -1168,13 +1172,75 @@
     overflow: hidden;
   }
   .vorstellung > * { position: absolute; }
+
+  /* DER RAUM. Erst wird es schwarz, dann steht der Stern im Nichts.
+
+     Eigene Ebene mit fester Farbe und bewegter Deckkraft, nicht die
+     Hintergrundfarbe der Huelle: eine Farbe zu animieren malt die ganze
+     Flaeche bei jedem Bild neu. */
+  .vorstellung .raum {
+    inset: 0;
+    z-index: 0;
+    background: #05070c;
+    animation: raumDunkel 7s both;
+  }
+  @keyframes raumDunkel {
+    0%   { opacity: 0; }
+    16%  { opacity: 0.94; }
+    82%  { opacity: 0.94; }
+    100% { opacity: 0; }
+  }
+
+  /* DAS STERNENFELD — EINE KAMERA, DIE HINDURCHFLIEGT
+
+     Echte Tiefe statt eines Bildes, das groesser wird: die Ebenen fahren
+     auf der Z-Achse an der Kamera vorbei. Was hinten steht, kommt klein und
+     langsam; was vorn ankommt, rauscht vorbei.
+
+     Drei Ebenen, versetzt gestartet, jede zweimal — so reisst der Strom nie
+     ab. Die Punkte sind Verlaeufe im Hintergrund, nicht Elemente: drei
+     Ebenen statt dreihundert. */
+  .vorstellung .feld {
+    top: 50%;
+    left: 50%;
+    width: 260vmax;
+    height: 260vmax;
+    margin: -130vmax 0 0 -130vmax;
+    z-index: 1;
+    background-image:
+      radial-gradient(1.6px 1.6px at 11% 17%, #fff, transparent),
+      radial-gradient(1.2px 1.2px at 29% 63%, #cfe0ff, transparent),
+      radial-gradient(1.8px 1.8px at 47% 31%, #fff, transparent),
+      radial-gradient(1px 1px at 63% 78%, #dbe6ff, transparent),
+      radial-gradient(1.4px 1.4px at 78% 22%, #fff, transparent),
+      radial-gradient(1px 1px at 91% 57%, #c8d8ff, transparent),
+      radial-gradient(1.2px 1.2px at 19% 88%, #fff, transparent),
+      radial-gradient(1.6px 1.6px at 38% 8%, #e6eeff, transparent),
+      radial-gradient(1px 1px at 57% 49%, #fff, transparent),
+      radial-gradient(1.3px 1.3px at 72% 94%, #d4e2ff, transparent),
+      radial-gradient(1.1px 1.1px at 85% 41%, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 4% 44%, #dde8ff, transparent);
+    background-size: 340px 340px;
+    background-repeat: repeat;
+    will-change: transform;
+    animation: raumFlug 3.5s linear 2 both;
+  }
+  .vorstellung .feld.zwei { background-size: 250px 250px; animation-delay: 1.17s; }
+  .vorstellung .feld.drei { background-size: 180px 180px; animation-delay: 2.33s; }
+  @keyframes raumFlug {
+    0%   { transform: translateZ(-1400px); opacity: 0; }
+    14%  { opacity: 0.9; }
+    72%  { opacity: 0.9; }
+    100% { transform: translateZ(480px); opacity: 0; }
+  }
+
   .vorstellung .logo {
     position: relative;
     width: 132px;
     height: 132px;
     padding: 0;
     font-size: 40px;
-    z-index: 2;
+    z-index: 5;
     will-change: transform;
     animation: sternMarke 7s both;
   }
@@ -1196,6 +1262,7 @@
   }
 
   .vorstellung .hof {
+    z-index: 2;
     width: 460px;
     height: 460px;
     border-radius: 50%;
@@ -1220,6 +1287,7 @@
   /* Zwei Bewegungen an einem Element, aber an verschiedenen Eigenschaften:
      drehen (transform) und aufklaren (opacity). Das vertraegt sich. */
   .vorstellung .strahlen {
+    z-index: 3;
     width: 300px;
     height: 300px;
     will-change: transform;
@@ -1255,6 +1323,7 @@
   }
 
   .vorstellung .blitz {
+    z-index: 4;
     width: 300px;
     height: 300px;
     border-radius: 50%;
@@ -1279,6 +1348,7 @@
      sehen war nur die Marke, und der ganze Stern fehlte, ohne dass
      irgendwo ein Fehler stand. */
   .vorstellung .zug {
+    z-index: 4;
     top: 100%;
     width: 2px;
     border-radius: 2px;
@@ -3651,7 +3721,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=135");
+    background-image: url("/kerzen.svg?v=136");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -3665,7 +3735,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=135");
+    background-image: url("/kerzen-blass.svg?v=136");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -4489,7 +4559,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=135" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=136" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -4616,7 +4686,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=135" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=136" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -4664,7 +4734,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=135" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=136" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -4683,7 +4753,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=135" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=136" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -4800,7 +4870,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=135" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=136" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -5597,6 +5667,14 @@
       schirm.appendChild(zeichen.cloneNode(true));
       schirm.appendChild(el("i", "blitz"));
       for (var i = 0; i < 4; i++) schirm.appendChild(el("i", "zug"));
+      /* Raum und Sternenfeld kommen ans ENDE, nicht an den Anfang: die
+         Regeln der Striche sprechen nth-child(5) bis (8) an, und eine Ebene
+         davor haette die ganze Reihe verschoben. Wo sie liegen, entscheidet
+         ohnehin z-index. */
+      schirm.appendChild(el("i", "raum"));
+      schirm.appendChild(el("i", "feld"));
+      schirm.appendChild(el("i", "feld zwei"));
+      schirm.appendChild(el("i", "feld drei"));
       document.body.appendChild(schirm);
       setTimeout(function () {
         if (schirm.parentNode) schirm.parentNode.removeChild(schirm);
@@ -7457,7 +7535,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=135";
+      i.src = "/icon-512.png?v=136";
     });
     return symbolBild;
   }
