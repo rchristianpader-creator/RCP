@@ -5,7 +5,7 @@
    - everything else (TradingView, /.netlify/functions/*): straight to network, never cached
    Bump CACHE on every deploy so old shells are dropped. */
 
-const CACHE = "aktien-liste-v147";
+const CACHE = "aktien-liste-v148";
 
 /* Ohne Sitzung liefert das Tor statt der Seite eine Weiterleitung zur
    Anmeldung — deshalb wird das Dokument hier nicht vorgeladen, sondern
@@ -17,13 +17,13 @@ const CACHE = "aktien-liste-v147";
    Kein Kommentar zwischen den Zeilen: die Pruefreihe liest diese Liste als
    JSON aus der Datei, und daran waere sie eben zerbrochen. */
 const PRECACHE = [
-  "/stil.css?v=147",
+  "/stil.css?v=148",
   "/manifest.webmanifest",
-  "/icon-180.png?v=147",
-  "/icon-192.png?v=147",
-  "/icon-512.png?v=147",
-  "/kerzen.svg?v=147",
-  "/kerzen-blass.svg?v=147"
+  "/icon-180.png?v=148",
+  "/icon-192.png?v=148",
+  "/icon-512.png?v=148",
+  "/kerzen.svg?v=148",
+  "/kerzen-blass.svg?v=148"
 ];
 
 /* css dazu: seit v137 liegt das Aussehen in stil.css. Sie traegt ?v=NN,
@@ -31,11 +31,12 @@ const PRECACHE = [
    "Zwischenspeicher zuerst" gedacht ist.
 
    js seit v143 fuer stern.js. Vorgeladen wird die Datei NICHT: sie wird nur
-   von der Verwaltung gebraucht, und allen anderen bei jedem neuen Stand
-   vierzehn Kilobyte in den Speicher zu legen, die niemand abruft, waere
-   verkehrt herum. Beim ersten Mal kommt sie aus dem Netz und liegt danach
-   da. Der eigene Service Worker geht hier nicht durch — sein Skript holt
-   der Browser an ihm vorbei. */
+   gebraucht, wenn es ueberhaupt etwas vorzustellen gibt, und bei jedem
+   neuen Stand vierzehn Kilobyte in den Speicher zu legen, die meistens
+   niemand abruft, waere verkehrt herum. Beim ersten Mal kommt sie aus dem
+   Netz und liegt danach da — und geholt wird sie neben dem Ladebildschirm
+   her, also lange bevor sie gebraucht wird. Der eigene Service Worker geht
+   hier nicht durch — sein Skript holt der Browser an ihm vorbei. */
 const STATIC = /\.(?:css|js|png|jpg|jpeg|svg|webp|ico|pdf|webmanifest)$/i;
 
 self.addEventListener("install", (event) => {

@@ -14,8 +14,10 @@
    dreifacher Pixeldichte, nach einem Absturz von vorher 1,3 GB). Hier ist
    es eine Leinwand von rund 5 MB plus eine Handvoll kleiner Vorlagen.
 
-   Und sie wird nur geholt, wenn es etwas vorzustellen gibt — also nur fuer
-   die Verwaltung. Fuer alle anderen kostet diese Datei kein Byte.
+   Und sie wird nur geholt, wenn es etwas vorzustellen gibt. Das war eine
+   Weile gleichbedeutend mit "nur fuer die Verwaltung"; seit Fetch.ai
+   freigegeben ist, fliegt sie einmalig fuer jeden. Wer nichts
+   vorzustellen hat, zahlt weiterhin kein Byte.
 
    WIE ES SCHNELL BLEIBT
 
