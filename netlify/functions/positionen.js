@@ -22,7 +22,7 @@
    einmal raus. */
 
 import { getStore } from "@netlify/blobs";
-import { START, NACHTRAG } from "./positionen-start.js";
+import { START, NACHTRAG, AENDERUNG } from "./positionen-start.js";
 import { keys } from "./vapid.js";
 import { kontoLesen, chefLesen, geheimnis, notieren } from "./sitzung.js";
 
@@ -238,55 +238,128 @@ function ergaenzen(liste) {
   return geaendert ? raus : null;
 }
 
-async function nachtragen(store, da) {
-  if (!Array.isArray(NACHTRAG) || !NACHTRAG.length) return da;
+/* DREI ABGLEICHE IN EINEM DURCHGANG.
 
-  const getan = new Set(Array.isArray(da.nachgetragen) ? da.nachgetragen : []);
-  const daIds = new Set(da.liste.map((p) => p && p.id));
-  const offen = NACHTRAG.filter((n) =>
-    n && n.position && n.schluessel &&
-    !getan.has(n.schluessel) && !daIds.has(n.position.id));
+   Was der Code sagt und was im Speicher steht, kann auf drei Arten
+   auseinanderliegen, und jede hat ihre eigene Regel:
 
-  /* Nichts Neues? Dann bleibt immer noch die Frage, ob an dem, was schon
-     dasteht, etwas fehlt. */
-  if (!offen.length) {
-    const gefuellt = ergaenzen(da.liste);
-    if (!gefuellt) return da;
-    const jetzt = new Date().toISOString();
-    try {
-      await store.setJSON(EINTRAG, { zeit: jetzt, von: "ergaenzt", liste: gefuellt,
-                                     nachgetragen: Array.from(getan) });
-    } catch (e) {
-      /* Nicht schreiben zu koennen heisst: beim naechsten Mal noch einmal.
-         Geliefert wird die ergaenzte Liste trotzdem schon. */
+     ANLEGEN     was es noch gar nicht gibt          (NACHTRAG)
+     UMSTELLEN   ein Wert, der sich aendern soll     (AENDERUNG)
+     ERGAENZEN   ein Feld, das nie gefuellt wurde    (ERGAENZBAR)
+
+   Sie stehen hier bewusst hintereinander in einer Funktion: geschrieben
+   wird hoechstens einmal, und ein Nachtrag, der in derselben Auslieferung
+   auch umgestellt werden soll, ist im selben Durchgang fertig.
+
+   Frueher war das eine Kette aus vorzeitigen Rueckgaben — "nichts Neues?
+   dann trotzdem noch nachsehen, ob etwas fehlt" —, und mit dem dritten
+   Abgleich waere daraus ein Knoten geworden. */
+/* Das Entscheiden, getrennt vom Schreiben und Melden.
+
+   Ausdruecklich ohne Speicher und ohne Uhr: so laesst sich der Fall
+   pruefen, um den es hier eigentlich geht — "im Speicher steht noch der
+   alte Wert" —, ohne dass man einen alten Speicher haben muesste. Ueber die
+   Schnittstelle ist er gar nicht herstellbar: die Vermerke ueberleben jedes
+   Speichern, und eine einmal angewandte Umstellung laesst sich nicht
+   zuruecknehmen. Was nicht zu pruefen ist, wird auch nicht geprueft — und
+   genau daran haette diese Freigabe still scheitern koennen. */
+export function abgleichen(vorher, getan, zeit) {
+  const vermerke = Array.from(getan);
+  let liste = vorher;
+  let neue = [];
+  let freigegeben = [];
+
+  /* ---- 1. Anlegen ---- */
+  if (Array.isArray(NACHTRAG) && NACHTRAG.length) {
+    const daIds = new Set(liste.map((p) => p && p.id));
+    const offen = NACHTRAG.filter((n) =>
+      n && n.position && n.schluessel &&
+      !getan.has(n.schluessel) && !daIds.has(n.position.id));
+    if (offen.length) {
+      /* Durch dieselbe Pruefung wie alles andere. Ein Nachtrag ist kein
+         Freifahrtschein — was hier nicht besteht, gehoert nicht in die
+         Liste. */
+      const gepruft = pruefen(offen.map((n) => n.position));
+      if (gepruft.liste.length) {
+        neue = gepruft.liste.map((p) => Object.assign({}, p, { seit: zeit }));
+        liste = liste.concat(neue);
+        for (const n of offen) vermerke.push(n.schluessel);
+      }
     }
-    return { zeit: jetzt, liste: gefuellt, nachgetragen: Array.from(getan) };
   }
 
-  /* Durch dieselbe Pruefung wie alles andere. Ein Nachtrag ist kein
-     Freifahrtschein — was hier nicht besteht, gehoert nicht in die Liste. */
-  const gepruft = pruefen(offen.map((n) => n.position));
-  if (!gepruft.liste.length) return da;
+  /* ---- 2. Umstellen ---- */
+  if (Array.isArray(AENDERUNG) && AENDERUNG.length) {
+    for (const a of AENDERUNG) {
+      if (!a || !a.schluessel || !a.id || !a.setzen) continue;
+      if (getan.has(a.schluessel) || vermerke.indexOf(a.schluessel) >= 0) continue;
+      let gefunden = false, geaendert = null;
+      liste = liste.map((p) => {
+        if (!p || p.id !== a.id) return p;
+        gefunden = true;
+        /* Steht der Wert schon so da, wird nichts angefasst — und vor allem
+           nichts gemeldet. Der Fall ist nicht ausgedacht: eine frische
+           Anlage nimmt die Position direkt aus der Quelle, und die traegt
+           den neuen Wert bereits. Ohne diesen Vergleich haette jede neue
+           Installation eine Freigabe-Meldung verschickt fuer etwas, das bei
+           ihr nie anders war. */
+        if (!Object.keys(a.setzen).some((k) => p[k] !== a.setzen[k])) return p;
+        geaendert = Object.assign({}, p, a.setzen);
+        return geaendert;
+      });
+      /* Kein Vermerk, wenn die Position (noch) fehlt: der Eintrag wartet
+         darauf, dass es sie gibt. */
+      if (!gefunden) continue;
+      vermerke.push(a.schluessel);
+      if (geaendert && a.melden) freigegeben.push(geaendert);
+    }
+  }
 
+  /* ---- 3. Ergaenzen ---- */
+  const gefuellt = ergaenzen(liste);
+  if (gefuellt) liste = gefuellt;
+
+  return {
+    liste: liste,
+    vermerke: vermerke,
+    neue: neue,
+    freigegeben: freigegeben,
+    /* Ob ueberhaupt etwas zu tun war. Ein Vermerk allein zaehlt mit: er
+       muss geschrieben werden, sonst wird beim naechsten Lesen dieselbe
+       Umstellung noch einmal geprueft. */
+    geaendert: !!(neue.length || freigegeben.length || gefuellt ||
+                  vermerke.length !== getan.size)
+  };
+}
+
+async function nachtragen(store, da) {
+  const getan = new Set(Array.isArray(da.nachgetragen) ? da.nachgetragen : []);
   const zeit = new Date().toISOString();
-  const neue = gepruft.liste.map((p) => Object.assign({}, p, { seit: zeit }));
-  const liste = ergaenzen(da.liste.concat(neue)) || da.liste.concat(neue);
-  const vermerke = Array.from(getan).concat(offen.map((n) => n.schluessel));
+  const r = abgleichen(da.liste, getan, zeit);
+  const liste = r.liste, vermerke = r.vermerke;
+  const neue = r.neue, freigegeben = r.freigegeben;
+  if (!r.geaendert) return da;
 
   try {
-    await store.setJSON(EINTRAG, { zeit: zeit, von: "nachtrag", liste: liste,
+    await store.setJSON(EINTRAG, { zeit: zeit, von: "abgleich", liste: liste,
                                    nachgetragen: vermerke });
   } catch (e) {
     /* Nicht schreiben zu koennen heisst: beim naechsten Mal noch einmal
-       versuchen. Geliefert wird trotzdem schon die ergaenzte Liste. */
+       versuchen. Geliefert wird trotzdem schon die abgeglichene Liste —
+       gemeldet aber nichts, sonst ginge die Meldung bei jedem Aufruf
+       wieder raus, solange das Schreiben klemmt. */
     return { zeit: zeit, liste: liste, nachgetragen: vermerke };
   }
 
   /* Gemeldet wird nur, was auch alle sehen duerfen. Eine Meldung geht an
      jedes Geraet und nennt das Kuerzel — eine Position "nur fuer die
      Verwaltung" waere damit angekuendigt, bevor sie jemand sehen kann.
-     Bleibt nichts uebrig, bleibt es still. */
-  const laut = neue.filter((p) => !p.nurchef);
+
+     Eine FREIGEGEBENE Position gehoert dagegen ausdruecklich dazu: fuer
+     alle anderen ist sie in genau diesem Augenblick neu. Das war der ganze
+     Grund, warum sie vorher still blieb. */
+  const laut = neue.filter((p) => !p.nurchef)
+    .concat(freigegeben.filter((p) => !p.nurchef));
   if (laut.length) {
     try {
       await melden("Neu in der Liste", kuerzel(laut), laut[0].id, "neu", zeichen(laut));
@@ -328,7 +401,11 @@ export async function lesen(store) {
   const zeit = new Date().toISOString();
   const roh = START.concat(NACHTRAG.map((n) => n && n.position).filter(Boolean));
   const start = (pruefen(roh).liste || []).map((p) => Object.assign({}, p, { seit: zeit }));
-  const vermerkt = NACHTRAG.map((n) => n && n.schluessel).filter(Boolean);
+  /* Die Schluessel der Umstellungen gehoeren mit hinein. Die Quelle traegt
+     ihr Ergebnis ja schon; ohne Vermerk wuerde beim naechsten Lesen jede
+     Umstellung noch einmal geprueft, obwohl an ihr nichts mehr zu tun ist. */
+  const vermerkt = NACHTRAG.map((n) => n && n.schluessel).filter(Boolean)
+    .concat((AENDERUNG || []).map((a) => a && a.schluessel).filter(Boolean));
   try {
     await store.setJSON(EINTRAG, { zeit: zeit, von: "start", liste: start,
                                    nachgetragen: vermerkt });

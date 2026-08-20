@@ -280,15 +280,17 @@ export const NACHTRAG = [
       "badge": "FETUSD",
       "chip": "FET",
       "neu": true,
-      /* NUR FUER DIE VERWALTUNG.
+      /* VEROEFFENTLICHT. Stand hier eine Weile auf true — "nur fuer die
+         Verwaltung": sichtbar in der Liste des Chefs und in der Verwaltung,
+         sonst nirgends, nicht im Statusabruf, ohne Meldung beim Nachtragen
+         und ohne Zonenwache. Eine Zonenmeldung geht an jedes Geraet und
+         nennt das Kuerzel; das waere die Position gewesen, nur eben als
+         Mitteilung.
 
-         Sie steht in der Liste des Chefs und in der Verwaltung, sonst
-         nirgends: nicht bei den anderen Zugaengen, nicht im Statusabruf,
-         und sie loest keine Meldung aus — weder beim Nachtragen noch, wenn
-         der Kurs ihre Zone erreicht. Eine Zonenmeldung geht an jedes Geraet
-         und nennt das Kuerzel; das waere die Position, nur eben als
-         Mitteilung. */
-      "nurchef": true,
+         Hier steht es fuer eine FRISCHE Anlage. Speicher, in denen die
+         Position schon mit true steht, stellt der Eintrag in AENDERUNG
+         weiter unten um — die Quelle allein erreicht sie nicht. */
+      "nurchef": false,
       "branche": "Kryptowährung",
       /* Aus dem Wochenchart abgelesen: die Kaufzone ist das graue Band
          zwischen 50,0 % (0,08014477) und 61,8 % (0,04562110). Fuenf
@@ -303,6 +305,40 @@ export const NACHTRAG = [
       "keys": "Fetch.ai|FET",
       "fibo": "https://de.tradingview.com/chart/DWzdvP7E/"
     }
+  }
+];
+
+/* EINMALIGE AENDERUNGEN an Positionen, die schon stehen.
+
+   NACHTRAG kann nur ANLEGEN. Etwas an einer Position, die es schon gibt,
+   war aus dem Code heraus nicht zu erreichen: ergaenzen() fuellt nur, was
+   leer ist, und tut das mit Absicht — es darf eine Aenderung aus der
+   Verwaltung nicht zurueckdrehen. Fuer einen Schalter wie "nur fuer die
+   Verwaltung" reicht das nicht; dort ist false ein Wert und keine Luecke.
+
+   Diese Liste macht denselben Handgriff wie NACHTRAG, nur an Bestehendem:
+   ein Schluessel, einmal angewandt, dann vermerkt. Sie ist bewusst schmal —
+   was hier steht, ueberschreibt, und ueberschreiben ist genau das, was
+   ergaenzen() nicht darf.
+
+   Trifft der Eintrag auf keine Position, wird NICHTS vermerkt: er wartet,
+   bis es sie gibt. Sonst waere ein Nachtrag, der eine Zeile spaeter
+   umgestellt werden soll, still verpufft.
+
+   melden: true schickt danach dieselbe Meldung wie bei einer neuen
+   Position. Fuer eine Freigabe ist das richtig — fuer alle anderen ist die
+   Position ja wirklich neu. */
+export const AENDERUNG = [
+  {
+    /* Fetch.ai war "nur fuer die Verwaltung" — noch nicht veroeffentlicht.
+       Jetzt fuer alle. Damit faellt auch alles andere, was an dem Schalter
+       hing: der Kurs im Statusabruf, die Zonenwache, und die Vorstellung
+       beim Start (die sucht eine Position, die nurchef UND neu ist — ab
+       jetzt findet sie keine mehr). */
+    "schluessel": "fet-frei-2026-08",
+    "id": "fet",
+    "setzen": { "nurchef": false },
+    "melden": true
   }
 ];
 
