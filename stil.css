@@ -69,6 +69,16 @@
     --r-chip: 11px;    /* die kleinen Marken in der Leiste */
     --r-marke: 6px;    /* Abzeichen, Punkte, Zaehler */
 
+    /* DIE FARBE DER GEZEICHNETEN MARKE — an EINER Stelle.
+
+       Sie kam zweimal vor: einmal hier als Verlauf der Scheibe, einmal in
+       stern.js, wo die fliegende Marke gemalt wird. Zwei Quellen fuer
+       dieselbe Farbe halten genau so lange, bis jemand eine davon anfasst.
+       stern.js liest die drei Werte jetzt von hier. */
+    --marke-hell: #3c2fa8;
+    --marke-mitte: #241b78;
+    --marke-tief: #141051;
+
     /* GLAS — vier Teile machen aus Milchglas Glas:
 
          Frost    das Verwischen dahinter, mit hochgezogener Saettigung;
@@ -1077,14 +1087,26 @@
      auftritt: heller Raster auf dunklem Grund. Nicht an .card-head
      gebunden — dasselbe Stueck fliegt bei der Vorstellung ueber die Liste,
      und dort gibt es keinen Kartenkopf mehr. */
-  .logo-marke {
+  /* ZWEI KLASSEN, NICHT EINE — und das ist der ganze Fehler gewesen.
+
+     Hier stand ".logo-marke", also EINE Klasse. Weiter oben steht
+     ".card-head .logo" mit dem Glasverlauf, also ZWEI. Damit gewann in der
+     Karte das Glas, und die Marke sass auf einer grauen Scheibe statt auf
+     ihrem Indigo — gemeldet als "das Symbol ist schwarzweiss statt das
+     originale". Im Flug fiel es nicht auf, weil dort die Scheibe gemalt
+     und nicht gestylt wird; genau deshalb sahen die beiden verschieden aus.
+
+     ".logo.logo-marke" hat ebenfalls zwei Klassen und steht spaeter — es
+     gewinnt, und zwar ohne !important. */
+  .logo.logo-marke {
     /* Mittig aus eigener Kraft. Die Zentrierung stand nur an
        .card-head .logo-zeichen — beim Flug ueber die Liste gibt es keinen
        Kartenkopf mehr, und der Raster sass in der Ecke des Kreises. */
     display: flex;
     align-items: center;
     justify-content: center;
-    background: radial-gradient(circle at 32% 26%, #3c2fa8 0%, #241b78 46%, #141051 100%);
+    background: radial-gradient(circle at 32% 26%,
+      var(--marke-hell) 0%, var(--marke-mitte) 46%, var(--marke-tief) 100%);
     border-radius: 50%;
     border: 1px solid rgba(255, 255, 255, 0.22);
     box-shadow: var(--glas-kante);
@@ -3484,7 +3506,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=144");
+    background-image: url("/kerzen.svg?v=145");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -3498,7 +3520,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=144");
+    background-image: url("/kerzen-blass.svg?v=145");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {

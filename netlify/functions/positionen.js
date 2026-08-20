@@ -188,6 +188,56 @@ async function vermerke(store) {
    Gemeldet wird wie bei jeder neuen Position auch. Der Vermerk wird VOR der
    Meldung gesetzt: lieber eine Meldung, die einmal ausfaellt, als eine, die
    bei jedem Aufruf noch einmal rausgeht. */
+/* NACHREICHEN, WAS SPAETER DAZUKAM.
+
+   Der Fall, der das noetig gemacht hat: Fetch.ai ging ohne Analyse-Link
+   raus ("zu dieser Position kam ein Bild, kein Link"). Einen Commit spaeter
+   kam der Link in die Quelle — aber die Position stand da schon im
+   Speicher, und nachtragen() fasst Vorhandenes nicht an. Der Knopf fehlte
+   also auf Dauer, obwohl die Adresse im Code stand. Gemeldet als "Link zur
+   Analyse und Knopf fehlt".
+
+   Das ist kein Einzelfall, sondern die Bauart: ein Nachtrag wirkt genau
+   einmal, und jede spaetere Verbesserung daran ist unsichtbar.
+
+   Gefuellt wird deshalb, was LEER ist — nie etwas ueberschrieben. Damit
+   kann diese Funktion eine Aenderung aus der Verwaltung nicht zurueckdrehen;
+   sie kann nur nachreichen, was nie dastand. Und sie braucht keinen
+   Vermerk: ist das Feld einmal gefuellt, aendert der naechste Durchlauf
+   nichts mehr und es wird auch nicht geschrieben.
+
+   Nur Felder, die von Natur aus fehlen duerfen — Adressen und Suchhilfen.
+   Nicht Name, Zone oder Ziel: dort hiesse "leer" womoeglich "bewusst
+   geleert", und eine Zahl zurueckzuholen, die jemand entfernt hat, waere
+   das Gegenteil von hilfreich. */
+const ERGAENZBAR = ["fibo", "fn", "tv", "yahoo", "frage", "keys", "logo"];
+
+function leer(x) {
+  return x === undefined || x === null || String(x).trim() === "";
+}
+
+function ergaenzen(liste) {
+  const quelle = new Map();
+  for (const n of NACHTRAG) {
+    if (n && n.position && n.position.id) quelle.set(n.position.id, n.position);
+  }
+  let geaendert = false;
+  const raus = liste.map((p) => {
+    const q = p && quelle.get(p.id);
+    if (!q) return p;
+    let neu = null;
+    for (const feld of ERGAENZBAR) {
+      if (!leer(p[feld]) || leer(q[feld])) continue;
+      neu = neu || Object.assign({}, p);
+      neu[feld] = q[feld];
+    }
+    if (!neu) return p;
+    geaendert = true;
+    return neu;
+  });
+  return geaendert ? raus : null;
+}
+
 async function nachtragen(store, da) {
   if (!Array.isArray(NACHTRAG) || !NACHTRAG.length) return da;
 
@@ -196,7 +246,22 @@ async function nachtragen(store, da) {
   const offen = NACHTRAG.filter((n) =>
     n && n.position && n.schluessel &&
     !getan.has(n.schluessel) && !daIds.has(n.position.id));
-  if (!offen.length) return da;
+
+  /* Nichts Neues? Dann bleibt immer noch die Frage, ob an dem, was schon
+     dasteht, etwas fehlt. */
+  if (!offen.length) {
+    const gefuellt = ergaenzen(da.liste);
+    if (!gefuellt) return da;
+    const jetzt = new Date().toISOString();
+    try {
+      await store.setJSON(EINTRAG, { zeit: jetzt, von: "ergaenzt", liste: gefuellt,
+                                     nachgetragen: Array.from(getan) });
+    } catch (e) {
+      /* Nicht schreiben zu koennen heisst: beim naechsten Mal noch einmal.
+         Geliefert wird die ergaenzte Liste trotzdem schon. */
+    }
+    return { zeit: jetzt, liste: gefuellt, nachgetragen: Array.from(getan) };
+  }
 
   /* Durch dieselbe Pruefung wie alles andere. Ein Nachtrag ist kein
      Freifahrtschein — was hier nicht besteht, gehoert nicht in die Liste. */
@@ -205,7 +270,7 @@ async function nachtragen(store, da) {
 
   const zeit = new Date().toISOString();
   const neue = gepruft.liste.map((p) => Object.assign({}, p, { seit: zeit }));
-  const liste = da.liste.concat(neue);
+  const liste = ergaenzen(da.liste.concat(neue)) || da.liste.concat(neue);
   const vermerke = Array.from(getan).concat(offen.map((n) => n.schluessel));
 
   try {

@@ -285,14 +285,19 @@
      Dazu, was eine Zeichnung von einem Koerper unterscheidet: ein Verlauf
      mit einer Lichtquelle oben links, ein Glanzpunkt darauf, ein heller
      Saum an der Oberkante und ein dunkler an der Unterkante. */
-  function markeTafel(gr, bild) {
+  function markeTafel(gr, bild, farben) {
     var c = tafel(gr, gr), x = c.getContext("2d");
     var m = gr / 2, r = m - gr * 0.02;
 
+    /* Die drei Werte kommen aus stil.css, nicht von hier. Sie standen
+       einmal an beiden Stellen, und prompt waren sie verschieden: in der
+       Karte ein Indigo, im Flug ein helleres. Wer die Marke umfaerbt, soll
+       eine Zeile aendern muessen, nicht zwei — und nicht raten, wo die
+       zweite steht. */
     var v = x.createRadialGradient(m - r * 0.36, m - r * 0.48, r * 0.05, m, m, r);
-    v.addColorStop(0, "#5a49da");
-    v.addColorStop(0.42, "#2c2189");
-    v.addColorStop(1, "#0f0c40");
+    v.addColorStop(0, (farben && farben[0]) || "#3c2fa8");
+    v.addColorStop(0.46, (farben && farben[1]) || "#241b78");
+    v.addColorStop(1, (farben && farben[2]) || "#141051");
     x.beginPath(); x.arc(m, m, r, 0, 6.2832);
     x.fillStyle = v; x.fill();
 
@@ -479,7 +484,7 @@
 
     /* Die Marke: erst die Scheibe ohne Zeichnung, damit sofort etwas da ist;
        sobald das Bild geladen ist, wird die Vorlage einmal neu gemalt. */
-    var MARKE = markeTafel(256, null);
+    var MARKE = markeTafel(256, null, wahl.farben);
     var GLYPH = glyphTafel(256, null);
     if (wahl.zeichen) {
       /* NICHT "bild" nennen. So hiess es zuerst, und weil var fuer die ganze
@@ -495,7 +500,7 @@
       window.rcpSternMarke = "wartet";
       var vorlage = new Image();
       vorlage.onload = function () {
-        MARKE = markeTafel(256, vorlage);
+        MARKE = markeTafel(256, vorlage, wahl.farben);
         GLYPH = glyphTafel(256, vorlage);
         window.rcpSternMarke = "da";
       };
