@@ -5,7 +5,7 @@
    - everything else (TradingView, /.netlify/functions/*): straight to network, never cached
    Bump CACHE on every deploy so old shells are dropped. */
 
-const CACHE = "aktien-liste-v165";
+const CACHE = "aktien-liste-v166";
 
 /* Ohne Sitzung liefert das Tor statt der Seite eine Weiterleitung zur
    Anmeldung — deshalb wird das Dokument hier nicht vorgeladen, sondern
@@ -17,13 +17,13 @@ const CACHE = "aktien-liste-v165";
    Kein Kommentar zwischen den Zeilen: die Pruefreihe liest diese Liste als
    JSON aus der Datei, und daran waere sie eben zerbrochen. */
 const PRECACHE = [
-  "/stil.css?v=165",
+  "/stil.css?v=166",
   "/manifest.webmanifest",
-  "/icon-180.png?v=165",
-  "/icon-192.png?v=165",
-  "/icon-512.png?v=165",
-  "/kerzen.svg?v=165",
-  "/kerzen-blass.svg?v=165"
+  "/icon-180.png?v=166",
+  "/icon-192.png?v=166",
+  "/icon-512.png?v=166",
+  "/kerzen.svg?v=166",
+  "/kerzen-blass.svg?v=166"
 ];
 
 /* css dazu: seit v137 liegt das Aussehen in stil.css. Sie traegt ?v=NN,

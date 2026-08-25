@@ -120,83 +120,13 @@
     return c;
   }
 
-  /* Ein unscharfer Lichtpunkt nahe der Linse: eine Scheibe mit hellerem
-     Rand — die Form der Blende, nicht eine weiche Wolke. */
-  function bokeh(gr, farbe) {
-    var c = tafel(gr, gr), x = c.getContext("2d");
-    var m = gr / 2, r = m * 0.82;
-    var v = x.createRadialGradient(m, m, 0, m, m, r);
-    v.addColorStop(0, "rgba(" + farbe + ",0.32)");
-    v.addColorStop(0.72, "rgba(" + farbe + ",0.38)");
-    v.addColorStop(0.9, "rgba(" + farbe + ",0.8)");
-    v.addColorStop(1, "rgba(" + farbe + ",0)");
-    x.fillStyle = v;
-    x.beginPath(); x.arc(m, m, r, 0, 6.2832); x.fill();
-    return c;
-  }
-
-  /* Der Himmel: Gas in gezogenen Faeden statt runder Watte, dunkle
-     Staubbahnen hineingeschnitten, feiner Staub darueber. Wird in halber
-     Aufloesung benutzt — Nebel IST unscharf.
-
-     DIE FARBEN DER APP, woertlich: der Grund jeder Seite ist --bg
-     #0a0d0c, und darauf liegen VIER Lichtfelder — Stahlblau (38,74,96),
-     Tuerkis (28,88,78), Bronze (112,82,52) und Flieder (64,44,78), so
-     stehen sie in stil.css. Je Ton die Originalstufe und eine
-     aufgehellte MIT GLEICHEM VERHAELTNIS der Kanaele — heller duerfen
-     sie werden, anders nicht. */
-  function himmel(gr, wuerfel) {
-    var c = tafel(gr, gr), x = c.getContext("2d");
-    x.fillStyle = "#0a0d0c";
-    x.fillRect(0, 0, gr, gr);
-    var toene = [
-      [38, 74, 96], [52, 100, 130],
-      [28, 88, 78], [38, 118, 105],
-      [112, 82, 52], [148, 110, 70],
-      [64, 44, 78], [86, 60, 105]
-    ];
-    var richtung = 0.5;
-    x.globalCompositeOperation = "lighter";
-    for (var i = 0; i < 96; i++) {
-      var t = toene[(wuerfel() * toene.length) | 0];
-      var r = gr * (0.03 + wuerfel() * wuerfel() * 0.26);
-      var px = wuerfel() * gr, py = wuerfel() * gr;
-      var a = 0.05 + wuerfel() * 0.12;
-      var lang = 1.6 + wuerfel() * wuerfel() * 3.4;
-      x.save();
-      x.translate(px, py);
-      x.rotate(richtung + (wuerfel() - 0.5) * 1.5);
-      x.scale(lang, 1 / Math.sqrt(lang));
-      var v = x.createRadialGradient(0, 0, 0, 0, 0, r);
-      v.addColorStop(0, "rgba(" + t[0] + "," + t[1] + "," + t[2] + "," + a.toFixed(3) + ")");
-      v.addColorStop(0.55, "rgba(" + t[0] + "," + t[1] + "," + t[2] + "," + (a * 0.35).toFixed(3) + ")");
-      v.addColorStop(1, "rgba(0,0,0,0)");
-      x.fillStyle = v;
-      x.fillRect(-r, -r, r * 2, r * 2);
-      x.restore();
-    }
-    x.globalCompositeOperation = "source-over";
-    for (var d = 0; d < 40; d++) {
-      var rr = gr * (0.04 + wuerfel() * wuerfel() * 0.22);
-      var dx = wuerfel() * gr, dy = wuerfel() * gr;
-      var da = 0.16 + wuerfel() * 0.3;
-      var dv = x.createRadialGradient(dx, dy, 0, dx, dy, rr);
-      dv.addColorStop(0, "rgba(6,9,8," + da.toFixed(3) + ")");
-      dv.addColorStop(1, "rgba(6,9,8,0)");
-      x.fillStyle = dv;
-      x.fillRect(dx - rr, dy - rr, rr * 2, rr * 2);
-    }
-    x.globalCompositeOperation = "lighter";
-    for (var s = 0; s < 150; s++) {
-      var sr = 0.8 + wuerfel() * wuerfel() * 2.2;
-      var sa = 0.08 + wuerfel() * 0.2;
-      x.fillStyle = "rgba(" + (196 + ((wuerfel() * 50) | 0)) + ",224,214," + sa.toFixed(3) + ")";
-      x.beginPath();
-      x.arc(wuerfel() * gr, wuerfel() * gr, sr, 0, 6.2832);
-      x.fill();
-    }
-    return c;
-  }
+  /* Hier standen bokeh() und himmel(). Beide sind fort: der Nebel ist
+     jetzt die Liquid-Ebene aus CSS, und der Linsenstaub, der bokeh()
+     brauchte, ist gestrichen (gemessen 15 bis 31 Prozent der
+     Szenenkosten fuer eine Deckkraft von 0,022 — der teuerste
+     unsichtbare Posten, den die Suche gefunden hat). Mit ihnen faellt
+     auch ihr Backen im Konstruktor weg, das bei sechsfacher Bremse
+     allein 370 ms schwarzen Schirm gekostet hat. */
 
   function korn(gr, wuerfel) {
     var c = tafel(gr, gr), x = c.getContext("2d");
@@ -208,6 +138,98 @@
     }
     x.putImageData(bild, 0, 0);
     return c;
+  }
+
+  /* ---- DIE EBENEN, UND WARUM SIE NICHT AUF DER LEINWAND LIEGEN ----
+
+     Gemessen (Malkosten je Abschnitt, Ladebildschirm, Pixeldichte 3):
+     die zwei ganzflaechigen Lagen — der Nebel und die Nachbereitung aus
+     Randabdunklung und Korn — kosteten zusammen 52 % der Szenenkosten.
+     Beide sind UNBEWEGT und wurden trotzdem sechzigmal je Sekunde neu
+     gerastert, weil sie auf der Leinwand lagen. Das ist reine
+     Fuellarbeit auf dem Hauptfaden, und sie ist der Grund fuer das
+     Ruckeln.
+
+     Jetzt liegen sie als eigene Ebenen um die Leinwand herum: der
+     Kompositor bewegt sie auf der Grafikkarte, der Hauptfaden zahlt
+     nichts. Und weil sie ohnehin neu gebaut werden mussten, sprechen
+     sie ab jetzt die Sprache der App:
+
+       LIQUID — dieselben drei driftenden Lichtfelder wie unter dem
+       gewoehnlichen Ladebildschirm (.liquidfeld eins/zwei/drei in
+       stil.css), in derselben helleren Palette (74,138,186 Stahlblau /
+       196,138,76 Bronze / 126,90,190 Flieder) und mit derselben
+       Bewegung: gross herein, quer durchs Bild, zur Ruhe.
+       Die kosmische Fassung hatte das ausgeblendet — der Auftakt sah
+       darum nach einer fremden App aus.
+
+       ZUG — der Lichtzug, der schraeg ueber den ganzen Schirm faehrt.
+       Das ist die Signatur von fluessigem Glas: Licht, das darueber
+       streicht. Zweimal, wie im Original.
+
+       FLUT — der Puls aus der Mitte, der nach aussen laeuft und
+       ausklingt: die Bewegung, die man von Fluessigkeit erwartet, wenn
+       etwas hineinfaellt.
+
+       GLAS — darueber Randabdunklung und Korn. Das Korn wandert per
+       transform, nicht per Neuzeichnung.
+
+     Der Anstrich wird EINMAL je Seite eingehaengt, damit kosmos.js
+     ohne Zutun der Seiten funktioniert (die Verwaltung hat ihr eigenes
+     Regelwerk, die Liste ihres — eine gemeinsame dritte Stelle waere
+     wieder eine Kopplung, an der etwas auseinanderlaeuft). */
+  var ANSTRICH_DA = false;
+  function anstrichEinhaengen() {
+    if (ANSTRICH_DA || document.getElementById("kosmosAnstrich")) return;
+    ANSTRICH_DA = true;
+    var s = document.createElement("style");
+    s.id = "kosmosAnstrich";
+    s.textContent = [
+      ".kosmosliquid,.kosmosglas{position:absolute;inset:0;pointer-events:none;overflow:hidden}",
+      ".kosmosliquid{z-index:0;background:#0a0d0c}",
+      ".kosmosleinwand{position:absolute;inset:0;z-index:1;display:block;width:100%;height:100%}",
+      ".kosmosglas{z-index:2}",
+      ".kosmosfeld{position:absolute;top:50%;left:50%;width:150%;aspect-ratio:1;",
+      "margin:-75% 0 0 -75%;border-radius:50%;will-change:transform}",
+      ".kosmosfeld.eins{background:radial-gradient(closest-side,",
+      "rgba(74,138,186,.27) 0%,rgba(74,138,186,.1) 44%,rgba(74,138,186,0) 72%);",
+      "animation:kosmosFeldEins 7s cubic-bezier(.32,.08,.18,1) both}",
+      ".kosmosfeld.zwei{background:radial-gradient(closest-side,",
+      "rgba(196,138,76,.24) 0%,rgba(196,138,76,.09) 44%,rgba(196,138,76,0) 72%);",
+      "animation:kosmosFeldZwei 7s cubic-bezier(.32,.08,.18,1) both}",
+      ".kosmosfeld.drei{background:radial-gradient(closest-side,",
+      "rgba(126,90,190,.25) 0%,rgba(126,90,190,.1) 44%,rgba(126,90,190,0) 72%);",
+      "animation:kosmosFeldDrei 7s cubic-bezier(.32,.08,.18,1) both}",
+      "@keyframes kosmosFeldEins{0%{transform:translate3d(-34%,-26%,0) scale(.62)}",
+      "55%{transform:translate3d(30%,26%,0) scale(1.34)}100%{transform:none}}",
+      "@keyframes kosmosFeldZwei{0%{transform:translate3d(38%,30%,0) scale(.58)}",
+      "55%{transform:translate3d(-28%,-22%,0) scale(1.28)}100%{transform:none}}",
+      "@keyframes kosmosFeldDrei{0%{transform:translate3d(-8%,40%,0) scale(1.42)}",
+      "55%{transform:translate3d(22%,-30%,0) scale(.66)}100%{transform:none}}",
+      ".kosmoszug{position:absolute;top:-40%;bottom:-40%;left:-70%;width:55%;",
+      "background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.04) 26%,",
+      "rgba(255,255,255,.09) 44%,rgba(255,255,255,.17) 50%,rgba(255,255,255,.09) 56%,",
+      "rgba(255,255,255,.04) 74%,rgba(255,255,255,0) 100%);will-change:transform;",
+      "animation:kosmosZug 2.6s cubic-bezier(.5,0,.3,1) .3s 2 both}",
+      "@keyframes kosmosZug{from{transform:rotate(14deg) translate3d(0,0,0)}",
+      "to{transform:rotate(14deg) translate3d(430%,0,0)}}",
+      ".kosmosflut{position:absolute;top:50%;left:50%;width:150%;aspect-ratio:1;",
+      "margin:-75% 0 0 -75%;border-radius:50%;will-change:transform,opacity;",
+      "background:radial-gradient(closest-side,rgba(255,255,255,0) 52%,",
+      "rgba(214,232,255,.13) 68%,rgba(214,232,255,.04) 82%,rgba(214,232,255,0) 100%);",
+      "animation:kosmosFlut 3.2s cubic-bezier(.22,.7,.2,1) .2s 2 both}",
+      "@keyframes kosmosFlut{0%{transform:scale(.12);opacity:0}18%{opacity:1}",
+      "100%{transform:scale(1.5);opacity:0}}",
+      ".kosmosrand{position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 46%,",
+      "rgba(0,0,0,0) 30%,rgba(0,0,0,.3) 62%,rgba(2,4,4,.82) 100%)}",
+      ".kosmoskorn{position:absolute;inset:-8%;opacity:.09;will-change:transform;",
+      "animation:kosmosKorn .5s steps(1) infinite}",
+      "@keyframes kosmosKorn{0%{transform:translate3d(0,0,0)}33%{transform:translate3d(-11px,7px,0)}",
+      "66%{transform:translate3d(6px,-9px,0)}100%{transform:translate3d(0,0,0)}}",
+      "@media (prefers-reduced-motion: reduce){.kosmosfeld,.kosmoszug,.kosmosflut,",
+      ".kosmoskorn{animation:none}.kosmoszug,.kosmosflut{opacity:0}}"
+    ].join("");
+    document.head.appendChild(s);
   }
 
   /* Ein eigener Zufall mit festem Anfang: derselbe Himmel bei jedem
@@ -606,26 +628,41 @@
       if (wahl && typeof wahl.fertig === "function") setTimeout(wahl.fertig, 0);
       return { ende: function () {}, planeten: function () {}, abbrechen: function () {} };
     }
+    anstrichEinhaengen();
+    /* Unten das Liquid, in der Mitte die Leinwand, oben das Glas. */
+    var unten = document.createElement("div");
+    unten.className = "kosmosliquid";
+    unten.setAttribute("aria-hidden", "true");
+    unten.innerHTML = '<i class="kosmosfeld eins"></i><i class="kosmosfeld zwei"></i>' +
+      '<i class="kosmosfeld drei"></i><i class="kosmosflut"></i>';
+    huelle.appendChild(unten);
+
     leinwand.className = "kosmosleinwand";
     leinwand.setAttribute("aria-hidden", "true");
     huelle.appendChild(leinwand);
+
+    var oben = document.createElement("div");
+    oben.className = "kosmosglas";
+    oben.setAttribute("aria-hidden", "true");
+    oben.innerHTML = '<i class="kosmoszug"></i><i class="kosmoskorn"></i><i class="kosmosrand"></i>';
+    huelle.appendChild(oben);
 
     /* Zwei Deckel uebereinander: die Pixeldichte (hoechstens 2, die
        Sparschaltung darf sie auf 1 druecken) UND die Gesamtflaeche der
        Leinwand — auf einem 4K-Fenster darf die Dichte auch unter 1
        fallen, weich ist bei einem Auftakt kein Fehler. */
-    /* 1,7 statt 2: "es ruckelt". Der Flug malt grosse Flaechen — nahe
-       Scheiben, Hoefe, Nebel —, und deren Kosten wachsen mit dem QUADRAT
-       der Dichte. 1,7 ist auf einem Telefon von 2 nicht zu
-       unterscheiden (bewegtes Bild, Korn darueber), kostet aber nur
-       72 Prozent der Punkte. */
-    var dichteDeckel = 1.7;
+    /* 1,5 — und zwar aus zwei Gruenden zugleich. Erstens die Kosten:
+       Fuellarbeit waechst mit dem QUADRAT der Dichte, und gemessen
+       haengen 87 Prozent der Bildzeit an der Flaeche. Zweitens die
+       Schaerfe: ein Telefon mit Pixeldichte 3 zieht 1,5 mit dem glatten
+       Faktor 2 hoch, 1,7 dagegen mit dem krummen 1,765 — das ist teurer
+       UND unschaerfer. Ein krummer Faktor war nie eine gute Wahl. */
+    var dichteDeckel = 1.5;
     var DPR = 1;
     var B = 0, H = 0, MX = 0, MY = 0, F = 700;
-    var grund = null, gg = null, nachher = [];
+    var gemessen = false;
 
     var wuerfel = wuerfelWerk(20260825);
-    var HIMMEL = himmel(512, wuerfel);
     var KORN = korn(128, wuerfel);
     var GLUT = glut(256, [
       [0, "rgba(228,242,238,0.7)"],
@@ -636,8 +673,6 @@
     ]);
     var SPINNE = spinne(160);
     var STREIF = streifen(512, 48, "rgba(150,214,196,0.5)");
-    var BOKEH = bokeh(96, "150,206,190");
-    var BOKEHWARM = bokeh(96, "255,208,158");
     var BLITZ = glut(256, [
       [0, "rgba(255,255,255,0.95)"],
       [0.1, "rgba(228,244,238,0.6)"],
@@ -660,14 +695,20 @@
     function messen(erzwungen) {
       var nb = huelle.clientWidth || window.innerWidth;
       var nh = huelle.clientHeight || window.innerHeight;
-      /* Nur bei echter Aenderung — der Browser feuert resize in Serien,
-         und jeder Durchlauf hier baut die Grosspuffer neu. Erzwungen wird
-         nur von der Sparschaltung, die dieselbe Groesse mit neuer Dichte
-         will. */
-      if (!erzwungen && nb === B && nh === H && grund) return;
+      /* Nur bei echter Aenderung — der Browser feuert resize in Serien.
+         WICHTIG: der Horcher unten ruft messen() OHNE Argument auf. Stand
+         messen direkt am Horcher, bekam es das Ereignisobjekt als
+         "erzwungen" — immer wahr —, und die Abkuerzung war ausgehebelt:
+         jedes einzelne resize baute alles neu, gemessen 12,5 ms je
+         Ereignis bei vierfacher Bremse, in Serien von fuenf. */
+      if (!erzwungen && nb === B && nh === H && gemessen) return;
       B = nb; H = nh;
+      gemessen = true;
       DPR = Math.min(window.devicePixelRatio || 1, dichteDeckel);
-      var deckel = Math.sqrt(4200000 / (B * H));
+      /* Der Flaechendeckel greift jetzt frueher (2,4 statt 4,2 Millionen):
+         auf einem gewoehnlichen Fenster am Schreibtisch kostete dieselbe
+         Szene sonst das Dreifache an Fuellarbeit. */
+      var deckel = Math.sqrt(2400000 / (B * H));
       if (DPR > deckel) DPR = Math.max(0.5, deckel);
       leinwand.width = Math.round(B * DPR);
       leinwand.height = Math.round(H * DPR);
@@ -679,31 +720,15 @@
          Schirmgroesse unabhaengig — ein Drehen des Geraets aendert den
          Blick, nicht die Welt. */
       F = Math.max(B, H) * 0.78;
-      grund = tafel(Math.round(B * DPR / 2), Math.round(H * DPR / 2));
-      gg = grund.getContext("2d");
-      nachher = [];
-      var teiler = Math.max(2, Math.sqrt((B * H) / 700000));
-      for (var n = 0; n < 3; n++) {
-        var t = tafel(Math.round(B / teiler), Math.round(H / teiler));
-        var sx = t.getContext("2d");
-        var tw = t.width, th = t.height;
-        var sv = sx.createRadialGradient(tw / 2, th / 2, Math.min(tw, th) * 0.16,
-                                         tw / 2, th / 2, Math.sqrt(tw * tw + th * th) * 0.62);
-        sv.addColorStop(0, "rgba(0,0,0,0)");
-        sv.addColorStop(0.62, "rgba(0,0,0,0.3)");
-        sv.addColorStop(1, "rgba(2,4,4,0.74)");
-        sx.fillStyle = sv;
-        sx.fillRect(0, 0, tw, th);
-        try {
-          sx.globalAlpha = 0.09;
-          sx.translate(n * 41, n * 27);
-          sx.fillStyle = sx.createPattern(KORN, "repeat");
-          sx.fillRect(-n * 41, -n * 27, tw, th);
-        } catch (e) {}
-        nachher.push(t);
-      }
     }
     messen();
+    /* Das Korn als Bild fuer die Glasebene — einmal gebacken, danach vom
+       Kompositor bewegt. Auf der Leinwand kostete es je Bild einen
+       Vollbild-Blit. */
+    try {
+      var kornbild = oben.querySelector(".kosmoskorn");
+      if (kornbild) kornbild.style.backgroundImage = "url(" + KORN.toDataURL() + ")";
+    } catch (e) {}
 
     var KERN = kernScheibe(220, null);
     if (wahl.kern) {
@@ -746,19 +771,6 @@
       { farbe: "255,241,206", breit: 1.05 },
       { farbe: "255,206,158", breit: 0.95 }
     ];
-
-    /* Staub nahe der Linse: wenige grosse, fast unsichtbare Blenden-
-       scheiben, die schnell vorbeiziehen — die naechste Tiefenebene vor
-       allen anderen. */
-    var staub = [];
-    for (var st0 = 0; st0 < 8; st0++) {
-      staub.push({
-        x: (wuerfel() - 0.5) * WELTBREIT * 0.5,
-        y: (wuerfel() - 0.5) * WELTBREIT * 0.5,
-        z: 120 + wuerfel() * 1400,
-        warm: st0 % 3 === 0
-      });
-    }
 
     var planeten = [];
     var koerperZahl = 0;
@@ -850,9 +862,9 @@
        Achse klebt, sieht nach Werkzeug aus, nicht nach Hand. */
     var fahrt = 0, driftX = 0, driftY = 0;
     var abflugFahrt = -1, abflugRest = 0, markeDa = 0;
-    var sparsam = false, dtSumme = 0, dtZahl = 0, hoefe = true, himmelTakt = 0;
+    var sparsam = false, dtSumme = 0, dtZahl = 0, messAb = 0, hoefe = true;
     var abrissAb = bahnDauer;
-    var bildnummer = 0;
+    var bildnummer = 0, gemeldet = false;
     var fertig = typeof wahl.fertig === "function" ? wahl.fertig : function () {};
 
     /* Die Spur fuer die Nachschau — auf einer Leinwand gibt es sonst
@@ -864,41 +876,81 @@
        Tiefenschritte vom Sollschritt (Symmetrie der Gasse, tausendstel) */
     var spur = [];
     window.rcpKosmosSpur = spur;
+    /* Die MALZEIT je Bild — getrennt von der Bilddauer. Die Bilddauer
+       misst den Takt des Bildschirms (nie unter 16,7 ms bei 60 Hz) und
+       sagt ueber "90 Bilder mindestens" gar nichts. Die Malzeit sagt,
+       was moeglich WAERE: unter 11 ms sind 90 Bilder/s drin, unter 8,3
+       auch 120. Und "kein Stoppen" ist eine Aussage ueber das
+       SCHLIMMSTE Bild, nicht ueber den Durchschnitt — deshalb wird
+       jedes einzelne notiert. */
+    var malzeit = [];
+    window.rcpKosmosMalzeit = malzeit;
 
     function bild(jetzt) {
       if (!laeuft) return;
+      var malAb = performance.now();
       if (!t0) { t0 = jetzt; vorher = jetzt; }
       var t = jetzt - t0;
-      var dt = klemm(jetzt - vorher, 0, 64);
+      var dtRoh = jetzt - vorher;
+      var dt = klemm(dtRoh, 0, 64);
       vorher = jetzt;
-      if (t >= abrissAb + endeDauer) {
-        laeuft = false;
-        aufraeumen();
-        fertig();
-        return;
-      }
+      /* KEIN STILLSTAND MEHR. Frueher hoerte die Szene hier auf zu
+         malen und meldete DANN erst "fertig" — und der Deckel braucht
+         zum Ausblenden 610 ms. Die Leinwand hing also noch eine gute
+         halbe Sekunde im Bild und zeigte ihr letztes, EINGEFRORENES
+         Bild. Gemessen: 597 ms Stillstand, genau vor dem Erscheinen
+         der Liste.
 
-      /* Die Sparschaltung, nachgeschaerft: die alte Schwelle (34 ms)
-         sprang erst an, wenn es unter 30 Bilder fiel — ein Geraet bei 45
-         ruckelt aber laengst sichtbar. Jetzt zaehlt schon das verfehlte
-         60er-Ziel (ueber 21 ms im Mittel), das Fenster reicht ueber die
-         ganze Reise, und geopfert wird mehr: halbes Sternenfeld, der
-         Staub, die Hoefe der Scheiben, und die Dichte faellt auf 1. */
-      if (!sparsam && t > 400) {
-        dtSumme += dt; dtZahl++;
-        if (dtZahl >= 24) {
-          if (dtSumme / dtZahl > 21) {
-            sparsam = true;
-            sterne.length = Math.floor(sterne.length / 2);
-            staub.length = 0;
-            hoefe = false;
-            if (DPR > 1) { dichteDeckel = 1; messen(true); }
-          }
-          dtSumme = 0; dtZahl = 0;
+         Jetzt wird "fertig" gemeldet, aber WEITERGEMALT: die Fahrt
+         zieht ueber das Ziel hinaus, der Blitz waechst zu Weiss, und
+         waehrend der Deckel durchsichtig wird, bewegt sich das Bild
+         bis zum letzten Augenblick. Schluss ist erst, wenn die Seite
+         abbrechen() ruft — oder nach einer Notfrist. */
+      if (t >= abrissAb + endeDauer) {
+        if (!gemeldet) { gemeldet = true; fertig(); }
+        if (t >= abrissAb + endeDauer + 1400) {
+          laeuft = false;
+          aufraeumen();
+          return;
         }
       }
 
-      var abriss = klemm((t - abrissAb) / endeDauer, 0, 1);
+      /* DIE SPARSCHALTUNG URTEILT NACH ZEIT, NICHT NACH BILDERN.
+
+         Das war der zweitgroesste Fund: sie sammelte 24 BILDER ab
+         t > 400 ms — und auf einem langsamen Geraet dauern 24 Bilder
+         eben 1,8 Sekunden. Gemessen griff sie erst nach 2,2 s, also
+         nachdem 42 Prozent der Szene mit 16 Bildern je Sekunde
+         durchgeruckelt waren. Ein Regler, der genau dort am laengsten
+         wartet, wo er gebraucht wird, regelt nichts.
+
+         Jetzt: ab 150 ms sammeln, und entscheiden, sobald ENTWEDER
+         zehn Bilder ODER 260 ms beisammen sind — was zuerst eintritt.
+         Auf einem schnellen Geraet urteilen die zehn Bilder (und finden
+         nichts), auf einem langsamen die 260 ms (und greifen sofort).
+         Gemessen brachte das allein 27 Prozent mehr Bilder bei
+         vierfacher und 57 Prozent bei sechsfacher Bremse.
+
+         Gerechnet wird mit der UNGEKLEMMTEN Bilddauer: die Fahrt
+         braucht das Klemmen bei 64 ms (ein Sprung von 190 ms darf die
+         Kamera nicht schleudern), die Regelung darf davon aber nicht
+         geblendet werden — mit dem Deckel kann sie ein Geraet bei 64 ms
+         nicht von einem bei 190 unterscheiden. */
+      if (!sparsam && t > 150) {
+        if (!messAb) messAb = t;
+        dtSumme += dtRoh; dtZahl++;
+        if (dtZahl >= 10 || t - messAb >= 260) {
+          if (dtSumme / dtZahl > 12) {
+            sparsam = true;
+            sterne.length = Math.floor(sterne.length / 2);
+            hoefe = false;
+            if (DPR > 1) { dichteDeckel = 1; messen(true); }
+          }
+          dtSumme = 0; dtZahl = 0; messAb = t;
+        }
+      }
+
+      var abriss = klemm((t - abrissAb) / endeDauer, 0, 1.45);
       var blenden = glatt(0, 500, t);
 
       /* Die Fahrt: sanfter Anlauf, dann Reisegeschwindigkeit — bemessen
@@ -955,37 +1007,14 @@
          weiter — langsam genug, dass man es nicht benennen kann. */
       var rad = t * 0.00013;
 
-      /* Der Himmel in halber Aufloesung, zwei Lagen. Er ist das Ferne:
-         er rollt mit der Kamera und atmet mit der Fahrt nur wenig —
-         Parallaxe entsteht dadurch, dass ALLES ANDERE staerker zieht. */
-      /* Der Nebel-Puffer wird nur jedes ZWEITE Bild neu gemalt — er
-         bewegt sich so langsam, dass 30 Hertz fuer ihn unsichtbar sind,
-         und die zwei grossen Blits auf den Halbpuffer sind ein gutes
-         Stueck jeder Bilddauer. Das fertige Bild zieht ihn weiter in
-         vollen 60. */
-      if ((himmelTakt++ & 1) === 0 || himmelTakt < 3) {
-        var hzoom = 1 + 0.10 * Math.min(1, fahrt / (zielZ || 1));
-        gg.setTransform(DPR / 2, 0, 0, DPR / 2, 0, 0);
-        gg.globalCompositeOperation = "source-over";
-        gg.globalAlpha = 1;
-        gg.fillStyle = "#0a0d0c";
-        gg.fillRect(0, 0, B, H);
-        gg.translate(MX, MY);
-        gg.rotate(roll);
-        gg.globalCompositeOperation = "lighter";
-        var s1 = Math.max(B, H) * 1.5 * hzoom;
-        var s2 = Math.max(B, H) * 2.1 * hzoom;
-        gg.globalAlpha = 0.17;
-        gg.drawImage(HIMMEL, -s1 / 2 - camX * 0.6, -s1 / 2 - camY * 0.6, s1, s1);
-        gg.globalAlpha = 0.1;
-        gg.drawImage(HIMMEL, -s2 / 2 - camX * 0.25, -s2 / 2 - camY * 0.25, s2, s2);
-      }
-
+      /* KEIN Nebel mehr auf der Leinwand. Er liegt als Liquid-Ebene
+         darunter und wird vom Kompositor bewegt — gemessen war er samt
+         Halbpuffer der teuerste Posten der Szene. Die Leinwand traegt
+         ab hier nur noch, was je Bild wirklich neu gerechnet werden
+         muss: Sterne, Scheiben, Kern, Schrift, Blitz. Sie beginnt
+         DURCHSICHTIG; was darunter liegt, scheint hindurch. */
       g.setTransform(DPR, 0, 0, DPR, 0, 0);
       g.clearRect(0, 0, B, H);
-      g.globalCompositeOperation = "source-over";
-      g.globalAlpha = blenden;
-      g.drawImage(grund, 0, 0, B, H);
 
       /* ---- Die Sterne ---- */
       g.globalCompositeOperation = "lighter";
@@ -1112,11 +1141,11 @@
         g.globalCompositeOperation = "lighter";
         if (kg < GRENZE * 0.75) {
           g.globalAlpha = kd * 0.42;
-          var gg2 = Math.min(kg * 3.0 * puls, GRENZE * 1.3);
+          var gg2 = Math.min(kg * 3.0 * puls, GRENZE * 0.95);
           g.drawImage(GLUT, kx - gg2 / 2, ky - gg2 / 2, gg2, gg2);
         }
         g.globalAlpha = kd * 0.18;
-        var bb = Math.min(kg * 6 * (0.7 + 0.3 * puls), GRENZE * 1.6);
+        var bb = Math.min(kg * 6 * (0.7 + 0.3 * puls), GRENZE * 1.15);
         var bh2 = Math.min(kg * 0.32, GRENZE * 0.09);
         g.drawImage(STREIF, kx - bb / 2, ky - bh2 / 2, bb, bh2);
         if (kg > 14) {
@@ -1126,7 +1155,7 @@
           if (kg < GRENZE * 0.55) {
             g.globalCompositeOperation = "lighter";
             g.globalAlpha = kd * 0.32;
-            var sg = Math.min(kg * 2.2, GRENZE * 1.15);
+            var sg = Math.min(kg * 2.2, GRENZE * 0.85);
             g.drawImage(SPINNE, kx - sg / 2, ky - sg / 2, sg, sg);
           }
         }
@@ -1169,10 +1198,15 @@
            aus der KONTAKTABDUNKLUNG hinter dem Ding, nicht aus Licht
            davor. Das grosse Leuchten hat in dieser Szene genau eine
            Quelle: das App-Zeichen am Ende. */
-        if (hoefe) {
+        /* 1,15 statt 1,5: die Flaeche faellt auf 59 Prozent, und der
+           Hof traegt ohnehin nur an der Kante Information — sein
+           Aussenrand ist bei Deckkraft null. Und ab einer Scheibe, die
+           mehr als sechs Zehntel des Schirms fuellt, faellt er ganz
+           weg: dort liegt der ganze Hof hinter der Scheibe. */
+        if (hoefe && gr < Math.min(B, H) * 0.6) {
           g.globalCompositeOperation = "source-over";
-          g.globalAlpha = deck * 0.62;
-          var sh = Math.min(gr * 1.5, 560);
+          g.globalAlpha = deck * 0.7;
+          var sh = gr * 1.15;
           g.drawImage(SCHATTEN, px3 - sh / 2, py3 - sh / 2, sh, sh);
         }
 
@@ -1215,25 +1249,6 @@
         g.globalAlpha = 1;
       }
 
-      /* ---- Der Staub nahe der Linse ---- */
-      for (var di = 0; di < staub.length; di++) {
-        var db = staub[di];
-        var dz = db.z - fahrt;
-        if (dz < 60) {
-          db.z += 1500 + wuerfel() * 700;
-          db.x = (wuerfel() - 0.5) * WELTBREIT * 0.5;
-          db.y = (wuerfel() - 0.5) * WELTBREIT * 0.5;
-          dz = db.z - fahrt;
-        }
-        var df = F / dz;
-        var dgr = klemm(600 * df, 20, 260);
-        g.globalAlpha = blenden * 0.022 * klemm((1600 - dz) / 1300, 0, 1);
-        g.globalCompositeOperation = "lighter";
-        g.drawImage(db.warm ? BOKEHWARM : BOKEH,
-          MX + (db.x - camX) * df - dgr / 2, MY + (db.y - camY) * df - dgr / 2, dgr, dgr);
-      }
-      g.globalAlpha = 1;
-
       /* Der Blitz der Ankunft — er kommt aus der NAEHE, nicht aus der
          Uhr: je dichter die Kamera am Zeichen, desto heller, und im
          Moment des Eintauchens deckt er den Schnitt zur Seite. Vorher
@@ -1241,23 +1256,22 @@
          Zeichen noch weit war — ein Blitz ohne Ursache. */
       if (abriss > 0) {
         var naehe = klemm((1150 - (zielZ - fahrt)) / 1050, 0, 1);
-        var hell2 = Math.pow(naehe, 2.4) * 0.9;
+        /* Im Nachlauf (abriss > 1) zieht der Blitz weiter an, bis er
+           deckt — so hat das Auge bis zum letzten Bild Bewegung, und
+           der Uebergang zur Seite ist ein Aufloesen statt eines
+           Standbilds. */
+        var hell2 = Math.pow(naehe, 2.4) * 0.9 * (1 + 1.6 * Math.max(0, abriss - 1));
         if (hell2 > 0.004) {
           g.globalCompositeOperation = "lighter";
           g.globalAlpha = hell2 * blenden;
-          var bg = Math.max(B, H) * 2.0;
+          var bg = Math.max(B, H) * 1.05;
           g.drawImage(BLITZ, MX - bg / 2, MY - bg / 2, bg, bg);
           g.globalAlpha = 1;
         }
       }
 
-      /* Nachbereitung: Randabdunklung und Korn in einem Zug. */
-      g.globalCompositeOperation = "source-over";
-      g.globalAlpha = blenden;
-      if (nachher.length) {
-        g.drawImage(nachher[(bildnummer++) % nachher.length], 0, 0, B, H);
-      }
-      g.globalAlpha = 1;
+      /* Randabdunklung und Korn liegen als Glasebene DARUEBER, nicht
+         mehr als Vollbild-Blit je Bild. */
 
       if (spur.length < 600) {
         /* [7]: die Symmetrie der Gasse, gemessen statt behauptet — die
@@ -1279,18 +1293,31 @@
           Math.round(symAbw * 1000)]);
       }
 
+      /* SPUELEN, aber nur auf dem Prueftisch. Chromium zeichnet die
+         Befehle der 2D-Leinwand nur auf und rastert sie erst spaeter —
+         wer im Rueckruf misst, sieht rund ein Zehntel der Wahrheit. Ein
+         Lesen eines einzigen Punktes erzwingt das Rastern und macht die
+         Zahl ehrlich. Im Betrieb bleibt es aus: es waere selbst teuer,
+         und dort wird nicht gemessen. */
+      if (window.rcpKosmosSpuelen) { try { g.getImageData(0, 0, 1, 1); } catch (e) {} }
+      if (malzeit.length < 900) malzeit.push(Math.round((performance.now() - malAb) * 100) / 100);
       kennung = window.requestAnimationFrame(bild);
     }
 
     if (wahl.positionen) planetenSetzen(wahl.positionen);
 
+    /* Eigene Function, KEIN direktes messen: der Horcher wuerde sonst
+       das Ereignisobjekt als "erzwungen" durchreichen (immer wahr) und
+       damit genau die Abkuerzung aushebeln, die Serien abfangen soll. */
+    function beiGroesse() { messen(); }
+
     function aufraeumen() {
       if (kennung) window.cancelAnimationFrame(kennung);
       kennung = 0;
-      window.removeEventListener("resize", messen);
+      window.removeEventListener("resize", beiGroesse);
     }
 
-    window.addEventListener("resize", messen);
+    window.addEventListener("resize", beiGroesse);
     kennung = window.requestAnimationFrame(bild);
 
     return {
