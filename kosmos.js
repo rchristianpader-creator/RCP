@@ -243,61 +243,60 @@
     return basis.slice(0, 2) || "?";
   }
 
-  /* Die Glasscheibe, auf der alles sitzt — mit Glanzpunkt oben links und
-     kaltem Gegenlichtsaum unten rechts: der Griff, der aus einer Flaeche
-     eine Kugel macht. */
-  function scheibenGrund(x, gr, fuellung) {
+  /* Die Glasscheibe — und zwar DAS GLAS DER APP, nicht ein eigenes.
+
+     Die Karten-Logos der Liste sind fluessiges Glas: durchscheinend,
+     ein Schimmer von oben links (148 Grad, weiss 0,22 auslaufend), eine
+     hauchduenne Fuellung (weiss 0,10 auf 0,075), eine harte Lichtkante
+     oben und eine dunkle unten (--glas-kante), aussen der 1px-Rand in
+     --line. Genau diese Schichten stehen in stil.css — hier werden sie
+     gemalt statt gestylt, Wert fuer Wert. Der erste Wurf hatte
+     stattdessen deckende dunkle Kugeln mit eigenem Verlauf erfunden,
+     und die sahen nach einer anderen App aus: "Es muss zum App Design
+     passen." Ein Hauch Frost unter der Fuellung, damit Schrift und
+     Logo vor dem bewegten Himmel lesbar bleiben — die Rolle, die in
+     der App der ruhige Grund uebernimmt. */
+  function scheibenGrund(x, gr) {
     var m = gr / 2, r = m - gr * 0.03;
-    x.beginPath(); x.arc(m, m, r, 0, 6.2832);
-    if (fuellung) {
-      x.fillStyle = fuellung;
-    } else {
-      /* Das Glas traegt denselben Stich wie die App: gruengrau statt
-         blaugrau. Bei den nahen Vorbeifluegen fuellt eine Scheibe das
-         halbe Bild — mit blauem Glas kippte das Bildmittel ins Blau,
-         und die Farbmessung der Pruefreihe schlug zu Recht an. */
-      var v = x.createRadialGradient(m - r * 0.36, m - r * 0.48, r * 0.05, m, m, r);
-      v.addColorStop(0, "rgba(94,114,118,0.98)");
-      v.addColorStop(0.5, "rgba(50,64,66,0.98)");
-      v.addColorStop(1, "rgba(22,32,33,0.98)");
-      x.fillStyle = v;
-    }
-    x.fill();
-
-    x.lineWidth = Math.max(1, gr * 0.012);
-    var k = x.createLinearGradient(0, 0, 0, gr);
-    k.addColorStop(0, "rgba(255,255,255,0.6)");
-    k.addColorStop(0.45, "rgba(255,255,255,0.16)");
-    k.addColorStop(1, "rgba(0,0,0,0.42)");
-    x.strokeStyle = k;
-    x.beginPath(); x.arc(m, m, r - x.lineWidth / 2, 0, 6.2832); x.stroke();
-
-    var gx = m - r * 0.34, gy = m - r * 0.46;
-    var gv = x.createRadialGradient(gx, gy, 0, gx, gy, r * 0.55);
-    gv.addColorStop(0, "rgba(255,255,255,0.3)");
-    gv.addColorStop(1, "rgba(255,255,255,0)");
-    x.fillStyle = gv;
-    x.beginPath(); x.arc(m, m, r, 0, 6.2832); x.fill();
-
     x.save();
     x.beginPath(); x.arc(m, m, r, 0, 6.2832); x.clip();
-    x.globalCompositeOperation = "lighter";
-    var sv = x.createRadialGradient(m + r * 0.52, m + r * 0.6, r * 0.1,
-                                    m + r * 0.52, m + r * 0.6, r * 1.15);
-    sv.addColorStop(0, "rgba(150,206,192,0.42)");
-    sv.addColorStop(0.4, "rgba(118,186,168,0.1)");
-    sv.addColorStop(1, "rgba(0,0,0,0)");
+    x.fillStyle = "rgba(10,13,12,0.44)";
+    x.fillRect(0, 0, gr, gr);
+    var fv = x.createLinearGradient(0, 0, 0, gr);
+    fv.addColorStop(0, "rgba(255,255,255,0.10)");
+    fv.addColorStop(1, "rgba(255,255,255,0.075)");
+    x.fillStyle = fv;
+    x.fillRect(0, 0, gr, gr);
+    var sv = x.createLinearGradient(m - r, m - r, m + r * 0.45, m + r * 0.45);
+    sv.addColorStop(0, "rgba(255,255,255,0.22)");
+    sv.addColorStop(0.24, "rgba(255,255,255,0.12)");
+    sv.addColorStop(0.5, "rgba(255,255,255,0.04)");
+    sv.addColorStop(0.72, "rgba(255,255,255,0)");
     x.fillStyle = sv;
     x.fillRect(0, 0, gr, gr);
     x.restore();
+    /* Die Kante faengt Licht: oben hell, unten dunkel — dieselben drei
+       Linien wie --glas-kante, als Bogenstrich. */
+    x.lineWidth = Math.max(1, gr * 0.014);
+    var k = x.createLinearGradient(0, 0, 0, gr);
+    k.addColorStop(0, "rgba(255,255,255,0.28)");
+    k.addColorStop(0.35, "rgba(255,255,255,0.08)");
+    k.addColorStop(1, "rgba(0,0,0,0.3)");
+    x.strokeStyle = k;
+    x.beginPath(); x.arc(m, m, r - x.lineWidth, 0, 6.2832); x.stroke();
+    x.lineWidth = Math.max(1, gr * 0.011);
+    x.strokeStyle = "rgba(255,255,255,0.16)";
+    x.beginPath(); x.arc(m, m, r - x.lineWidth / 2, 0, 6.2832); x.stroke();
     return r;
   }
 
   function textScheibe(gr, text) {
     var c = tafel(gr, gr), x = c.getContext("2d");
-    scheibenGrund(x, gr, null);
-    x.fillStyle = "#ffffff";
-    x.font = "800 " + Math.round(gr * (text.length > 2 ? 0.3 : 0.36)) + "px -apple-system, 'Segoe UI', sans-serif";
+    scheibenGrund(x, gr);
+    /* Schrift wie auf den Karten: 700, in --muted (#9aa5a2) — nicht
+       reinweiss, das kennt die App an dieser Stelle nicht. */
+    x.fillStyle = "#9aa5a2";
+    x.font = "700 " + Math.round(gr * (text.length > 2 ? 0.28 : 0.34)) + "px -apple-system, 'Segoe UI', sans-serif";
     x.textAlign = "center";
     x.textBaseline = "middle";
     x.fillText(text, gr / 2, gr / 2 + gr * 0.02);
@@ -306,43 +305,38 @@
 
   function bildScheibe(gr, bild) {
     var c = tafel(gr, gr), x = c.getContext("2d");
-    var r = scheibenGrund(x, gr, null);
+    var r = scheibenGrund(x, gr);
     x.save();
     x.beginPath(); x.arc(gr / 2, gr / 2, r * 0.99, 0, 6.2832); x.clip();
     /* Das Seitenverhaeltnis bleibt, wie es ist — dieselbe Regel, die in
        der Liste als object-fit: contain steht. Ein breites Wortlogo in
-       ein Quadrat gepresst ist sofort als falsch zu erkennen. */
+       ein Quadrat gepresst ist sofort als falsch zu erkennen. Und wie in
+       der Liste liegt das Logo AUF dem Glas, ohne zweiten Glanz darueber
+       — die App legt keinen darauf, also legt die Szene auch keinen. */
     var s = gr * 0.62;
     var bw = bild.naturalWidth || bild.width || 1;
     var bh = bild.naturalHeight || bild.height || 1;
     var f = Math.min(s / bw, s / bh);
     try { x.drawImage(bild, (gr - bw * f) / 2, (gr - bh * f) / 2, bw * f, bh * f); } catch (e) {}
     x.restore();
-    /* Der Glanz noch einmal OBEN AUF dem Bild — sonst liegt das Logo wie
-       ein Aufkleber auf der Kugel statt unter ihrem Glas. */
-    var gv = x.createRadialGradient(gr / 2 - r * 0.34, gr / 2 - r * 0.46, 0,
-                                    gr / 2 - r * 0.34, gr / 2 - r * 0.46, r * 0.6);
-    gv.addColorStop(0, "rgba(255,255,255,0.18)");
-    gv.addColorStop(1, "rgba(255,255,255,0)");
-    x.fillStyle = gv;
-    x.beginPath(); x.arc(gr / 2, gr / 2, r, 0, 6.2832); x.fill();
     return c;
   }
 
   /* Die Fetch.ai-Marke, gezeichnet: drei mal drei Felder, Quadrate oben
      links zu Kreisen unten rechts — dieselbe Geometrie wie MARKEN in
-     index.html. Die Farben kommen von der Seite; die Werte hier sind nur
-     der Boden, falls sie fehlen. */
+     index.html, und derselbe Verlauf wie .logo.logo-marke in stil.css:
+     radial bei 32 % / 26 %, hell zu mitte zu tief, Rand weiss 0,22.
+     Die Farben kommen von der Seite; die Werte hier sind nur der Boden,
+     falls sie fehlen. */
   function fetScheibe(gr, farben) {
     var c = tafel(gr, gr), x = c.getContext("2d");
     var m = gr / 2, r = m - gr * 0.03;
-    var v = x.createRadialGradient(m - r * 0.36, m - r * 0.48, r * 0.05, m, m, r);
+    var v = x.createRadialGradient(gr * 0.32, gr * 0.26, r * 0.05, m, m, r * 1.25);
     v.addColorStop(0, (farben && farben[0]) || "#3c2fa8");
     v.addColorStop(0.46, (farben && farben[1]) || "#241b78");
     v.addColorStop(1, (farben && farben[2]) || "#141051");
     x.beginPath(); x.arc(m, m, r, 0, 6.2832);
     x.fillStyle = v; x.fill();
-    scheibenRand(x, gr, r);
 
     var s = gr * 0.56, ab = (gr - s) / 2, z = s / 24;
     x.fillStyle = "#fff";
@@ -356,23 +350,10 @@
       x.arc(ab + k[j][0] * z, ab + k[j][1] * z, 2.5 * z, 0, 6.2832);
       x.fill();
     }
-    return c;
-  }
-  function scheibenRand(x, gr, r) {
-    var m = gr / 2;
-    x.lineWidth = Math.max(1, gr * 0.012);
-    var k = x.createLinearGradient(0, 0, 0, gr);
-    k.addColorStop(0, "rgba(255,255,255,0.6)");
-    k.addColorStop(0.45, "rgba(255,255,255,0.16)");
-    k.addColorStop(1, "rgba(0,0,0,0.42)");
-    x.strokeStyle = k;
+    x.lineWidth = Math.max(1, gr * 0.011);
+    x.strokeStyle = "rgba(255,255,255,0.22)";
     x.beginPath(); x.arc(m, m, r - x.lineWidth / 2, 0, 6.2832); x.stroke();
-    var gv = x.createRadialGradient(m - r * 0.34, m - r * 0.46, 0,
-                                    m - r * 0.34, m - r * 0.46, r * 0.55);
-    gv.addColorStop(0, "rgba(255,255,255,0.26)");
-    gv.addColorStop(1, "rgba(255,255,255,0)");
-    x.fillStyle = gv;
-    x.beginPath(); x.arc(m, m, r, 0, 6.2832); x.fill();
+    return c;
   }
   function rund(x, px, py, gr, rx) {
     x.beginPath();
@@ -381,21 +362,38 @@
     x.fill();
   }
 
-  /* Der Kern: die eigene Marke der App, in einer Glutscheibe. Das Bild
-     liegt im Vorrat des Service Workers — es ist sofort da. */
+  /* Der Kern: die eigene Marke der App — als GERUNDETES QUADRAT, denn
+     genau das ist das App-Zeichen (icon-192, ueberall in der App mit
+     einer Ecke von rund einem Viertel der Kante). Der erste Wurf schnitt
+     es in einen Kreis, und ein rundes App-Icon gibt es nirgends. Das
+     Bild liegt im Vorrat des Service Workers — es ist sofort da. */
   function kernScheibe(gr, bild) {
     var c = tafel(gr, gr), x = c.getContext("2d");
-    var m = gr / 2, r = m - gr * 0.03;
-    x.beginPath(); x.arc(m, m, r, 0, 6.2832);
-    x.fillStyle = "#0d1412"; x.fill();
+    var r = gr * 0.03, s = gr - r * 2, e = gr * 0.235;
+    x.fillStyle = "#0d1412";
+    rundPfad(x, r, r, s, e);
+    x.fill();
     if (bild) {
       x.save();
-      x.beginPath(); x.arc(m, m, r * 0.99, 0, 6.2832); x.clip();
-      try { x.drawImage(bild, m - r, m - r, r * 2, r * 2); } catch (e) {}
+      rundPfad(x, r, r, s, e);
+      x.clip();
+      try { x.drawImage(bild, r, r, s, s); } catch (er) {}
       x.restore();
     }
-    scheibenRand(x, gr, r);
+    x.lineWidth = Math.max(1, gr * 0.012);
+    var k = x.createLinearGradient(0, 0, 0, gr);
+    k.addColorStop(0, "rgba(255,255,255,0.28)");
+    k.addColorStop(0.35, "rgba(255,255,255,0.1)");
+    k.addColorStop(1, "rgba(0,0,0,0.3)");
+    x.strokeStyle = k;
+    rundPfad(x, r + x.lineWidth / 2, r + x.lineWidth / 2, s - x.lineWidth, e);
+    x.stroke();
     return c;
+  }
+  function rundPfad(x, px, py, s, e) {
+    x.beginPath();
+    if (x.roundRect) x.roundRect(px, py, s, s, e);
+    else x.rect(px, py, s, s);
   }
 
   window.rcpKosmos = function (huelle, wahl) {
@@ -425,7 +423,12 @@
        Sparschaltung darf sie auf 1 druecken) UND die Gesamtflaeche der
        Leinwand — auf einem 4K-Fenster darf die Dichte auch unter 1
        fallen, weich ist bei einem Auftakt kein Fehler. */
-    var dichteDeckel = 2;
+    /* 1,7 statt 2: "es ruckelt". Der Flug malt grosse Flaechen — nahe
+       Scheiben, Hoefe, Nebel —, und deren Kosten wachsen mit dem QUADRAT
+       der Dichte. 1,7 ist auf einem Telefon von 2 nicht zu
+       unterscheiden (bewegtes Bild, Korn darueber), kostet aber nur
+       72 Prozent der Punkte. */
+    var dichteDeckel = 1.7;
     var DPR = 1;
     var B = 0, H = 0, MX = 0, MY = 0, F = 700;
     var grund = null, gg = null, nachher = [];
@@ -640,7 +643,7 @@
        Drift und eine traege Rolle: eine Kamera, die haargenau auf der
        Achse klebt, sieht nach Werkzeug aus, nicht nach Hand. */
     var fahrt = 0, driftX = 0, driftY = 0;
-    var sparsam = false, dtSumme = 0, dtZahl = 0;
+    var sparsam = false, dtSumme = 0, dtZahl = 0, hoefe = true, himmelTakt = 0;
     var abrissAb = bahnDauer;
     var bildnummer = 0;
     var fertig = typeof wahl.fertig === "function" ? wahl.fertig : function () {};
@@ -668,13 +671,20 @@
         return;
       }
 
-      if (!sparsam && t > 400 && t < 2600) {
+      /* Die Sparschaltung, nachgeschaerft: die alte Schwelle (34 ms)
+         sprang erst an, wenn es unter 30 Bilder fiel — ein Geraet bei 45
+         ruckelt aber laengst sichtbar. Jetzt zaehlt schon das verfehlte
+         60er-Ziel (ueber 21 ms im Mittel), das Fenster reicht ueber die
+         ganze Reise, und geopfert wird mehr: halbes Sternenfeld, der
+         Staub, die Hoefe der Scheiben, und die Dichte faellt auf 1. */
+      if (!sparsam && t > 400 && t < 4000) {
         dtSumme += dt; dtZahl++;
         if (dtZahl >= 24) {
-          if (dtSumme / dtZahl > 34) {
+          if (dtSumme / dtZahl > 21) {
             sparsam = true;
             sterne.length = Math.floor(sterne.length / 2);
             staub.length = 0;
+            hoefe = false;
             if (DPR > 1) { dichteDeckel = 1; messen(true); }
           }
           dtSumme = 0; dtZahl = 0;
@@ -705,21 +715,28 @@
       /* Der Himmel in halber Aufloesung, zwei Lagen. Er ist das Ferne:
          er rollt mit der Kamera und atmet mit der Fahrt nur wenig —
          Parallaxe entsteht dadurch, dass ALLES ANDERE staerker zieht. */
-      var hzoom = 1 + 0.10 * Math.min(1, fahrt / (zielZ || 1));
-      gg.setTransform(DPR / 2, 0, 0, DPR / 2, 0, 0);
-      gg.globalCompositeOperation = "source-over";
-      gg.globalAlpha = 1;
-      gg.fillStyle = "#0a0d0c";
-      gg.fillRect(0, 0, B, H);
-      gg.translate(MX, MY);
-      gg.rotate(roll);
-      gg.globalCompositeOperation = "lighter";
-      var s1 = Math.max(B, H) * 1.5 * hzoom;
-      var s2 = Math.max(B, H) * 2.1 * hzoom;
-      gg.globalAlpha = 0.94;
-      gg.drawImage(HIMMEL, -s1 / 2 - camX * 0.6, -s1 / 2 - camY * 0.6, s1, s1);
-      gg.globalAlpha = 0.52;
-      gg.drawImage(HIMMEL, -s2 / 2 - camX * 0.25, -s2 / 2 - camY * 0.25, s2, s2);
+      /* Der Nebel-Puffer wird nur jedes ZWEITE Bild neu gemalt — er
+         bewegt sich so langsam, dass 30 Hertz fuer ihn unsichtbar sind,
+         und die zwei grossen Blits auf den Halbpuffer sind ein gutes
+         Stueck jeder Bilddauer. Das fertige Bild zieht ihn weiter in
+         vollen 60. */
+      if ((himmelTakt++ & 1) === 0 || himmelTakt < 3) {
+        var hzoom = 1 + 0.10 * Math.min(1, fahrt / (zielZ || 1));
+        gg.setTransform(DPR / 2, 0, 0, DPR / 2, 0, 0);
+        gg.globalCompositeOperation = "source-over";
+        gg.globalAlpha = 1;
+        gg.fillStyle = "#0a0d0c";
+        gg.fillRect(0, 0, B, H);
+        gg.translate(MX, MY);
+        gg.rotate(roll);
+        gg.globalCompositeOperation = "lighter";
+        var s1 = Math.max(B, H) * 1.5 * hzoom;
+        var s2 = Math.max(B, H) * 2.1 * hzoom;
+        gg.globalAlpha = 0.94;
+        gg.drawImage(HIMMEL, -s1 / 2 - camX * 0.6, -s1 / 2 - camY * 0.6, s1, s1);
+        gg.globalAlpha = 0.52;
+        gg.drawImage(HIMMEL, -s2 / 2 - camX * 0.25, -s2 / 2 - camY * 0.25, s2, s2);
+      }
 
       g.setTransform(DPR, 0, 0, DPR, 0, 0);
       g.clearRect(0, 0, B, H);
@@ -879,15 +896,22 @@
         if (gr > maxGemalt && deck > 0.2) maxGemalt = gr;
 
                 /* Erst der Schattenhof, dann ein Hauch Glimmen — das grosse
-           Licht gehoert dem Kern. */
-        g.globalCompositeOperation = "source-over";
-        g.globalAlpha = deck * 0.55;
-        var sh = gr * 1.6;
-        g.drawImage(SCHATTEN, px3 - sh / 2, py3 - sh / 2, sh, sh);
-        g.globalCompositeOperation = "lighter";
-        g.globalAlpha = deck * 0.3;
-        var lg = gr * 1.7;
-        g.drawImage(GLUT, px3 - lg / 2, py3 - lg / 2, lg, lg);
+           Licht gehoert dem Kern. Beides gedeckelt: die Kosten eines
+           Hofs wachsen mit dem Quadrat seiner Groesse, und an einer
+           Scheibe, die schon das halbe Bild fuellt, sieht ihn niemand
+           mehr. In der Sparschaltung entfallen beide. */
+        if (hoefe) {
+          g.globalCompositeOperation = "source-over";
+          g.globalAlpha = deck * 0.55;
+          var sh = Math.min(gr * 1.6, 560);
+          g.drawImage(SCHATTEN, px3 - sh / 2, py3 - sh / 2, sh, sh);
+          if (gr < 300) {
+            g.globalCompositeOperation = "lighter";
+            g.globalAlpha = deck * 0.3;
+            var lg = gr * 1.7;
+            g.drawImage(GLUT, px3 - lg / 2, py3 - lg / 2, lg, lg);
+          }
+        }
 
         /* Die Muenzdrehung: die Breite ist der Kosinus des eigenen
            Drehwinkels, nie ganz null, und an der Kante wird sie dunkler.
