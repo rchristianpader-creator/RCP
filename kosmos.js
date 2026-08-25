@@ -808,11 +808,6 @@
         var e = {
           sym: sym,
           gr0: 168 + ((i * 37) % 5) * 18,
-          /* UM SICH SELBST: jede Scheibe dreht wie eine Muenze um die
-             eigene senkrechte Achse — eigener Anfang, eigenes Tempo,
-             abwechselnde Richtung. */
-          dreh: (i * 1.7) % 6.2832,
-          drehW: (0.3 + ((i * 29) % 10) * 0.04) * (i % 2 ? 1 : -1),
           bild: sym === "FET-USD" ? fetScheibe(96, wahl.farben)
                                   : (sinnBild(sym, 96) || textScheibe(96, zeichenFuer(sym) || "?"))
         };
@@ -896,7 +891,8 @@
        [0] Zeit  [1] Koerperzahl  [2] Fahrt (Tiefe der Kamera)
        [3] wie viele Marken schon an der Kamera vorbeigezogen sind
        [4] Bilddauer  [5] groesste gemalte Marke in Pixeln
-       [6] Eigendrehung der ersten Marke  [7] groesste Abweichung der
+       [6] Seitenverhaeltnis der gemalten Scheiben (muss 1 sein)
+       [7] groesste Abweichung der
        Tiefenschritte vom Sollschritt (Symmetrie der Gasse, tausendstel) */
     var spur = [];
     window.rcpKosmosSpur = spur;
@@ -1127,7 +1123,6 @@
            fuer JEDEN Koerper weiter, auch fern im Nebel und hinter der
            Kamera — sonst friert die erste Marke ein, sobald sie
            vorbeigezogen ist, und die Nachschau misst einen toten Wert. */
-        kp.dreh += kp.drehW * (1 + 2 * abriss) * dt * 0.001;
         var kz = kp.z - fahrt;
         if (kz < 70) {
           if (!kp.vorbei) { kp.vorbei = true; vorbeiZahl++; }
@@ -1148,7 +1143,7 @@
       var kernDran = kernZ > 70;
       reihe.sort(function (a, b) { return b.kz - a.kz; });
 
-      var maxGemalt = 0;
+      var maxGemalt = 0, formVerhaeltnis = 1;
 
       function kernMalen() {
         var kf = F / kernZ;
@@ -1235,16 +1230,35 @@
           g.drawImage(SCHATTEN, px3 - sh / 2, py3 - sh / 2, sh, sh);
         }
 
-        /* Die Muenzdrehung: die Breite ist der Kosinus des eigenen
-           Drehwinkels, nie ganz null, und an der Kante wird sie dunkler.
-           Der Betrag statt des Vorzeichens: gezeigt wird immer das
-           Gesicht, wie bei einem Schild im Wind. */
-        var quer = Math.abs(Math.cos(kp2.dreh));
-        var schmal = gr * Math.max(0.24, quer);
-        g.globalAlpha = deck * (0.55 + 0.45 * quer);
+        /* DIE MARKE BLEIBT RUND. Hier stand die Muenzdrehung: die
+           Breite folgte dem Kosinus eines eigenen Drehwinkels, die
+           Scheibe wurde also schmalgezogen und wieder breit. Als
+           Bewegung war das gedacht, gesehen hat man etwas anderes —
+           ein Logo, das die Form wechselt. Ein Zeichen darf sich
+           bewegen, aber es darf nicht anders aussehen: es ist die eine
+           Sache im Bild, die der Mensch wiedererkennen soll.
+
+           Quadratisch gemalt, also im Seitenverhaeltnis eins zu eins,
+           genau wie die Vorlage. Groesse und Helligkeit kommen allein
+           aus der Tiefe. */
+        /* Breite und Hoehe als eigene Werte — und GENAU DIESE beiden
+           gehen sowohl in das Malen als auch in die Spur. Stuende in
+           der Spur eine Rechnung fuer sich (gr durch gr), waere sie
+           immer eins und koennte den Fehler nicht finden, den sie zu
+           pruefen behauptet. So teilen Malen und Nachschau dieselbe
+           Quelle: wer hier je wieder ein Schmalziehen einbaut, sieht
+           es sofort in der Spur. */
+        var malBreit = gr, malHoch = gr;
+        g.globalAlpha = deck;
         g.globalCompositeOperation = "source-over";
-        g.drawImage(kp2.bild, px3 - schmal / 2, py3 - gr / 2, schmal, gr);
+        g.drawImage(kp2.bild, px3 - malBreit / 2, py3 - malHoch / 2, malBreit, malHoch);
         g.globalAlpha = 1;
+        if (malHoch > 0) {
+          var vh = malBreit / malHoch;
+          if (Math.abs(vh - 1) > Math.abs(formVerhaeltnis - 1)) {
+            formVerhaeltnis = Math.round(vh * 1000) / 1000;
+          }
+        }
       }
       if (kernDran) kernMalen();
 
@@ -1314,7 +1328,7 @@
           vorbeiZahl,
           Math.round(dt * 10) / 10,
           Math.round(maxGemalt),
-          ersterK ? Math.round(ersterK.dreh * 100) / 100 : 0,
+          formVerhaeltnis,
           Math.round(symAbw * 1000)]);
       }
 
