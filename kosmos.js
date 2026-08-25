@@ -807,17 +807,30 @@
          damit die Formation auch bei einem langen Auftakt (die Liste
          bestellt den Abriss spaet) nie den sicheren Bereich verlaesst. */
       var flugKraft = glatt(300, 1400, t) * (1 + 3.5 * abriss);
-      flugX += 9 * flugKraft * dt * 0.001;
-      flugY -= 6 * flugKraft * dt * 0.001;
-      zAktX = MX + klemm(flugX, -B * 0.15, B * 0.15);
-      zAktY = MY + klemm(flugY, -H * 0.13, H * 0.13);
-      kippeAkt = KIPPE + t * 0.000028;
+      flugX += 16 * flugKraft * dt * 0.001;
+      flugY -= 10 * flugKraft * dt * 0.001;
+      zAktX = MX + klemm(flugX, -B * 0.2, B * 0.2);
+      zAktY = MY + klemm(flugY, -H * 0.17, H * 0.17);
+      kippeAkt = KIPPE + t * 0.00006;
       KO = Math.cos(kippeAkt);
       SI = Math.sin(kippeAkt);
       var blenden = glatt(0, 500, t);
+      /* DIE ANNAEHERUNG: die ganze Formation waechst ueber den Auftakt
+         langsam heran — die Kamera fliegt AUF sie zu, nicht an ihr
+         vorbei. Das ist der Unterschied zwischen einem Mobile, das sich
+         dreht, und einem Ort, den man erreicht. Fest verankert an der
+         Zeit, nicht am Abriss: auch der lange Auftakt der Liste soll die
+         ganze Fahrt bekommen. */
+      var annaeh = 0.84 + 0.24 * glatt(400, 5200, t);
       /* Drei Gaenge: WARP beim Einflug (die Koerper kommen ja gerade aus
          genau dieser Fahrt), Ruhe im Stand, Sog beim Abriss. */
-      var tempo = 0.35 + 4 * (1 - glatt(900, 2200, t)) + 15 * abriss * abriss;
+      /* Der Reisegang: 1,0 im Stand — die Sterne STROEMEN vorbei, sie
+         stehen nicht. Das ist die Trennung, an der die letzte Fassung
+         scheiterte: "zu schnell" war das KREISELN, nicht das Fliegen.
+         Als beides halbiert wurde, blieb ein Uhrwerk im Stillstand —
+         ruhig, aber keine Reise mehr. Das Uhrwerk bleibt langsam; der
+         Flug durch den Raum laeuft immer. */
+      var tempo = 1.0 + 4.5 * (1 - glatt(900, 2200, t)) + 15 * abriss * abriss;
       gefahren += tempo * dt * 0.001;
       /* Der Himmel faehrt mit eigener, GEDECKELTER Geschwindigkeit. Beim
          ersten Anlauf schob der Abriss auch ihn an — und die eine grosse
@@ -866,8 +879,13 @@
           Math.round(symAbw * 1000)]);
       }
 
-      /* Der Himmel in halber Aufloesung, zwei Lagen, leichte Rolle. */
-      var roll = -0.04 + 0.05 * Math.min(1, t / 5800);
+      /* Der Himmel in halber Aufloesung, zwei Lagen, leichte Rolle — und
+         auch er kommt NAEHER: beide Lagen wachsen ueber den Auftakt um
+         acht Prozent. Zusammen mit der Annaeherung der Formation ist das
+         die Tiefe der Fahrt: alles kommt auf einen zu, jede Ebene in
+         ihrem eigenen Mass. */
+      var roll = -0.05 + 0.08 * Math.min(1, t / 5800);
+      var hzoom = 1 + 0.08 * Math.min(1, t / 6000);
       gg.setTransform(DPR / 2, 0, 0, DPR / 2, 0, 0);
       gg.globalCompositeOperation = "source-over";
       gg.globalAlpha = 1;
@@ -876,8 +894,8 @@
       gg.translate(MX, MY);
       gg.rotate(roll);
       gg.globalCompositeOperation = "lighter";
-      var s1 = Math.max(B, H) * 1.5;
-      var s2 = Math.max(B, H) * 2.1;
+      var s1 = Math.max(B, H) * 1.5 * hzoom;
+      var s2 = Math.max(B, H) * 2.1 * hzoom;
       gg.globalAlpha = 0.85;
       gg.drawImage(HIMMEL, -s1 / 2, -s1 / 2 + himmelFahrt * 6, s1, s1);
       gg.globalAlpha = 0.45;
@@ -951,7 +969,7 @@
            auf die Bahn, waehrend der Winkel schon laeuft. Beim Abriss
            weitet sich die Bahn wieder — dieselbe Bewegung, rueckwaerts
            und schneller. */
-        kp.rAkt = kp.r * (3.2 - 2.2 * aus(da)) * (1 + 2.4 * abriss * abriss);
+        kp.rAkt = kp.r * annaeh * (3.2 - 2.2 * aus(da)) * (1 + 2.4 * abriss * abriss);
         kp.a += kp.w * (1 + 7 * abriss * abriss) * dt * 0.001;
         kp.dreh += kp.drehW * (1 + 2.5 * abriss) * dt * 0.001;
         if (kp.mond) {
@@ -1012,7 +1030,7 @@
 
       function koerperMalen(kp) {
         /* Tiefe: hinten kleiner und mit Dunst davor, vorn groesser. */
-        var nah = 1 + 0.3 * kp.oz;
+        var nah = (1 + 0.3 * kp.oz) * annaeh;
         var gr = kp.gr * 2 * nah * (0.3 + 0.7 * aus(kp.da));
         var deck = blenden * kp.da * (0.62 + 0.38 * (kp.oz * 0.5 + 0.5));
 
@@ -1125,7 +1143,7 @@
       var kernDa = glatt(150, 900, t);
       if (kernDa > 0) {
         var puls = 1 + 0.03 * Math.sin(t * 0.0021);
-        var kg = Math.min(B, H) * 0.21 * puls * aus(kernDa) * (1 - 0.25 * abriss);
+        var kg = Math.min(B, H) * 0.21 * annaeh * puls * aus(kernDa) * (1 - 0.25 * abriss);
         g.globalCompositeOperation = "lighter";
         g.globalAlpha = blenden * kernDa * 0.85;
         var gg2 = kg * 3.4;
