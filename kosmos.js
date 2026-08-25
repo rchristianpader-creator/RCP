@@ -1251,14 +1251,17 @@
 
     return {
       planeten: planetenSetzen,
-      /* Zum Abriss springen — der Tipp des Ungeduldigen. Fruehestens ab
-         Sekunde eins, sonst nimmt ein versehentliches Tippen beim
-         Oeffnen die ganze Szene mit. */
+      /* Zum Abriss springen — der Tipp des Ungeduldigen, und der Abflug
+         des Ladebildschirms. Fruehestens ab Sekunde eins, aber ein zu
+         FRUEHER Wunsch wird VORGEMERKT, nicht verworfen: seit der
+         Deckel der Liste auf das fertig der Szene wartet, waere ein
+         verschluckter Wunsch eine Szene, die niemals endet — und die
+         Notbremse schnitte sie dann doch wieder mitten im Flug ab. */
       ende: function () {
-        if (!laeuft || !t0) return;
-        var t = performance.now() - t0;
-        if (t < 1000) return;
-        if (t < abrissAb) abrissAb = t;
+        if (!laeuft) return;
+        var t = t0 ? (performance.now() - t0) : 0;
+        var ab = Math.max(t, 1000);
+        if (ab < abrissAb) abrissAb = ab;
       },
       abbrechen: function () { laeuft = false; aufraeumen(); }
     };
