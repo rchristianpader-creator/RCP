@@ -161,7 +161,7 @@
       var t = toene[(wuerfel() * toene.length) | 0];
       var r = gr * (0.03 + wuerfel() * wuerfel() * 0.26);
       var px = wuerfel() * gr, py = wuerfel() * gr;
-      var a = 0.07 + wuerfel() * 0.17;
+      var a = 0.05 + wuerfel() * 0.12;
       var lang = 1.6 + wuerfel() * wuerfel() * 3.4;
       x.save();
       x.translate(px, py);
@@ -301,6 +301,192 @@
     x.textBaseline = "middle";
     x.fillText(text, gr / 2, gr / 2 + gr * 0.02);
     return c;
+  }
+
+  /* ---- DIE SINNBILDER ----
+
+     "Du sollst die echten Logos nutzen und nicht Text." Fuer Aktien
+     liefert der Logo-Dienst die Originale — aber Gold, Oel oder Bitcoin
+     GEHOEREN niemandem, und ihre Scheiben trugen Buchstaben. Jetzt
+     tragen sie ihre echten, ueberall bekannten Zeichen, gezeichnet
+     statt geschrieben: Bitcoin als seine orangene Muenze, Ethereum als
+     seine Raute, die Metalle als Barrenstapel im eigenen Metall, Oel
+     als Tropfen, Gas als blaue Flamme, Korn als Aehre. Alles auf
+     demselben App-Glas wie die uebrigen Scheiben. Schrift bleibt nur
+     der aeusserste Rueckfall (Indizes, Unbekanntes). */
+  function barrenScheibe(gr, hell, mitte, dunkel) {
+    var c = tafel(gr, gr), x = c.getContext("2d");
+    scheibenGrund(x, gr);
+    function barren(mx, my, b, h) {
+      var s = b * 0.14;
+      x.beginPath();
+      x.moveTo(mx - b / 2, my + h / 2);
+      x.lineTo(mx - b / 2 + s, my - h / 2);
+      x.lineTo(mx + b / 2 - s, my - h / 2);
+      x.lineTo(mx + b / 2, my + h / 2);
+      x.closePath();
+      var v = x.createLinearGradient(0, my - h / 2, 0, my + h / 2);
+      v.addColorStop(0, hell);
+      v.addColorStop(0.55, mitte);
+      v.addColorStop(1, dunkel);
+      x.fillStyle = v;
+      x.fill();
+      x.lineWidth = Math.max(1, gr * 0.012);
+      x.strokeStyle = "rgba(0,0,0,0.35)";
+      x.stroke();
+      /* Die Glanzkante oben — Metall ohne Licht ist Pappe. */
+      x.beginPath();
+      x.moveTo(mx - b / 2 + s, my - h / 2 + 1);
+      x.lineTo(mx + b / 2 - s, my - h / 2 + 1);
+      x.strokeStyle = "rgba(255,255,255,0.55)";
+      x.stroke();
+    }
+    var b = gr * 0.34, h = gr * 0.15;
+    barren(gr * 0.335, gr * 0.60, b, h);
+    barren(gr * 0.665, gr * 0.60, b, h);
+    barren(gr * 0.5, gr * 0.43, b, h);
+    return c;
+  }
+  function muenzeBtc(gr) {
+    var c = tafel(gr, gr), x = c.getContext("2d");
+    scheibenGrund(x, gr);
+    var m = gr / 2, r = gr * 0.3;
+    var v = x.createRadialGradient(m - r * 0.4, m - r * 0.5, r * 0.1, m, m, r);
+    v.addColorStop(0, "#f9a83b");
+    v.addColorStop(0.6, "#f7931a");
+    v.addColorStop(1, "#d4770e");
+    x.beginPath(); x.arc(m, m, r, 0, 6.2832);
+    x.fillStyle = v; x.fill();
+    x.lineWidth = Math.max(1, gr * 0.014);
+    x.strokeStyle = "rgba(0,0,0,0.25)";
+    x.stroke();
+    x.fillStyle = "#fff";
+    x.font = "700 " + Math.round(r * 1.3) + "px -apple-system, 'Segoe UI', sans-serif";
+    x.textAlign = "center";
+    x.textBaseline = "middle";
+    x.save();
+    x.translate(m, m + r * 0.04);
+    x.rotate(0.14);
+    x.fillText("₿", 0, 0);
+    x.restore();
+    return c;
+  }
+  function rauteEth(gr) {
+    var c = tafel(gr, gr), x = c.getContext("2d");
+    scheibenGrund(x, gr);
+    var m = gr / 2;
+    var o = gr * 0.20, u = gr * 0.80, mitte = gr * 0.52, b = gr * 0.20;
+    /* Die Raute: oben zwei Flaechen, unten zwei — die rechte jeweils
+       dunkler, so traegt das flache Zeichen sein Volumen. */
+    function flaeche(punkte, ton) {
+      x.beginPath();
+      x.moveTo(punkte[0][0], punkte[0][1]);
+      for (var i = 1; i < punkte.length; i++) x.lineTo(punkte[i][0], punkte[i][1]);
+      x.closePath();
+      x.fillStyle = ton;
+      x.fill();
+    }
+    flaeche([[m, o], [m - b, mitte], [m, mitte + gr * 0.06]], "rgba(226,232,236,0.9)");
+    flaeche([[m, o], [m + b, mitte], [m, mitte + gr * 0.06]], "rgba(168,178,188,0.9)");
+    flaeche([[m, mitte + gr * 0.1], [m - b * 0.86, mitte + gr * 0.035], [m, u]], "rgba(206,214,220,0.85)");
+    flaeche([[m, mitte + gr * 0.1], [m + b * 0.86, mitte + gr * 0.035], [m, u]], "rgba(140,150,160,0.85)");
+    return c;
+  }
+  function tropfenScheibe(gr) {
+    var c = tafel(gr, gr), x = c.getContext("2d");
+    scheibenGrund(x, gr);
+    var m = gr / 2;
+    x.beginPath();
+    x.moveTo(m, gr * 0.22);
+    x.bezierCurveTo(m + gr * 0.02, gr * 0.34, m + gr * 0.2, gr * 0.44, m + gr * 0.2, gr * 0.58);
+    x.bezierCurveTo(m + gr * 0.2, gr * 0.71, m + gr * 0.11, gr * 0.78, m, gr * 0.78);
+    x.bezierCurveTo(m - gr * 0.11, gr * 0.78, m - gr * 0.2, gr * 0.71, m - gr * 0.2, gr * 0.58);
+    x.bezierCurveTo(m - gr * 0.2, gr * 0.44, m - gr * 0.02, gr * 0.34, m, gr * 0.22);
+    x.closePath();
+    var v = x.createLinearGradient(0, gr * 0.22, 0, gr * 0.78);
+    v.addColorStop(0, "#3a3f45");
+    v.addColorStop(1, "#101316");
+    x.fillStyle = v;
+    x.fill();
+    x.lineWidth = Math.max(1, gr * 0.012);
+    x.strokeStyle = "rgba(255,255,255,0.3)";
+    x.stroke();
+    x.beginPath();
+    x.ellipse(m - gr * 0.07, gr * 0.5, gr * 0.035, gr * 0.07, -0.5, 0, 6.2832);
+    x.fillStyle = "rgba(255,255,255,0.45)";
+    x.fill();
+    return c;
+  }
+  function flammeScheibe(gr) {
+    var c = tafel(gr, gr), x = c.getContext("2d");
+    scheibenGrund(x, gr);
+    var m = gr / 2;
+    function flamme(f, farbe1, farbe2) {
+      x.beginPath();
+      x.moveTo(m, gr * (0.5 - 0.28 * f));
+      x.bezierCurveTo(m + gr * 0.06 * f, gr * (0.5 - 0.16 * f), m + gr * 0.2 * f, gr * (0.5 - 0.08 * f), m + gr * 0.17 * f, gr * (0.5 + 0.12 * f));
+      x.bezierCurveTo(m + gr * 0.14 * f, gr * (0.5 + 0.26 * f), m - gr * 0.14 * f, gr * (0.5 + 0.26 * f), m - gr * 0.17 * f, gr * (0.5 + 0.12 * f));
+      x.bezierCurveTo(m - gr * 0.2 * f, gr * (0.5 - 0.06 * f), m - gr * 0.04 * f, gr * (0.5 - 0.12 * f), m, gr * (0.5 - 0.28 * f));
+      x.closePath();
+      var v = x.createLinearGradient(0, gr * (0.5 - 0.28 * f), 0, gr * (0.5 + 0.26 * f));
+      v.addColorStop(0, farbe1);
+      v.addColorStop(1, farbe2);
+      x.fillStyle = v;
+      x.fill();
+    }
+    flamme(1, "#79c4ff", "#2a6fd6");
+    flamme(0.55, "#d8efff", "#79c4ff");
+    return c;
+  }
+  function aehreScheibe(gr) {
+    var c = tafel(gr, gr), x = c.getContext("2d");
+    scheibenGrund(x, gr);
+    var m = gr / 2;
+    x.strokeStyle = "#c9a94e";
+    x.lineWidth = Math.max(1.5, gr * 0.024);
+    x.lineCap = "round";
+    x.beginPath();
+    x.moveTo(m, gr * 0.78);
+    x.lineTo(m, gr * 0.3);
+    x.stroke();
+    x.fillStyle = "#d9b45a";
+    x.strokeStyle = "rgba(0,0,0,0.25)";
+    x.lineWidth = 1;
+    for (var i = 0; i < 4; i++) {
+      var y = gr * (0.36 + i * 0.105);
+      var seite;
+      for (seite = -1; seite <= 1; seite += 2) {
+        x.save();
+        x.translate(m + seite * gr * 0.07, y);
+        x.rotate(seite * 0.65);
+        x.beginPath();
+        x.ellipse(0, 0, gr * 0.075, gr * 0.038, 0, 0, 6.2832);
+        x.fill();
+        x.stroke();
+        x.restore();
+      }
+    }
+    x.save();
+    x.translate(m, gr * 0.26);
+    x.beginPath();
+    x.ellipse(0, 0, gr * 0.04, gr * 0.075, 0, 0, 6.2832);
+    x.fill();
+    x.stroke();
+    x.restore();
+    return c;
+  }
+  /* Welches Sinnbild ein Wert traegt — oder null, dann faellt die Wahl
+     weiter (Logo-Dienst fuer Aktien, Schrift als letzter Rueckfall). */
+  function sinnBild(sym, gr) {
+    if (sym === "BTC-USD") return muenzeBtc(gr);
+    if (sym === "ETH-USD") return rauteEth(gr);
+    if (sym === "GC=F") return barrenScheibe(gr, "#f2d47c", "#d8a83c", "#9a7016");
+    if (sym === "SI=F") return barrenScheibe(gr, "#eceef2", "#bfc4cd", "#83899a");
+    if (sym === "HG=F") return barrenScheibe(gr, "#eda76e", "#c47a3e", "#8a4d20");
+    if (sym === "CL=F") return tropfenScheibe(gr);
+    if (sym === "NG=F") return flammeScheibe(gr);
+    if (sym === "ZC=F") return aehreScheibe(gr);
+    return null;
   }
 
   function bildScheibe(gr, bild) {
@@ -596,22 +782,37 @@
           dreh: (i * 1.7) % 6.2832,
           drehW: (0.3 + ((i * 29) % 10) * 0.04) * (i % 2 ? 1 : -1),
           bild: sym === "FET-USD" ? fetScheibe(96, wahl.farben)
-                                  : textScheibe(96, zeichenFuer(sym) || "?")
+                                  : (sinnBild(sym, 96) || textScheibe(96, zeichenFuer(sym) || "?"))
         };
         /* Dieselbe Vorfahrt wie in der Liste: eine EIGENE Adresse geht
            immer vor. Ohne p.logo fragt fuer Krypto und Rohstoffe niemand
            den Dienst (ohneLogo), Fetch.ai behaelt seine Zeichnung. Und
-           es wird GEZAEHLT, denn dieses Laden scheitert still. */
+           es wird GEZAEHLT, denn dieses Laden scheitert still.
+
+           KEIN WECHSEL VOR DEM AUGE: eine Marke mit Bildweg betritt die
+           Szene erst, wenn ihr echtes Logo da ist — vorher bleibt sie
+           im Nebel verborgen und blendet dann weich ein. Vorher stand
+           jede sofort mit ihrem Kuerzel da und sprang mitten im Flug
+           auf das Logo um ("das ist doof", zu Recht). Nur wenn der
+           Dienst gar nicht antwortet, faellt nach einer Frist das
+           Kuerzel als Rueckfall — und bleibt dann; getauscht wird nie
+           mehr, was man schon gesehen hat. Die Zeichen-Scheiben (Gold,
+           Bitcoin, ...) sind sofort bereit: das Zeichen IST dort die
+           echte Darstellung, wie auf den Karten. */
+        e.bereit = true;
         if (p.logo || (sym && !ohneLogo(sym))) {
+          e.bereit = false;
+          e.frist = jetzt + 2600;
           window.rcpKosmosLogos = window.rcpKosmosLogos || { angefragt: 0, geladen: 0 };
           window.rcpKosmosLogos.angefragt++;
           (function (k, quelle) {
             var b = new Image();
             b.onload = function () {
-              k.bild = bildScheibe(96, b);
+              if (k.auf == null) k.bild = bildScheibe(96, b);
+              k.bereit = true;
               window.rcpKosmosLogos.geladen++;
             };
-            b.onerror = function () {};
+            b.onerror = function () { k.bereit = true; };
             b.src = quelle;
           })(e, p.logo || "/.netlify/functions/logo?sym=" + encodeURIComponent(sym));
         }
@@ -732,9 +933,9 @@
         gg.globalCompositeOperation = "lighter";
         var s1 = Math.max(B, H) * 1.5 * hzoom;
         var s2 = Math.max(B, H) * 2.1 * hzoom;
-        gg.globalAlpha = 0.94;
+        gg.globalAlpha = 0.62;
         gg.drawImage(HIMMEL, -s1 / 2 - camX * 0.6, -s1 / 2 - camY * 0.6, s1, s1);
-        gg.globalAlpha = 0.52;
+        gg.globalAlpha = 0.34;
         gg.drawImage(HIMMEL, -s2 / 2 - camX * 0.25, -s2 / 2 - camY * 0.25, s2, s2);
       }
 
@@ -794,7 +995,7 @@
           }
           if (leer) continue;
           g.lineWidth = art.breit;
-          g.strokeStyle = "rgba(" + art.farbe + "," + (blenden * (0.2 + stq * 0.26)).toFixed(3) + ")";
+          g.strokeStyle = "rgba(" + art.farbe + "," + (blenden * (0.16 + stq * 0.22)).toFixed(3) + ")";
           g.stroke();
         }
         var pl = punkte[k];
@@ -808,7 +1009,7 @@
             g.arc(pl[j2], pl[j2 + 1], pr, 0, 6.2832);
           }
           if (leer2) continue;
-          g.fillStyle = "rgba(" + art.farbe + "," + (blenden * (0.3 + stp * 0.28)).toFixed(3) + ")";
+          g.fillStyle = "rgba(" + art.farbe + "," + (blenden * (0.24 + stp * 0.24)).toFixed(3) + ")";
           g.fill();
         }
       }
@@ -816,7 +1017,7 @@
          Pixeln und Sternen. */
       for (var fu = 0; fu < funken.length; fu += 3) {
         var fh = funken[fu + 2];
-        g.globalAlpha = blenden * (fh - 0.55) * 0.8;
+        g.globalAlpha = blenden * (fh - 0.55) * 0.6;
         var fgr = 5 + 8 * fh;
         g.drawImage(GLUT, funken[fu] - fgr / 2, funken[fu + 1] - fgr / 2, fgr, fgr);
       }
@@ -837,6 +1038,13 @@
           continue;
         }
         if (kz > 5600) continue;
+        /* Wer auf sein Logo wartet, bleibt unsichtbar — bis es da ist
+           oder die Frist faellt. kp.auf ist der Moment des Auftritts:
+           ab ihm blendet die Scheibe weich ein, und ab ihm wird ihr
+           Bild nie mehr getauscht. */
+        if (!kp.bereit && t > kp.frist) kp.bereit = true;
+        if (!kp.bereit) continue;
+        if (kp.auf == null) kp.auf = t;
         kp.kz = kz;
         reihe.push(kp);
       }
@@ -854,10 +1062,10 @@
         var kd = blenden * klemm((6400 - kernZ) / 3800, 0, 1);
         var puls = 1 + 0.03 * Math.sin(t * 0.0021);
         g.globalCompositeOperation = "lighter";
-        g.globalAlpha = kd * 0.88;
-        var gg2 = kg * 3.5 * puls;
+        g.globalAlpha = kd * 0.62;
+        var gg2 = kg * 3.0 * puls;
         g.drawImage(GLUT, kx - gg2 / 2, ky - gg2 / 2, gg2, gg2);
-        g.globalAlpha = kd * 0.3;
+        g.globalAlpha = kd * 0.22;
         var bb = kg * 6 * (0.7 + 0.3 * puls);
         g.drawImage(STREIF, kx - bb / 2, ky - kg * 0.16, bb, kg * 0.32);
         if (kg > 14) {
@@ -891,7 +1099,7 @@
            zu zerreissen: die Kamera fliegt durch sie hindurch. */
         var fern = klemm((5200 - kp2.kz) / 3300, 0, 1);
         var nah = klemm((kp2.kz - 110) / 320, 0, 1);
-        var deck = blenden * Math.pow(fern, 0.85) * nah;
+        var deck = blenden * Math.pow(fern, 0.85) * nah * glatt(kp2.auf, kp2.auf + 320, t);
         if (deck <= 0.01) continue;
         if (gr > maxGemalt && deck > 0.2) maxGemalt = gr;
 
@@ -938,7 +1146,7 @@
         }
         var df = F / dz;
         var dgr = klemm(600 * df, 20, 260);
-        g.globalAlpha = blenden * 0.07 * klemm((1600 - dz) / 1300, 0, 1);
+        g.globalAlpha = blenden * 0.05 * klemm((1600 - dz) / 1300, 0, 1);
         g.globalCompositeOperation = "lighter";
         g.drawImage(db.warm ? BOKEHWARM : BOKEH,
           MX + (db.x - camX) * df - dgr / 2, MY + (db.y - camY) * df - dgr / 2, dgr, dgr);
