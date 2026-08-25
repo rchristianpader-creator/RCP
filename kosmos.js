@@ -104,11 +104,11 @@
       x.rotate(arme[i][0]);
       var l = m * arme[i][1], b = gr * arme[i][2];
       var v = x.createLinearGradient(-l, 0, l, 0);
-      v.addColorStop(0, "rgba(190,214,255,0)");
-      v.addColorStop(0.34, "rgba(214,232,255,0.34)");
+      v.addColorStop(0, "rgba(192,220,212,0)");
+      v.addColorStop(0.34, "rgba(216,236,229,0.34)");
       v.addColorStop(0.5, "rgba(255,255,255,0.85)");
-      v.addColorStop(0.66, "rgba(214,232,255,0.34)");
-      v.addColorStop(1, "rgba(190,214,255,0)");
+      v.addColorStop(0.66, "rgba(216,236,229,0.34)");
+      v.addColorStop(1, "rgba(192,220,212,0)");
       x.fillStyle = v;
       x.fillRect(-l, -b / 2, l * 2, b);
       x.restore();
@@ -141,20 +141,23 @@
      Aufloesung benutzt — Nebel IST unscharf. */
   function himmel(gr, wuerfel) {
     var c = tafel(gr, gr), x = c.getContext("2d");
-    x.fillStyle = "#050808";
+    x.fillStyle = "#0a0d0c";
     x.fillRect(0, 0, gr, gr);
 
-    /* DIE FARBEN DER APP, nicht irgendein Weltraum: die drei Lichtfelder
-       unter jeder Seite sind Stahlblau (64,108,138), Bronze (126,96,62)
-       und Flieder (78,62,104). Der Nebel nimmt genau diese drei Toene,
-       nur kraeftiger — je zwei Stufen pro Ton. Vorher stand hier die
-       Palette aus stern.js, und die war blauer und kuehler als die App;
-       "Universum passend zur App" heisst: dieselben Felder, nur am
-       Himmel. */
+    /* DIE FARBEN DER APP, diesmal woertlich: der Grund jeder Seite ist
+       --bg #0a0d0c, und darauf liegen VIER Lichtfelder — Stahlblau
+       (38,74,96), Tuerkis (28,88,78), Bronze (112,82,52) und Flieder
+       (64,44,78), so stehen sie in stil.css. Der erste Anlauf hatte die
+       Toene "kraeftiger" gemacht und dabei den Farbton verschoben (blauer,
+       violetter) und das Tuerkis ganz vergessen — und genau das sah man:
+       "nicht dieselbe App Farbe". Jetzt je Ton die Originalstufe und eine
+       aufgehellte MIT GLEICHEM VERHAELTNIS der Kanaele — heller duerfen
+       sie werden, anders nicht. */
     var toene = [
-      [76, 130, 168], [58, 100, 130],
-      [158, 120, 76], [126, 96, 62],
-      [112, 90, 152], [84, 68, 116]
+      [38, 74, 96], [52, 100, 130],
+      [28, 88, 78], [38, 118, 105],
+      [112, 82, 52], [148, 110, 70],
+      [64, 44, 78], [86, 60, 105]
     ];
     var richtung = 0.5;
     x.globalCompositeOperation = "lighter";
@@ -182,8 +185,8 @@
       var dx = wuerfel() * gr, dy = wuerfel() * gr;
       var da = 0.16 + wuerfel() * 0.3;
       var dv = x.createRadialGradient(dx, dy, 0, dx, dy, rr);
-      dv.addColorStop(0, "rgba(4,7,7," + da.toFixed(3) + ")");
-      dv.addColorStop(1, "rgba(4,7,7,0)");
+      dv.addColorStop(0, "rgba(6,9,8," + da.toFixed(3) + ")");
+      dv.addColorStop(1, "rgba(6,9,8,0)");
       x.fillStyle = dv;
       x.fillRect(dx - rr, dy - rr, rr * 2, rr * 2);
     }
@@ -191,7 +194,7 @@
     for (var s = 0; s < 150; s++) {
       var sr = 0.8 + wuerfel() * wuerfel() * 2.2;
       var sa = 0.08 + wuerfel() * 0.2;
-      x.fillStyle = "rgba(" + (196 + ((wuerfel() * 50) | 0)) + ",220,255," + sa.toFixed(3) + ")";
+      x.fillStyle = "rgba(" + (196 + ((wuerfel() * 50) | 0)) + ",224,214," + sa.toFixed(3) + ")";
       x.beginPath();
       x.arc(wuerfel() * gr, wuerfel() * gr, sr, 0, 6.2832);
       x.fill();
@@ -281,8 +284,8 @@
     x.globalCompositeOperation = "lighter";
     var sv = x.createRadialGradient(m + r * 0.52, m + r * 0.6, r * 0.1,
                                     m + r * 0.52, m + r * 0.6, r * 1.15);
-    sv.addColorStop(0, "rgba(150,196,255,0.42)");
-    sv.addColorStop(0.4, "rgba(120,170,255,0.1)");
+    sv.addColorStop(0, "rgba(150,206,192,0.42)");
+    sv.addColorStop(0.4, "rgba(118,186,168,0.1)");
     sv.addColorStop(1, "rgba(0,0,0,0)");
     x.fillStyle = sv;
     x.fillRect(0, 0, gr, gr);
@@ -444,22 +447,25 @@
     var wuerfel = wuerfelWerk(20260820);
     var HIMMEL = himmel(512, wuerfel);
     var KORN = korn(128, wuerfel);
+    /* Auch das Licht traegt die App-Palette: nicht das generische
+       Weltraum-Blau, sondern das kuehle Tuerkis-Weiss, das zu #0a0d0c und
+       den Feldern der Seiten gehoert. */
     var GLUT = glut(256, [
-      [0, "rgba(226,236,255,0.7)"],
-      [0.16, "rgba(168,190,255,0.4)"],
-      [0.36, "rgba(112,132,250,0.16)"],
-      [0.66, "rgba(72,96,220,0.05)"],
+      [0, "rgba(228,242,238,0.7)"],
+      [0.16, "rgba(166,214,202,0.4)"],
+      [0.36, "rgba(100,186,166,0.16)"],
+      [0.66, "rgba(56,140,122,0.05)"],
       [1, "rgba(0,0,0,0)"]
     ]);
     var SPINNE = spinne(160);
-    var STREIF = streifen(512, 48, "rgba(150,200,255,0.5)");
-    var BOKEH = bokeh(96, "150,186,255");
+    var STREIF = streifen(512, 48, "rgba(150,214,196,0.5)");
+    var BOKEH = bokeh(96, "150,206,190");
     var BOKEHWARM = bokeh(96, "255,208,158");
     var BLITZ = glut(256, [
       [0, "rgba(255,255,255,0.95)"],
-      [0.1, "rgba(226,238,255,0.6)"],
-      [0.26, "rgba(180,204,255,0.28)"],
-      [0.55, "rgba(120,150,255,0.07)"],
+      [0.1, "rgba(228,244,238,0.6)"],
+      [0.26, "rgba(178,220,206,0.28)"],
+      [0.55, "rgba(110,180,160,0.07)"],
       [1, "rgba(0,0,0,0)"]
     ]);
 
@@ -557,7 +563,7 @@
       });
     }
     var TOPF = [
-      { farbe: "199,216,255", breit: 1.0 },
+      { farbe: "196,222,213", breit: 1.0 },
       { farbe: "255,255,255", breit: 1.15 },
       { farbe: "255,241,206", breit: 1.05 },
       { farbe: "255,206,158", breit: 0.95 }
@@ -612,7 +618,7 @@
              abwechselnde Richtung. Eine Formation, in der alle im
              Gleichtakt staenden, saehe wieder nach Schaubild aus. */
           dreh: (i * 1.7) % 6.2832,
-          drehW: (0.7 + ((i * 29) % 10) * 0.09) * (i % 2 ? 1 : -1),
+          drehW: (0.32 + ((i * 29) % 10) * 0.045) * (i % 2 ? 1 : -1),
           /* Fetch.ai bringt seine gezeichnete Marke mit, alle anderen ihr
              Kuerzel — bis das Bild da ist. */
           bild: sym === "FET-USD" ? fetScheibe(96, wahl.farben)
@@ -691,8 +697,11 @@
         var ring = {
           fak: fak,
           zahl: zahl,
-          /* Kepler je RING, gegenlaeufig im Wechsel. */
-          w: 1.45 * Math.pow(bm.innen / radius, 1.5) * (ri % 2 ? -1 : 1),
+          /* Kepler je RING, gegenlaeufig im Wechsel. 0,62 rad/s innen —
+             eine gute halbe Umdrehung ueber den ganzen Auftakt. Der erste
+             Wurf stand auf 1,45, und das war "viel zu schnell": ein
+             Uhrwerk zeigt seine Ordnung nur, wenn man ihr folgen kann. */
+          w: 0.62 * Math.pow(bm.innen / radius, 1.5) * (ri % 2 ? -1 : 1),
           /* Alle Koerper eines Rings kommen ZUSAMMEN — eine Formation,
              die geschlossen einrastet, ist der halbe Auftritt. */
           ab: Math.max(560, jetzt + 80) + ri * 300,
@@ -721,7 +730,7 @@
           a: k3 * 2.1 + 0.4,
           /* Deutlich schneller als jede Hauptbahn — ein Mond, der so
              langsam laeuft wie sein Traeger, sieht angeklebt aus. */
-          w: 3.4 + k3 * 0.55,
+          w: 1.7 + k3 * 0.3,
           r: m3.traeger.gr * 2.5
         };
       }
@@ -808,7 +817,7 @@
       var blenden = glatt(0, 500, t);
       /* Drei Gaenge: WARP beim Einflug (die Koerper kommen ja gerade aus
          genau dieser Fahrt), Ruhe im Stand, Sog beim Abriss. */
-      var tempo = 0.5 + 7 * (1 - glatt(900, 2000, t)) + 15 * abriss * abriss;
+      var tempo = 0.35 + 4 * (1 - glatt(900, 2200, t)) + 15 * abriss * abriss;
       gefahren += tempo * dt * 0.001;
       /* Der Himmel faehrt mit eigener, GEDECKELTER Geschwindigkeit. Beim
          ersten Anlauf schob der Abriss auch ihn an — und die eine grosse
@@ -862,7 +871,7 @@
       gg.setTransform(DPR / 2, 0, 0, DPR / 2, 0, 0);
       gg.globalCompositeOperation = "source-over";
       gg.globalAlpha = 1;
-      gg.fillStyle = "#050808";
+      gg.fillStyle = "#0a0d0c";
       gg.fillRect(0, 0, B, H);
       gg.translate(MX, MY);
       gg.rotate(roll);
@@ -967,7 +976,7 @@
           var ringO = alleRinge[ri];
           var rk = ringO.koerper[0];
           if (!rk || !rk.da) continue;
-          g.strokeStyle = "rgba(170,196,255," + (0.085 * blenden * (1 - abriss)).toFixed(3) + ")";
+          g.strokeStyle = "rgba(168,206,194," + (0.085 * blenden * (1 - abriss)).toFixed(3) + ")";
           g.beginPath();
           g.ellipse(zAktX, zAktY, rk.rAkt, rk.rAkt * QUETSCH, kippeAkt, 0, 6.2832);
           g.stroke();
@@ -978,7 +987,7 @@
           var seitFest = t - (ringO.ab + 780);
           if (seitFest > 0 && seitFest < 480) {
             var pf = Math.pow(1 - seitFest / 480, 2);
-            g.strokeStyle = "rgba(214,232,255," + (0.55 * pf * blenden).toFixed(3) + ")";
+            g.strokeStyle = "rgba(216,236,229," + (0.55 * pf * blenden).toFixed(3) + ")";
             g.lineWidth = 1 + 2.2 * pf;
             g.beginPath();
             g.ellipse(zAktX, zAktY, rk.rAkt, rk.rAkt * QUETSCH, kippeAkt, 0, 6.2832);
@@ -989,7 +998,7 @@
           /* Ein Funke laeuft auf jeder Bahn, gegen die Laufrichtung des
              Rings — das Zifferblatt bekommt einen Sekundenzeiger. */
           if (seitFest > 0 && !abriss) {
-            var fw = t * 0.0021 * (ri % 2 ? 1 : -1) + ri * 2.1;
+            var fw = t * 0.0009 * (ri % 2 ? 1 : -1) + ri * 2.1;
             var fc = Math.cos(fw), fsn = Math.sin(fw);
             var fex = rk.rAkt * fc, fey = rk.rAkt * fsn * QUETSCH;
             var fpx = zAktX + fex * KO - fey * SI;
@@ -1012,7 +1021,7 @@
            Bewegungsunschaerfe des Aufbruchs. */
         var lang = 0.22 + kp.w * 0.1 + abriss * 1.6;
         g.globalCompositeOperation = "lighter";
-        g.strokeStyle = "rgba(178,202,255," + (0.16 * deck).toFixed(3) + ")";
+        g.strokeStyle = "rgba(176,208,197," + (0.16 * deck).toFixed(3) + ")";
         g.lineWidth = Math.max(1, gr * 0.1);
         g.lineCap = "round";
         g.beginPath();
@@ -1042,7 +1051,7 @@
           mgr = mond.e.gr * 2 * nah * (1 + 0.12 * ms) * (0.3 + 0.7 * aus(kp.da));
           mdeck = deck * 0.95;
           if (!sparsam) {
-            g.strokeStyle = "rgba(170,196,255," + (0.06 * deck * (1 - abriss)).toFixed(3) + ")";
+            g.strokeStyle = "rgba(168,206,194," + (0.06 * deck * (1 - abriss)).toFixed(3) + ")";
             g.lineWidth = 1;
             g.beginPath();
             g.ellipse(kp.ox, kp.oy, mond.r * nah, mond.r * nah * QUETSCH, kippeAkt, 0, 6.2832);
@@ -1072,7 +1081,7 @@
           var rlen = Math.sqrt(rdx * rdx + rdy * rdy) || 1;
           var schweif = (1 - aus(kp.da)) * 150 + 10;
           g.globalCompositeOperation = "lighter";
-          g.strokeStyle = "rgba(200,222,255," + (0.5 * deck).toFixed(3) + ")";
+          g.strokeStyle = "rgba(198,226,215," + (0.5 * deck).toFixed(3) + ")";
           g.lineWidth = Math.max(1.2, gr * 0.14);
           g.lineCap = "round";
           g.beginPath();
@@ -1156,7 +1165,7 @@
         g.globalCompositeOperation = "lighter";
         g.globalAlpha = Math.pow(1 - wp, 1.6) * 0.5 * blenden;
         g.lineWidth = 2.5 * (1 - wp) + 0.5;
-        g.strokeStyle = "rgba(190,214,255,1)";
+        g.strokeStyle = "rgba(192,220,212,1)";
         g.beginPath();
         g.ellipse(zAktX, zAktY, wr, wr * (QUETSCH + 0.28), kippeAkt, 0, 6.2832);
         g.stroke();
@@ -1170,10 +1179,10 @@
          Raum weitergeht, wo die Formation aufhoert. Hoechstens zwei
          zugleich, keiner in der Sparschaltung, keiner im Abriss (dort
          streckt sich ohnehin alles zu Strichen). */
-      if (!sparsam && !abriss && t > naechsterKomet && kometen.length < 2) {
-        naechsterKomet = t + 1500 + wuerfel() * 900;
+      if (!sparsam && !abriss && t > naechsterKomet && kometen.length < 1) {
+        naechsterKomet = t + 2400 + wuerfel() * 1200;
         var kwinkel = 0.5 + wuerfel() * 0.5;
-        var ktempo = 0.45 + wuerfel() * 0.25;
+        var ktempo = 0.3 + wuerfel() * 0.15;
         kometen.push({
           x: -40 + wuerfel() * B * 0.5,
           y: -30,
@@ -1185,13 +1194,13 @@
       for (var ki = kometen.length - 1; ki >= 0; ki--) {
         var kom = kometen[ki];
         var alter = t - kom.ab;
-        if (alter > 1100) { kometen.splice(ki, 1); continue; }
+        if (alter > 1500) { kometen.splice(ki, 1); continue; }
         kom.x += kom.vx * dt;
         kom.y += kom.vy * dt;
-        var ka = Math.sin(Math.min(1, alter / 1100) * 3.1416) * 0.7 * blenden;
+        var ka = Math.sin(Math.min(1, alter / 1500) * 3.1416) * 0.7 * blenden;
         var kv = Math.sqrt(kom.vx * kom.vx + kom.vy * kom.vy) || 1;
         g.globalCompositeOperation = "lighter";
-        g.strokeStyle = "rgba(214,232,255," + ka.toFixed(3) + ")";
+        g.strokeStyle = "rgba(216,236,229," + ka.toFixed(3) + ")";
         g.lineWidth = 1.4;
         g.lineCap = "round";
         g.beginPath();
