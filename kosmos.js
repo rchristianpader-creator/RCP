@@ -924,37 +924,57 @@
          stroemen von dort an ihr vorbei nach hinten unten links —
          dorthin, wo sie herkam. */
       var slX = zAktX + B * 0.22, slY = zAktY - H * 0.15;
+      /* DIE VERSCHLUSSZEIT — der Umbau gegen das Billige. Vorher wurde
+         jeder Stern immer als Strich seiner vollen Bildbewegung gemalt:
+         im Reisegang zog das Feld dauerhaft leinwandlange, duenne, harte
+         Linien, und genau das ist der Bildschirmschoner-Blick. Eine
+         Kamera verschmiert aber nur, was schneller ist als ihr
+         Verschluss: im Flug sind Sterne PUNKTE mit weichem Glimmen, und
+         erst wenn es reisst — der Warp des Anfangs, der Sog des Endes —
+         strecken sie sich zu Strichen. Gemalt wird also die Bewegung mal
+         Verschluss (0,12 in Ruhe, 1 im Riss); was kuerzer bleibt als
+         gut zwei Punkte, ist ein Punkt. */
+      var zug = klemm((tempo - 0.9) / 4, 0.12, 1);
       g.globalCompositeOperation = "lighter";
       var pfade = [[], [], [], []];
+      var punkte = [[], [], [], []];
+      var funken = [];
       for (var i = 0; i < sterne.length; i++) {
         var s = sterne[i];
-        var alt = s.d;
-        s.d += (s.d * 0.055 + 1.1) * s.v * tempo * (dt / 16.667);
+        var schritt = (s.d * 0.055 + 1.1) * s.v * tempo * (dt / 16.667);
+        s.d += schritt;
         if (s.d > WEIT) {
           s.w = wuerfel() * 6.2832;
           s.d = 3 + wuerfel() * 22;
-          alt = s.d;
+          schritt = 0;
         }
         var co = Math.cos(s.w), si = Math.sin(s.w);
         var hell = s.h * klemm((s.d - 14) / (WEIT * 0.3), 0, 1) *
           (0.78 + 0.22 * Math.sin(t * 0.001 * s.fs + s.fp));
-        pfade[s.topf].push(slX + co * alt, slY + si * alt,
-                           slX + co * s.d, slY + si * s.d, hell);
+        if (hell <= 0.02) continue;
+        var px = slX + co * s.d, py = slY + si * s.d;
+        var schweifL = schritt * zug;
+        if (schweifL > 2.2) {
+          pfade[s.topf].push(px - co * schweifL, py - si * schweifL, px, py, hell);
+        } else {
+          punkte[s.topf].push(px, py, hell);
+          /* Die hellsten bekommen ihr Glimmen — wenige, sonst ist es
+             wieder Lametta. */
+          if (hell > 0.62 && !sparsam) funken.push(px, py, hell);
+        }
       }
       g.lineCap = "round";
       for (var k = 0; k < TOPF.length; k++) {
-        var liste = pfade[k];
-        if (!liste.length) continue;
         var art = TOPF[k];
+        var liste = pfade[k];
         for (var st = 0; st < 3; st++) {
-          g.beginPath();
           var leer = true;
           for (var j = 0; j < liste.length; j += 5) {
             var h = liste[j + 4];
             if (Math.min(2, (h * 3) | 0) !== st) continue;
+            if (leer) { g.beginPath(); leer = false; }
             g.moveTo(liste[j], liste[j + 1]);
             g.lineTo(liste[j + 2], liste[j + 3]);
-            leer = false;
           }
           if (leer) continue;
           var kraftS = blenden * (0.2 + st * 0.26);
@@ -962,7 +982,31 @@
           g.strokeStyle = "rgba(" + art.farbe + "," + kraftS.toFixed(3) + ")";
           g.stroke();
         }
+        var pl = punkte[k];
+        for (var st2 = 0; st2 < 3; st2++) {
+          var leer2 = true;
+          for (var j2 = 0; j2 < pl.length; j2 += 3) {
+            var h2 = pl[j2 + 2];
+            if (Math.min(2, (h2 * 3) | 0) !== st2) continue;
+            if (leer2) { g.beginPath(); leer2 = false; }
+            var pr = art.breit * (0.55 + 0.75 * h2);
+            g.moveTo(pl[j2] + pr, pl[j2 + 1]);
+            g.arc(pl[j2], pl[j2 + 1], pr, 0, 6.2832);
+          }
+          if (leer2) continue;
+          g.fillStyle = "rgba(" + art.farbe + "," + (blenden * (0.3 + st2 * 0.28)).toFixed(3) + ")";
+          g.fill();
+        }
       }
+      /* Das weiche Glimmen der hellen Punkte — der Unterschied zwischen
+         Pixeln und Sternen. */
+      for (var fu = 0; fu < funken.length; fu += 3) {
+        var fh = funken[fu + 2];
+        g.globalAlpha = blenden * (fh - 0.5) * 0.7;
+        var fgr = 5 + 8 * fh;
+        g.drawImage(GLUT, funken[fu] - fgr / 2, funken[fu + 1] - fgr / 2, fgr, fgr);
+      }
+      g.globalAlpha = 1;
 
       /* Unscharfe Punkte im Vordergrund. */
       for (var m = 0; m < (sparsam ? 0 : 5); m++) {
@@ -1094,8 +1138,8 @@
         }
         function mondMalen() {
           g.globalCompositeOperation = "lighter";
-          g.globalAlpha = mdeck * 0.6;
-          var mlg = mgr * 2.2;
+          g.globalAlpha = mdeck * 0.32;
+          var mlg = mgr * 1.7;
           g.drawImage(GLUT, mx - mlg / 2, my - mlg / 2, mlg, mlg);
           var mquer = Math.abs(Math.cos(mond.e.dreh));
           var mschmal = mgr * Math.max(0.16, mquer);
@@ -1115,8 +1159,8 @@
           var rlen = Math.sqrt(rdx * rdx + rdy * rdy) || 1;
           var schweif = (1 - aus(kp.da)) * 150 + 10;
           g.globalCompositeOperation = "lighter";
-          g.strokeStyle = "rgba(198,226,215," + (0.5 * deck).toFixed(3) + ")";
-          g.lineWidth = Math.max(1.2, gr * 0.14);
+          g.strokeStyle = "rgba(198,226,215," + (0.34 * deck).toFixed(3) + ")";
+          g.lineWidth = Math.max(1, gr * 0.1);
           g.lineCap = "round";
           g.beginPath();
           g.moveTo(kp.ox, kp.oy);
@@ -1134,8 +1178,13 @@
         }
 
         g.globalCompositeOperation = "lighter";
-        g.globalAlpha = deck * 0.75;
-        var lg = gr * 2.4;
+        /* Ein Hauch Glimmen, kein Scheinwerfer: 0,75 auf 2,4-facher
+           Groesse machte aus jeder Scheibe eine Leuchtblase — und viele
+           grosse weiche Blasen uebereinander sind genau das, was ein
+           Bild billig macht. Das Licht gehoert dem Kern und den
+           Blitzen; die Koerper sind Dinge, die es empfangen. */
+        g.globalAlpha = deck * 0.38;
+        var lg = gr * 1.8;
         g.drawImage(GLUT, kp.ox - lg / 2, kp.oy - lg / 2, lg, lg);
         g.globalAlpha = deck;
         g.globalCompositeOperation = "source-over";
