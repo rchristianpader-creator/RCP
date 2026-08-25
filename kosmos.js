@@ -849,6 +849,7 @@
        Drift und eine traege Rolle: eine Kamera, die haargenau auf der
        Achse klebt, sieht nach Werkzeug aus, nicht nach Hand. */
     var fahrt = 0, driftX = 0, driftY = 0;
+    var abflugFahrt = -1, abflugRest = 0;
     var sparsam = false, dtSumme = 0, dtZahl = 0, hoefe = true, himmelTakt = 0;
     var abrissAb = bahnDauer;
     var bildnummer = 0;
@@ -883,7 +884,7 @@
          60er-Ziel (ueber 21 ms im Mittel), das Fenster reicht ueber die
          ganze Reise, und geopfert wird mehr: halbes Sternenfeld, der
          Staub, die Hoefe der Scheiben, und die Dichte faellt auf 1. */
-      if (!sparsam && t > 400 && t < 4000) {
+      if (!sparsam && t > 400) {
         dtSumme += dt; dtZahl++;
         if (dtZahl >= 24) {
           if (dtSumme / dtZahl > 21) {
@@ -902,13 +903,29 @@
 
       /* Die Fahrt: sanfter Anlauf, dann Reisegeschwindigkeit — bemessen
          so, dass die Gasse bis zum geplanten Abriss durchflogen ist.
-         Beim Abriss zieht sie hinein in den Kern. Die Liste bestellt
-         ihren Abriss frueher, als die Reise geplant war: dann reisst
-         die Fahrt eben mitten aus der Gasse — auch das ist ein Ende. */
-      var reiseZeit = klemm(bahnDauer, 3600, 5600);
-      var V = (zielZ - 550) / (reiseZeit - 600);
-      var v = V * glatt(120, 950, t) * (1 + 7 * abriss * abriss);
-      fahrt += v * dt;
+
+         DAS ENDE IST DIE ANKUNFT IM APP-ZEICHEN, immer. Vorher hiess
+         Abriss nur "schneller in dieselbe Richtung" — wer frueh tippte
+         oder den kurzen Fahrplan der Liste hatte, bekam einen Blitz
+         mitten in der Gasse, weit vor dem Ziel; das Zeichen blieb
+         klein, und der Flug wirkte abgebrochen statt fertig. Jetzt
+         merkt sich der Abriss die Reststrecke bis kurz vor den Kern
+         und faehrt genau sie zu Ende — weich anziehend, weich
+         ankommend (Smoothstep): so steht das Zeichen die letzten
+         dreihundert Millisekunden GROSS im Bild, statt erst im
+         allerletzten Wimpernschlag aufzuplatzen. Man fliegt IN das
+         Zeichen hinein — von wo auch immer die Reise gerade war. */
+      if (abriss > 0) {
+        if (abflugFahrt < 0) {
+          abflugFahrt = fahrt;
+          abflugRest = Math.max(200, zielZ - 70 - fahrt);
+        }
+        fahrt = abflugFahrt + abflugRest * abriss * abriss * (3 - 2 * abriss);
+      } else {
+        var reiseZeit = klemm(bahnDauer, 3600, 5600);
+        var V = (zielZ - 550) / (reiseZeit - 600);
+        fahrt += V * glatt(120, 950, t) * dt;
+      }
       driftX += 0.010 * glatt(500, 2200, t) * (1 - abriss) * dt;
       driftY -= 0.006 * glatt(500, 2200, t) * (1 - abriss) * dt;
       var camX = klemm(driftX, -55, 55);
@@ -1063,24 +1080,35 @@
         var kf = F / kernZ;
         var kx = MX + (0 - camX) * kf;
         var ky = MY + (0 - camY) * kf;
-        var kg = klemm(300 * kf, 8, Math.min(B, H) * 1.4);
+        var kg = klemm(300 * kf, 8, Math.max(B, H) * 1.15);
         var kd = blenden * klemm((6400 - kernZ) / 3800, 0, 1);
         var puls = 1 + 0.03 * Math.sin(t * 0.0021);
+        /* Die Lichter des Kerns sind GEDECKELT, nicht mitwachsend: als
+           das Zeichen schirmfuellend wurde, skalierten Glut, Streifen
+           und Spinne mit — Blits von fuenftausend Pixeln Breite, jedes
+           Bild, und die Drossel-Messung brach von 60 auf 20 ein. Was
+           breiter ist als der Schirm, malt ohnehin nur Unsichtbares. */
+        var GRENZE = Math.max(B, H);
         g.globalCompositeOperation = "lighter";
-        g.globalAlpha = kd * 0.42;
-        var gg2 = kg * 3.0 * puls;
-        g.drawImage(GLUT, kx - gg2 / 2, ky - gg2 / 2, gg2, gg2);
+        if (kg < GRENZE * 0.75) {
+          g.globalAlpha = kd * 0.42;
+          var gg2 = Math.min(kg * 3.0 * puls, GRENZE * 1.3);
+          g.drawImage(GLUT, kx - gg2 / 2, ky - gg2 / 2, gg2, gg2);
+        }
         g.globalAlpha = kd * 0.18;
-        var bb = kg * 6 * (0.7 + 0.3 * puls);
-        g.drawImage(STREIF, kx - bb / 2, ky - kg * 0.16, bb, kg * 0.32);
+        var bb = Math.min(kg * 6 * (0.7 + 0.3 * puls), GRENZE * 1.6);
+        var bh2 = Math.min(kg * 0.32, GRENZE * 0.09);
+        g.drawImage(STREIF, kx - bb / 2, ky - bh2 / 2, bb, bh2);
         if (kg > 14) {
           g.globalAlpha = kd;
           g.globalCompositeOperation = "source-over";
           g.drawImage(KERN, kx - kg / 2, ky - kg / 2, kg, kg);
-          g.globalCompositeOperation = "lighter";
-          g.globalAlpha = kd * 0.32;
-          var sg = kg * 2.2;
-          g.drawImage(SPINNE, kx - sg / 2, ky - sg / 2, sg, sg);
+          if (kg < GRENZE * 0.55) {
+            g.globalCompositeOperation = "lighter";
+            g.globalAlpha = kd * 0.32;
+            var sg = Math.min(kg * 2.2, GRENZE * 1.15);
+            g.drawImage(SPINNE, kx - sg / 2, ky - sg / 2, sg, sg);
+          }
         }
         g.globalAlpha = 1;
       }
@@ -1162,9 +1190,14 @@
       }
       g.globalAlpha = 1;
 
-      /* Der Blitz der Ankunft. */
+      /* Der Blitz der Ankunft — er kommt aus der NAEHE, nicht aus der
+         Uhr: je dichter die Kamera am Zeichen, desto heller, und im
+         Moment des Eintauchens deckt er den Schnitt zur Seite. Vorher
+         hing er am Abriss-Fortschritt und zuendete auch dann, wenn das
+         Zeichen noch weit war — ein Blitz ohne Ursache. */
       if (abriss > 0) {
-        var hell2 = Math.pow(Math.sin(Math.min(1, abriss * 1.6) * 3.1416), 2) * 0.7;
+        var naehe = klemm((1150 - (zielZ - fahrt)) / 1050, 0, 1);
+        var hell2 = Math.pow(naehe, 2.4) * 0.9;
         if (hell2 > 0.004) {
           g.globalCompositeOperation = "lighter";
           g.globalAlpha = hell2 * blenden;
