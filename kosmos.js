@@ -490,7 +490,11 @@
       leinwand.style.width = B + "px";
       leinwand.style.height = H + "px";
       MX = B / 2; MY = H * 0.46;
-      WEIT = Math.sqrt(B * B + H * H) * 0.62;
+      /* 0,8 statt 0,62: seit der Fluchtpunkt der Sterne VORAUS liegt
+         (Verfolgungskamera), ist die gegenueberliegende Ecke weiter weg
+         als je ein Punkt vorher — mit dem alten Mass starben die Sterne,
+         bevor sie sie erreichten, und die Ecke blieb leer. */
+      WEIT = Math.sqrt(B * B + H * H) * 0.8;
       grund = tafel(Math.round(B * DPR / 2), Math.round(H * DPR / 2));
       gg = grund.getContext("2d");
       nachher = [];
@@ -896,10 +900,15 @@
       gg.globalCompositeOperation = "lighter";
       var s1 = Math.max(B, H) * 1.5 * hzoom;
       var s2 = Math.max(B, H) * 2.1 * hzoom;
+      /* Beide Lagen schwenken GEGEN die Flugrichtung (die Formation
+         fliegt nach oben rechts, der Raum zieht nach unten links vorbei),
+         die nahe schneller als die ferne — vorher liefen sie
+         gegeneinander, und das war Parallaxe ohne Richtung: Tiefe, aber
+         keine Verfolgung. */
       gg.globalAlpha = 0.85;
-      gg.drawImage(HIMMEL, -s1 / 2, -s1 / 2 + himmelFahrt * 6, s1, s1);
+      gg.drawImage(HIMMEL, -s1 / 2 - himmelFahrt * 10, -s1 / 2 + himmelFahrt * 7, s1, s1);
       gg.globalAlpha = 0.45;
-      gg.drawImage(HIMMEL, -s2 / 2, -s2 / 2 - himmelFahrt * 11, s2, s2);
+      gg.drawImage(HIMMEL, -s2 / 2 - himmelFahrt * 4, -s2 / 2 + himmelFahrt * 3, s2, s2);
 
       g.setTransform(DPR, 0, 0, DPR, 0, 0);
       g.clearRect(0, 0, B, H);
@@ -907,7 +916,14 @@
       g.globalAlpha = blenden;
       g.drawImage(grund, 0, 0, B, H);
 
-      /* Das Strichfeld. */
+      /* Das Strichfeld — mit dem FLUCHTPUNKT VORAUS. Bisher lag er in
+         der Formation selbst: die Kamera stand in ihrer Mitte, und der
+         Raum floss um sie herum auseinander. Eine Verfolgungskamera
+         haengt HINTER dem, was fliegt: der Punkt, auf den alles zulaeuft,
+         liegt der Formation in Flugrichtung voraus, und die Sterne
+         stroemen von dort an ihr vorbei nach hinten unten links —
+         dorthin, wo sie herkam. */
+      var slX = zAktX + B * 0.22, slY = zAktY - H * 0.15;
       g.globalCompositeOperation = "lighter";
       var pfade = [[], [], [], []];
       for (var i = 0; i < sterne.length; i++) {
@@ -922,8 +938,8 @@
         var co = Math.cos(s.w), si = Math.sin(s.w);
         var hell = s.h * klemm((s.d - 14) / (WEIT * 0.3), 0, 1) *
           (0.78 + 0.22 * Math.sin(t * 0.001 * s.fs + s.fp));
-        pfade[s.topf].push(zAktX + co * alt, zAktY + si * alt,
-                           zAktX + co * s.d, zAktY + si * s.d, hell);
+        pfade[s.topf].push(slX + co * alt, slY + si * alt,
+                           slX + co * s.d, slY + si * s.d, hell);
       }
       g.lineCap = "round";
       for (var k = 0; k < TOPF.length; k++) {
@@ -1199,10 +1215,14 @@
          streckt sich ohnehin alles zu Strichen). */
       if (!sparsam && !abriss && t > naechsterKomet && kometen.length < 1) {
         naechsterKomet = t + 2400 + wuerfel() * 1200;
-        var kwinkel = 0.5 + wuerfel() * 0.5;
+        /* MIT dem Strom: die Kometen ziehen dorthin, wohin auch die
+           Sterne stroemen (nach unten links, gegen die Flugrichtung) —
+           ein Komet quer zum Strom saehe aus wie aus einer anderen
+           Szene. */
+        var kwinkel = 2.3 + wuerfel() * 0.5;
         var ktempo = 0.3 + wuerfel() * 0.15;
         kometen.push({
-          x: -40 + wuerfel() * B * 0.5,
+          x: B * 0.45 + wuerfel() * B * 0.55,
           y: -30,
           vx: Math.cos(kwinkel) * ktempo,
           vy: Math.sin(kwinkel) * ktempo,
