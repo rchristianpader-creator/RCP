@@ -25,7 +25,11 @@
      0,0 - 0,9   Der Raum blendet auf, der Kern kommt aus der Tiefe.
      0,5 - 2,4   Die Marken fliegen einzeln herein, jede auf ihre Bahn.
      2,4 - 4,6   Das Uhrwerk: innen schnell, aussen langsam, die Koerper
-                 laufen voreinander und hintereinander vorbei.
+                 laufen voreinander und hintereinander vorbei — und jeder
+                 dreht sich dabei um die eigene Achse, wie eine Muenze.
+                 Die ganze Formation fliegt unterdessen durch den Raum:
+                 in eine Richtung, der Himmel zieht als Parallaxe hinten
+                 langsamer mit.
      4,6 - 5,8   Der Abriss: die Bahnen weiten sich, alles streckt sich
                  zu Strichen, ein Blitz — und die Seite liegt frei.
 
@@ -603,6 +607,12 @@
         var e = {
           sym: sym,
           gr: 19 + ((i * 37) % 7),
+          /* UM SICH SELBST: jede Scheibe dreht wie eine Muenze um die
+             eigene senkrechte Achse — eigener Anfang, eigenes Tempo,
+             abwechselnde Richtung. Eine Formation, in der alle im
+             Gleichtakt staenden, saehe wieder nach Schaubild aus. */
+          dreh: (i * 1.7) % 6.2832,
+          drehW: (0.7 + ((i * 29) % 10) * 0.09) * (i % 2 ? 1 : -1),
           /* Fetch.ai bringt seine gezeichnete Marke mit, alle anderen ihr
              Kuerzel — bis das Bild da ist. */
           bild: sym === "FET-USD" ? fetScheibe(96, wahl.farben)
@@ -691,13 +701,20 @@
       var c = Math.cos(k.a), s = Math.sin(k.a);
       var ex = k.rAkt * c, ey = k.rAkt * s * QUETSCH;
       return {
-        x: MX + ex * KO - ey * SI,
-        y: MY + ex * SI + ey * KO,
+        x: zAktX + ex * KO - ey * SI,
+        y: zAktY + ex * SI + ey * KO,
         z: s
       };
     }
 
     var laeuft = true, kennung = 0, t0 = 0, vorher = 0, gefahren = 0, himmelFahrt = 0;
+    /* DER FLUG DURCH DEN RAUM. Das Zentrum des Uhrwerks wandert — in EINE
+       Richtung, ohne Wendepunkte (die Lehre vom Stern: was sich
+       umentscheidet, zappelt). Der Himmel bleibt am Schirm verankert und
+       zieht nur traege nach: die Formation bewegt sich also GEGEN den
+       Himmel, und genau dieser Unterschied ist das Fliegen. Beim Abriss
+       beschleunigt der Flug in dieselbe Richtung. */
+    var flugX = 0, flugY = 0, zAktX = 0, zAktY = 0;
     /* DIE SPARSCHALTUNG. Die Szene misst ihre eigenen Bilder, und wenn das
        Geraet nicht hinterherkommt (Mittel der letzten Bilder ueber 34 ms),
        opfert sie zuerst, was am wenigsten fehlt: das halbe Strichfeld, die
@@ -744,7 +761,15 @@
       }
 
       var abriss = klemm((t - abrissAb) / endeDauer, 0, 1);
-      kippeAkt = KIPPE + t * 0.000016;
+      /* Sanft anfahren, beim Abriss durchziehen — und hart gedeckelt,
+         damit die Formation auch bei einem langen Auftakt (die Liste
+         bestellt den Abriss spaet) nie den sicheren Bereich verlaesst. */
+      var flugKraft = glatt(300, 1400, t) * (1 + 3.5 * abriss);
+      flugX += 9 * flugKraft * dt * 0.001;
+      flugY -= 6 * flugKraft * dt * 0.001;
+      zAktX = MX + klemm(flugX, -B * 0.15, B * 0.15);
+      zAktY = MY + klemm(flugY, -H * 0.13, H * 0.13);
+      kippeAkt = KIPPE + t * 0.000028;
       KO = Math.cos(kippeAkt);
       SI = Math.sin(kippeAkt);
       var blenden = glatt(0, 500, t);
@@ -762,7 +787,11 @@
         spur.push([Math.round(t), koerperZahl,
           erster ? Math.round(erster.a * 573) / 10 : 0,
           erster ? Math.round(Math.sin(erster.a) * 100) / 100 : 0,
-          Math.round(dt * 10) / 10]);
+          /* [5] und [6] siehe unten — dt bleibt [4], die Leser davor
+             sollen nichts merken. */
+          Math.round(dt * 10) / 10,
+          Math.round(zAktX),
+          erster ? Math.round(erster.dreh * 100) / 100 : 0]);
       }
 
       /* Der Himmel in halber Aufloesung, zwei Lagen, leichte Rolle. */
@@ -803,7 +832,8 @@
         var co = Math.cos(s.w), si = Math.sin(s.w);
         var hell = s.h * klemm((s.d - 14) / (WEIT * 0.3), 0, 1) *
           (0.78 + 0.22 * Math.sin(t * 0.001 * s.fs + s.fp));
-        pfade[s.topf].push(MX + co * alt, MY + si * alt, MX + co * s.d, MY + si * s.d, hell);
+        pfade[s.topf].push(zAktX + co * alt, zAktY + si * alt,
+                           zAktX + co * s.d, zAktY + si * s.d, hell);
       }
       g.lineCap = "round";
       for (var k = 0; k < TOPF.length; k++) {
@@ -835,7 +865,7 @@
         var mg = 40 + m * 14;
         g.globalAlpha = blenden * (0.09 - m * 0.008);
         g.drawImage(m % 2 ? BOKEH : BOKEHWARM,
-          MX + Math.cos(mw) * md - mg / 2, MY + Math.sin(mw) * md - mg / 2, mg, mg);
+          zAktX + Math.cos(mw) * md - mg / 2, zAktY + Math.sin(mw) * md - mg / 2, mg, mg);
       }
       g.globalAlpha = 1;
 
@@ -851,7 +881,11 @@
            und schneller. */
         kp.rAkt = kp.r * (1.9 - 0.9 * aus(da)) * (1 + 2.4 * abriss * abriss);
         kp.a += kp.w * (1 + 7 * abriss * abriss) * dt * 0.001;
-        if (kp.mond) kp.mond.a += kp.mond.w * (1 + 5 * abriss * abriss) * dt * 0.001;
+        kp.dreh += kp.drehW * (1 + 2.5 * abriss) * dt * 0.001;
+        if (kp.mond) {
+          kp.mond.a += kp.mond.w * (1 + 5 * abriss * abriss) * dt * 0.001;
+          kp.mond.e.dreh += kp.mond.e.drehW * (1 + 2.5 * abriss) * dt * 0.001;
+        }
         kp.da = da;
         var o = ort(kp);
         kp.ox = o.x; kp.oy = o.y; kp.oz = o.z;
@@ -871,7 +905,7 @@
           var rp = planeten[ri];
           if (!rp.da) continue;
           g.beginPath();
-          g.ellipse(MX, MY, rp.rAkt, rp.rAkt * QUETSCH, kippeAkt, 0, 6.2832);
+          g.ellipse(zAktX, zAktY, rp.rAkt, rp.rAkt * QUETSCH, kippeAkt, 0, 6.2832);
           g.stroke();
         }
       }
@@ -896,7 +930,7 @@
           var wa = kp.a - lang * (1 - si2 / schritte);
           var c2 = Math.cos(wa), s2 = Math.sin(wa);
           var ex = kp.rAkt * c2, ey = kp.rAkt * s2 * QUETSCH;
-          var px2 = MX + ex * KO - ey * SI, py2 = MY + ex * SI + ey * KO;
+          var px2 = zAktX + ex * KO - ey * SI, py2 = zAktY + ex * SI + ey * KO;
           if (si2 === 0) g.moveTo(px2, py2); else g.lineTo(px2, py2);
         }
         g.stroke();
@@ -929,9 +963,11 @@
           g.globalAlpha = mdeck * 0.6;
           var mlg = mgr * 2.2;
           g.drawImage(GLUT, mx - mlg / 2, my - mlg / 2, mlg, mlg);
-          g.globalAlpha = mdeck;
+          var mquer = Math.abs(Math.cos(mond.e.dreh));
+          var mschmal = mgr * Math.max(0.16, mquer);
+          g.globalAlpha = mdeck * (0.55 + 0.45 * mquer);
           g.globalCompositeOperation = "source-over";
-          g.drawImage(mond.e.bild, mx - mgr / 2, my - mgr / 2, mgr, mgr);
+          g.drawImage(mond.e.bild, mx - mschmal / 2, my - mgr / 2, mschmal, mgr);
         }
         if (mond && mz < 0) mondMalen();
 
@@ -941,7 +977,16 @@
         g.drawImage(GLUT, kp.ox - lg / 2, kp.oy - lg / 2, lg, lg);
         g.globalAlpha = deck;
         g.globalCompositeOperation = "source-over";
-        g.drawImage(kp.bild, kp.ox - gr / 2, kp.oy - gr / 2, gr, gr);
+        /* Die Muenzdrehung: die Breite ist der Kosinus des eigenen
+           Drehwinkels, nie ganz null (eine Scheibe hat eine Kante), und
+           an der Kante wird sie dunkler — das Licht streift sie nur
+           noch. Der Betrag statt des Vorzeichens: die Rueckseite einer
+           Marke gibt es nicht, gezeigt wird immer das Gesicht, wie bei
+           einem Schild, das sich im Wind dreht. */
+        var quer = Math.abs(Math.cos(kp.dreh));
+        var schmal2 = gr * Math.max(0.16, quer);
+        g.globalAlpha = deck * (0.55 + 0.45 * quer);
+        g.drawImage(kp.bild, kp.ox - schmal2 / 2, kp.oy - gr / 2, schmal2, gr);
         if (mond && mz >= 0) mondMalen();
         g.globalAlpha = 1;
       }
@@ -956,17 +1001,17 @@
         g.globalCompositeOperation = "lighter";
         g.globalAlpha = blenden * kernDa * 0.85;
         var gg2 = kg * 3.4;
-        g.drawImage(GLUT, MX - gg2 / 2, MY - gg2 / 2, gg2, gg2);
+        g.drawImage(GLUT, zAktX - gg2 / 2, zAktY - gg2 / 2, gg2, gg2);
         g.globalAlpha = blenden * kernDa * 0.3;
         var bb = kg * 7 * (0.7 + 0.3 * puls);
-        g.drawImage(STREIF, MX - bb / 2, MY - kg * 0.17, bb, kg * 0.34);
+        g.drawImage(STREIF, zAktX - bb / 2, zAktY - kg * 0.17, bb, kg * 0.34);
         g.globalAlpha = blenden * kernDa;
         g.globalCompositeOperation = "source-over";
-        g.drawImage(KERN, MX - kg / 2, MY - kg / 2, kg, kg);
+        g.drawImage(KERN, zAktX - kg / 2, zAktY - kg / 2, kg, kg);
         g.globalCompositeOperation = "lighter";
         g.globalAlpha = blenden * kernDa * 0.4;
         var sg = kg * 2.3;
-        g.drawImage(SPINNE, MX - sg / 2, MY - sg / 2, sg, sg);
+        g.drawImage(SPINNE, zAktX - sg / 2, zAktY - sg / 2, sg, sg);
         g.globalAlpha = 1;
       }
 
@@ -979,7 +1024,7 @@
           g.globalCompositeOperation = "lighter";
           g.globalAlpha = hell2 * blenden;
           var bg = WEIT * 2.6;
-          g.drawImage(BLITZ, MX - bg / 2, MY - bg / 2, bg, bg);
+          g.drawImage(BLITZ, zAktX - bg / 2, zAktY - bg / 2, bg, bg);
           g.globalAlpha = 1;
         }
       }
