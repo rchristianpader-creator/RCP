@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#0a0d0c">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=149">
-<link rel="apple-touch-icon" href="/icon-180.png?v=149">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=150">
+<link rel="apple-touch-icon" href="/icon-180.png?v=150">
 <title>Verwaltung · Aktien-Liste</title>
 <style>
   :root {
@@ -35,6 +35,12 @@
     --r-feld: 12px;
     --r-chip: 11px;
     --r-marke: 6px;
+    /* Die Farbe der gezeichneten Fetch.ai-Marke — dieselben drei Werte wie
+       in stil.css. Hier braucht sie der Auftakt (kosmos.js malt die
+       Scheibe damit); stil-test haelt die Fassungen zusammen. */
+    --marke-hell: #3c2fa8;
+    --marke-mitte: #241b78;
+    --marke-tief: #141051;
     /* Der Grund: dieselben vier Farbfelder wie drueben, darueber die drei
        wandernden Lichtfelder. Ohne ihn waere das Glas darauf nur graue
        Fuellung — es braucht etwas, das hindurchscheint. */
@@ -138,6 +144,45 @@
   }
   @media (prefers-reduced-motion: reduce) {
     .lichtfeld { animation: none; }
+  }
+
+  /* DER AUFTAKT: das Uhrwerk aller Marken im Universum (kosmos.js).
+
+     Die Flaeche steht als Markup im Dokument und traegt ihre Farbe
+     selbst — so ist der Schirm vom allerersten Anstrich an dunkel, noch
+     bevor irgendein Skript laeuft. Ein Auftakt, unter dem erst die Seite
+     aufblitzt, waere keiner.
+
+     Sie faengt nichts ab (pointer-events: none): die Seite darunter laedt
+     und funktioniert wie immer, ein Tipp erreicht beides — die Szene
+     nimmt ihn als "weiter", die Seite als das, was er sonst gewesen
+     waere. Ein Auftakt ist ein Vorhang, kein Tuersteher. */
+  .kosmos {
+    position: fixed;
+    inset: 0;
+    z-index: 400;
+    /* Gruenschwarz wie der Grund der App (--bg), nicht blauschwarz —
+       das Universum gehoert zur Seite, nicht zu irgendeinem Weltraum. */
+    background: #050808;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .kosmos.weg {
+    opacity: 0;
+    transition: opacity 0.55s ease;
+  }
+  .kosmosleinwand {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  /* Doppelt gesichert: das Startskript fragt dasselbe noch einmal und
+     nimmt die Flaeche ganz aus dem Dokument — display:none hier ist nur
+     das Netz darunter. */
+  @media (prefers-reduced-motion: reduce) {
+    .kosmos { display: none; }
   }
 
   /* Der Streifen hinter der Statuszeile — wie in der Liste, aus demselben
@@ -789,6 +834,8 @@
 </style>
 </head>
 <body>
+<div class="kosmos" id="kosmos" aria-hidden="true"></div>
+
 <div class="grundkurve" aria-hidden="true">
   <i class="lichtfeld eins"></i><i class="lichtfeld zwei"></i><i class="lichtfeld drei"></i>
 </div>
@@ -918,6 +965,95 @@
   var quelle = document.querySelector('link[rel="apple-touch-icon"]');
   var treffer = quelle && String(quelle.getAttribute("href")).match(/[?&]v=(\d+)/);
   feld.textContent = treffer ? "v" + treffer[1] : "—";
+})();
+</script>
+
+<script>
+/* DER AUFTAKT — das Uhrwerk aller Marken (kosmos.js).
+
+   Hier steht nur der Anstoss: die Szene selbst wird gezeichnet, und die
+   Datei kommt erst in dem Moment ueber die Leitung, in dem diese Seite
+   sie braucht — sie liegt bei niemand anderem im Speicher.
+
+   Die Seite laedt waehrenddessen ganz normal weiter; die Flaeche deckt
+   nur zu. Geht irgendetwas schief — Datei nicht ladbar, Szene haengt —,
+   faellt der Vorhang trotzdem: die Notbremse unten kennt keinen
+   Sonderfall. */
+(function () {
+  var flaeche = document.getElementById("kosmos");
+  if (!flaeche) return;
+
+  var wegGewesen = false;
+  function weg() {
+    if (wegGewesen || !flaeche.parentNode) return;
+    wegGewesen = true;
+    /* Alles in einem Griff: Szene anhalten, Horcher abhaengen, Verweis
+       loslassen. Der Horcher am Fenster war der eine Halter, der sonst
+       die ganze Szene — Leinwand, Puffer, alle Scheiben — fuer die
+       restliche Lebensdauer der Seite im Speicher festgehalten haette:
+       am Schreibtisch zweistellige Megabyte fuer einen Vorhang, der
+       laengst gefallen ist. */
+    window.removeEventListener("pointerdown", tipp, true);
+    if (szene) { try { szene.abbrechen(); } catch (e) {} }
+    szene = null;
+    /* Erst ausblenden, dann ausbauen: der Vorhang geht auf, er faellt
+       nicht um. */
+    flaeche.classList.add("weg");
+    setTimeout(function () {
+      if (flaeche.parentNode) flaeche.parentNode.removeChild(flaeche);
+    }, 620);
+  }
+
+  /* Wer weniger Bewegung eingestellt hat, bekommt gar keinen Auftakt —
+     und zwar hier schon: die Regel im Anstrich versteckt die Flaeche nur,
+     gerechnet wuerde trotzdem. */
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (flaeche.parentNode) flaeche.parentNode.removeChild(flaeche);
+    return;
+  }
+
+  var szene = null;
+  var datei = document.createElement("script");
+  datei.src = "/kosmos.js?v=150";
+  datei.onload = function () {
+    if (wegGewesen || !window.rcpKosmos) return weg();
+    var marken = getComputedStyle(document.documentElement);
+    szene = window.rcpKosmos(flaeche, {
+      kern: "/icon-192.png?v=150",
+      farben: [marken.getPropertyValue("--marke-hell").trim(),
+               marken.getPropertyValue("--marke-mitte").trim(),
+               marken.getPropertyValue("--marke-tief").trim()],
+      fertig: weg
+    });
+    /* Die Koerper: alle Positionen der Liste. Die Verwaltung sieht immer
+       alles — auch, was noch nur ihr gehoert. Kommt die Antwort nicht,
+       laeuft das Universum ohne Uhrwerk; ein Auftakt, der an einer
+       Abfrage haengt, waere selbst die Verzoegerung, die er ueberdecken
+       soll. */
+    fetch("/.netlify/functions/positionen", { credentials: "same-origin" })
+      .then(function (r) { return r.json(); })
+      .then(function (a) {
+        if (szene && a && a.ok && Array.isArray(a.positionen)) {
+          szene.planeten(a.positionen);
+        }
+      })
+      .catch(function () {});
+  };
+  datei.onerror = weg;
+  document.head.appendChild(datei);
+
+  /* Ein Tipp irgendwohin: weiter. Am Fenster abgehoert, nicht an der
+     Flaeche — die faengt ja absichtlich nichts ab. Mit Namen, damit weg()
+     ihn wieder abhaengen kann. */
+  function tipp() { if (szene) szene.ende(); }
+  window.addEventListener("pointerdown", tipp, true);
+
+  /* Die Notbremse: laenger als zehn Sekunden hat hier nichts zu stehen,
+     egal warum. weg() haelt selbst an und raeumt ab — hier stand einmal
+     ein eigener abbrechen()-Aufruf davor, ungeprueft, und genau der waere
+     am Ersatzobjekt ohne diesen Griff zum TypeError geworden: die
+     Notbremse haette den Vorhang festgenagelt statt ihn zu ziehen. */
+  setTimeout(weg, 10000);
 })();
 </script>
 

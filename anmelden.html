@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#0a0d0c">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=149">
-<link rel="apple-touch-icon" href="/icon-180.png?v=149">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=150">
+<link rel="apple-touch-icon" href="/icon-180.png?v=150">
 <title>Anmelden · Aktien-Liste</title>
 
 <!-- Die Vorschau beim Verschicken entsteht hier, nicht auf der Liste.
@@ -23,7 +23,7 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Geschützt, Zugang auf Anfrage">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=149">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=150">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -32,7 +32,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Geschützt, Zugang auf Anfrage">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=149">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=150">
 <style>
   :root {
     /* Dunkel, wie die Liste. Umgestellt sind nur diese Marken. */
@@ -53,6 +53,13 @@
     --r-feld: 12px;
     --r-chip: 11px;
     --r-marke: 6px;
+    /* Die Farbe der gezeichneten Fetch.ai-Marke — dieselben drei Werte auf
+       jeder Seite, stil-test haelt sie zusammen. Gebraucht werden sie hier
+       nicht unmittelbar; sie stehen da, damit es EINE Antwort auf die
+       Frage gibt, welche Farbe die Marke hat. */
+    --marke-hell: #3c2fa8;
+    --marke-mitte: #241b78;
+    --marke-tief: #141051;
     /* Dieselben vier Farbfelder wie in der Liste — hier liegen sie unter den
        laufenden Kerzen, und der Kasten liegt ueber beidem. */
     --grund-kuehl: rgba(38, 74, 96, 0.05);
@@ -161,7 +168,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=149");
+    background-image: url("/kerzen.svg?v=150");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -178,7 +185,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=149");
+    background-image: url("/kerzen-blass.svg?v=150");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
