@@ -39,8 +39,13 @@
 (function () {
   "use strict";
 
-  var DAUER_BAHN = 4600;   /* bis hierhin dauert die Reise               */
-  var DAUER_ENDE = 2000;   /* Anflug, Halt, Eintauchen                   */
+  /* Wie lange der Flug dauert — nicht wie schnell er ist. Die
+     Geschwindigkeit folgt aus Strecke durch Zeit und bleibt dann fest.
+     Der Nachlauf ist die Strecke NACH der Ankunft, in der der Blitz
+     deckt, waehrend die Seite den Deckel abzieht. */
+  var FLUGZEIT = 6200;
+  var DAUER_BAHN = 4600;   /* nur noch fuer die Vertraege nach aussen    */
+  var DAUER_ENDE = 2000;
 
   function klemm(x, a, b) { return x < a ? a : (x > b ? b : x); }
   function glatt(a, b, x) {
@@ -615,8 +620,14 @@
        laesst die Reise von selbst enden, der Auftakt der Liste bestellt
        den Abriss von aussen (bahn: sehr gross, dann ende()) — sein
        Fahrplan gehoert dem Ladebildschirm, nicht der Szene. */
-    var bahnDauer = wahl.bahn || DAUER_BAHN;
-    var endeDauer = wahl.ende || DAUER_ENDE;
+    /* bahn und ende sind Fassungen von frueher, als die Uhr den Flug
+       bestimmte. Jetzt bestimmt ihn die Strecke: die Szene ist fertig,
+       wenn sie angekommen ist, und meldet das der Seite. Wer eine
+       laengere oder kuerzere Reise will, sagt es ueber "flug" in
+       Millisekunden — die Geschwindigkeit folgt daraus und bleibt dann
+       fest. Die alten Namen werden noch entgegengenommen, damit die
+       Seiten nicht in derselben Fassung mitwechseln muessen. */
+    var flugZeit = klemm(wahl.flug || FLUGZEIT, 3000, 9000);
     var leinwand = document.createElement("canvas");
     var g = leinwand.getContext && leinwand.getContext("2d");
     if (!g) {
@@ -784,7 +795,11 @@
          Kamera gestellt — mit den Anfangsorten stuende er schlagartig
          hinter ihr. Und in den Abriss hinein kommt niemand mehr. */
       var jetzt = t0 ? (performance.now() - t0) : 0;
-      if (jetzt > abrissAb - 900) return;
+      /* In die Ankunft hinein tritt niemand mehr an: eine Formation,
+         die im letzten Drittel des Anflugs erscheint, waere Unfug.
+         Gemessen wird die verbleibende STRECKE, nicht die Uhr — bei
+         fester Geschwindigkeit ist das dasselbe, nur ehrlicher. */
+      if (angekommen || zielZ - fahrt < 2200) return;
 
       var eintraege = [];
       for (var i = 0; i < liste.length && i < 16; i++) {
@@ -853,6 +868,7 @@
         planeten.push(e2);
       }
       zielZ = start + 12 * SCHRITT + ZIEL_ABSTAND;
+      tempoSetzen();
     }
 
     var laeuft = true, kennung = 0, t0 = 0, vorher = 0;
@@ -861,10 +877,18 @@
        Drift und eine traege Rolle: eine Kamera, die haargenau auf der
        Achse klebt, sieht nach Werkzeug aus, nicht nach Hand. */
     var fahrt = 0, driftX = 0, driftY = 0;
-    var abflugFahrt = -1, abflugRest = 0, markeDa = 0;
+    var markeDa = 0;
+    /* Die eine Geschwindigkeit. Sie steht fest, sobald die Gasse steht:
+       die ganze Strecke geteilt durch die Zeit, die der Flug dauern
+       soll. eile ist der Tipp des Ungeduldigen — die EINZIGE Stelle,
+       an der sich das Tempo aendert, und dort will es der Mensch. */
+    var V = 1.2, eile = 1;
+    function tempoSetzen() {
+      V = Math.max(0.2, (zielZ - 70) / flugZeit);
+    }
+    tempoSetzen();
     var sparsam = false, dtSumme = 0, dtZahl = 0, messAb = 0, hoefe = true;
-    var abrissAb = bahnDauer;
-    var bildnummer = 0, gemeldet = false;
+    var bildnummer = 0, gemeldet = false, angekommen = 0;
     var fertig = typeof wahl.fertig === "function" ? wahl.fertig : function () {};
 
     /* Die Spur fuer die Nachschau — auf einer Leinwand gibt es sonst
@@ -906,13 +930,21 @@
          waehrend der Deckel durchsichtig wird, bewegt sich das Bild
          bis zum letzten Augenblick. Schluss ist erst, wenn die Seite
          abbrechen() ruft — oder nach einer Notfrist. */
-      if (t >= abrissAb + endeDauer) {
+      /* FERTIG IST, WER ANGEKOMMEN IST — nicht, wessen Uhr abgelaufen
+         ist. Bei fester Geschwindigkeit richtet sich die Dauer nach der
+         Strecke; wer hier nach der Uhr abbraeche, schnitte genau das
+         ab, was der Flug erreichen sollte. Danach wird WEITERGEMALT,
+         bis die Seite abbrechen() ruft: sonst haenge die Leinwand mit
+         einem eingefrorenen Bild im Schirm, waehrend der Deckel
+         ausblendet (gemessen waren das einmal 597 ms Stillstand). */
+      if (!angekommen && zielZ - fahrt <= 70) {
+        angekommen = t;
         if (!gemeldet) { gemeldet = true; fertig(); }
-        if (t >= abrissAb + endeDauer + 1400) {
-          laeuft = false;
-          aufraeumen();
-          return;
-        }
+      }
+      if (angekommen && t > angekommen + 2600) {
+        laeuft = false;
+        aufraeumen();
+        return;
       }
 
       /* DIE SPARSCHALTUNG URTEILT NACH ZEIT, NICHT NACH BILDERN.
@@ -950,54 +982,47 @@
         }
       }
 
-      var abriss = klemm((t - abrissAb) / endeDauer, 0, 1.45);
+      /* "abriss" ist kein Zeitabschnitt mehr, sondern die NAEHE zum
+         Ziel: er steuert nur noch, wie hell es blitzt und wie schnell
+         sich die Scheiben drehen — nicht mehr die Fahrt. */
+      var abriss = klemm((1400 - (zielZ - fahrt)) / 1330, 0, 1) +
+        (angekommen ? klemm((t - angekommen) / 700, 0, 0.45) : 0);
       var blenden = glatt(0, 500, t);
 
-      /* Die Fahrt: sanfter Anlauf, dann Reisegeschwindigkeit — bemessen
-         so, dass die Gasse bis zum geplanten Abriss durchflogen ist.
+      /* DIE FAHRT — EINE EINZIGE, GLEICHBLEIBENDE GESCHWINDIGKEIT.
 
-         DAS ENDE IST DIE ANKUNFT IM APP-ZEICHEN, immer. Vorher hiess
-         Abriss nur "schneller in dieselbe Richtung" — wer frueh tippte
-         oder den kurzen Fahrplan der Liste hatte, bekam einen Blitz
-         mitten in der Gasse, weit vor dem Ziel; das Zeichen blieb
-         klein, und der Flug wirkte abgebrochen statt fertig. Jetzt
-         merkt sich der Abriss die Reststrecke bis kurz vor den Kern
-         und faehrt genau sie zu Ende — weich anziehend, weich
-         ankommend (Smoothstep): so steht das Zeichen die letzten
-         dreihundert Millisekunden GROSS im Bild, statt erst im
-         allerletzten Wimpernschlag aufzuplatzen. Man fliegt IN das
-         Zeichen hinein — von wo auch immer die Reise gerade war. */
-      if (abriss > 0) {
-        if (abflugFahrt < 0) {
-          abflugFahrt = fahrt;
-          abflugRest = Math.max(200, zielZ - 70 - fahrt);
-        }
-        /* DREI SAETZE STATT EINEM STURZ. Ein durchgehender Sturz ist
-           eine Fahrt, die zufaellig aufhoert. Ein Markenauftritt hat
-           einen RUHEPUNKT: anfliegen — HALTEN — eintauchen. Genau die
-           Pause, in der Zeichen und Schriftzug ruhig beieinander
-           stehen, ist der Moment, den man als "fertig" liest; ohne sie
-           rauscht alles bis zum Schnitt durch, und nichts kommt an. */
-        var HALT_A = 0.56, HALT_E = 0.78;
-        var haltZ = Math.max(120, 300 * F / (Math.min(B, H) * 0.4));
-        var bisHalt = Math.max(0, (zielZ - haltZ) - abflugFahrt);
-        if (abriss < HALT_A) {
-          var an = abriss / HALT_A;
-          fahrt = abflugFahrt + bisHalt * an * an * (3 - 2 * an);
-        } else if (abriss < HALT_E) {
-          fahrt = abflugFahrt + bisHalt;
-        } else {
-          var st = (abriss - HALT_E) / (1 - HALT_E);
-          fahrt = abflugFahrt + bisHalt + (abflugRest - bisHalt) * st * st;
-        }
-        /* Der Schriftzug tritt im Halt zu — und faehrt beim Eintauchen
-           mit dem Zeichen aus dem Bild. */
-        markeDa = glatt(HALT_A * 0.72, HALT_A + 0.06, abriss) * (1 - glatt(HALT_E, 0.94, abriss));
-      } else {
-        var reiseZeit = klemm(bahnDauer, 3600, 5600);
-        var V = (zielZ - 550) / (reiseZeit - 600);
-        fahrt += V * glatt(120, 950, t) * dt;
-      }
+         Vorher hatte der Flug drei Tempi und einen Stillstand: sanftes
+         Anfahren ueber eine Sekunde, Reisegeschwindigkeit, dann zum
+         Ende hin anfliegen — HALTEN — stuerzen. Das war als Dramaturgie
+         gedacht und ist als Gezappel angekommen. Jetzt gilt eine Zahl
+         fuer den ganzen Weg: V Einheiten je Millisekunde, vom ersten
+         Bild bis zur Ankunft, ohne Anfahren, ohne Pause, ohne Sturz.
+
+         Das Auge sieht trotzdem keine Monotonie, und zwar aus einem
+         ehrlichen Grund: bei GLEICHER Geschwindigkeit waechst alles
+         schneller, je naeher es kommt (die Groesse geht mit eins durch
+         Abstand). Die Beschleunigung, die man wahrnimmt, ist also die
+         der Perspektive — die einzige, die nicht nach Regler aussieht.
+
+         Und weil die Geschwindigkeit fest ist, richtet sich die DAUER
+         nach der Strecke, nicht umgekehrt: die Szene ist fertig, wenn
+         sie angekommen ist. Ein zu frueh bestellter Abriss verkuerzt
+         darum nicht mehr die Fahrt, sondern nur noch den Weg, der noch
+         vor ihr liegt — geschnitten wird nichts. */
+      fahrt += V * eile * dt;
+
+      /* Der Schriftzug haengt an der NAEHE zum Zeichen, nicht mehr an
+         einem Abschnitt der Uhr: er tritt zu, wenn das Zeichen gross
+         genug steht, und geht, wenn man hineinfaehrt. */
+      var zielAb = zielZ - fahrt;
+      /* Zu, solange das Zeichen weit ist (ueber 2100), auf, sobald es
+         nah steht (unter 1500), und wieder zu, wenn man hineinfaehrt
+         (unter 330). glatt() steigt IMMER von a nach b — fuer ein
+         Zunehmen bei ABNEHMENDEM Abstand muss der Wert also abgezogen
+         werden. Andersherum stand der Name die ganze Reise ueber im
+         Bild, vom ersten Augenblick an. */
+      markeDa = (1 - glatt(1500, 2100, zielAb)) * glatt(150, 330, zielAb);
+
       driftX += 0.010 * glatt(500, 2200, t) * (1 - abriss) * dt;
       driftY -= 0.006 * glatt(500, 2200, t) * (1 - abriss) * dt;
       var camX = klemm(driftX, -55, 55);
@@ -1328,11 +1353,16 @@
          Deckel der Liste auf das fertig der Szene wartet, waere ein
          verschluckter Wunsch eine Szene, die niemals endet — und die
          Notbremse schnitte sie dann doch wieder mitten im Flug ab. */
+      /* Der Tipp des Ungeduldigen — und die EINZIGE Stelle, an der
+         sich das Tempo aendert. Der Mensch hat es hier ausdruecklich
+         verlangt, also darf es sich aendern; von selbst tut es das
+         nirgends mehr. Fruehestens ab Sekunde eins, sonst nimmt ein
+         versehentliches Tippen beim Oeffnen die ganze Szene mit. */
       ende: function () {
         if (!laeuft) return;
         var t = t0 ? (performance.now() - t0) : 0;
-        var ab = Math.max(t, 1000);
-        if (ab < abrissAb) abrissAb = ab;
+        if (t < 1000) return;
+        eile = 3.2;
       },
       abbrechen: function () { laeuft = false; aufraeumen(); }
     };
