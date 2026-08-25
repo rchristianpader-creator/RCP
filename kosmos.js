@@ -262,15 +262,20 @@
     x.beginPath(); x.arc(m, m, r, 0, 6.2832); x.clip();
     x.fillStyle = "rgba(10,13,12,0.44)";
     x.fillRect(0, 0, gr, gr);
+    /* Die Werte der App, auf SZENENMASS gedimmt: eine Karte bedeckt in
+       der Liste eine Handflaeche, eine nahe Scheibe hier den halben
+       Schirm — dieselben Weissanteile wirken auf der grossen Flaeche
+       doppelt so hell. Also alle Schichten auf rund siebzig Prozent,
+       damit die WIRKUNG dieselbe ist, nicht die Zahl. */
     var fv = x.createLinearGradient(0, 0, 0, gr);
-    fv.addColorStop(0, "rgba(255,255,255,0.10)");
-    fv.addColorStop(1, "rgba(255,255,255,0.075)");
+    fv.addColorStop(0, "rgba(255,255,255,0.07)");
+    fv.addColorStop(1, "rgba(255,255,255,0.05)");
     x.fillStyle = fv;
     x.fillRect(0, 0, gr, gr);
     var sv = x.createLinearGradient(m - r, m - r, m + r * 0.45, m + r * 0.45);
-    sv.addColorStop(0, "rgba(255,255,255,0.22)");
-    sv.addColorStop(0.24, "rgba(255,255,255,0.12)");
-    sv.addColorStop(0.5, "rgba(255,255,255,0.04)");
+    sv.addColorStop(0, "rgba(255,255,255,0.15)");
+    sv.addColorStop(0.24, "rgba(255,255,255,0.08)");
+    sv.addColorStop(0.5, "rgba(255,255,255,0.03)");
     sv.addColorStop(0.72, "rgba(255,255,255,0)");
     x.fillStyle = sv;
     x.fillRect(0, 0, gr, gr);
@@ -279,13 +284,13 @@
        Linien wie --glas-kante, als Bogenstrich. */
     x.lineWidth = Math.max(1, gr * 0.014);
     var k = x.createLinearGradient(0, 0, 0, gr);
-    k.addColorStop(0, "rgba(255,255,255,0.28)");
-    k.addColorStop(0.35, "rgba(255,255,255,0.08)");
+    k.addColorStop(0, "rgba(255,255,255,0.22)");
+    k.addColorStop(0.35, "rgba(255,255,255,0.06)");
     k.addColorStop(1, "rgba(0,0,0,0.3)");
     x.strokeStyle = k;
     x.beginPath(); x.arc(m, m, r - x.lineWidth, 0, 6.2832); x.stroke();
     x.lineWidth = Math.max(1, gr * 0.011);
-    x.strokeStyle = "rgba(255,255,255,0.16)";
+    x.strokeStyle = "rgba(255,255,255,0.13)";
     x.beginPath(); x.arc(m, m, r - x.lineWidth / 2, 0, 6.2832); x.stroke();
     return r;
   }
@@ -685,7 +690,7 @@
         var sv = sx.createRadialGradient(tw / 2, th / 2, Math.min(tw, th) * 0.16,
                                          tw / 2, th / 2, Math.sqrt(tw * tw + th * th) * 0.62);
         sv.addColorStop(0, "rgba(0,0,0,0)");
-        sv.addColorStop(0.62, "rgba(0,0,0,0.22)");
+        sv.addColorStop(0.62, "rgba(0,0,0,0.3)");
         sv.addColorStop(1, "rgba(2,4,4,0.74)");
         sx.fillStyle = sv;
         sx.fillRect(0, 0, tw, th);
@@ -802,13 +807,13 @@
         e.bereit = true;
         if (p.logo || (sym && !ohneLogo(sym))) {
           e.bereit = false;
-          e.frist = jetzt + 2600;
+          e.frist = jetzt + 1400;
           window.rcpKosmosLogos = window.rcpKosmosLogos || { angefragt: 0, geladen: 0 };
           window.rcpKosmosLogos.angefragt++;
           (function (k, quelle) {
             var b = new Image();
             b.onload = function () {
-              if (k.auf == null) k.bild = bildScheibe(96, b);
+              if (!k.gross) k.bild = bildScheibe(96, b);
               k.bereit = true;
               window.rcpKosmosLogos.geladen++;
             };
@@ -933,9 +938,9 @@
         gg.globalCompositeOperation = "lighter";
         var s1 = Math.max(B, H) * 1.5 * hzoom;
         var s2 = Math.max(B, H) * 2.1 * hzoom;
-        gg.globalAlpha = 0.62;
+        gg.globalAlpha = 0.3;
         gg.drawImage(HIMMEL, -s1 / 2 - camX * 0.6, -s1 / 2 - camY * 0.6, s1, s1);
-        gg.globalAlpha = 0.34;
+        gg.globalAlpha = 0.18;
         gg.drawImage(HIMMEL, -s2 / 2 - camX * 0.25, -s2 / 2 - camY * 0.25, s2, s2);
       }
 
@@ -995,7 +1000,7 @@
           }
           if (leer) continue;
           g.lineWidth = art.breit;
-          g.strokeStyle = "rgba(" + art.farbe + "," + (blenden * (0.16 + stq * 0.22)).toFixed(3) + ")";
+          g.strokeStyle = "rgba(" + art.farbe + "," + (blenden * (0.12 + stq * 0.15)).toFixed(3) + ")";
           g.stroke();
         }
         var pl = punkte[k];
@@ -1009,7 +1014,7 @@
             g.arc(pl[j2], pl[j2 + 1], pr, 0, 6.2832);
           }
           if (leer2) continue;
-          g.fillStyle = "rgba(" + art.farbe + "," + (blenden * (0.24 + stp * 0.24)).toFixed(3) + ")";
+          g.fillStyle = "rgba(" + art.farbe + "," + (blenden * (0.16 + stp * 0.16)).toFixed(3) + ")";
           g.fill();
         }
       }
@@ -1017,7 +1022,7 @@
          Pixeln und Sternen. */
       for (var fu = 0; fu < funken.length; fu += 3) {
         var fh = funken[fu + 2];
-        g.globalAlpha = blenden * (fh - 0.55) * 0.6;
+        g.globalAlpha = blenden * (fh - 0.55) * 0.42;
         var fgr = 5 + 8 * fh;
         g.drawImage(GLUT, funken[fu] - fgr / 2, funken[fu + 1] - fgr / 2, fgr, fgr);
       }
@@ -1062,10 +1067,10 @@
         var kd = blenden * klemm((6400 - kernZ) / 3800, 0, 1);
         var puls = 1 + 0.03 * Math.sin(t * 0.0021);
         g.globalCompositeOperation = "lighter";
-        g.globalAlpha = kd * 0.62;
+        g.globalAlpha = kd * 0.42;
         var gg2 = kg * 3.0 * puls;
         g.drawImage(GLUT, kx - gg2 / 2, ky - gg2 / 2, gg2, gg2);
-        g.globalAlpha = kd * 0.22;
+        g.globalAlpha = kd * 0.18;
         var bb = kg * 6 * (0.7 + 0.3 * puls);
         g.drawImage(STREIF, kx - bb / 2, ky - kg * 0.16, bb, kg * 0.32);
         if (kg > 14) {
@@ -1073,7 +1078,7 @@
           g.globalCompositeOperation = "source-over";
           g.drawImage(KERN, kx - kg / 2, ky - kg / 2, kg, kg);
           g.globalCompositeOperation = "lighter";
-          g.globalAlpha = kd * 0.4;
+          g.globalAlpha = kd * 0.32;
           var sg = kg * 2.2;
           g.drawImage(SPINNE, kx - sg / 2, ky - sg / 2, sg, sg);
         }
@@ -1102,8 +1107,12 @@
         var deck = blenden * Math.pow(fern, 0.85) * nah * glatt(kp2.auf, kp2.auf + 320, t);
         if (deck <= 0.01) continue;
         if (gr > maxGemalt && deck > 0.2) maxGemalt = gr;
+        /* GROSS heisst: ab jetzt sieht man einen Bildtausch. Ein Logo,
+           das frueher eintrifft — die Scheibe noch klein und matt im
+           Nebel —, darf lautlos einwechseln; danach nie mehr. */
+        if (!kp2.gross && (gr > 90 || deck > 0.55)) kp2.gross = true;
 
-                /* Erst der Schattenhof, dann ein Hauch Glimmen — das grosse
+        /* Erst der Schattenhof, dann ein Hauch Glimmen — das grosse
            Licht gehoert dem Kern. Beides gedeckelt: die Kosten eines
            Hofs wachsen mit dem Quadrat seiner Groesse, und an einer
            Scheibe, die schon das halbe Bild fuellt, sieht ihn niemand
@@ -1155,11 +1164,11 @@
 
       /* Der Blitz der Ankunft. */
       if (abriss > 0) {
-        var hell2 = Math.pow(Math.sin(Math.min(1, abriss * 1.6) * 3.1416), 2);
+        var hell2 = Math.pow(Math.sin(Math.min(1, abriss * 1.6) * 3.1416), 2) * 0.7;
         if (hell2 > 0.004) {
           g.globalCompositeOperation = "lighter";
           g.globalAlpha = hell2 * blenden;
-          var bg = Math.max(B, H) * 2.4;
+          var bg = Math.max(B, H) * 2.0;
           g.drawImage(BLITZ, MX - bg / 2, MY - bg / 2, bg, bg);
           g.globalAlpha = 1;
         }

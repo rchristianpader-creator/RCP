@@ -5,7 +5,7 @@
    - everything else (TradingView, /.netlify/functions/*): straight to network, never cached
    Bump CACHE on every deploy so old shells are dropped. */
 
-const CACHE = "aktien-liste-v161";
+const CACHE = "aktien-liste-v162";
 
 /* Ohne Sitzung liefert das Tor statt der Seite eine Weiterleitung zur
    Anmeldung — deshalb wird das Dokument hier nicht vorgeladen, sondern
@@ -17,13 +17,13 @@ const CACHE = "aktien-liste-v161";
    Kein Kommentar zwischen den Zeilen: die Pruefreihe liest diese Liste als
    JSON aus der Datei, und daran waere sie eben zerbrochen. */
 const PRECACHE = [
-  "/stil.css?v=161",
+  "/stil.css?v=162",
   "/manifest.webmanifest",
-  "/icon-180.png?v=161",
-  "/icon-192.png?v=161",
-  "/icon-512.png?v=161",
-  "/kerzen.svg?v=161",
-  "/kerzen-blass.svg?v=161"
+  "/icon-180.png?v=162",
+  "/icon-192.png?v=162",
+  "/icon-512.png?v=162",
+  "/kerzen.svg?v=162",
+  "/kerzen-blass.svg?v=162"
 ];
 
 /* css dazu: seit v137 liegt das Aussehen in stil.css. Sie traegt ?v=NN,
@@ -82,6 +82,26 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
+  /* Die EINE Ausnahme vom Functions-Verbot: die Logos. Sie aendern sich
+     praktisch nie, die Liste holt sie bei jedem Besuch fuer ihre Karten,
+     und der Kosmos-Auftakt braucht sie SOFORT — eine Marke soll dort
+     nie auf ihr Bild warten. Zwischenspeicher zuerst, einmal je Stand
+     (der Vorrat wird mit jedem CACHE-Wechsel geleert). */
+  if (url.pathname === "/.netlify/functions/logo") {
+    event.respondWith(
+      caches.match(req).then((hit) => {
+        if (hit) return hit;
+        return fetch(req).then((res) => {
+          if (res.ok) {
+            const copy = res.clone();
+            caches.open(CACHE).then((c) => c.put(req, copy));
+          }
+          return res;
+        });
+      })
+    );
+    return;
+  }
   if (url.pathname.startsWith("/.netlify/")) return;
   if (url.pathname === "/anmelden.html" || url.pathname === "/verwaltung.html") return;
 
