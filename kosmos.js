@@ -668,21 +668,52 @@
         }
       }
 
+      /* RINGE, NICHT EINZELBAHNEN — die Antwort auf "sieht nicht
+         symmetrisch aus". Vorher hatte jeder Koerper eigenen Radius und
+         eigenes Tempo; nach zwei Sekunden war jede Ordnung Zufall. Jetzt
+         liegen die Koerper auf wenigen Ringen, und je Ring gilt: EIN
+         Radius, EIN Tempo, exakt gleiche Abstaende. Gleiche
+         Geschwindigkeit heisst: die Abstaende bleiben fuer immer gleich —
+         die Formation ist nicht am Anfang symmetrisch, sie BLEIBT es, wie
+         ein Uhrwerk. Benachbarte Ringe laufen gegenlaeufig; das liest
+         sich als Getriebe, nicht als Scheibe. */
       var bm = bahnenMasse();
-      var n = Math.max(2, haupt.length);
-      for (var k2 = 0; k2 < haupt.length; k2++) {
-        var h2 = haupt[k2];
-        h2.fak = k2 / (n - 1);
-        h2.r = bm.innen + (bm.aussen - bm.innen) * h2.fak;
-        /* Der goldene Winkel verteilt die Anfaenge so, dass nie zwei
-           Nachbarn beieinander starten. */
-        h2.a = k2 * 2.39996 + 0.7;
-        /* Kepler, auf eine Sichtbarkeit skaliert: innen rund eine
-           Umdrehung waehrend des Uhrwerks, aussen eine halbe. */
-        h2.w = 1.45 * Math.pow(bm.innen / h2.r, 1.5);
-        h2.ab = Math.max(500, jetzt + 80) + k2 * 140;
-        planeten.push(h2);
+      var M = haupt.length;
+      var ringGroessen = M <= 4 ? [M]
+        : (M <= 8 ? [Math.ceil(M / 2), Math.floor(M / 2)]
+                  : [3, Math.ceil((M - 3) / 2), Math.floor((M - 3) / 2)]);
+      var ringe = [];
+      var lauf = 0;
+      for (var ri = 0; ri < ringGroessen.length; ri++) {
+        var zahl = ringGroessen[ri];
+        var fak = ringGroessen.length === 1 ? 0.5 : ri / (ringGroessen.length - 1);
+        var radius = bm.innen + (bm.aussen - bm.innen) * fak;
+        var ring = {
+          fak: fak,
+          zahl: zahl,
+          /* Kepler je RING, gegenlaeufig im Wechsel. */
+          w: 1.45 * Math.pow(bm.innen / radius, 1.5) * (ri % 2 ? -1 : 1),
+          /* Alle Koerper eines Rings kommen ZUSAMMEN — eine Formation,
+             die geschlossen einrastet, ist der halbe Auftritt. */
+          ab: Math.max(560, jetzt + 80) + ri * 300,
+          koerper: []
+        };
+        for (var bi = 0; bi < zahl; bi++) {
+          var h2 = haupt[lauf++];
+          h2.fak = fak;
+          h2.r = radius;
+          h2.ring = ring;
+          /* Exakt gleiche Abstaende, je Ring leicht versetzt, damit die
+             Ringe nicht in einer Linie stehen. */
+          h2.a = bi * (6.2832 / zahl) + ri * 0.9 + 0.4;
+          h2.w = ring.w;
+          h2.ab = ring.ab;
+          ring.koerper.push(h2);
+          planeten.push(h2);
+        }
+        ringe.push(ring);
       }
+      alleRinge = ringe;
       for (var k3 = 0; k3 < monde.length; k3++) {
         var m3 = monde[k3];
         m3.traeger.mond = {
@@ -715,6 +746,8 @@
        Himmel, und genau dieser Unterschied ist das Fliegen. Beim Abriss
        beschleunigt der Flug in dieselbe Richtung. */
     var flugX = 0, flugY = 0, zAktX = 0, zAktY = 0;
+    var alleRinge = [];
+    var kometen = [], naechsterKomet = 1400;
     /* DIE SPARSCHALTUNG. Die Szene misst ihre eigenen Bilder, und wenn das
        Geraet nicht hinterherkommt (Mittel der letzten Bilder ueber 34 ms),
        opfert sie zuerst, was am wenigsten fehlt: das halbe Strichfeld, die
@@ -773,7 +806,9 @@
       KO = Math.cos(kippeAkt);
       SI = Math.sin(kippeAkt);
       var blenden = glatt(0, 500, t);
-      var tempo = 0.5 + 15 * abriss * abriss;
+      /* Drei Gaenge: WARP beim Einflug (die Koerper kommen ja gerade aus
+         genau dieser Fahrt), Ruhe im Stand, Sog beim Abriss. */
+      var tempo = 0.5 + 7 * (1 - glatt(900, 2000, t)) + 15 * abriss * abriss;
       gefahren += tempo * dt * 0.001;
       /* Der Himmel faehrt mit eigener, GEDECKELTER Geschwindigkeit. Beim
          ersten Anlauf schob der Abriss auch ihn an — und die eine grosse
@@ -784,6 +819,33 @@
 
       if (spur.length < 600) {
         var erster = planeten[0];
+        /* [7]: die Symmetrie, gemessen statt behauptet. Im vollsten Ring
+           muessten alle Winkelabstaende gleich sein (2π durch die Zahl der
+           Koerper); notiert wird die groesste Abweichung davon, in
+           Tausendstel Radiant. Gleiches Tempo je Ring heisst: sie muss
+           dauerhaft bei null bleiben — und wenn nicht, sieht es die
+           Pruefreihe, bevor es jemand auf dem Telefon sieht. */
+        var symAbw = 0, vollRing = null;
+        for (var sri = 0; sri < alleRinge.length; sri++) {
+          if (!vollRing || alleRinge[sri].zahl > vollRing.zahl) vollRing = alleRinge[sri];
+        }
+        if (vollRing && vollRing.zahl > 1) {
+          var wk = [];
+          for (var swi = 0; swi < vollRing.koerper.length; swi++) {
+            var wa2 = vollRing.koerper[swi].a % 6.28318530718;
+            if (wa2 < 0) wa2 += 6.28318530718;
+            wk.push(wa2);
+          }
+          wk.sort(function (a, b) { return a - b; });
+          var soll = 6.28318530718 / vollRing.zahl;
+          for (var sgi = 0; sgi < wk.length; sgi++) {
+            var luecke = (sgi === wk.length - 1)
+              ? wk[0] + 6.28318530718 - wk[sgi]
+              : wk[sgi + 1] - wk[sgi];
+            var abwS = Math.abs(luecke - soll);
+            if (abwS > symAbw) symAbw = abwS;
+          }
+        }
         spur.push([Math.round(t), koerperZahl,
           erster ? Math.round(erster.a * 573) / 10 : 0,
           erster ? Math.round(Math.sin(erster.a) * 100) / 100 : 0,
@@ -791,7 +853,8 @@
              sollen nichts merken. */
           Math.round(dt * 10) / 10,
           Math.round(zAktX),
-          erster ? Math.round(erster.dreh * 100) / 100 : 0]);
+          erster ? Math.round(erster.dreh * 100) / 100 : 0,
+          Math.round(symAbw * 1000)]);
       }
 
       /* Der Himmel in halber Aufloesung, zwei Lagen, leichte Rolle. */
@@ -879,7 +942,7 @@
            auf die Bahn, waehrend der Winkel schon laeuft. Beim Abriss
            weitet sich die Bahn wieder — dieselbe Bewegung, rueckwaerts
            und schneller. */
-        kp.rAkt = kp.r * (1.9 - 0.9 * aus(da)) * (1 + 2.4 * abriss * abriss);
+        kp.rAkt = kp.r * (3.2 - 2.2 * aus(da)) * (1 + 2.4 * abriss * abriss);
         kp.a += kp.w * (1 + 7 * abriss * abriss) * dt * 0.001;
         kp.dreh += kp.drehW * (1 + 2.5 * abriss) * dt * 0.001;
         if (kp.mond) {
@@ -897,16 +960,44 @@
 
       /* Die Bahnen als hauchduenne Ringe — das Uhrwerk zeigt sein
          Zifferblatt. Nur ein Hauch: bei mehr saehe es nach Schaubild aus. */
-      if (planeten.length && !sparsam) {
+      if (alleRinge.length && !sparsam) {
         g.globalCompositeOperation = "lighter";
-        g.strokeStyle = "rgba(170,196,255," + (0.05 * blenden * (1 - abriss)).toFixed(3) + ")";
         g.lineWidth = 1;
-        for (var ri = 0; ri < planeten.length; ri++) {
-          var rp = planeten[ri];
-          if (!rp.da) continue;
+        for (var ri = 0; ri < alleRinge.length; ri++) {
+          var ringO = alleRinge[ri];
+          var rk = ringO.koerper[0];
+          if (!rk || !rk.da) continue;
+          g.strokeStyle = "rgba(170,196,255," + (0.085 * blenden * (1 - abriss)).toFixed(3) + ")";
           g.beginPath();
-          g.ellipse(zAktX, zAktY, rp.rAkt, rp.rAkt * QUETSCH, kippeAkt, 0, 6.2832);
+          g.ellipse(zAktX, zAktY, rk.rAkt, rk.rAkt * QUETSCH, kippeAkt, 0, 6.2832);
           g.stroke();
+
+          /* Der Einrast-Puls: wenn ein Ring geschlossen ankommt, leuchtet
+             seine Bahn einmal auf — der Moment, in dem die Ordnung
+             sichtbar wird, bekommt sein eigenes Licht. */
+          var seitFest = t - (ringO.ab + 780);
+          if (seitFest > 0 && seitFest < 480) {
+            var pf = Math.pow(1 - seitFest / 480, 2);
+            g.strokeStyle = "rgba(214,232,255," + (0.55 * pf * blenden).toFixed(3) + ")";
+            g.lineWidth = 1 + 2.2 * pf;
+            g.beginPath();
+            g.ellipse(zAktX, zAktY, rk.rAkt, rk.rAkt * QUETSCH, kippeAkt, 0, 6.2832);
+            g.stroke();
+            g.lineWidth = 1;
+          }
+
+          /* Ein Funke laeuft auf jeder Bahn, gegen die Laufrichtung des
+             Rings — das Zifferblatt bekommt einen Sekundenzeiger. */
+          if (seitFest > 0 && !abriss) {
+            var fw = t * 0.0021 * (ri % 2 ? 1 : -1) + ri * 2.1;
+            var fc = Math.cos(fw), fsn = Math.sin(fw);
+            var fex = rk.rAkt * fc, fey = rk.rAkt * fsn * QUETSCH;
+            var fpx = zAktX + fex * KO - fey * SI;
+            var fpy = zAktY + fex * SI + fey * KO;
+            g.globalAlpha = blenden * 0.6;
+            g.drawImage(GLUT, fpx - 11, fpy - 11, 22, 22);
+            g.globalAlpha = 1;
+          }
         }
       }
 
@@ -972,6 +1063,34 @@
         if (mond && mz < 0) mondMalen();
 
         g.globalCompositeOperation = "lighter";
+        /* Der Lichtschweif des Einflugs: solange der Koerper noch aus der
+           Tiefe kommt, zieht er einen Streifen hinter sich her — nach
+           AUSSEN, dorthin, wo er herkam. Der Schweif ist die Bewegung;
+           ohne ihn ist ein schneller Einflug nur ein Groesserwerden. */
+        if (kp.da < 1) {
+          var rdx = kp.ox - zAktX, rdy = kp.oy - zAktY;
+          var rlen = Math.sqrt(rdx * rdx + rdy * rdy) || 1;
+          var schweif = (1 - aus(kp.da)) * 150 + 10;
+          g.globalCompositeOperation = "lighter";
+          g.strokeStyle = "rgba(200,222,255," + (0.5 * deck).toFixed(3) + ")";
+          g.lineWidth = Math.max(1.2, gr * 0.14);
+          g.lineCap = "round";
+          g.beginPath();
+          g.moveTo(kp.ox, kp.oy);
+          g.lineTo(kp.ox + rdx / rlen * schweif, kp.oy + rdy / rlen * schweif);
+          g.stroke();
+        }
+        /* Und das Aufblitzen im Moment des Einrastens. */
+        var fest = t - (kp.ab + 750);
+        if (fest > 0 && fest < 300) {
+          var fb = Math.pow(1 - fest / 300, 2);
+          g.globalCompositeOperation = "lighter";
+          g.globalAlpha = fb * 0.85 * blenden;
+          var fg2 = gr * (1.5 + 2.4 * (fest / 300));
+          g.drawImage(BLITZ, kp.ox - fg2 / 2, kp.oy - fg2 / 2, fg2, fg2);
+        }
+
+        g.globalCompositeOperation = "lighter";
         g.globalAlpha = deck * 0.75;
         var lg = gr * 2.4;
         g.drawImage(GLUT, kp.ox - lg / 2, kp.oy - lg / 2, lg, lg);
@@ -1015,15 +1134,82 @@
         g.globalAlpha = 1;
       }
 
+      /* Die Ankunft des Kerns bekommt Gewicht: ein Blitz, und danach
+         zwei Druckwellen, die als Ellipsen in der Bahnebene nach aussen
+         laufen — dieselbe Sprache wie beim Stern, nur liegend. Ein Kern,
+         der einfach nur groesser wird, ist angekommen; einer, der eine
+         Welle vor sich herschiebt, ist EINGESCHLAGEN. */
+      var kernBlitz = t - 700;
+      if (kernBlitz > 0 && kernBlitz < 360) {
+        var kbf = Math.pow(1 - kernBlitz / 360, 2);
+        g.globalCompositeOperation = "lighter";
+        g.globalAlpha = kbf * 0.8 * blenden;
+        var kbg = Math.min(B, H) * (0.5 + 0.9 * (kernBlitz / 360));
+        g.drawImage(BLITZ, zAktX - kbg / 2, zAktY - kbg / 2, kbg, kbg);
+        g.globalAlpha = 1;
+      }
+      var wellen = [glatt(760, 1500, t), glatt(880, 1700, t)];
+      for (var wi = 0; wi < wellen.length; wi++) {
+        var wp = wellen[wi];
+        if (wp <= 0 || wp >= 1) continue;
+        var wr = Math.min(B, H) * (0.06 + 0.85 * aus(wp));
+        g.globalCompositeOperation = "lighter";
+        g.globalAlpha = Math.pow(1 - wp, 1.6) * 0.5 * blenden;
+        g.lineWidth = 2.5 * (1 - wp) + 0.5;
+        g.strokeStyle = "rgba(190,214,255,1)";
+        g.beginPath();
+        g.ellipse(zAktX, zAktY, wr, wr * (QUETSCH + 0.28), kippeAkt, 0, 6.2832);
+        g.stroke();
+        g.globalAlpha = 1;
+      }
+
       for (var vi = 0; vi < vorn.length; vi++) koerperMalen(vorn[vi]);
+
+      /* Kometen: alle paar Sekunden zieht ein Lichtstrich quer durch das
+         Bild, unbeteiligt am Uhrwerk — die eine Zutat, die sagt, dass der
+         Raum weitergeht, wo die Formation aufhoert. Hoechstens zwei
+         zugleich, keiner in der Sparschaltung, keiner im Abriss (dort
+         streckt sich ohnehin alles zu Strichen). */
+      if (!sparsam && !abriss && t > naechsterKomet && kometen.length < 2) {
+        naechsterKomet = t + 1500 + wuerfel() * 900;
+        var kwinkel = 0.5 + wuerfel() * 0.5;
+        var ktempo = 0.45 + wuerfel() * 0.25;
+        kometen.push({
+          x: -40 + wuerfel() * B * 0.5,
+          y: -30,
+          vx: Math.cos(kwinkel) * ktempo,
+          vy: Math.sin(kwinkel) * ktempo,
+          ab: t
+        });
+      }
+      for (var ki = kometen.length - 1; ki >= 0; ki--) {
+        var kom = kometen[ki];
+        var alter = t - kom.ab;
+        if (alter > 1100) { kometen.splice(ki, 1); continue; }
+        kom.x += kom.vx * dt;
+        kom.y += kom.vy * dt;
+        var ka = Math.sin(Math.min(1, alter / 1100) * 3.1416) * 0.7 * blenden;
+        var kv = Math.sqrt(kom.vx * kom.vx + kom.vy * kom.vy) || 1;
+        g.globalCompositeOperation = "lighter";
+        g.strokeStyle = "rgba(214,232,255," + ka.toFixed(3) + ")";
+        g.lineWidth = 1.4;
+        g.lineCap = "round";
+        g.beginPath();
+        g.moveTo(kom.x, kom.y);
+        g.lineTo(kom.x - kom.vx / kv * 140, kom.y - kom.vy / kv * 140);
+        g.stroke();
+        g.globalAlpha = ka;
+        g.drawImage(GLUT, kom.x - 9, kom.y - 9, 18, 18);
+        g.globalAlpha = 1;
+      }
 
       /* Der Blitz des Abrisses. */
       if (abriss > 0) {
-        var hell2 = Math.pow(Math.sin(Math.min(1, abriss * 1.6) * 3.1416), 2) * 0.8;
+        var hell2 = Math.pow(Math.sin(Math.min(1, abriss * 1.6) * 3.1416), 2);
         if (hell2 > 0.004) {
           g.globalCompositeOperation = "lighter";
           g.globalAlpha = hell2 * blenden;
-          var bg = WEIT * 2.6;
+          var bg = WEIT * 3.0;
           g.drawImage(BLITZ, zAktX - bg / 2, zAktY - bg / 2, bg, bg);
           g.globalAlpha = 1;
         }
