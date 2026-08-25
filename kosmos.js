@@ -1,47 +1,46 @@
-/* DER KOSMOS — der Auftakt der Verwaltung.
+/* DER KOSMOS — der Auftakt der Verwaltung. Zweiter Wurf, von Grund auf.
 
-   Alle Marken der Liste als Koerper im Universum: sie ziehen auf gekippten
-   Bahnen um einen Kern, kommen einzeln aus der Tiefe herein, laufen
-   voreinander vorbei und hintereinander her, und am Ende reisst die ganze
-   Formation nach aussen ab, waehrend die Kamera durch das Sternenfeld
-   stoesst.
+   Der erste Wurf war ein Uhrwerk: Marken auf gekippten Ringen um einen
+   Kern, davor ein Sternenfeld aus Strichen. Er ist an seiner eigenen
+   Bauart gescheitert — eine flache Buehne, auf der Tiefe nur behauptet
+   wird (kleiner gemalt = weiter weg), sieht nach Schaubild aus, und
+   Striche quer uebers Bild nach Bildschirmschoner, egal wie viel man
+   daran stellt. Das Urteil dazu war eindeutig.
 
-   WARUM EINE EIGENE DATEI, UND WARUM SIE stern.js AEHNELT
+   JETZT IST ES EIN FLUG. Die Szene hat eine dritte Achse: jede Marke
+   haengt an einem ORT im Raum, und die Kamera fliegt mit stetiger Fahrt
+   eine Gasse aus Marken entlang — sie kommen als schwache Lichter aus
+   dem Nebel, wachsen im Naeherkommen, ziehen gross und nah an der
+   Kamera vorbei und tauchen hinter ihr weg. Nichts davon ist gemalte
+   Behauptung: Groesse, Lage und Licht folgen alle derselben Projektion
+   (Schirmweite mal Brennweite durch Abstand), und genau diese
+   Uebereinstimmung ist es, die ein Auge als "echt" liest.
 
-   Das Handwerkszeug — Himmel in halber Aufloesung, Sterne als Striche,
-   Blende, Korn, Randabdunklung — ist dasselbe wie in stern.js, und es ist
-   BEWUSST KOPIERT statt geteilt. Zwei Szenen auf zwei Seiten, jede mit
-   eigener Fassungsnummer: eine gemeinsame dritte Datei muessten beide
-   kennen und beide zugleich wechseln, und genau an so einer Kopplung ist
-   hier schon einmal etwas auseinandergelaufen. Was in stern.js an Lehren
-   steht (kein Anstrich je Bild, Ebenen hoechstens anderthalb Schirme,
-   Pixeldichte gedeckelt), gilt hier unveraendert.
+   DIE GASSE: die Marken stehen als Doppel-Helix um die Flugbahn —
+   zwei Straenge, exakt gleicher Abstand in der Tiefe, exakt gleicher
+   Winkelschritt, das Ganze dreht traege um die Achse weiter. Symmetrie
+   aus Bauart, nicht aus Regelung: die Staffel KANN nicht ungleich
+   werden, weil nichts an ihr nachstellt. Und jede Scheibe dreht dabei
+   um die eigene Achse, wie eine Muenze im Wind.
 
-   Geladen wird die Datei nur von der Verwaltung — fuer alle anderen
-   kostet sie kein Byte.
+   DAS ZIEL: ganz hinten steht die eigene Marke der App und glimmt der
+   Kamera entgegen. Der ganze Flug fuehrt auf sie zu; beim Abriss
+   beschleunigt die Fahrt in sie hinein — die Sterne strecken sich zu
+   Strichen (NUR dann: Verschmieren ist eine Verschlusszeit, kein
+   Dauerzustand), ein Blitz, und die Seite liegt frei.
 
-   DIE DRAMATURGIE, in vier Saetzen:
-
-     0,0 - 0,9   Der Raum blendet auf, der Kern kommt aus der Tiefe.
-     0,5 - 2,4   Die Marken fliegen einzeln herein, jede auf ihre Bahn.
-     2,4 - 4,6   Das Uhrwerk: innen schnell, aussen langsam, die Koerper
-                 laufen voreinander und hintereinander vorbei — und jeder
-                 dreht sich dabei um die eigene Achse, wie eine Muenze.
-                 Die ganze Formation fliegt unterdessen durch den Raum:
-                 in eine Richtung, der Himmel zieht als Parallaxe hinten
-                 langsamer mit.
-     4,6 - 5,8   Der Abriss: die Bahnen weiten sich, alles streckt sich
-                 zu Strichen, ein Blitz — und die Seite liegt frei.
-
-   Ein Tipp irgendwohin springt zum Abriss: ein Auftakt, den man nicht
-   abkuerzen kann, ist beim zwanzigsten Besuch eine Strafe. Die Flaeche
-   selbst faengt dafuer nichts ab (pointer-events: none) — der Tipp
-   erreicht die Seite darunter trotzdem, gehorcht also beiden. */
+   Geblieben aus dem ersten Wurf ist alles, was sich bewaehrt hat: die
+   Farben der App (#0a0d0c, Stahlblau/Tuerkis/Bronze/Flieder aus
+   stil.css), die Glasscheiben der Marken mit dem Logo-Weg der Liste,
+   Korn und Randabdunklung, die Sparschaltung, die Deckel auf
+   Pixeldichte und Flaeche, der feste Zufall — und die Vertraege zu den
+   Seiten: dieselben Griffe, dieselben Zeiten, derselbe Tipp zum
+   Abkuerzen (die Flaeche selbst faengt nichts ab, pointer-events: none). */
 (function () {
   "use strict";
 
-  var DAUER_BAHN = 4600;   /* bis hierhin laeuft das Uhrwerk             */
-  var DAUER_ENDE = 1200;   /* der Abriss                                 */
+  var DAUER_BAHN = 4600;   /* bis hierhin dauert die Reise               */
+  var DAUER_ENDE = 1200;   /* der Abriss: hinein in den Kern             */
 
   function klemm(x, a, b) { return x < a ? a : (x > b ? b : x); }
   function glatt(a, b, x) {
@@ -90,9 +89,9 @@
     return c;
   }
 
-  /* Die Beugungsspinne fuer den Kern: zwei lange Arme, zwei kurze schraeg.
-     Eine gleichmaessige Spinne sieht gezeichnet aus, eine ungleiche wie
-     Optik. */
+  /* Die Beugungsspinne fuer den Kern: zwei lange Arme, zwei kurze
+     schraeg. Eine gleichmaessige Spinne sieht gezeichnet aus, eine
+     ungleiche wie Optik. */
   function spinne(gr) {
     var c = tafel(gr, gr), x = c.getContext("2d");
     var m = gr / 2;
@@ -121,7 +120,7 @@
     return c;
   }
 
-  /* Ein unscharfer Lichtpunkt im Vordergrund: eine Scheibe mit hellerem
+  /* Ein unscharfer Lichtpunkt nahe der Linse: eine Scheibe mit hellerem
      Rand — die Form der Blende, nicht eine weiche Wolke. */
   function bokeh(gr, farbe) {
     var c = tafel(gr, gr), x = c.getContext("2d");
@@ -138,21 +137,18 @@
 
   /* Der Himmel: Gas in gezogenen Faeden statt runder Watte, dunkle
      Staubbahnen hineingeschnitten, feiner Staub darueber. Wird in halber
-     Aufloesung benutzt — Nebel IST unscharf. */
+     Aufloesung benutzt — Nebel IST unscharf.
+
+     DIE FARBEN DER APP, woertlich: der Grund jeder Seite ist --bg
+     #0a0d0c, und darauf liegen VIER Lichtfelder — Stahlblau (38,74,96),
+     Tuerkis (28,88,78), Bronze (112,82,52) und Flieder (64,44,78), so
+     stehen sie in stil.css. Je Ton die Originalstufe und eine
+     aufgehellte MIT GLEICHEM VERHAELTNIS der Kanaele — heller duerfen
+     sie werden, anders nicht. */
   function himmel(gr, wuerfel) {
     var c = tafel(gr, gr), x = c.getContext("2d");
     x.fillStyle = "#0a0d0c";
     x.fillRect(0, 0, gr, gr);
-
-    /* DIE FARBEN DER APP, diesmal woertlich: der Grund jeder Seite ist
-       --bg #0a0d0c, und darauf liegen VIER Lichtfelder — Stahlblau
-       (38,74,96), Tuerkis (28,88,78), Bronze (112,82,52) und Flieder
-       (64,44,78), so stehen sie in stil.css. Der erste Anlauf hatte die
-       Toene "kraeftiger" gemacht und dabei den Farbton verschoben (blauer,
-       violetter) und das Tuerkis ganz vergessen — und genau das sah man:
-       "nicht dieselbe App Farbe". Jetzt je Ton die Originalstufe und eine
-       aufgehellte MIT GLEICHEM VERHAELTNIS der Kanaele — heller duerfen
-       sie werden, anders nicht. */
     var toene = [
       [38, 74, 96], [52, 100, 130],
       [28, 88, 78], [38, 118, 105],
@@ -215,7 +211,7 @@
   }
 
   /* Ein eigener Zufall mit festem Anfang: derselbe Himmel bei jedem
-     Start, dieselben Bahnen — sonst waere keine Pruefaufnahme mit der
+     Start, dieselbe Gasse — sonst waere keine Pruefaufnahme mit der
      naechsten vergleichbar. */
   function wuerfelWerk(saat) {
     var z = saat >>> 0;
@@ -256,10 +252,14 @@
     if (fuellung) {
       x.fillStyle = fuellung;
     } else {
+      /* Das Glas traegt denselben Stich wie die App: gruengrau statt
+         blaugrau. Bei den nahen Vorbeifluegen fuellt eine Scheibe das
+         halbe Bild — mit blauem Glas kippte das Bildmittel ins Blau,
+         und die Farbmessung der Pruefreihe schlug zu Recht an. */
       var v = x.createRadialGradient(m - r * 0.36, m - r * 0.48, r * 0.05, m, m, r);
-      v.addColorStop(0, "rgba(96,110,126,0.98)");
-      v.addColorStop(0.5, "rgba(52,62,74,0.98)");
-      v.addColorStop(1, "rgba(24,31,40,0.98)");
+      v.addColorStop(0, "rgba(94,114,118,0.98)");
+      v.addColorStop(0.5, "rgba(50,64,66,0.98)");
+      v.addColorStop(1, "rgba(22,32,33,0.98)");
       x.fillStyle = v;
     }
     x.fill();
@@ -306,11 +306,6 @@
 
   function bildScheibe(gr, bild) {
     var c = tafel(gr, gr), x = c.getContext("2d");
-    /* Mit dem vollen Glasgrund, nicht mit einer flachen dunklen Scheibe:
-       die war auf dem dunklen Himmel unsichtbar, und die Logos schwebten
-       als nackte Vierecke im Raum. Der Ring macht aus dem Bild einen
-       Koerper — dieselbe Fassung, in der jedes Logo auch in der Liste
-       sitzt. */
     var r = scheibenGrund(x, gr, null);
     x.save();
     x.beginPath(); x.arc(gr / 2, gr / 2, r * 0.99, 0, 6.2832); x.clip();
@@ -336,10 +331,8 @@
 
   /* Die Fetch.ai-Marke, gezeichnet: drei mal drei Felder, Quadrate oben
      links zu Kreisen unten rechts — dieselbe Geometrie wie MARKEN in
-     index.html, hier als Pfade statt als SVG, weil auf einer Leinwand
-     ohnehin gezeichnet wird. Die Farben kommen von der Seite (die liest
-     sie aus den Marken in ihrem Regelwerk); die Werte hier sind nur der
-     Boden, falls sie fehlen. */
+     index.html. Die Farben kommen von der Seite; die Werte hier sind nur
+     der Boden, falls sie fehlen. */
   function fetScheibe(gr, farben) {
     var c = tafel(gr, gr), x = c.getContext("2d");
     var m = gr / 2, r = m - gr * 0.03;
@@ -394,7 +387,7 @@
     var c = tafel(gr, gr), x = c.getContext("2d");
     var m = gr / 2, r = m - gr * 0.03;
     x.beginPath(); x.arc(m, m, r, 0, 6.2832);
-    x.fillStyle = "#0d1116"; x.fill();
+    x.fillStyle = "#0d1412"; x.fill();
     if (bild) {
       x.save();
       x.beginPath(); x.arc(m, m, r * 0.99, 0, 6.2832); x.clip();
@@ -408,21 +401,19 @@
   window.rcpKosmos = function (huelle, wahl) {
     wahl = wahl || {};
     /* Die Zeiten gehoeren der Szene, nicht dem Modul: die Verwaltungsseite
-       laesst das Uhrwerk von selbst abreissen, der Auftakt der Liste
-       bestellt den Abriss von aussen (bahn: sehr gross, dann ende()) —
-       sein Fahrplan gehoert dem Ladebildschirm, nicht der Szene. */
+       laesst die Reise von selbst enden, der Auftakt der Liste bestellt
+       den Abriss von aussen (bahn: sehr gross, dann ende()) — sein
+       Fahrplan gehoert dem Ladebildschirm, nicht der Szene. */
     var bahnDauer = wahl.bahn || DAUER_BAHN;
     var endeDauer = wahl.ende || DAUER_ENDE;
     var leinwand = document.createElement("canvas");
     var g = leinwand.getContext && leinwand.getContext("2d");
     if (!g) {
       /* Ohne Zeichenflaeche gibt es nichts zu zeigen — dann faellt der
-         Vorhang SOFORT, statt zehn Sekunden schwarz zu stehen. Und das
-         Ersatzobjekt traegt ALLE Griffe des echten: die Notbremse der
-         Seite ruft abbrechen() ungesehen auf, und ein Ersatz, dem ein
-         Griff fehlt, verwandelt genau den Rettungsweg in einen TypeError
-         — der Vorhang bliebe fuer immer. Der Gegenpruefung ins Netz
-         gegangen, bevor es jemand erlebt hat. */
+         Vorhang SOFORT. Und das Ersatzobjekt traegt ALLE Griffe des
+         echten: ein Ersatz, dem abbrechen() fehlt, macht die Notbremse
+         der Seite selbst zum TypeError, und der Vorhang bliebe fuer
+         immer. */
       if (wahl && typeof wahl.fertig === "function") setTimeout(wahl.fertig, 0);
       return { ende: function () {}, planeten: function () {}, abbrechen: function () {} };
     }
@@ -430,26 +421,18 @@
     leinwand.setAttribute("aria-hidden", "true");
     huelle.appendChild(leinwand);
 
-    /* Pixeldichte gedeckelt — und auf einem grossen Fenster (die
-       Verwaltung laeuft auch am Schreibtisch) faellt sie auf eins, bevor
-       die Leinwand in zweistellige Megabyte waechst. */
     /* Zwei Deckel uebereinander: die Pixeldichte (hoechstens 2, die
        Sparschaltung darf sie auf 1 druecken) UND die Gesamtflaeche der
-       Leinwand. Der zweite fehlte zuerst — auf einem 4K-Fenster war die
-       Dichte laengst bei 1 und die Leinwand trotzdem 33 Megabyte. Die
-       Dichte darf dafuer unter 1 fallen; die Flaeche wird dann vom
-       Anstrich hochgezogen, und weich ist bei einem Auftakt kein Fehler. */
+       Leinwand — auf einem 4K-Fenster darf die Dichte auch unter 1
+       fallen, weich ist bei einem Auftakt kein Fehler. */
     var dichteDeckel = 2;
     var DPR = 1;
-    var B = 0, H = 0, MX = 0, MY = 0, WEIT = 0;
+    var B = 0, H = 0, MX = 0, MY = 0, F = 700;
     var grund = null, gg = null, nachher = [];
 
-    var wuerfel = wuerfelWerk(20260820);
+    var wuerfel = wuerfelWerk(20260825);
     var HIMMEL = himmel(512, wuerfel);
     var KORN = korn(128, wuerfel);
-    /* Auch das Licht traegt die App-Palette: nicht das generische
-       Weltraum-Blau, sondern das kuehle Tuerkis-Weiss, das zu #0a0d0c und
-       den Feldern der Seiten gehoert. */
     var GLUT = glut(256, [
       [0, "rgba(228,242,238,0.7)"],
       [0.16, "rgba(166,214,202,0.4)"],
@@ -469,17 +452,13 @@
       [1, "rgba(0,0,0,0)"]
     ]);
 
-    function bahnenMasse() {
-      return { innen: Math.min(B, H) * 0.22, aussen: Math.min(B * 0.47, H * 0.32) };
-    }
-
     function messen(erzwungen) {
       var nb = huelle.clientWidth || window.innerWidth;
       var nh = huelle.clientHeight || window.innerHeight;
-      /* Nur bei echter Aenderung — der Browser feuert resize in Serien
-         (iOS-Leisten, Fenster ziehen), und jeder Durchlauf hier baut die
-         Grosspuffer neu. Erzwungen wird nur von der Sparschaltung, die
-         dieselbe Groesse mit neuer Dichte will. */
+      /* Nur bei echter Aenderung — der Browser feuert resize in Serien,
+         und jeder Durchlauf hier baut die Grosspuffer neu. Erzwungen wird
+         nur von der Sparschaltung, die dieselbe Groesse mit neuer Dichte
+         will. */
       if (!erzwungen && nb === B && nh === H && grund) return;
       B = nb; H = nh;
       DPR = Math.min(window.devicePixelRatio || 1, dichteDeckel);
@@ -490,18 +469,14 @@
       leinwand.style.width = B + "px";
       leinwand.style.height = H + "px";
       MX = B / 2; MY = H * 0.46;
-      /* 0,8 statt 0,62: seit der Fluchtpunkt der Sterne VORAUS liegt
-         (Verfolgungskamera), ist die gegenueberliegende Ecke weiter weg
-         als je ein Punkt vorher — mit dem alten Mass starben die Sterne,
-         bevor sie sie erreichten, und die Ecke blieb leer. */
-      WEIT = Math.sqrt(B * B + H * H) * 0.8;
+      /* Die Brennweite: aus der Schirmhoehe, damit die Gasse auf jedem
+         Geraet denselben Bildwinkel hat. Die Orte im Raum sind von der
+         Schirmgroesse unabhaengig — ein Drehen des Geraets aendert den
+         Blick, nicht die Welt. */
+      F = Math.max(B, H) * 0.78;
       grund = tafel(Math.round(B * DPR / 2), Math.round(H * DPR / 2));
       gg = grund.getContext("2d");
       nachher = [];
-      /* Auch die Nachbereitung ist gedeckelt: auf einem grossen Fenster
-         waeren drei Kacheln in halber Groesse zusammen teurer als die
-         Leinwand selbst. Grober aufgezogenes Korn ist dort nicht zu
-         unterscheiden. */
       var teiler = Math.max(2, Math.sqrt((B * H) / 700000));
       for (var n = 0; n < 3; n++) {
         var t = tafel(Math.round(B / teiler), Math.round(H / teiler));
@@ -522,21 +497,6 @@
         } catch (e) {}
         nachher.push(t);
       }
-      /* Die Bahnen ziehen mit: sie sind als Anteil gemerkt, nicht als
-         Pixel — sonst laege nach einem Drehen des Geraets die aeusserste
-         Bahn ausserhalb des Bildes, waehrend Kern und Mitte laengst auf
-         die neue Mitte gewechselt haben. */
-      /* planeten ist zur ERSTEN Messung noch nicht zugewiesen — messen()
-         laeuft beim Aufbau, die Zuweisung steht weiter unten, und var
-         hoisted nur den Namen, nicht den Wert. Ohne diese Pruefung stand
-         hier "undefined.length", und die ganze Szene starb im Aufbau —
-         dieselbe Falle wie einst var bild in stern.js, nur andersherum. */
-      if (planeten) {
-        var bm = bahnenMasse();
-        for (var pi = 0; pi < planeten.length; pi++) {
-          planeten[pi].r = bm.innen + (bm.aussen - bm.innen) * planeten[pi].fak;
-        }
-      }
     }
     messen();
 
@@ -548,22 +508,31 @@
       kb.src = wahl.kern;
     }
 
-    /* Das Strichfeld: waehrend des Uhrwerks eine langsame Fahrt, beim
-       Abriss der Sog. Bewusst duenner als in stern.js — die Koerper sollen
-       das Bild tragen, nicht das Feld. */
-    var ANZ = Math.round(klemm((B * H) / 1800, 120, 280));
+    /* ---- DER RAUM ----
+
+       Masse der Welt (einheitenlos, die Projektion macht Pixel daraus):
+       die Gasse beginnt bei TOR und schreitet mit SCHRITT in die Tiefe,
+       der Kern wartet ZIEL_ABSTAND hinter der letzten Marke. HELIX ist
+       der Radius der Gasse um die Flugachse. */
+    var TOR = 1500, SCHRITT = 430, HELIX = 250, ZIEL_ABSTAND = 950;
+
+    /* Die Sterne: echte Orte im Raum, keine Striche auf einer Scheibe.
+       Jeder hat Ort, Topf (Farbtemperatur), Grundhelligkeit und sein
+       Flimmern; gemalt wird er als Punkt — zum Strich wird er nur, wenn
+       seine BILDbewegung schneller ist als die Verschlusszeit. */
+    var ANZ = Math.round(klemm((B * H) / 2400, 90, 220));
+    var WELTBREIT = Math.max(B, H) * 2.6;
     var sterne = [];
     for (var i = 0; i < ANZ; i++) {
-      var fern = wuerfel();
       sterne.push({
-        w: wuerfel() * 6.2832,
-        d: 8 + WEIT * Math.sqrt(wuerfel()),
-        v: fern < 0.34 ? 0.06 + wuerfel() * 0.16
-          : (fern < 0.82 ? 0.3 + wuerfel() * 0.55 : 0.95 + wuerfel() * 0.75),
+        x: (wuerfel() - 0.5) * WELTBREIT,
+        y: (wuerfel() - 0.5) * WELTBREIT,
+        z: 200 + wuerfel() * 6800,
         h: 0.2 + 0.8 * Math.pow(wuerfel(), 2.3),
         topf: (wuerfel() * 4) | 0,
         fs: 1.6 + wuerfel() * 4.2,
-        fp: wuerfel() * 6.2832
+        fp: wuerfel() * 6.2832,
+        px: 0, py: 0, war: false
       });
     }
     var TOPF = [
@@ -573,75 +542,53 @@
       { farbe: "255,206,158", breit: 0.95 }
     ];
 
-    /* ---- DAS UHRWERK ----
+    /* Staub nahe der Linse: wenige grosse, fast unsichtbare Blenden-
+       scheiben, die schnell vorbeiziehen — die naechste Tiefenebene vor
+       allen anderen. */
+    var staub = [];
+    for (var st0 = 0; st0 < 8; st0++) {
+      staub.push({
+        x: (wuerfel() - 0.5) * WELTBREIT * 0.5,
+        y: (wuerfel() - 0.5) * WELTBREIT * 0.5,
+        z: 120 + wuerfel() * 1400,
+        warm: st0 % 3 === 0
+      });
+    }
 
-       Jeder Koerper auf einer gekippten Ellipse um den Kern. Die Bahnen
-       liegen wie eine Galaxie im Bild: senkrecht auf ein Drittel
-       gestaucht, als Ganzes gedreht. Die Tiefe kommt aus dem Winkel —
-       wer auf der oberen Haelfte der Bahn laeuft, ist hinten: kleiner,
-       dunkler, und er wird VOR dem Kern gemalt, damit der ihn verdeckt.
-
-       Innen schnell, aussen langsam, wie es sich gehoert (Kepler: die
-       Umlaufzeit waechst mit r hoch anderthalb). Ohne diese Staffelung
-       dreht sich das Ganze wie ein Teller — starr, und starr ist billig. */
-    var KIPPE = -0.4;
-    var QUETSCH = 0.34;
-    /* Die Kippung ist nicht fest: das ganze Uhrwerk praezediert, langsam
-       genug, dass man es nicht benennen kann, und schnell genug, dass die
-       Formation nie zweimal gleich steht. Ein starr ausgerichtetes System
-       sieht aus wie ein Schaubild; eines, das sich unmerklich weiterdreht,
-       wie ein Ding im Raum. */
-    var kippeAkt = KIPPE;
-    var KO = Math.cos(KIPPE), SI = Math.sin(KIPPE);
     var planeten = [];
-
     var koerperZahl = 0;
+    var vorbeiZahl = 0;
+    var zielZ = TOR + 12 * SCHRITT + ZIEL_ABSTAND;
 
     function planetenSetzen(liste) {
       if (!laeuft || !Array.isArray(liste) || planeten.length) return;
       /* Wie spaet ist es? Eine kalt startende Function kann laenger
-         brauchen als das halbe Uhrwerk. Wer dann kommt, fliegt AB JETZT
-         gestaffelt ein — mit festen Zeiten aus der Anfangsplanung stuende
-         er schlagartig im Bild. Und in den Abriss hinein kommt niemand
-         mehr: eine Formation, die waehrend der Explosion antritt, ist
-         Unfug. */
+         brauchen als die halbe Reise. Wer dann kommt, wird VOR die
+         Kamera gestellt — mit den Anfangsorten stuende er schlagartig
+         hinter ihr. Und in den Abriss hinein kommt niemand mehr. */
       var jetzt = t0 ? (performance.now() - t0) : 0;
       if (jetzt > abrissAb - 900) return;
 
-      /* Erst die Scheiben, dann die Bahnen: wer wo laeuft, entscheidet
-         sich erst, wenn feststeht, wie viele HAUPTkoerper es gibt. */
       var eintraege = [];
       for (var i = 0; i < liste.length && i < 16; i++) {
         var p = liste[i];
         var sym = String(p.yahoo || p.badge || "").toUpperCase();
         var e = {
           sym: sym,
-          gr: 19 + ((i * 37) % 7),
+          gr0: 150 + ((i * 37) % 5) * 16,
           /* UM SICH SELBST: jede Scheibe dreht wie eine Muenze um die
              eigene senkrechte Achse — eigener Anfang, eigenes Tempo,
-             abwechselnde Richtung. Eine Formation, in der alle im
-             Gleichtakt staenden, saehe wieder nach Schaubild aus. */
+             abwechselnde Richtung. */
           dreh: (i * 1.7) % 6.2832,
-          drehW: (0.32 + ((i * 29) % 10) * 0.045) * (i % 2 ? 1 : -1),
-          /* Fetch.ai bringt seine gezeichnete Marke mit, alle anderen ihr
-             Kuerzel — bis das Bild da ist. */
+          drehW: (0.3 + ((i * 29) % 10) * 0.04) * (i % 2 ? 1 : -1),
           bild: sym === "FET-USD" ? fetScheibe(96, wahl.farben)
                                   : textScheibe(96, zeichenFuer(sym) || "?")
         };
         /* Dieselbe Vorfahrt wie in der Liste: eine EIGENE Adresse geht
-           immer vor, auch bei einer gezeichneten Marke — die Regel steht
-           woertlich an logoNeben. Ohne p.logo fragt fuer Krypto und
-           Rohstoffe niemand den Dienst (ohneLogo), Fetch.ai behaelt dann
-           seine Zeichnung. */
+           immer vor. Ohne p.logo fragt fuer Krypto und Rohstoffe niemand
+           den Dienst (ohneLogo), Fetch.ai behaelt seine Zeichnung. Und
+           es wird GEZAEHLT, denn dieses Laden scheitert still. */
         if (p.logo || (sym && !ohneLogo(sym))) {
-          /* Das Original zuerst: die eigene Adresse der Position, sonst der
-             Logo-Dienst — dieselbe Kette wie an den Karten der Liste. Bis
-             das Bild da ist, traegt die Scheibe das Kuerzel; danach wird
-             die Vorlage getauscht, das naechste Bild malt das Logo.
-
-             Und es wird GEZAEHLT, denn dieses Laden scheitert still: auf
-             einem Prueftisch ohne fremde Hosts saehe eine Szene voller
-             Kuerzel genauso aus wie eine mit kaputtem Bildweg. */
           window.rcpKosmosLogos = window.rcpKosmosLogos || { angefragt: 0, geladen: 0 };
           window.rcpKosmosLogos.angefragt++;
           (function (k, quelle) {
@@ -658,123 +605,42 @@
       }
       koerperZahl = eintraege.length;
 
-      /* DREHEN UM DIE ANDEREN, woertlich: jede vierte Marke wird zum MOND
-         der Marke davor — kleiner, schnell, auf einer eigenen kleinen
-         Bahn um ihren Traeger, mit eigener Tiefe: sie verschwindet hinter
-         ihm und kommt auf der anderen Seite wieder hervor.
-
-         Nur Fetch.ai nicht. Ihre gezeichnete Marke ist das eine Zeichen,
-         das die App selbst gebaut hat — als Trabant einer anderen waere
-         sie Beiwerk. */
-      var monde = [];
-      var haupt = [];
-      for (var j = 0; j < eintraege.length; j++) {
-        var ej = eintraege[j];
-        if (j % 4 === 3 && ej.sym !== "FET-USD" && haupt.length) {
-          ej.gr = Math.round(ej.gr * 0.55);
-          monde.push({ e: ej, traeger: haupt[haupt.length - 1] });
-        } else {
-          haupt.push(ej);
-        }
+      /* DIE GASSE: Doppel-Helix, exakt gleicher Schritt in der Tiefe,
+         exakt gleicher Winkelschritt je Strang. KEIN Wuerfeln an den
+         Abstaenden — die Staffel ist symmetrisch, weil nichts an ihr
+         ungleich sein KANN; Abwechslung kommt aus Groesse, Drehung und
+         dem Rad der Helix, nicht aus Unordnung. Kommt die Liste spaet,
+         beginnt die Gasse eben vor der jetzigen Kamera. */
+      var start = Math.max(TOR, fahrt + 1100);
+      for (var bi = 0; bi < eintraege.length; bi++) {
+        var e2 = eintraege[bi];
+        e2.z = start + bi * SCHRITT;
+        e2.strang = bi % 2;
+        e2.phi0 = (bi >> 1) * 0.85 + e2.strang * 3.1416;
+        e2.vorbei = false;
+        planeten.push(e2);
       }
-
-      /* RINGE, NICHT EINZELBAHNEN — die Antwort auf "sieht nicht
-         symmetrisch aus". Vorher hatte jeder Koerper eigenen Radius und
-         eigenes Tempo; nach zwei Sekunden war jede Ordnung Zufall. Jetzt
-         liegen die Koerper auf wenigen Ringen, und je Ring gilt: EIN
-         Radius, EIN Tempo, exakt gleiche Abstaende. Gleiche
-         Geschwindigkeit heisst: die Abstaende bleiben fuer immer gleich —
-         die Formation ist nicht am Anfang symmetrisch, sie BLEIBT es, wie
-         ein Uhrwerk. Benachbarte Ringe laufen gegenlaeufig; das liest
-         sich als Getriebe, nicht als Scheibe. */
-      var bm = bahnenMasse();
-      var M = haupt.length;
-      var ringGroessen = M <= 4 ? [M]
-        : (M <= 8 ? [Math.ceil(M / 2), Math.floor(M / 2)]
-                  : [3, Math.ceil((M - 3) / 2), Math.floor((M - 3) / 2)]);
-      var ringe = [];
-      var lauf = 0;
-      for (var ri = 0; ri < ringGroessen.length; ri++) {
-        var zahl = ringGroessen[ri];
-        var fak = ringGroessen.length === 1 ? 0.5 : ri / (ringGroessen.length - 1);
-        var radius = bm.innen + (bm.aussen - bm.innen) * fak;
-        var ring = {
-          fak: fak,
-          zahl: zahl,
-          /* Kepler je RING, gegenlaeufig im Wechsel. 0,62 rad/s innen —
-             eine gute halbe Umdrehung ueber den ganzen Auftakt. Der erste
-             Wurf stand auf 1,45, und das war "viel zu schnell": ein
-             Uhrwerk zeigt seine Ordnung nur, wenn man ihr folgen kann. */
-          w: 0.62 * Math.pow(bm.innen / radius, 1.5) * (ri % 2 ? -1 : 1),
-          /* Alle Koerper eines Rings kommen ZUSAMMEN — eine Formation,
-             die geschlossen einrastet, ist der halbe Auftritt. */
-          ab: Math.max(560, jetzt + 80) + ri * 300,
-          koerper: []
-        };
-        for (var bi = 0; bi < zahl; bi++) {
-          var h2 = haupt[lauf++];
-          h2.fak = fak;
-          h2.r = radius;
-          h2.ring = ring;
-          /* Exakt gleiche Abstaende, je Ring leicht versetzt, damit die
-             Ringe nicht in einer Linie stehen. */
-          h2.a = bi * (6.2832 / zahl) + ri * 0.9 + 0.4;
-          h2.w = ring.w;
-          h2.ab = ring.ab;
-          ring.koerper.push(h2);
-          planeten.push(h2);
-        }
-        ringe.push(ring);
-      }
-      alleRinge = ringe;
-      for (var k3 = 0; k3 < monde.length; k3++) {
-        var m3 = monde[k3];
-        m3.traeger.mond = {
-          e: m3.e,
-          a: k3 * 2.1 + 0.4,
-          /* Deutlich schneller als jede Hauptbahn — ein Mond, der so
-             langsam laeuft wie sein Traeger, sieht angeklebt aus. */
-          w: 1.7 + k3 * 0.3,
-          r: m3.traeger.gr * 2.5
-        };
-      }
-    }
-    if (wahl.positionen) planetenSetzen(wahl.positionen);
-
-    function ort(k) {
-      var c = Math.cos(k.a), s = Math.sin(k.a);
-      var ex = k.rAkt * c, ey = k.rAkt * s * QUETSCH;
-      return {
-        x: zAktX + ex * KO - ey * SI,
-        y: zAktY + ex * SI + ey * KO,
-        z: s
-      };
+      zielZ = start + 12 * SCHRITT + ZIEL_ABSTAND;
     }
 
-    var laeuft = true, kennung = 0, t0 = 0, vorher = 0, gefahren = 0, himmelFahrt = 0;
-    /* DER FLUG DURCH DEN RAUM. Das Zentrum des Uhrwerks wandert — in EINE
-       Richtung, ohne Wendepunkte (die Lehre vom Stern: was sich
-       umentscheidet, zappelt). Der Himmel bleibt am Schirm verankert und
-       zieht nur traege nach: die Formation bewegt sich also GEGEN den
-       Himmel, und genau dieser Unterschied ist das Fliegen. Beim Abriss
-       beschleunigt der Flug in dieselbe Richtung. */
-    var flugX = 0, flugY = 0, zAktX = 0, zAktY = 0;
-    var alleRinge = [];
-    var kometen = [], naechsterKomet = 1400;
-    /* DIE SPARSCHALTUNG. Die Szene misst ihre eigenen Bilder, und wenn das
-       Geraet nicht hinterherkommt (Mittel der letzten Bilder ueber 34 ms),
-       opfert sie zuerst, was am wenigsten fehlt: das halbe Strichfeld, die
-       Bahnringe, die unscharfen Punkte. Ein Auftakt, der ruckelt, ist
-       schlechter als einer, der etwas weniger zeigt — und niemand zaehlt
-       waehrend einer Kamerafahrt die Sterne. */
+    var laeuft = true, kennung = 0, t0 = 0, vorher = 0;
+    /* DIE FAHRT. Ein einziger Wert: wie weit die Kamera in der Tiefe
+       ist. Er waechst — immer, nie zurueck. Dazu eine leichte seitliche
+       Drift und eine traege Rolle: eine Kamera, die haargenau auf der
+       Achse klebt, sieht nach Werkzeug aus, nicht nach Hand. */
+    var fahrt = 0, driftX = 0, driftY = 0;
     var sparsam = false, dtSumme = 0, dtZahl = 0;
     var abrissAb = bahnDauer;
     var bildnummer = 0;
     var fertig = typeof wahl.fertig === "function" ? wahl.fertig : function () {};
 
     /* Die Spur fuer die Nachschau — auf einer Leinwand gibt es sonst
-       nichts zu befragen. Je Bild: Zeit, Koerperzahl, Winkel und Tiefe
-       des innersten Koerpers, Bilddauer. */
+       nichts zu befragen. Je Bild:
+       [0] Zeit  [1] Koerperzahl  [2] Fahrt (Tiefe der Kamera)
+       [3] wie viele Marken schon an der Kamera vorbeigezogen sind
+       [4] Bilddauer  [5] groesste gemalte Marke in Pixeln
+       [6] Eigendrehung der ersten Marke  [7] groesste Abweichung der
+       Tiefenschritte vom Sollschritt (Symmetrie der Gasse, tausendstel) */
     var spur = [];
     window.rcpKosmosSpur = spur;
 
@@ -797,9 +663,7 @@
           if (dtSumme / dtZahl > 34) {
             sparsam = true;
             sterne.length = Math.floor(sterne.length / 2);
-            /* Der grosse Hebel: die Pixeldichte. Von 2 auf 1 ist ein
-               Viertel der Punkte — auf einem Telefon, das hier angekommen
-               ist, faellt das dem Auge weniger auf als jeder Ruckler. */
+            staub.length = 0;
             if (DPR > 1) { dichteDeckel = 1; messen(true); }
           }
           dtSumme = 0; dtZahl = 0;
@@ -807,89 +671,30 @@
       }
 
       var abriss = klemm((t - abrissAb) / endeDauer, 0, 1);
-      /* Sanft anfahren, beim Abriss durchziehen — und hart gedeckelt,
-         damit die Formation auch bei einem langen Auftakt (die Liste
-         bestellt den Abriss spaet) nie den sicheren Bereich verlaesst. */
-      var flugKraft = glatt(300, 1400, t) * (1 + 3.5 * abriss);
-      flugX += 16 * flugKraft * dt * 0.001;
-      flugY -= 10 * flugKraft * dt * 0.001;
-      zAktX = MX + klemm(flugX, -B * 0.2, B * 0.2);
-      zAktY = MY + klemm(flugY, -H * 0.17, H * 0.17);
-      kippeAkt = KIPPE + t * 0.00006;
-      KO = Math.cos(kippeAkt);
-      SI = Math.sin(kippeAkt);
       var blenden = glatt(0, 500, t);
-      /* DIE ANNAEHERUNG: die ganze Formation waechst ueber den Auftakt
-         langsam heran — die Kamera fliegt AUF sie zu, nicht an ihr
-         vorbei. Das ist der Unterschied zwischen einem Mobile, das sich
-         dreht, und einem Ort, den man erreicht. Fest verankert an der
-         Zeit, nicht am Abriss: auch der lange Auftakt der Liste soll die
-         ganze Fahrt bekommen. */
-      var annaeh = 0.84 + 0.24 * glatt(400, 5200, t);
-      /* Drei Gaenge: WARP beim Einflug (die Koerper kommen ja gerade aus
-         genau dieser Fahrt), Ruhe im Stand, Sog beim Abriss. */
-      /* Der Reisegang: 1,0 im Stand — die Sterne STROEMEN vorbei, sie
-         stehen nicht. Das ist die Trennung, an der die letzte Fassung
-         scheiterte: "zu schnell" war das KREISELN, nicht das Fliegen.
-         Als beides halbiert wurde, blieb ein Uhrwerk im Stillstand —
-         ruhig, aber keine Reise mehr. Das Uhrwerk bleibt langsam; der
-         Flug durch den Raum laeuft immer. */
-      var tempo = 1.0 + 4.5 * (1 - glatt(900, 2200, t)) + 15 * abriss * abriss;
-      gefahren += tempo * dt * 0.001;
-      /* Der Himmel faehrt mit eigener, GEDECKELTER Geschwindigkeit. Beim
-         ersten Anlauf schob der Abriss auch ihn an — und die eine grosse
-         Kachel rutschte so weit, dass ihre Kante ins Bild kam: oben links
-         stand ein heller Keil, der kein Nebel war, sondern der Rand des
-         Bildes. Das Feld darf rasen, der Nebel dahinter nicht. */
-      himmelFahrt += klemm(tempo, 0, 1.6) * dt * 0.001;
 
-      if (spur.length < 600) {
-        var erster = planeten[0];
-        /* [7]: die Symmetrie, gemessen statt behauptet. Im vollsten Ring
-           muessten alle Winkelabstaende gleich sein (2π durch die Zahl der
-           Koerper); notiert wird die groesste Abweichung davon, in
-           Tausendstel Radiant. Gleiches Tempo je Ring heisst: sie muss
-           dauerhaft bei null bleiben — und wenn nicht, sieht es die
-           Pruefreihe, bevor es jemand auf dem Telefon sieht. */
-        var symAbw = 0, vollRing = null;
-        for (var sri = 0; sri < alleRinge.length; sri++) {
-          if (!vollRing || alleRinge[sri].zahl > vollRing.zahl) vollRing = alleRinge[sri];
-        }
-        if (vollRing && vollRing.zahl > 1) {
-          var wk = [];
-          for (var swi = 0; swi < vollRing.koerper.length; swi++) {
-            var wa2 = vollRing.koerper[swi].a % 6.28318530718;
-            if (wa2 < 0) wa2 += 6.28318530718;
-            wk.push(wa2);
-          }
-          wk.sort(function (a, b) { return a - b; });
-          var soll = 6.28318530718 / vollRing.zahl;
-          for (var sgi = 0; sgi < wk.length; sgi++) {
-            var luecke = (sgi === wk.length - 1)
-              ? wk[0] + 6.28318530718 - wk[sgi]
-              : wk[sgi + 1] - wk[sgi];
-            var abwS = Math.abs(luecke - soll);
-            if (abwS > symAbw) symAbw = abwS;
-          }
-        }
-        spur.push([Math.round(t), koerperZahl,
-          erster ? Math.round(erster.a * 573) / 10 : 0,
-          erster ? Math.round(Math.sin(erster.a) * 100) / 100 : 0,
-          /* [5] und [6] siehe unten — dt bleibt [4], die Leser davor
-             sollen nichts merken. */
-          Math.round(dt * 10) / 10,
-          Math.round(zAktX),
-          erster ? Math.round(erster.dreh * 100) / 100 : 0,
-          Math.round(symAbw * 1000)]);
-      }
+      /* Die Fahrt: sanfter Anlauf, dann Reisegeschwindigkeit — bemessen
+         so, dass die Gasse bis zum geplanten Abriss durchflogen ist.
+         Beim Abriss zieht sie hinein in den Kern. Die Liste bestellt
+         ihren Abriss frueher, als die Reise geplant war: dann reisst
+         die Fahrt eben mitten aus der Gasse — auch das ist ein Ende. */
+      var reiseZeit = klemm(bahnDauer, 3600, 5600);
+      var V = (zielZ - 550) / (reiseZeit - 600);
+      var v = V * glatt(120, 950, t) * (1 + 7 * abriss * abriss);
+      fahrt += v * dt;
+      driftX += 0.010 * glatt(500, 2200, t) * (1 - abriss) * dt;
+      driftY -= 0.006 * glatt(500, 2200, t) * (1 - abriss) * dt;
+      var camX = klemm(driftX, -55, 55);
+      var camY = klemm(driftY, -40, 40);
+      var roll = -0.035 + 0.065 * Math.min(1, t / 5600);
+      /* Das Rad der Helix: die ganze Gasse dreht traege um die Achse
+         weiter — langsam genug, dass man es nicht benennen kann. */
+      var rad = t * 0.00013;
 
-      /* Der Himmel in halber Aufloesung, zwei Lagen, leichte Rolle — und
-         auch er kommt NAEHER: beide Lagen wachsen ueber den Auftakt um
-         acht Prozent. Zusammen mit der Annaeherung der Formation ist das
-         die Tiefe der Fahrt: alles kommt auf einen zu, jede Ebene in
-         ihrem eigenen Mass. */
-      var roll = -0.05 + 0.08 * Math.min(1, t / 5800);
-      var hzoom = 1 + 0.08 * Math.min(1, t / 6000);
+      /* Der Himmel in halber Aufloesung, zwei Lagen. Er ist das Ferne:
+         er rollt mit der Kamera und atmet mit der Fahrt nur wenig —
+         Parallaxe entsteht dadurch, dass ALLES ANDERE staerker zieht. */
+      var hzoom = 1 + 0.10 * Math.min(1, fahrt / (zielZ || 1));
       gg.setTransform(DPR / 2, 0, 0, DPR / 2, 0, 0);
       gg.globalCompositeOperation = "source-over";
       gg.globalAlpha = 1;
@@ -900,15 +705,10 @@
       gg.globalCompositeOperation = "lighter";
       var s1 = Math.max(B, H) * 1.5 * hzoom;
       var s2 = Math.max(B, H) * 2.1 * hzoom;
-      /* Beide Lagen schwenken GEGEN die Flugrichtung (die Formation
-         fliegt nach oben rechts, der Raum zieht nach unten links vorbei),
-         die nahe schneller als die ferne — vorher liefen sie
-         gegeneinander, und das war Parallaxe ohne Richtung: Tiefe, aber
-         keine Verfolgung. */
       gg.globalAlpha = 0.85;
-      gg.drawImage(HIMMEL, -s1 / 2 - himmelFahrt * 10, -s1 / 2 + himmelFahrt * 7, s1, s1);
+      gg.drawImage(HIMMEL, -s1 / 2 - camX * 0.6, -s1 / 2 - camY * 0.6, s1, s1);
       gg.globalAlpha = 0.45;
-      gg.drawImage(HIMMEL, -s2 / 2 - himmelFahrt * 4, -s2 / 2 + himmelFahrt * 3, s2, s2);
+      gg.drawImage(HIMMEL, -s2 / 2 - camX * 0.25, -s2 / 2 - camY * 0.25, s2, s2);
 
       g.setTransform(DPR, 0, 0, DPR, 0, 0);
       g.clearRect(0, 0, B, H);
@@ -916,85 +716,71 @@
       g.globalAlpha = blenden;
       g.drawImage(grund, 0, 0, B, H);
 
-      /* Das Strichfeld — mit dem FLUCHTPUNKT VORAUS. Bisher lag er in
-         der Formation selbst: die Kamera stand in ihrer Mitte, und der
-         Raum floss um sie herum auseinander. Eine Verfolgungskamera
-         haengt HINTER dem, was fliegt: der Punkt, auf den alles zulaeuft,
-         liegt der Formation in Flugrichtung voraus, und die Sterne
-         stroemen von dort an ihr vorbei nach hinten unten links —
-         dorthin, wo sie herkam. */
-      var slX = zAktX + B * 0.22, slY = zAktY - H * 0.15;
-      /* DIE VERSCHLUSSZEIT — der Umbau gegen das Billige. Vorher wurde
-         jeder Stern immer als Strich seiner vollen Bildbewegung gemalt:
-         im Reisegang zog das Feld dauerhaft leinwandlange, duenne, harte
-         Linien, und genau das ist der Bildschirmschoner-Blick. Eine
-         Kamera verschmiert aber nur, was schneller ist als ihr
-         Verschluss: im Flug sind Sterne PUNKTE mit weichem Glimmen, und
-         erst wenn es reisst — der Warp des Anfangs, der Sog des Endes —
-         strecken sie sich zu Strichen. Gemalt wird also die Bewegung mal
-         Verschluss (0,12 in Ruhe, 1 im Riss); was kuerzer bleibt als
-         gut zwei Punkte, ist ein Punkt. */
-      var zug = klemm((tempo - 0.9) / 4, 0.12, 1);
+      /* ---- Die Sterne ---- */
       g.globalCompositeOperation = "lighter";
-      var pfade = [[], [], [], []];
       var punkte = [[], [], [], []];
+      var striche = [[], [], [], []];
       var funken = [];
-      for (var i = 0; i < sterne.length; i++) {
-        var s = sterne[i];
-        var schritt = (s.d * 0.055 + 1.1) * s.v * tempo * (dt / 16.667);
-        s.d += schritt;
-        if (s.d > WEIT) {
-          s.w = wuerfel() * 6.2832;
-          s.d = 3 + wuerfel() * 22;
-          schritt = 0;
+      for (var si = 0; si < sterne.length; si++) {
+        var s = sterne[si];
+        var z2 = s.z - fahrt;
+        if (z2 < 130) {
+          s.z += 6800 + wuerfel() * 1600;
+          s.x = (wuerfel() - 0.5) * WELTBREIT;
+          s.y = (wuerfel() - 0.5) * WELTBREIT;
+          s.war = false;
+          continue;
         }
-        var co = Math.cos(s.w), si = Math.sin(s.w);
-        var hell = s.h * klemm((s.d - 14) / (WEIT * 0.3), 0, 1) *
+        var f2 = F / z2;
+        var sx2 = MX + (s.x - camX) * f2;
+        var sy2 = MY + (s.y - camY) * f2;
+        if (sx2 < -30 || sx2 > B + 30 || sy2 < -30 || sy2 > H + 30) { s.war = false; continue; }
+        var tiefe = klemm((6200 - z2) / 4600, 0, 1);
+        var hell = s.h * tiefe *
           (0.78 + 0.22 * Math.sin(t * 0.001 * s.fs + s.fp));
-        if (hell <= 0.02) continue;
-        var px = slX + co * s.d, py = slY + si * s.d;
-        var schweifL = schritt * zug;
-        if (schweifL > 2.2) {
-          pfade[s.topf].push(px - co * schweifL, py - si * schweifL, px, py, hell);
+        if (hell <= 0.02) { s.war = false; continue; }
+        /* Verschlusszeit: der Strich ist die eigene Bildbewegung seit
+           dem letzten Bild — im Reisegang sind das wenige Pixel (ein
+           Punkt), erst der Sog des Abrisses streckt die nahen Sterne
+           zu Linien. */
+        var zog = s.war ? Math.sqrt((sx2 - s.px) * (sx2 - s.px) + (sy2 - s.py) * (sy2 - s.py)) : 0;
+        if (s.war && zog > 3.2 && zog < 400) {
+          striche[s.topf].push(s.px, s.py, sx2, sy2, hell);
         } else {
-          punkte[s.topf].push(px, py, hell);
-          /* Die hellsten bekommen ihr Glimmen — wenige, sonst ist es
-             wieder Lametta. */
-          if (hell > 0.62 && !sparsam) funken.push(px, py, hell);
+          punkte[s.topf].push(sx2, sy2, hell, klemm(f2 * 260, 0.5, 1.9));
+          if (hell > 0.66 && !sparsam) funken.push(sx2, sy2, hell);
         }
+        s.px = sx2; s.py = sy2; s.war = true;
       }
       g.lineCap = "round";
       for (var k = 0; k < TOPF.length; k++) {
         var art = TOPF[k];
-        var liste = pfade[k];
-        for (var st = 0; st < 3; st++) {
+        var sl = striche[k];
+        for (var stq = 0; stq < 3; stq++) {
           var leer = true;
-          for (var j = 0; j < liste.length; j += 5) {
-            var h = liste[j + 4];
-            if (Math.min(2, (h * 3) | 0) !== st) continue;
+          for (var j = 0; j < sl.length; j += 5) {
+            if (Math.min(2, (sl[j + 4] * 3) | 0) !== stq) continue;
             if (leer) { g.beginPath(); leer = false; }
-            g.moveTo(liste[j], liste[j + 1]);
-            g.lineTo(liste[j + 2], liste[j + 3]);
+            g.moveTo(sl[j], sl[j + 1]);
+            g.lineTo(sl[j + 2], sl[j + 3]);
           }
           if (leer) continue;
-          var kraftS = blenden * (0.2 + st * 0.26);
           g.lineWidth = art.breit;
-          g.strokeStyle = "rgba(" + art.farbe + "," + kraftS.toFixed(3) + ")";
+          g.strokeStyle = "rgba(" + art.farbe + "," + (blenden * (0.2 + stq * 0.26)).toFixed(3) + ")";
           g.stroke();
         }
         var pl = punkte[k];
-        for (var st2 = 0; st2 < 3; st2++) {
+        for (var stp = 0; stp < 3; stp++) {
           var leer2 = true;
-          for (var j2 = 0; j2 < pl.length; j2 += 3) {
-            var h2 = pl[j2 + 2];
-            if (Math.min(2, (h2 * 3) | 0) !== st2) continue;
+          for (var j2 = 0; j2 < pl.length; j2 += 4) {
+            if (Math.min(2, (pl[j2 + 2] * 3) | 0) !== stp) continue;
             if (leer2) { g.beginPath(); leer2 = false; }
-            var pr = art.breit * (0.55 + 0.75 * h2);
+            var pr = art.breit * pl[j2 + 3] * (0.5 + 0.6 * pl[j2 + 2]);
             g.moveTo(pl[j2] + pr, pl[j2 + 1]);
             g.arc(pl[j2], pl[j2 + 1], pr, 0, 6.2832);
           }
           if (leer2) continue;
-          g.fillStyle = "rgba(" + art.farbe + "," + (blenden * (0.3 + st2 * 0.28)).toFixed(3) + ")";
+          g.fillStyle = "rgba(" + art.farbe + "," + (blenden * (0.3 + stp * 0.28)).toFixed(3) + ")";
           g.fill();
         }
       }
@@ -1002,311 +788,131 @@
          Pixeln und Sternen. */
       for (var fu = 0; fu < funken.length; fu += 3) {
         var fh = funken[fu + 2];
-        g.globalAlpha = blenden * (fh - 0.5) * 0.7;
+        g.globalAlpha = blenden * (fh - 0.55) * 0.8;
         var fgr = 5 + 8 * fh;
         g.drawImage(GLUT, funken[fu] - fgr / 2, funken[fu + 1] - fgr / 2, fgr, fgr);
       }
       g.globalAlpha = 1;
 
-      /* Unscharfe Punkte im Vordergrund. */
-      for (var m = 0; m < (sparsam ? 0 : 5); m++) {
-        var mw = (m / 5) * 6.2832 + gefahren * 0.07 + m;
-        var md = WEIT * (0.36 + 0.5 * ((m * 0.41) % 1));
-        var mg = 40 + m * 14;
-        g.globalAlpha = blenden * (0.09 - m * 0.008);
-        g.drawImage(m % 2 ? BOKEH : BOKEHWARM,
-          zAktX + Math.cos(mw) * md - mg / 2, zAktY + Math.sin(mw) * md - mg / 2, mg, mg);
+      /* ---- Die Gasse und der Kern, nach Tiefe sortiert ---- */
+      var reihe = [];
+      for (var pi = 0; pi < planeten.length; pi++) {
+        var kp = planeten[pi];
+        /* Die Drehung gehoert zur Physik, nicht zum Malen: sie laeuft
+           fuer JEDEN Koerper weiter, auch fern im Nebel und hinter der
+           Kamera — sonst friert die erste Marke ein, sobald sie
+           vorbeigezogen ist, und die Nachschau misst einen toten Wert. */
+        kp.dreh += kp.drehW * (1 + 2 * abriss) * dt * 0.001;
+        var kz = kp.z - fahrt;
+        if (kz < 70) {
+          if (!kp.vorbei) { kp.vorbei = true; vorbeiZahl++; }
+          continue;
+        }
+        if (kz > 5600) continue;
+        kp.kz = kz;
+        reihe.push(kp);
+      }
+      var kernZ = zielZ - fahrt;
+      var kernDran = kernZ > 70;
+      reihe.sort(function (a, b) { return b.kz - a.kz; });
+
+      var maxGemalt = 0;
+
+      function kernMalen() {
+        var kf = F / kernZ;
+        var kx = MX + (0 - camX) * kf;
+        var ky = MY + (0 - camY) * kf;
+        var kg = klemm(300 * kf, 8, Math.min(B, H) * 1.4);
+        var kd = blenden * klemm((6400 - kernZ) / 3800, 0, 1);
+        var puls = 1 + 0.03 * Math.sin(t * 0.0021);
+        g.globalCompositeOperation = "lighter";
+        g.globalAlpha = kd * 0.8;
+        var gg2 = kg * 3.2 * puls;
+        g.drawImage(GLUT, kx - gg2 / 2, ky - gg2 / 2, gg2, gg2);
+        g.globalAlpha = kd * 0.3;
+        var bb = kg * 6 * (0.7 + 0.3 * puls);
+        g.drawImage(STREIF, kx - bb / 2, ky - kg * 0.16, bb, kg * 0.32);
+        if (kg > 14) {
+          g.globalAlpha = kd;
+          g.globalCompositeOperation = "source-over";
+          g.drawImage(KERN, kx - kg / 2, ky - kg / 2, kg, kg);
+          g.globalCompositeOperation = "lighter";
+          g.globalAlpha = kd * 0.4;
+          var sg = kg * 2.2;
+          g.drawImage(SPINNE, kx - sg / 2, ky - sg / 2, sg, sg);
+        }
+        g.globalAlpha = 1;
+      }
+
+      for (var ri = 0; ri < reihe.length; ri++) {
+        var kp2 = reihe[ri];
+        /* Der Kern steht hinter der Gasse; sobald die Reihe an ihm
+           vorbei ist, wird er gemalt — einmal, an seinem Platz in der
+           Tiefe. */
+        if (kernDran && kernZ >= kp2.kz) { kernMalen(); kernDran = false; }
+        var phi = kp2.phi0 + rad;
+        var wx = Math.cos(phi) * HELIX * 0.9;
+        var wy = Math.sin(phi) * HELIX;
+        var f3 = F / kp2.kz;
+        var px3 = MX + (wx - camX) * f3;
+        var py3 = MY + (wy - camY) * f3;
+        var gr = kp2.gr0 * f3;
+        if (gr > Math.min(B, H) * 1.2) gr = Math.min(B, H) * 1.2;
+        /* Das Licht der Tiefe: fern im Nebel schwach, nah voll — und
+           GANZ nah loest die Scheibe sich auf, statt hart am Bildrand
+           zu zerreissen: die Kamera fliegt durch sie hindurch. */
+        var fern = klemm((5200 - kp2.kz) / 3300, 0, 1);
+        var nah = klemm((kp2.kz - 90) / 200, 0, 1);
+        var deck = blenden * Math.pow(fern, 0.85) * nah;
+        if (deck <= 0.01) continue;
+        if (gr > maxGemalt && deck > 0.2) maxGemalt = gr;
+
+                /* Ein Hauch Glimmen — das grosse Licht gehoert dem Kern. */
+        g.globalCompositeOperation = "lighter";
+        g.globalAlpha = deck * 0.3;
+        var lg = gr * 1.7;
+        g.drawImage(GLUT, px3 - lg / 2, py3 - lg / 2, lg, lg);
+
+        /* Die Muenzdrehung: die Breite ist der Kosinus des eigenen
+           Drehwinkels, nie ganz null, und an der Kante wird sie dunkler.
+           Der Betrag statt des Vorzeichens: gezeigt wird immer das
+           Gesicht, wie bei einem Schild im Wind. */
+        var quer = Math.abs(Math.cos(kp2.dreh));
+        var schmal = gr * Math.max(0.16, quer);
+        g.globalAlpha = deck * (0.55 + 0.45 * quer);
+        g.globalCompositeOperation = "source-over";
+        g.drawImage(kp2.bild, px3 - schmal / 2, py3 - gr / 2, schmal, gr);
+        g.globalAlpha = 1;
+      }
+      if (kernDran) kernMalen();
+
+      /* ---- Der Staub nahe der Linse ---- */
+      for (var di = 0; di < staub.length; di++) {
+        var db = staub[di];
+        var dz = db.z - fahrt;
+        if (dz < 60) {
+          db.z += 1500 + wuerfel() * 700;
+          db.x = (wuerfel() - 0.5) * WELTBREIT * 0.5;
+          db.y = (wuerfel() - 0.5) * WELTBREIT * 0.5;
+          dz = db.z - fahrt;
+        }
+        var df = F / dz;
+        var dgr = klemm(600 * df, 20, 260);
+        g.globalAlpha = blenden * 0.05 * klemm((1600 - dz) / 1300, 0, 1);
+        g.globalCompositeOperation = "lighter";
+        g.drawImage(db.warm ? BOKEHWARM : BOKEH,
+          MX + (db.x - camX) * df - dgr / 2, MY + (db.y - camY) * df - dgr / 2, dgr, dgr);
       }
       g.globalAlpha = 1;
 
-      /* ---- Das Uhrwerk selbst ---- */
-      var hinten = [], vorn = [];
-      for (var pi = 0; pi < planeten.length; pi++) {
-        var kp = planeten[pi];
-        var da = glatt(kp.ab, kp.ab + 750, t);
-        if (da <= 0) continue;
-        /* Hereinspiralen: von aussen (dem 1,9-fachen der eigenen Bahn)
-           auf die Bahn, waehrend der Winkel schon laeuft. Beim Abriss
-           weitet sich die Bahn wieder — dieselbe Bewegung, rueckwaerts
-           und schneller. */
-        kp.rAkt = kp.r * annaeh * (3.2 - 2.2 * aus(da)) * (1 + 2.4 * abriss * abriss);
-        kp.a += kp.w * (1 + 7 * abriss * abriss) * dt * 0.001;
-        kp.dreh += kp.drehW * (1 + 2.5 * abriss) * dt * 0.001;
-        if (kp.mond) {
-          kp.mond.a += kp.mond.w * (1 + 5 * abriss * abriss) * dt * 0.001;
-          kp.mond.e.dreh += kp.mond.e.drehW * (1 + 2.5 * abriss) * dt * 0.001;
-        }
-        kp.da = da;
-        var o = ort(kp);
-        kp.ox = o.x; kp.oy = o.y; kp.oz = o.z;
-        (o.z < 0 ? hinten : vorn).push(kp);
-      }
-      var nachTiefe = function (a, b) { return a.oz - b.oz; };
-      hinten.sort(nachTiefe);
-      vorn.sort(nachTiefe);
-
-      /* Die Bahnen als hauchduenne Ringe — das Uhrwerk zeigt sein
-         Zifferblatt. Nur ein Hauch: bei mehr saehe es nach Schaubild aus. */
-      if (alleRinge.length && !sparsam) {
-        g.globalCompositeOperation = "lighter";
-        g.lineWidth = 1;
-        for (var ri = 0; ri < alleRinge.length; ri++) {
-          var ringO = alleRinge[ri];
-          var rk = ringO.koerper[0];
-          if (!rk || !rk.da) continue;
-          g.strokeStyle = "rgba(168,206,194," + (0.085 * blenden * (1 - abriss)).toFixed(3) + ")";
-          g.beginPath();
-          g.ellipse(zAktX, zAktY, rk.rAkt, rk.rAkt * QUETSCH, kippeAkt, 0, 6.2832);
-          g.stroke();
-
-          /* Der Einrast-Puls: wenn ein Ring geschlossen ankommt, leuchtet
-             seine Bahn einmal auf — der Moment, in dem die Ordnung
-             sichtbar wird, bekommt sein eigenes Licht. */
-          var seitFest = t - (ringO.ab + 780);
-          if (seitFest > 0 && seitFest < 480) {
-            var pf = Math.pow(1 - seitFest / 480, 2);
-            g.strokeStyle = "rgba(216,236,229," + (0.55 * pf * blenden).toFixed(3) + ")";
-            g.lineWidth = 1 + 2.2 * pf;
-            g.beginPath();
-            g.ellipse(zAktX, zAktY, rk.rAkt, rk.rAkt * QUETSCH, kippeAkt, 0, 6.2832);
-            g.stroke();
-            g.lineWidth = 1;
-          }
-
-          /* Ein Funke laeuft auf jeder Bahn, gegen die Laufrichtung des
-             Rings — das Zifferblatt bekommt einen Sekundenzeiger. */
-          if (seitFest > 0 && !abriss) {
-            var fw = t * 0.0009 * (ri % 2 ? 1 : -1) + ri * 2.1;
-            var fc = Math.cos(fw), fsn = Math.sin(fw);
-            var fex = rk.rAkt * fc, fey = rk.rAkt * fsn * QUETSCH;
-            var fpx = zAktX + fex * KO - fey * SI;
-            var fpy = zAktY + fex * SI + fey * KO;
-            g.globalAlpha = blenden * 0.6;
-            g.drawImage(GLUT, fpx - 11, fpy - 11, 22, 22);
-            g.globalAlpha = 1;
-          }
-        }
-      }
-
-      function koerperMalen(kp) {
-        /* Tiefe: hinten kleiner und mit Dunst davor, vorn groesser. */
-        var nah = (1 + 0.3 * kp.oz) * annaeh;
-        var gr = kp.gr * 2 * nah * (0.3 + 0.7 * aus(kp.da));
-        var deck = blenden * kp.da * (0.62 + 0.38 * (kp.oz * 0.5 + 0.5));
-
-        /* Die Schleppe: ein Stueck der eigenen Bahn, das hinter dem
-           Koerper verglueht. Beim Abriss wird sie lang — das ist die
-           Bewegungsunschaerfe des Aufbruchs. */
-        var lang = 0.22 + kp.w * 0.1 + abriss * 1.6;
-        g.globalCompositeOperation = "lighter";
-        g.strokeStyle = "rgba(176,208,197," + (0.16 * deck).toFixed(3) + ")";
-        g.lineWidth = Math.max(1, gr * 0.1);
-        g.lineCap = "round";
-        g.beginPath();
-        var schritte = 7;
-        for (var si2 = 0; si2 <= schritte; si2++) {
-          var wa = kp.a - lang * (1 - si2 / schritte);
-          var c2 = Math.cos(wa), s2 = Math.sin(wa);
-          var ex = kp.rAkt * c2, ey = kp.rAkt * s2 * QUETSCH;
-          var px2 = zAktX + ex * KO - ey * SI, py2 = zAktY + ex * SI + ey * KO;
-          if (si2 === 0) g.moveTo(px2, py2); else g.lineTo(px2, py2);
-        }
-        g.stroke();
-
-        /* Der Mond: dieselbe Stauchung und Kippung wie das grosse Uhrwerk,
-           nur um den Traeger statt um den Kern — so liegen beide Ebenen
-           parallel, und das Auge liest EIN System statt zwei Effekte.
-           Seine Tiefe entscheidet, ob er vor oder hinter dem Traeger
-           gemalt wird: das ist der Moment, in dem "drehen um die anderen"
-           sichtbar wird. */
-        var mond = kp.mond, mx = 0, my = 0, mgr = 0, mdeck = 0, mz = 0;
-        if (mond) {
-          var mc = Math.cos(mond.a), ms = Math.sin(mond.a);
-          var mex = mond.r * nah * mc, mey = mond.r * nah * ms * QUETSCH;
-          mx = kp.ox + mex * KO - mey * SI;
-          my = kp.oy + mex * SI + mey * KO;
-          mz = ms;
-          mgr = mond.e.gr * 2 * nah * (1 + 0.12 * ms) * (0.3 + 0.7 * aus(kp.da));
-          mdeck = deck * 0.95;
-          if (!sparsam) {
-            g.strokeStyle = "rgba(168,206,194," + (0.06 * deck * (1 - abriss)).toFixed(3) + ")";
-            g.lineWidth = 1;
-            g.beginPath();
-            g.ellipse(kp.ox, kp.oy, mond.r * nah, mond.r * nah * QUETSCH, kippeAkt, 0, 6.2832);
-            g.stroke();
-          }
-        }
-        function mondMalen() {
-          g.globalCompositeOperation = "lighter";
-          g.globalAlpha = mdeck * 0.32;
-          var mlg = mgr * 1.7;
-          g.drawImage(GLUT, mx - mlg / 2, my - mlg / 2, mlg, mlg);
-          var mquer = Math.abs(Math.cos(mond.e.dreh));
-          var mschmal = mgr * Math.max(0.16, mquer);
-          g.globalAlpha = mdeck * (0.55 + 0.45 * mquer);
-          g.globalCompositeOperation = "source-over";
-          g.drawImage(mond.e.bild, mx - mschmal / 2, my - mgr / 2, mschmal, mgr);
-        }
-        if (mond && mz < 0) mondMalen();
-
-        g.globalCompositeOperation = "lighter";
-        /* Der Lichtschweif des Einflugs: solange der Koerper noch aus der
-           Tiefe kommt, zieht er einen Streifen hinter sich her — nach
-           AUSSEN, dorthin, wo er herkam. Der Schweif ist die Bewegung;
-           ohne ihn ist ein schneller Einflug nur ein Groesserwerden. */
-        if (kp.da < 1) {
-          var rdx = kp.ox - zAktX, rdy = kp.oy - zAktY;
-          var rlen = Math.sqrt(rdx * rdx + rdy * rdy) || 1;
-          var schweif = (1 - aus(kp.da)) * 150 + 10;
-          g.globalCompositeOperation = "lighter";
-          g.strokeStyle = "rgba(198,226,215," + (0.34 * deck).toFixed(3) + ")";
-          g.lineWidth = Math.max(1, gr * 0.1);
-          g.lineCap = "round";
-          g.beginPath();
-          g.moveTo(kp.ox, kp.oy);
-          g.lineTo(kp.ox + rdx / rlen * schweif, kp.oy + rdy / rlen * schweif);
-          g.stroke();
-        }
-        /* Und das Aufblitzen im Moment des Einrastens. */
-        var fest = t - (kp.ab + 750);
-        if (fest > 0 && fest < 300) {
-          var fb = Math.pow(1 - fest / 300, 2);
-          g.globalCompositeOperation = "lighter";
-          g.globalAlpha = fb * 0.85 * blenden;
-          var fg2 = gr * (1.5 + 2.4 * (fest / 300));
-          g.drawImage(BLITZ, kp.ox - fg2 / 2, kp.oy - fg2 / 2, fg2, fg2);
-        }
-
-        g.globalCompositeOperation = "lighter";
-        /* Ein Hauch Glimmen, kein Scheinwerfer: 0,75 auf 2,4-facher
-           Groesse machte aus jeder Scheibe eine Leuchtblase — und viele
-           grosse weiche Blasen uebereinander sind genau das, was ein
-           Bild billig macht. Das Licht gehoert dem Kern und den
-           Blitzen; die Koerper sind Dinge, die es empfangen. */
-        g.globalAlpha = deck * 0.38;
-        var lg = gr * 1.8;
-        g.drawImage(GLUT, kp.ox - lg / 2, kp.oy - lg / 2, lg, lg);
-        g.globalAlpha = deck;
-        g.globalCompositeOperation = "source-over";
-        /* Die Muenzdrehung: die Breite ist der Kosinus des eigenen
-           Drehwinkels, nie ganz null (eine Scheibe hat eine Kante), und
-           an der Kante wird sie dunkler — das Licht streift sie nur
-           noch. Der Betrag statt des Vorzeichens: die Rueckseite einer
-           Marke gibt es nicht, gezeigt wird immer das Gesicht, wie bei
-           einem Schild, das sich im Wind dreht. */
-        var quer = Math.abs(Math.cos(kp.dreh));
-        var schmal2 = gr * Math.max(0.16, quer);
-        g.globalAlpha = deck * (0.55 + 0.45 * quer);
-        g.drawImage(kp.bild, kp.ox - schmal2 / 2, kp.oy - gr / 2, schmal2, gr);
-        if (mond && mz >= 0) mondMalen();
-        g.globalAlpha = 1;
-      }
-
-      for (var hi = 0; hi < hinten.length; hi++) koerperMalen(hinten[hi]);
-
-      /* Der Kern, mit Atem und Spinne. */
-      var kernDa = glatt(150, 900, t);
-      if (kernDa > 0) {
-        var puls = 1 + 0.03 * Math.sin(t * 0.0021);
-        var kg = Math.min(B, H) * 0.21 * annaeh * puls * aus(kernDa) * (1 - 0.25 * abriss);
-        g.globalCompositeOperation = "lighter";
-        g.globalAlpha = blenden * kernDa * 0.85;
-        var gg2 = kg * 3.4;
-        g.drawImage(GLUT, zAktX - gg2 / 2, zAktY - gg2 / 2, gg2, gg2);
-        g.globalAlpha = blenden * kernDa * 0.3;
-        var bb = kg * 7 * (0.7 + 0.3 * puls);
-        g.drawImage(STREIF, zAktX - bb / 2, zAktY - kg * 0.17, bb, kg * 0.34);
-        g.globalAlpha = blenden * kernDa;
-        g.globalCompositeOperation = "source-over";
-        g.drawImage(KERN, zAktX - kg / 2, zAktY - kg / 2, kg, kg);
-        g.globalCompositeOperation = "lighter";
-        g.globalAlpha = blenden * kernDa * 0.4;
-        var sg = kg * 2.3;
-        g.drawImage(SPINNE, zAktX - sg / 2, zAktY - sg / 2, sg, sg);
-        g.globalAlpha = 1;
-      }
-
-      /* Die Ankunft des Kerns bekommt Gewicht: ein Blitz, und danach
-         zwei Druckwellen, die als Ellipsen in der Bahnebene nach aussen
-         laufen — dieselbe Sprache wie beim Stern, nur liegend. Ein Kern,
-         der einfach nur groesser wird, ist angekommen; einer, der eine
-         Welle vor sich herschiebt, ist EINGESCHLAGEN. */
-      var kernBlitz = t - 700;
-      if (kernBlitz > 0 && kernBlitz < 360) {
-        var kbf = Math.pow(1 - kernBlitz / 360, 2);
-        g.globalCompositeOperation = "lighter";
-        g.globalAlpha = kbf * 0.8 * blenden;
-        var kbg = Math.min(B, H) * (0.5 + 0.9 * (kernBlitz / 360));
-        g.drawImage(BLITZ, zAktX - kbg / 2, zAktY - kbg / 2, kbg, kbg);
-        g.globalAlpha = 1;
-      }
-      var wellen = [glatt(760, 1500, t), glatt(880, 1700, t)];
-      for (var wi = 0; wi < wellen.length; wi++) {
-        var wp = wellen[wi];
-        if (wp <= 0 || wp >= 1) continue;
-        var wr = Math.min(B, H) * (0.06 + 0.85 * aus(wp));
-        g.globalCompositeOperation = "lighter";
-        g.globalAlpha = Math.pow(1 - wp, 1.6) * 0.5 * blenden;
-        g.lineWidth = 2.5 * (1 - wp) + 0.5;
-        g.strokeStyle = "rgba(192,220,212,1)";
-        g.beginPath();
-        g.ellipse(zAktX, zAktY, wr, wr * (QUETSCH + 0.28), kippeAkt, 0, 6.2832);
-        g.stroke();
-        g.globalAlpha = 1;
-      }
-
-      for (var vi = 0; vi < vorn.length; vi++) koerperMalen(vorn[vi]);
-
-      /* Kometen: alle paar Sekunden zieht ein Lichtstrich quer durch das
-         Bild, unbeteiligt am Uhrwerk — die eine Zutat, die sagt, dass der
-         Raum weitergeht, wo die Formation aufhoert. Hoechstens zwei
-         zugleich, keiner in der Sparschaltung, keiner im Abriss (dort
-         streckt sich ohnehin alles zu Strichen). */
-      if (!sparsam && !abriss && t > naechsterKomet && kometen.length < 1) {
-        naechsterKomet = t + 2400 + wuerfel() * 1200;
-        /* MIT dem Strom: die Kometen ziehen dorthin, wohin auch die
-           Sterne stroemen (nach unten links, gegen die Flugrichtung) —
-           ein Komet quer zum Strom saehe aus wie aus einer anderen
-           Szene. */
-        var kwinkel = 2.3 + wuerfel() * 0.5;
-        var ktempo = 0.3 + wuerfel() * 0.15;
-        kometen.push({
-          x: B * 0.45 + wuerfel() * B * 0.55,
-          y: -30,
-          vx: Math.cos(kwinkel) * ktempo,
-          vy: Math.sin(kwinkel) * ktempo,
-          ab: t
-        });
-      }
-      for (var ki = kometen.length - 1; ki >= 0; ki--) {
-        var kom = kometen[ki];
-        var alter = t - kom.ab;
-        if (alter > 1500) { kometen.splice(ki, 1); continue; }
-        kom.x += kom.vx * dt;
-        kom.y += kom.vy * dt;
-        var ka = Math.sin(Math.min(1, alter / 1500) * 3.1416) * 0.7 * blenden;
-        var kv = Math.sqrt(kom.vx * kom.vx + kom.vy * kom.vy) || 1;
-        g.globalCompositeOperation = "lighter";
-        g.strokeStyle = "rgba(216,236,229," + ka.toFixed(3) + ")";
-        g.lineWidth = 1.4;
-        g.lineCap = "round";
-        g.beginPath();
-        g.moveTo(kom.x, kom.y);
-        g.lineTo(kom.x - kom.vx / kv * 140, kom.y - kom.vy / kv * 140);
-        g.stroke();
-        g.globalAlpha = ka;
-        g.drawImage(GLUT, kom.x - 9, kom.y - 9, 18, 18);
-        g.globalAlpha = 1;
-      }
-
-      /* Der Blitz des Abrisses. */
+      /* Der Blitz der Ankunft. */
       if (abriss > 0) {
         var hell2 = Math.pow(Math.sin(Math.min(1, abriss * 1.6) * 3.1416), 2);
         if (hell2 > 0.004) {
           g.globalCompositeOperation = "lighter";
           g.globalAlpha = hell2 * blenden;
-          var bg = WEIT * 3.0;
-          g.drawImage(BLITZ, zAktX - bg / 2, zAktY - bg / 2, bg, bg);
+          var bg = Math.max(B, H) * 2.4;
+          g.drawImage(BLITZ, MX - bg / 2, MY - bg / 2, bg, bg);
           g.globalAlpha = 1;
         }
       }
@@ -1319,8 +925,30 @@
       }
       g.globalAlpha = 1;
 
+      if (spur.length < 600) {
+        /* [7]: die Symmetrie der Gasse, gemessen statt behauptet — die
+           groesste Abweichung der Tiefenschritte vom Sollschritt. Sie
+           ist aus Bauart null; stuende hier je etwas anderes, hat
+           jemand an den Orten gewuerfelt. */
+        var symAbw = 0;
+        for (var sp = 1; sp < planeten.length; sp++) {
+          var luecke = Math.abs((planeten[sp].z - planeten[sp - 1].z) - SCHRITT);
+          if (luecke > symAbw) symAbw = luecke;
+        }
+        var ersterK = planeten[0];
+        spur.push([Math.round(t), koerperZahl,
+          Math.round(fahrt),
+          vorbeiZahl,
+          Math.round(dt * 10) / 10,
+          Math.round(maxGemalt),
+          ersterK ? Math.round(ersterK.dreh * 100) / 100 : 0,
+          Math.round(symAbw * 1000)]);
+      }
+
       kennung = window.requestAnimationFrame(bild);
     }
+
+    if (wahl.positionen) planetenSetzen(wahl.positionen);
 
     function aufraeumen() {
       if (kennung) window.cancelAnimationFrame(kennung);
@@ -1334,8 +962,8 @@
     return {
       planeten: planetenSetzen,
       /* Zum Abriss springen — der Tipp des Ungeduldigen. Fruehestens ab
-         Sekunde eins, sonst nimmt ein versehentliches Tippen beim Oeffnen
-         die ganze Szene mit. */
+         Sekunde eins, sonst nimmt ein versehentliches Tippen beim
+         Oeffnen die ganze Szene mit. */
       ende: function () {
         if (!laeuft || !t0) return;
         var t = performance.now() - t0;
