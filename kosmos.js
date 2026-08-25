@@ -400,6 +400,12 @@
 
   window.rcpKosmos = function (huelle, wahl) {
     wahl = wahl || {};
+    /* Die Zeiten gehoeren der Szene, nicht dem Modul: die Verwaltungsseite
+       laesst das Uhrwerk von selbst abreissen, der Auftakt der Liste
+       bestellt den Abriss von aussen (bahn: sehr gross, dann ende()) —
+       sein Fahrplan gehoert dem Ladebildschirm, nicht der Szene. */
+    var bahnDauer = wahl.bahn || DAUER_BAHN;
+    var endeDauer = wahl.ende || DAUER_ENDE;
     var leinwand = document.createElement("canvas");
     var g = leinwand.getContext && leinwand.getContext("2d");
     if (!g) {
@@ -699,7 +705,7 @@
        schlechter als einer, der etwas weniger zeigt — und niemand zaehlt
        waehrend einer Kamerafahrt die Sterne. */
     var sparsam = false, dtSumme = 0, dtZahl = 0;
-    var abrissAb = DAUER_BAHN;
+    var abrissAb = bahnDauer;
     var bildnummer = 0;
     var fertig = typeof wahl.fertig === "function" ? wahl.fertig : function () {};
 
@@ -715,7 +721,7 @@
       var t = jetzt - t0;
       var dt = klemm(jetzt - vorher, 0, 64);
       vorher = jetzt;
-      if (t >= abrissAb + DAUER_ENDE) {
+      if (t >= abrissAb + endeDauer) {
         laeuft = false;
         aufraeumen();
         fertig();
@@ -737,7 +743,7 @@
         }
       }
 
-      var abriss = klemm((t - abrissAb) / DAUER_ENDE, 0, 1);
+      var abriss = klemm((t - abrissAb) / endeDauer, 0, 1);
       kippeAkt = KIPPE + t * 0.000016;
       KO = Math.cos(kippeAkt);
       SI = Math.sin(kippeAkt);
@@ -760,7 +766,7 @@
       }
 
       /* Der Himmel in halber Aufloesung, zwei Lagen, leichte Rolle. */
-      var roll = -0.04 + 0.05 * (t / (DAUER_BAHN + DAUER_ENDE));
+      var roll = -0.04 + 0.05 * Math.min(1, t / 5800);
       gg.setTransform(DPR / 2, 0, 0, DPR / 2, 0, 0);
       gg.globalCompositeOperation = "source-over";
       gg.globalAlpha = 1;
