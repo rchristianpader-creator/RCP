@@ -40,7 +40,7 @@
   "use strict";
 
   var DAUER_BAHN = 4600;   /* bis hierhin dauert die Reise               */
-  var DAUER_ENDE = 1200;   /* der Abriss: hinein in den Kern             */
+  var DAUER_ENDE = 2000;   /* Anflug, Halt, Eintauchen                   */
 
   function klemm(x, a, b) { return x < a ? a : (x > b ? b : x); }
   function glatt(a, b, x) {
@@ -849,7 +849,7 @@
        Drift und eine traege Rolle: eine Kamera, die haargenau auf der
        Achse klebt, sieht nach Werkzeug aus, nicht nach Hand. */
     var fahrt = 0, driftX = 0, driftY = 0;
-    var abflugFahrt = -1, abflugRest = 0;
+    var abflugFahrt = -1, abflugRest = 0, markeDa = 0;
     var sparsam = false, dtSumme = 0, dtZahl = 0, hoefe = true, himmelTakt = 0;
     var abrissAb = bahnDauer;
     var bildnummer = 0;
@@ -920,7 +920,27 @@
           abflugFahrt = fahrt;
           abflugRest = Math.max(200, zielZ - 70 - fahrt);
         }
-        fahrt = abflugFahrt + abflugRest * abriss * abriss * (3 - 2 * abriss);
+        /* DREI SAETZE STATT EINEM STURZ. Ein durchgehender Sturz ist
+           eine Fahrt, die zufaellig aufhoert. Ein Markenauftritt hat
+           einen RUHEPUNKT: anfliegen — HALTEN — eintauchen. Genau die
+           Pause, in der Zeichen und Schriftzug ruhig beieinander
+           stehen, ist der Moment, den man als "fertig" liest; ohne sie
+           rauscht alles bis zum Schnitt durch, und nichts kommt an. */
+        var HALT_A = 0.56, HALT_E = 0.78;
+        var haltZ = Math.max(120, 300 * F / (Math.min(B, H) * 0.4));
+        var bisHalt = Math.max(0, (zielZ - haltZ) - abflugFahrt);
+        if (abriss < HALT_A) {
+          var an = abriss / HALT_A;
+          fahrt = abflugFahrt + bisHalt * an * an * (3 - 2 * an);
+        } else if (abriss < HALT_E) {
+          fahrt = abflugFahrt + bisHalt;
+        } else {
+          var st = (abriss - HALT_E) / (1 - HALT_E);
+          fahrt = abflugFahrt + bisHalt + (abflugRest - bisHalt) * st * st;
+        }
+        /* Der Schriftzug tritt im Halt zu — und faehrt beim Eintauchen
+           mit dem Zeichen aus dem Bild. */
+        markeDa = glatt(HALT_A * 0.72, HALT_A + 0.06, abriss) * (1 - glatt(HALT_E, 0.94, abriss));
       } else {
         var reiseZeit = klemm(bahnDauer, 3600, 5600);
         var V = (zielZ - 550) / (reiseZeit - 600);
@@ -955,9 +975,9 @@
         gg.globalCompositeOperation = "lighter";
         var s1 = Math.max(B, H) * 1.5 * hzoom;
         var s2 = Math.max(B, H) * 2.1 * hzoom;
-        gg.globalAlpha = 0.3;
+        gg.globalAlpha = 0.17;
         gg.drawImage(HIMMEL, -s1 / 2 - camX * 0.6, -s1 / 2 - camY * 0.6, s1, s1);
-        gg.globalAlpha = 0.18;
+        gg.globalAlpha = 0.1;
         gg.drawImage(HIMMEL, -s2 / 2 - camX * 0.25, -s2 / 2 - camY * 0.25, s2, s2);
       }
 
@@ -1140,22 +1160,20 @@
            Nebel —, darf lautlos einwechseln; danach nie mehr. */
         if (!kp2.gross && (gr > 90 || deck > 0.55)) kp2.gross = true;
 
-        /* Erst der Schattenhof, dann ein Hauch Glimmen — das grosse
-           Licht gehoert dem Kern. Beides gedeckelt: die Kosten eines
-           Hofs wachsen mit dem Quadrat seiner Groesse, und an einer
-           Scheibe, die schon das halbe Bild fuellt, sieht ihn niemand
-           mehr. In der Sparschaltung entfallen beide. */
+        /* NUR der Schattenhof — das Glimmen ist weg.
+
+           Weich leuchtende Hoefe um jedes Ding sind der sicherste Weg
+           zu "billig": sie verwaschen die Kante, und eine verwaschene
+           Kante liest sich als schlecht freigestellt. Teuer wirkt das
+           Gegenteil — harte Kante, klare Trennung, und die Tiefe kommt
+           aus der KONTAKTABDUNKLUNG hinter dem Ding, nicht aus Licht
+           davor. Das grosse Leuchten hat in dieser Szene genau eine
+           Quelle: das App-Zeichen am Ende. */
         if (hoefe) {
           g.globalCompositeOperation = "source-over";
-          g.globalAlpha = deck * 0.55;
-          var sh = Math.min(gr * 1.6, 560);
+          g.globalAlpha = deck * 0.62;
+          var sh = Math.min(gr * 1.5, 560);
           g.drawImage(SCHATTEN, px3 - sh / 2, py3 - sh / 2, sh, sh);
-          if (gr < 300) {
-            g.globalCompositeOperation = "lighter";
-            g.globalAlpha = deck * 0.3;
-            var lg = gr * 1.7;
-            g.drawImage(GLUT, px3 - lg / 2, py3 - lg / 2, lg, lg);
-          }
         }
 
         /* Die Muenzdrehung: die Breite ist der Kosinus des eigenen
@@ -1171,6 +1189,32 @@
       }
       if (kernDran) kernMalen();
 
+      /* ---- DER SCHRIFTZUG ----
+
+         Die kosmische Fassung blendete .auftakt-mitte aus — und damit
+         verschwand der Name der App spurlos. Ein Auftritt ohne Namen
+         ist Dekoration; ein Markenauftritt endet mit dem Wort. Er
+         steht unter dem Zeichen, in der Schrift des Ladebildschirms
+         (700, -0,4 px Laufweite), tritt im Halt zu und faehrt beim
+         Eintauchen mit dem Zeichen aus dem Bild. */
+      if (markeDa > 0.004) {
+        var kfM = F / Math.max(120, zielZ - fahrt);
+        var kgM = klemm(300 * kfM, 8, Math.max(B, H) * 1.15);
+        var schrift = klemm(Math.min(B, H) * 0.068, 15, 34);
+        var linie = MY + kgM * 0.5 + schrift * 1.55;
+        var mit = klemm(1 - markeDa, 0, 1);
+        g.globalCompositeOperation = "source-over";
+        g.globalAlpha = markeDa;
+        g.textAlign = "center";
+        g.textBaseline = "middle";
+        try { g.letterSpacing = "-0.4px"; } catch (e) {}
+        g.font = "700 " + Math.round(schrift) + "px -apple-system, 'Segoe UI', Roboto, sans-serif";
+        g.fillStyle = "#ffffff";
+        g.fillText("Aktien-Liste", MX, linie + mit * 10);
+        try { g.letterSpacing = "0px"; } catch (e) {}
+        g.globalAlpha = 1;
+      }
+
       /* ---- Der Staub nahe der Linse ---- */
       for (var di = 0; di < staub.length; di++) {
         var db = staub[di];
@@ -1183,7 +1227,7 @@
         }
         var df = F / dz;
         var dgr = klemm(600 * df, 20, 260);
-        g.globalAlpha = blenden * 0.05 * klemm((1600 - dz) / 1300, 0, 1);
+        g.globalAlpha = blenden * 0.022 * klemm((1600 - dz) / 1300, 0, 1);
         g.globalCompositeOperation = "lighter";
         g.drawImage(db.warm ? BOKEHWARM : BOKEH,
           MX + (db.x - camX) * df - dgr / 2, MY + (db.y - camY) * df - dgr / 2, dgr, dgr);
