@@ -451,6 +451,17 @@
       [0.55, "rgba(110,180,160,0.07)"],
       [1, "rgba(0,0,0,0)"]
     ]);
+    /* Der Schattenhof: ein weicher dunkler Halo HINTER jeder Scheibe.
+       Er hebt das Glas vom Nebel ab, wie es eine Kompositoerin mit
+       einer Kontaktabdunklung taete — die eine stille Zutat, an der
+       man teures Compositing von uebereinandergelegten Bildern
+       unterscheidet. */
+    var SCHATTEN = glut(256, [
+      [0, "rgba(4,6,6,0.6)"],
+      [0.5, "rgba(4,6,6,0.32)"],
+      [0.78, "rgba(4,6,6,0.1)"],
+      [1, "rgba(0,0,0,0)"]
+    ]);
 
     function messen(erzwungen) {
       var nb = huelle.clientWidth || window.innerWidth;
@@ -520,7 +531,7 @@
        Jeder hat Ort, Topf (Farbtemperatur), Grundhelligkeit und sein
        Flimmern; gemalt wird er als Punkt — zum Strich wird er nur, wenn
        seine BILDbewegung schneller ist als die Verschlusszeit. */
-    var ANZ = Math.round(klemm((B * H) / 2400, 90, 220));
+    var ANZ = Math.round(klemm((B * H) / 2000, 110, 260));
     var WELTBREIT = Math.max(B, H) * 2.6;
     var sterne = [];
     for (var i = 0; i < ANZ; i++) {
@@ -575,7 +586,7 @@
         var sym = String(p.yahoo || p.badge || "").toUpperCase();
         var e = {
           sym: sym,
-          gr0: 150 + ((i * 37) % 5) * 16,
+          gr0: 168 + ((i * 37) % 5) * 18,
           /* UM SICH SELBST: jede Scheibe dreht wie eine Muenze um die
              eigene senkrechte Achse — eigener Anfang, eigenes Tempo,
              abwechselnde Richtung. */
@@ -705,9 +716,9 @@
       gg.globalCompositeOperation = "lighter";
       var s1 = Math.max(B, H) * 1.5 * hzoom;
       var s2 = Math.max(B, H) * 2.1 * hzoom;
-      gg.globalAlpha = 0.85;
+      gg.globalAlpha = 0.94;
       gg.drawImage(HIMMEL, -s1 / 2 - camX * 0.6, -s1 / 2 - camY * 0.6, s1, s1);
-      gg.globalAlpha = 0.45;
+      gg.globalAlpha = 0.52;
       gg.drawImage(HIMMEL, -s2 / 2 - camX * 0.25, -s2 / 2 - camY * 0.25, s2, s2);
 
       g.setTransform(DPR, 0, 0, DPR, 0, 0);
@@ -748,7 +759,7 @@
           striche[s.topf].push(s.px, s.py, sx2, sy2, hell);
         } else {
           punkte[s.topf].push(sx2, sy2, hell, klemm(f2 * 260, 0.5, 1.9));
-          if (hell > 0.66 && !sparsam) funken.push(sx2, sy2, hell);
+          if (hell > 0.55 && !sparsam) funken.push(sx2, sy2, hell);
         }
         s.px = sx2; s.py = sy2; s.war = true;
       }
@@ -826,8 +837,8 @@
         var kd = blenden * klemm((6400 - kernZ) / 3800, 0, 1);
         var puls = 1 + 0.03 * Math.sin(t * 0.0021);
         g.globalCompositeOperation = "lighter";
-        g.globalAlpha = kd * 0.8;
-        var gg2 = kg * 3.2 * puls;
+        g.globalAlpha = kd * 0.88;
+        var gg2 = kg * 3.5 * puls;
         g.drawImage(GLUT, kx - gg2 / 2, ky - gg2 / 2, gg2, gg2);
         g.globalAlpha = kd * 0.3;
         var bb = kg * 6 * (0.7 + 0.3 * puls);
@@ -857,17 +868,22 @@
         var px3 = MX + (wx - camX) * f3;
         var py3 = MY + (wy - camY) * f3;
         var gr = kp2.gr0 * f3;
-        if (gr > Math.min(B, H) * 1.2) gr = Math.min(B, H) * 1.2;
+        if (gr > Math.min(B, H) * 1.35) gr = Math.min(B, H) * 1.35;
         /* Das Licht der Tiefe: fern im Nebel schwach, nah voll — und
            GANZ nah loest die Scheibe sich auf, statt hart am Bildrand
            zu zerreissen: die Kamera fliegt durch sie hindurch. */
         var fern = klemm((5200 - kp2.kz) / 3300, 0, 1);
-        var nah = klemm((kp2.kz - 90) / 200, 0, 1);
+        var nah = klemm((kp2.kz - 110) / 320, 0, 1);
         var deck = blenden * Math.pow(fern, 0.85) * nah;
         if (deck <= 0.01) continue;
         if (gr > maxGemalt && deck > 0.2) maxGemalt = gr;
 
-                /* Ein Hauch Glimmen — das grosse Licht gehoert dem Kern. */
+                /* Erst der Schattenhof, dann ein Hauch Glimmen — das grosse
+           Licht gehoert dem Kern. */
+        g.globalCompositeOperation = "source-over";
+        g.globalAlpha = deck * 0.55;
+        var sh = gr * 1.6;
+        g.drawImage(SCHATTEN, px3 - sh / 2, py3 - sh / 2, sh, sh);
         g.globalCompositeOperation = "lighter";
         g.globalAlpha = deck * 0.3;
         var lg = gr * 1.7;
@@ -878,7 +894,7 @@
            Der Betrag statt des Vorzeichens: gezeigt wird immer das
            Gesicht, wie bei einem Schild im Wind. */
         var quer = Math.abs(Math.cos(kp2.dreh));
-        var schmal = gr * Math.max(0.16, quer);
+        var schmal = gr * Math.max(0.24, quer);
         g.globalAlpha = deck * (0.55 + 0.45 * quer);
         g.globalCompositeOperation = "source-over";
         g.drawImage(kp2.bild, px3 - schmal / 2, py3 - gr / 2, schmal, gr);
@@ -898,7 +914,7 @@
         }
         var df = F / dz;
         var dgr = klemm(600 * df, 20, 260);
-        g.globalAlpha = blenden * 0.05 * klemm((1600 - dz) / 1300, 0, 1);
+        g.globalAlpha = blenden * 0.07 * klemm((1600 - dz) / 1300, 0, 1);
         g.globalCompositeOperation = "lighter";
         g.drawImage(db.warm ? BOKEHWARM : BOKEH,
           MX + (db.x - camX) * df - dgr / 2, MY + (db.y - camY) * df - dgr / 2, dgr, dgr);
