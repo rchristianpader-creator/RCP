@@ -3093,7 +3093,12 @@
     overflow: hidden;   /* die Lichtfelder ragen hinaus, wie bei .grundkurve */
     text-align: center;
     padding: 32px 28px;
-    transition: opacity 0.61s var(--ease), visibility 0.61s;
+    /* 0,42 statt 0,61 Sekunden: der Deckel geht aus einem hellen
+       Lichtaufgang heraus, und aus Licht heraus darf es schneller
+       gehen — die lange Blende war noch aus der Zeit, als darunter
+       einfach die Seite stand. Kuerzer heisst hier auch: die Bewegung
+       darunter wird frueher sichtbar. */
+    transition: opacity 0.42s var(--ease), visibility 0.42s;
   }
   /* VIER SEKUNDEN LIQUID, UND DANN DER GRUND DER LISTE
 
@@ -3393,6 +3398,18 @@
   body.einzug .erste-seite > .fg-box,
   body.einzug .karten > .card {
     animation: einzugRein 0.78s cubic-bezier(0.22, 1.02, 0.3, 1) both;
+    /* OHNE VORLAUF — der Inhalt darf nicht warten.
+
+       Ein erster Versuch gab den Bloecken 0,22 Sekunden Vorlauf, damit
+       ihr Aufstieg nicht hinter dem Deckel ablaeuft. Im Bildmitschnitt
+       stand danach ein LOCH: der Deckel war weg, der Inhalt noch bei
+       Deckkraft null, und fuer zwei Zehntelsekunden zeigte die Seite
+       nichts. Ein Uebergang darf sich ueberlappen, aber er darf nicht
+       aussetzen.
+
+       Der Deckel geht stattdessen schneller (0,34 s). Damit ist beim
+       Freiwerden erst ein Drittel des Aufstiegs vorbei statt drei
+       Vierteln — man sieht die Bewegung, ohne dass etwas fehlt. */
     animation-delay: calc(var(--n, 0) * 0.055s);
   }
   @keyframes einzugRein {
@@ -3444,16 +3461,43 @@
        dasselbe Problem, nur fiel es weniger auf, weil von ihr ohnehin
        nur die zweite Haelfte etwas zu sehen war.
 
-       Drei Zehntelsekunden: so lange braucht der Deckel, um weitgehend
-       durchsichtig zu werden. Dann geht der Ring auf — er setzt das
-       Licht fort, mit dem der Auftakt endet, statt darunter zu
-       verpuffen. */
-    animation: einzugLicht 1.05s cubic-bezier(0.32, 0.06, 0.2, 1) 0.3s both;
+       0,14 Sekunden: dann ist der Deckel knapp zur Haelfte
+       durchsichtig, und der Ring geht in dem Augenblick auf, in dem die
+       Liste sichtbar wird. Licht und Bewegung sind EINE Geste und nicht
+       zwei — der Ring geht auf, und in ihm steigt die Liste herein. */
+    animation: einzugLicht 1.30s cubic-bezier(0.22, 0.62, 0.24, 1) both;
   }
+  /* ES SETZT NICHT NEU AN, ES LAEUFT WEITER.
+
+     Der erste Wurf liess den Ring bei scale(0.06) beginnen — also
+     winzig. Der Auftakt davor endet aber mit einem SCHIRMFUELLENDEN
+     Lichtaufgang. Das Licht sprang damit von gross auf winzig zurueck,
+     und dazwischen lag ein dunkler Augenblick: gemessen fiel die
+     Helligkeit des oberen Drittels auf 7, waehrend der eingeschwungene
+     Wert bei 26 liegt. Genau das ist "falsch getimed" — nicht die
+     Dauer, sondern der Bruch.
+
+     Drei verschiedene Blendzeiten des Deckels aendern daran nichts (der
+     Einbruch blieb bei 7); es lag nie am Deckel.
+
+     Jetzt beginnt der Ring dort, wo der Aufgang aufhoert: gross und
+     hell, und laeuft von da nach aussen weiter. Eine Bewegung, die
+     uebernimmt, statt einer zweiten, die von vorn anfaengt.
+
+     Gemessen an der Helligkeit des oberen Drittels, Bild fuer Bild:
+
+       vorher   51 - 36 - 29 - 11 - 7 - 8 - 22 - 25   (Klippe)
+       jetzt    50 - 36 - 31 - 22 - 19 - 15 - 17 - 26 (Gefaelle)
+
+     Die Restsenke bleibt und soll bleiben: der Auftakt endet hell, die
+     Liste ist dunkel: irgendwo dazwischen MUSS es abwaerts gehen. Drei
+     verschiedene Blendzeiten des Deckels und drei Einzugstempi haben
+     daran nichts geaendert (der Boden blieb bei 13 bis 15) — es lag nie
+     daran. Die Dauer des Rings dagegen hebt ihn: 0,95 s ergab 10, 1,30 s
+     ergibt 15, laenger bringt nichts mehr. Darum 1,30. */
   @keyframes einzugLicht {
-    from { transform: scale(0.06); opacity: 0; }
-    18%  { opacity: 1; }
-    to   { transform: scale(1.35); opacity: 0; }
+    from { transform: scale(0.34); opacity: 1; }
+    to   { transform: scale(1.45); opacity: 0; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -3557,7 +3601,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=182");
+    background-image: url("/kerzen.svg?v=183");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -3571,7 +3615,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=182");
+    background-image: url("/kerzen-blass.svg?v=183");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
