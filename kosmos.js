@@ -682,16 +682,84 @@
 
      Es ist derselbe Gedanke wie bei den Glasstufen, eine Ebene tiefer:
      Aufwand dorthin, wo das Auge ihn einloest. */
-  function fernScheibe(glas, zeichen, gr) {
+  /* EIN ZEICHEN AUF EINE RUNDE SCHEIBE LEGEN.
+
+     "Warum sind die Logos rechteckig in runden Formen?" — weil sie es
+     waren. Zwei Fehler zugleich:
+
+     ERSTENS ragten sie heraus. Ein Zeichen nahm 0,7 der KANTE ein; ist
+     es quadratisch, liegen seine Ecken bei 0,7 mal Wurzel zwei halbe =
+     0,495 der Kante, der Kreis endet aber bei 0,47. Die Ecken standen
+     also ueber dem Glas. Auf dem Prueftisch fiel das nie auf, weil
+     meine Probebilder allesamt KREISE waren — ein Prueftisch, der nur
+     den gutartigen Fall liefert, verbirgt genau die anderen.
+
+     ZWEITENS bringen viele Logos ihren eigenen, deckenden Grund mit:
+     eine farbige Kachel mit einem Zeichen darin. So etwas MITTIG UND
+     KLEIN in einen Glaskreis zu legen ergibt genau das gemeldete Bild:
+     ein Rechteck in einem Kreis.
+
+     Also zwei Arten, wie es sich gehoert:
+
+       freigestellt (durchsichtiger Grund)  -> mittig, mit Luft zum Rand
+       flaechig (eigener Grund)             -> FUELLT die Scheibe
+
+     Ein Logo mit eigenem Grund wird damit zum Gesicht der Scheibe,
+     nicht zum Aufkleber darauf — dieselbe Regel, nach der ueberall
+     Profilbilder gesetzt werden. Und geschnitten wird IMMER am Kreis:
+     ueber den Rand steht nichts mehr. */
+  /* DAS GESICHT EINER SCHEIBE — EINMAL GEBACKEN, NICHT JE BILD.
+
+     Der erste Wurf schnitt bei jeder Marke in jedem Bild einen Kreis
+     (arc + clip) und legte das Zeichen hinein. Richtig gedacht und
+     teuer gemessen: die Malzeit stieg von 5,2 auf 9,5 ms — Schneiden
+     ist in einer Leinwand eine der teuersten Anweisungen, und hier
+     stand sie dreizehnmal je Bild.
+
+     Dabei aendert sich nichts daran, WIE das Zeichen auf der Scheibe
+     liegt; nur die Groesse aendert sich, und die macht drawImage. Also
+     wird das Gesicht einmal gebacken — Zeichen, fertig auf einer
+     durchsichtigen Scheibe liegend — und danach nur noch gestempelt. */
+  function scheibenGesicht(quelle, gr, flaechig) {
+    var c = tafel(gr, gr), x = c.getContext("2d");
+    var m = gr / 2, r = m - gr * 0.03;
+    var zb = quelle.naturalWidth || quelle.width || 1;
+    var zh = quelle.naturalHeight || quelle.height || 1;
+    var f;
+    x.beginPath();
+    if (flaechig) {
+      /* FUELLEN, ABER NICHT BIS AN DEN RAND.
+
+         Ein Logo, das seinen eigenen deckenden Grund mitbringt (eine
+         farbige Kachel), wurde bisher mittig und klein auf das Glas
+         gelegt — genau das gemeldete "Rechteck in einer runden Form".
+         Es fuellt jetzt einen Kreis INNERHALB der Scheibe, mit einem
+         Rand Glas ringsum: das Zeichen als runde Flaeche, die Scheibe
+         als Fassung, in der es liegt. Bis an den Rand darf es nicht,
+         sonst waere das Glas weg — und "in einem Liquid-Glass-Kreis
+         drin" war die Bestellung. */
+      var ri = r * 0.82;
+      x.arc(m, m, ri, 0, 6.2832);
+      x.clip();
+      f = Math.max((ri * 2) / zb, (ri * 2) / zh);
+    } else {
+      /* Ein freigestelltes Zeichen liegt mittig auf dem Glas — und wird
+         am Kreis geschnitten, damit nie eine Ecke ueber den Rand steht.
+         Genau das geschah: ein quadratisches Zeichen mit 0,7 der Kante
+         hat seine Ecken bei 0,495 der Kante, der Kreis endet bei 0,47. */
+      x.arc(m, m, r, 0, 6.2832);
+      x.clip();
+      var zs = gr * ZEICHENANTEIL;
+      f = Math.min(zs / zb, zs / zh);
+    }
+    try { x.drawImage(quelle, m - zb * f / 2, m - zh * f / 2, zb * f, zh * f); } catch (e) {}
+    return c;
+  }
+
+  function fernScheibe(glas, gesicht, gr) {
     var c = tafel(gr, gr), x = c.getContext("2d");
     x.drawImage(glas, 0, 0, gr, gr);
-    if (zeichen) {
-      var zs = gr * ZEICHENANTEIL;
-      var zb = zeichen.naturalWidth || zeichen.width || 1;
-      var zh = zeichen.naturalHeight || zeichen.height || 1;
-      var f = Math.min(zs / zb, zs / zh);
-      try { x.drawImage(zeichen, (gr - zb * f) / 2, (gr - zh * f) / 2, zb * f, zh * f); } catch (e) {}
-    }
+    if (gesicht) { try { x.drawImage(gesicht, 0, 0, gr, gr); } catch (e) {} }
     return c;
   }
 
@@ -708,10 +776,55 @@
     try { rx.drawImage(bild, 0, 0, bw, bh); } catch (e) {}
     weissWeg(rx, bw, bh);
 
-    var c = tafel(gr, gr), x = c.getContext("2d");
-    var f = Math.min(gr / bw, gr / bh);
-    try { x.drawImage(roh, (gr - bw * f) / 2, (gr - bh * f) / 2, bw * f, bh * f); } catch (e) {}
+    /* BRINGT DIESES LOGO SEINEN EIGENEN GRUND MIT?
+
+       Nach dem Freistellen ist ein wirklich freigestelltes Zeichen zu
+       grossen Teilen durchsichtig — ein Schriftzug deckt kaum ein
+       Fuenftel seiner Flaeche. Eine farbige Kachel dagegen deckt fast
+       alles: der Grund war nicht weiss, also blieb er stehen. An der
+       Deckung ist beides sicher zu unterscheiden, ohne den Dienst zu
+       fragen.
+
+       Gemessen wird grob (jeder achte Punkt) — es geht um "fast ganz"
+       gegen "zum grossen Teil durchsichtig", nicht um Feinheiten. */
+    var flaechig = false;
+    /* UND WO STEHT UEBERHAUPT ETWAS? Der zweite Grund, warum die Marken
+       ungleich schwer wirkten: viele Logos bringen breite leere Raender
+       mit. Wer das ganze Bild einpasst, passt die Leere mit ein — ein
+       Zeichen mit viel Luft wird klein, eines ohne gross, obwohl beide
+       gleich viel Scheibe bekommen sollten.
+
+       Also wird auf die wirkliche Zeichenflaeche beschnitten. Damit
+       haben alle Marken dasselbe optische Gewicht, und das ist der
+       Unterschied zwischen "zusammengesucht" und "gesetzt". */
+    var lx = 0, ly = 0, lb = bw, lh = bh;
+    try {
+      var pr = rx.getImageData(0, 0, bw, bh).data;
+      var voll = 0, alle = 0;
+      var x0 = bw, y0 = bh, x1 = -1, y1 = -1;
+      for (var py = 0; py < bh; py++) {
+        for (var px = 0; px < bw; px++) {
+          var a = pr[(py * bw + px) * 4 + 3];
+          if ((py * bw + px) % 8 === 0) { alle++; if (a > 200) voll++; }
+          if (a > 24) {
+            if (px < x0) x0 = px; if (px > x1) x1 = px;
+            if (py < y0) y0 = py; if (py > y1) y1 = py;
+          }
+        }
+      }
+      flaechig = alle > 0 && voll / alle > 0.86;
+      if (x1 >= x0 && y1 >= y0 && (x1 - x0) > 3 && (y1 - y0) > 3) {
+        lx = x0; ly = y0; lb = x1 - x0 + 1; lh = y1 - y0 + 1;
+      }
+    } catch (e) {}
+
+    /* Erst auf die Zeichenflaeche beschneiden, dann als Gesicht auf die
+       Scheibe legen. */
+    var eng = tafel(lb, lh);
+    try { eng.getContext("2d").drawImage(roh, lx, ly, lb, lh, 0, 0, lb, lh); } catch (e) {}
     try { roh.width = 0; roh.height = 0; } catch (e) {}
+    var c = scheibenGesicht(eng, gr, flaechig);
+    try { eng.width = 0; eng.height = 0; } catch (e) {}
     return c;
   }
 
@@ -1301,8 +1414,12 @@
             k.mittel = null;
             spaeter(function () {
               if (!k.zeichen) {
-                k.zeichen = sinnBild(sy, ZEICHENGR) ||
+                /* Auch die gezeichneten Zeichen kommen als Gesicht —
+                   sonst laegen sie nach anderen Regeln auf dem Glas als
+                   die echten Logos, und man saehe den Unterschied. */
+                var roh2 = sinnBild(sy, ZEICHENGR) ||
                   textScheibe(ZEICHENGR, zeichenFuer(sy) || "?");
+                k.zeichen = roh2 && scheibenGesicht(roh2, ZEICHENGR, false);
               }
             });
           }
@@ -2019,14 +2136,14 @@
              dafuer object-fit: contain). Ein breites Wortlogo in ein
              Quadrat gepresst ist sofort als falsch zu erkennen. */
           g.drawImage(GLAS_NAH, px3 - malBreit / 2, py3 - malHoch / 2, malBreit, malHoch);
-          var zn = kp2.zeichen;
-          if (zn) {
-            var zs = gr * ZEICHENANTEIL;
-            var zb = zn.naturalWidth || zn.width || 1;
-            var zh = zn.naturalHeight || zn.height || 1;
-            var zf = Math.min(zs / zb, zs / zh);
+          /* Dieselbe Regel wie auf den gebackenen Stufen — geschnitten
+             am Kreis, gefuellt wenn das Logo seinen eigenen Grund
+             mitbringt. Vorher stand hier eine zweite, eigene Rechnung,
+             und sie kannte weder den Schnitt noch das Fuellen: die
+             nahen Marken sahen darum anders aus als die fernen. */
+          if (kp2.zeichen) {
             try {
-              g.drawImage(zn, px3 - zb * zf / 2, py3 - zh * zf / 2, zb * zf, zh * zf);
+              g.drawImage(kp2.zeichen, px3 - malBreit / 2, py3 - malHoch / 2, malBreit, malHoch);
             } catch (e) {}
           }
         }
