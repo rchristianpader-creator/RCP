@@ -1081,8 +1081,24 @@
       glasFuellung(c.getContext("2d"), gr);
       return c;
     }
-    var GLAS_FERN = glasBauen(128);
-    var GLAS_MITTEL = glasBauen(MITTELGR);
+    /* OHNE RAND GEBACKEN — beide Stufen.
+
+       Der Glasrand ist das FEINSTE, was die Szene hat: eine Linie von
+       unter einem Punkt Breite. In einer Vorlage, die anschliessend
+       verkleinert wird, ist so eine Linie der klassische Flimmerfall —
+       welche Punkte der schnelle Filter trifft, aendert sich mit jeder
+       kleinsten Groessenaenderung, und der ganze Ring wird von Bild zu
+       Bild heller und dunkler. Genau das war als "die Kreise zittern"
+       zu sehen, und das Differenzbild zweier aufeinanderfolgender
+       Bilder zeigte es unmissverstaendlich: die Raender leuchteten als
+       vollstaendige Ringe auf. Ein Rand, der nur wandert, zeigte sich
+       als Sichel.
+
+       Also raus aus der Vorlage. Gebacken wird nur noch, was weich ist;
+       der Rand wird bei jeder Marke in ihrer wirklichen Groesse
+       gestrichen — dort ist er eine Kurve, kein abgetasteter Rest. */
+    var GLAS_FERN = glasWeich(128);
+    var GLAS_MITTEL = glasWeich(MITTELGR);
     var GLAS_NAH = null;
 
     function messen(erzwungen) {
@@ -1962,11 +1978,36 @@
            darin die Dichte steckt, verschiebt sich die Grenze von
            selbst mit, wenn die Leiter die Dichte aendert. */
         var gemalt = gr * DPR;
-        if (gemalt > FERNGR && gemalt <= MITTELGR && kp2.mittel && !sparsam) {
+        /* DIE STUFE WIRD NACH DEM VERHAELTNIS GEWAEHLT, NICHT NACH DER
+           OBERGRENZE.
+
+           Hier stand: bis 128 die ferne Vorlage, von 128 bis 288 die
+           mittlere. Das klingt richtig und ist der Fehler, an dem die
+           Kreise zitterten. Eine Marke, die mit 141 Punkten gemalt
+           wird, bekam damit die 288er Vorlage — ZWEIFACH verkleinert.
+           Die 128er waere um den Faktor 1,1 VERGROESSERT worden, und
+           das ist beinahe verlustfrei. Verkleinern kostet Kanten,
+           Vergroessern kostet nur Schaerfe; wer die Stufe nach der
+           Obergrenze waehlt, greift systematisch zur teureren Seite.
+
+           Gewechselt wird darum beim GEOMETRISCHEN MITTEL zweier
+           Stufen — so ist der Fehler nach oben und nach unten gleich
+           gross. Zwischen 128 und 288 liegt es bei 192, zwischen 288
+           und 512 bei 384. Damit wird nie staerker als um den Faktor
+           1,33 verkleinert; vorher waren es 2,25.
+
+           Gesehen habe ich es an einer vierfach vergroesserten Marke:
+           die Kante des Logos war stufig statt glatt. In einer Zahl
+           stand es nicht — das Differenzbild zweier Bilder zeigt bei
+           einer WACHSENDEN Scheibe zwangslaeufig den ganzen Ring, und
+           ich hatte das erst fuer das Flackern gehalten. */
+        var GRENZ_FM = Math.sqrt(FERNGR * MITTELGR);      /* 192 */
+        var GRENZ_MN = Math.sqrt(MITTELGR * GROSS);       /* 384 */
+        if (gemalt > GRENZ_FM && gemalt <= GRENZ_MN && kp2.mittel && !sparsam) {
           /* Die Zwischenstufe: dieselbe eine Zeichnung, nur aus einer
              Vorlage, die der gemalten Groesse nahekommt. */
           g.drawImage(kp2.mittel, px3 - malBreit / 2, py3 - malHoch / 2, malBreit, malHoch);
-        } else if ((gemalt <= FERNGR || sparsam || !GLAS_NAH || (!kp2.zeichen && !kp2.eigen)) && kp2.fern) {
+        } else if ((gemalt <= GRENZ_FM || sparsam || !GLAS_NAH || (!kp2.zeichen && !kp2.eigen)) && kp2.fern) {
           /* FERN: eine fertige Scheibe, ein Malbefehl. */
           g.drawImage(kp2.fern, px3 - malBreit / 2, py3 - malHoch / 2, malBreit, malHoch);
         } else if (kp2.eigen && !sparsam) {
@@ -1978,12 +2019,6 @@
              dafuer object-fit: contain). Ein breites Wortlogo in ein
              Quadrat gepresst ist sofort als falsch zu erkennen. */
           g.drawImage(GLAS_NAH, px3 - malBreit / 2, py3 - malHoch / 2, malBreit, malHoch);
-          /* Und der Rand als Strich, bei der Groesse, in der die Marke
-             wirklich steht — nicht aus einer Vorlage hochgezogen. */
-          g.save();
-          g.translate(px3 - malBreit / 2, py3 - malHoch / 2);
-          glasRand(g, malBreit);
-          g.restore();
           var zn = kp2.zeichen;
           if (zn) {
             var zs = gr * ZEICHENANTEIL;
@@ -1994,6 +2029,24 @@
               g.drawImage(zn, px3 - zb * zf / 2, py3 - zh * zf / 2, zb * zf, zh * zf);
             } catch (e) {}
           }
+        }
+        /* DER RAND — FUER JEDE MARKE, IN IHRER WIRKLICHEN GROESSE.
+
+           Er stand frueher in den gebackenen Scheiben und wurde mit
+           ihnen verkleinert. Eine Linie von unter einem Punkt Breite
+           ueberlebt das nicht: welche Punkte der Filter trifft, wechselt
+           mit jeder kleinsten Groessenaenderung, und der ganze Ring
+           flackert. Als Kurve gezogen kann er das nicht — er hat bei
+           jeder Groesse dieselbe Form und dieselbe Staerke.
+
+           Erst ab einer Scheibe, auf der ein Rand ueberhaupt etwas
+           bedeutet: darunter waeren es Pfade fuer nichts. */
+        if (gemalt > 26) {
+          g.globalAlpha = deck;
+          g.save();
+          g.translate(px3 - malBreit / 2, py3 - malHoch / 2);
+          glasRand(g, malBreit);
+          g.restore();
         }
         g.globalAlpha = 1;
         if (malHoch > 0) {
