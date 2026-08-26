@@ -3535,7 +3535,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=173");
+    background-image: url("/kerzen.svg?v=174");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -3549,7 +3549,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=173");
+    background-image: url("/kerzen-blass.svg?v=174");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {

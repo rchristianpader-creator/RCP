@@ -762,40 +762,124 @@
     x.fill();
   }
 
-  /* Der Kern: die eigene Marke der App — als GERUNDETES QUADRAT, denn
-     genau das ist das App-Zeichen (icon-192, ueberall in der App mit
-     einer Ecke von rund einem Viertel der Kante). Der erste Wurf schnitt
-     es in einen Kreis, und ein rundes App-Icon gibt es nirgends. Das
-     Bild liegt im Vorrat des Service Workers — es ist sofort da. */
-  function kernScheibe(gr, bild) {
-    var c = tafel(gr, gr), x = c.getContext("2d");
-    var r = gr * 0.03, s = gr - r * 2, e = gr * 0.235;
-    x.fillStyle = "#0d1412";
-    rundPfad(x, r, r, s, e);
-    x.fill();
-    if (bild) {
-      x.save();
-      rundPfad(x, r, r, s, e);
-      x.clip();
-      try { x.drawImage(bild, r, r, s, s); } catch (er) {}
-      x.restore();
-    }
-    x.lineWidth = Math.max(1, gr * 0.012);
-    var k = x.createLinearGradient(0, 0, 0, gr);
-    k.addColorStop(0, "rgba(255,255,255,0.28)");
-    k.addColorStop(0.35, "rgba(255,255,255,0.1)");
-    k.addColorStop(1, "rgba(0,0,0,0.3)");
-    x.strokeStyle = k;
-    rundPfad(x, r + x.lineWidth / 2, r + x.lineWidth / 2, s - x.lineWidth, e);
-    x.stroke();
-    return c;
-  }
-  function rundPfad(x, px, py, s, e) {
+  /* DIE VIER KERZEN — die Marke der App, in ihren eigenen Massen.
+
+     Es sind DIESELBEN Zahlen, die in index.html als SVG stehen und aus
+     denen icon-512.png gebacken wurde: ein Feld von 512 Einheiten, vier
+     Kerzen aus Docht und Koerper, die hinteren beiden nur umrissen
+     (Strichstaerke 18). Nachgemessen an der Bilddatei, Kante fuer Kante
+     — nicht abgeschrieben, sondern geprueft.
+
+     Docht und voller Koerper werden gefuellt, der hohle Koerper
+     gestrichen. */
+  var KERZEN = [
+    { d: [109, 128, 24, 154], k: [88, 172, 66, 80], hohl: false },
+    { d: [199, 228, 24, 160], k: [178, 252, 66, 90], hohl: false },
+    { d: [289, 310, 24, 74], k: [277, 259, 48, 74], hohl: true },
+    { d: [379, 98, 24, 186], k: [367, 133, 48, 108], hohl: true }
+  ];
+  function kasten(x, px, py, br, ho, e) {
     x.beginPath();
-    if (x.roundRect) x.roundRect(px, py, s, s, e);
-    else x.rect(px, py, s, s);
+    if (x.roundRect) x.roundRect(px, py, br, ho, e);
+    else x.rect(px, py, br, ho);
   }
 
+  /* DER KERN WIRD GEZEICHNET, NICHT KOPIERT.
+
+     Hier stand eine Textur: icon-512.png, in eine Leinwand gelegt und
+     bei der Ankunft auf Schirmgroesse gezogen. Auf einem Telefon mit
+     Pixeldichte 3 sind das rund 2900 Geraetepunkte aus einer Vorlage von
+     512 — knapp sechsfach hochgerechnet. Und wenn die Sparschaltung
+     zugriff, wurde die grosse Vorlage gar nicht erst gebaut: dann kam
+     das Zeichen aus 128 Punkten. Gemessen brauchte eine Kante am Ende
+     ACHT Geraetepunkte, um von dunkel nach hell zu kommen; scharf sind
+     ein bis zwei.
+
+     Eine Textur ist das falsche Werkzeug fuer etwas, das am Ende den
+     ganzen Schirm fuellt — jede Vorlage, die man dafuer gross genug
+     macht, ist fuer die ganze Reise davor zu gross. Vier gerundete
+     Rechtecke dagegen sind bei JEDER Groesse genau scharf und kosten
+     einen Bruchteil eines Vollbildes. Also wird gezeichnet.
+
+     Die Bilddatei bleibt, wo sie hingehoert: auf dem Home-Bildschirm. */
+  /* WAS WEICH IST, KOMMT AUS EINER VORLAGE — WAS HART IST, WIRD
+     GEZEICHNET.
+
+     Der erste Wurf zeichnete das ganze Zeichen je Bild, samt Grund und
+     Schein. Das war sauber gedacht und teuer gemessen: zwei Fuellungen
+     ueber den ganzen Schirm und zwei frisch gebaute Verlaeufe, JEDES
+     Bild. Die Malzeit stieg von 1,0 auf 3,3 ms im Mittel, und sieben
+     Prozent der Bilder rissen die Elf-Millisekunden-Grenze.
+
+     Dabei braucht nur die HAELFTE davon Schaerfe. Ein Verlauf, aus 512
+     Punkten auf Schirmgroesse gezogen, ist von einem frisch gerechneten
+     nicht zu unterscheiden — er hat ja keine Kanten. Die Kerzen dagegen
+     haben nichts als Kanten.
+
+     Also: der Grund samt Schein und Rand einmal gebacken, die vier
+     Kerzen je Bild gezeichnet. Sie bedecken ein Siebtel der Flaeche. */
+  function kernGrund(x, gr) {
+    var r = gr * 0.03, s = gr - r * 2, e = gr * 0.235;
+    x.save();
+    kasten(x, r, r, s, s, e);
+    x.clip();
+    /* An der Bilddatei abgelesen: oben rgb(38,50,55), unten
+       rgb(9,12,11) — dieselbe Glasscheibe wie ueberall in der App. */
+    var gd = x.createLinearGradient(0, r, 0, r + s);
+    gd.addColorStop(0, "#263237");
+    gd.addColorStop(0.45, "#161d1c");
+    gd.addColorStop(1, "#090c0b");
+    x.fillStyle = gd;
+    x.fillRect(r, r, s, s);
+    /* Der Schein von oben links, wie ihn das Zeichen traegt. */
+    var sch = x.createLinearGradient(r, r, r + s * 0.72, r + s * 0.52);
+    sch.addColorStop(0, "rgba(214,236,232,0.16)");
+    sch.addColorStop(0.35, "rgba(160,200,196,0.05)");
+    sch.addColorStop(1, "rgba(0,0,0,0)");
+    x.fillStyle = sch;
+    x.fillRect(r, r, s, s);
+    x.restore();
+    x.lineWidth = Math.max(1, gr * 0.012);
+    var kk = x.createLinearGradient(0, 0, 0, gr);
+    kk.addColorStop(0, "rgba(255,255,255,0.28)");
+    kk.addColorStop(0.35, "rgba(255,255,255,0.1)");
+    kk.addColorStop(1, "rgba(0,0,0,0.3)");
+    x.strokeStyle = kk;
+    kasten(x, r + x.lineWidth / 2, r + x.lineWidth / 2, s - x.lineWidth, s - x.lineWidth, e);
+    x.stroke();
+  }
+  /* Die vier Kerzen, in den Massen des 512er Feldes. Der Aufrufer hat
+     schon an den Ort geschoben; hier wird nur noch skaliert. */
+  function kernKerzen(x, gr) {
+    var r = gr * 0.03, s = gr - r * 2, f = s / 512;
+    x.save();
+    x.fillStyle = "#f2f5f4";
+    x.strokeStyle = "#f2f5f4";
+    x.lineWidth = 18 * f;
+    for (var i = 0; i < KERZEN.length; i++) {
+      var kz = KERZEN[i], d = kz.d, k = kz.k;
+      kasten(x, r + d[0] * f, r + d[1] * f, d[2] * f, d[3] * f, 12 * f);
+      x.fill();
+      kasten(x, r + k[0] * f, r + k[1] * f, k[2] * f, k[3] * f, (kz.hohl ? 7 : 9) * f);
+      if (kz.hohl) x.stroke(); else x.fill();
+    }
+    x.restore();
+  }
+  /* Fuer die Ferne alles zusammen gebacken: solange das Zeichen ein
+     Punkt von zwanzig Pixeln ist, waeren acht Pfade je Bild
+     verschwendet. */
+  function kernScheibe(gr) {
+    var c = tafel(gr, gr), x = c.getContext("2d");
+    kernGrund(x, gr);
+    kernKerzen(x, gr);
+    return c;
+  }
+  /* Nur der weiche Teil — die Kerzen kommen im Anflug als Pfade dazu. */
+  function kernGrundScheibe(gr) {
+    var c = tafel(gr, gr);
+    kernGrund(c.getContext("2d"), gr);
+    return c;
+  }
   window.rcpKosmos = function (huelle, wahl) {
     wahl = wahl || {};
     /* Die Zeiten gehoeren der Szene, nicht dem Modul: die Verwaltungsseite
@@ -844,13 +928,43 @@
        Sparschaltung darf sie auf 1 druecken) UND die Gesamtflaeche der
        Leinwand — auf einem 4K-Fenster darf die Dichte auch unter 1
        fallen, weich ist bei einem Auftakt kein Fehler. */
-    /* 1,5 — und zwar aus zwei Gruenden zugleich. Erstens die Kosten:
-       Fuellarbeit waechst mit dem QUADRAT der Dichte, und gemessen
-       haengen 87 Prozent der Bildzeit an der Flaeche. Zweitens die
-       Schaerfe: ein Telefon mit Pixeldichte 3 zieht 1,5 mit dem glatten
-       Faktor 2 hoch, 1,7 dagegen mit dem krummen 1,765 — das ist teurer
-       UND unschaerfer. Ein krummer Faktor war nie eine gute Wahl. */
-    var dichteDeckel = 1.5;
+    /* DIE HALBE DICHTE DES GERAETS — und zwar gemessen, nicht geraten.
+
+       Hier stand einmal die feste 1,5, mit den Kosten begruendet. Dann
+       stand hier die volle Geraetedichte, mit der Schaerfe begruendet.
+       Beide Male war die Begruendung eine Behauptung. Die Messung sagt
+       etwas Drittes:
+
+         Dichte 3    Flanke einer Kerzenkante  1,23 Geraetepunkte
+         Dichte 1,5  Flanke einer Kerzenkante  1,52 Geraetepunkte
+
+       Drei Zehntel eines Punktes. Dafuer die vierfache Fuellarbeit:
+       gemessen 10 ms je Bild statt 4,7 waehrend der Reise und 40 statt
+       11 bei der Ankunft, wo die Bildrate von 60 auf 16 einbrach.
+
+       Der Grund, dass die halbe Dichte reicht: das App-Zeichen wird
+       nicht mehr aus einer Vorlage gezogen, sondern GEZEICHNET. Eine
+       gezeichnete Kante ist auf der Leinwand einen Punkt breit, egal
+       wie gross das Zeichen ist — verdoppelt der Kompositor sie
+       anschliessend sauber, bleibt sie eine Kante. Die Unschaerfe kam
+       nie von der Dichte, sondern von einer 128-Punkte-Vorlage auf dem
+       ganzen Schirm.
+
+       GETEILT, nicht gedeckelt: die halbe Geraetedichte laesst den
+       Kompositor immer glatt verdoppeln. Ein fester Wert von 1,5 traefe
+       auf einem Geraet mit Dichte 2 den krummen Faktor 1,333 — teurer
+       UND unschaerfer als das glatte 1. Unter 1 geht es nie. */
+    var geraeteDichte = window.devicePixelRatio || 1;
+    var dichteDeckel = Math.max(1, geraeteDichte / 2);
+    /* Die naechstkleinere Dichte, die den Kompositor GANZZAHLIG
+       hochziehen laesst: bei Geraetedichte 3 sind das 3, 1,5 und 1. */
+    function glatteStufe(hoechstens) {
+      for (var teil = 1; teil <= 4; teil++) {
+        var d = geraeteDichte / teil;
+        if (d <= hoechstens + 0.001) return d;
+      }
+      return geraeteDichte / 4;
+    }
     var DPR = 1;
     var B = 0, H = 0, MX = 0, MY = 0, F = 700;
     var gemessen = false;
@@ -915,12 +1029,21 @@
       if (!erzwungen && nb === B && nh === H && gemessen) return;
       B = nb; H = nh;
       gemessen = true;
-      DPR = Math.min(window.devicePixelRatio || 1, dichteDeckel);
-      /* Der Flaechendeckel greift jetzt frueher (2,4 statt 4,2 Millionen):
-         auf einem gewoehnlichen Fenster am Schreibtisch kostete dieselbe
-         Szene sonst das Dreifache an Fuellarbeit. */
-      var deckel = Math.sqrt(2400000 / (B * H));
-      if (DPR > deckel) DPR = Math.max(0.5, deckel);
+      DPR = Math.min(geraeteDichte, dichteDeckel);
+      /* Der Flaechendeckel — er gilt dem grossen Fenster am
+         Schreibtisch, nicht dem Telefon. Ein Telefon von 390 mal 844
+         braucht bei voller Dichte 2,96 Millionen Punkte; der Deckel
+         stand auf 2,4 und haette gerade DIE Geraete beschnitten, um
+         derentwillen es die Szene gibt. Jetzt 3,3 Millionen: das
+         Telefon geht voll durch, ein 4K-Fenster wird weiterhin
+         heruntergerechnet — weich ist bei einem Auftakt kein Fehler,
+         aber eben nur dort, wo niemand nah davorsitzt.
+
+         GANZE SCHRITTE: greift der Deckel, wird auf den naechsten
+         glatten Teiler der Geraetedichte gerundet, nicht auf einen
+         krummen Zwischenwert. */
+      var deckel = Math.sqrt(3300000 / (B * H));
+      if (DPR > deckel) DPR = Math.max(0.5, glatteStufe(deckel));
       leinwand.width = Math.round(B * DPR);
       leinwand.height = Math.round(H * DPR);
       leinwand.style.width = B + "px";
@@ -947,25 +1070,14 @@
       if (kornbild) kornbild.style.backgroundImage = "url(" + KORN.toDataURL() + ")";
     } catch (e) {}
 
-    /* Der Kern in ZWEI Stufen, aus demselben Grund wie das Glas: die
-       ganze Reise ueber ist er ein Punkt von zwanzig Pixeln, und ihn
-       dort aus einer 512er Vorlage herunterzufiltern kostet mehr als
-       die Ankunft selbst. Erst im Anflug wird die grosse gebraucht —
-       dann aber wirklich, denn dort fuellt er den Schirm. */
-    var KERN_FERN = kernScheibe(128, null);
-    var KERN_NAH = null;
-    var kernBild = null;
-    if (wahl.kern) {
-      var kb = new Image();
-      kb.onload = function () {
-        kernBild = kb;
-        KERN_FERN = kernScheibe(128, kb);
-        if (KERN_NAH) { try { KERN_NAH.width = 0; KERN_NAH.height = 0; } catch (e) {} }
-        KERN_NAH = null;
-      };
-      kb.onerror = function () {};
-      kb.src = wahl.kern;
-    }
+    /* Nur noch EINE Stufe, und die ist die kleine: in der Ferne ist der
+       Kern ein Punkt von zwanzig Pixeln, dort waeren acht Pfade je Bild
+       Verschwendung. Sobald er gross wird, wird er gezeichnet statt
+       kopiert — siehe kernMalerei(). Eine grosse Vorlage gibt es nicht
+       mehr, und damit auch nichts, das die Sparschaltung wegsparen
+       koennte: die Ankunft ist IMMER scharf. */
+    var KERN_FERN = kernScheibe(128);
+    var KERN_GRUND = null;
 
     /* SPAETERE ARBEITEN, eine je Bild.
 
@@ -976,13 +1088,26 @@
        Also stehen sie in einer Schlange und werden einzeln abgearbeitet,
        in den ruhigen Bildern der Reise. */
     var arbeiten = [];
+    var pflichten = [];
     var spaeterBereit = false;
     function spaeter(tun) { arbeiten.push(tun); }
     function eineArbeit() {
       if (!spaeterBereit) {
         spaeterBereit = true;
+        /* PFLICHT: der Grund des App-Zeichens. Er wird gebaut, auch
+           wenn die Sparschaltung gegriffen hat — GENAU DAS war der
+           Fehler hinter "immer noch unscharf". Vorher hing die grosse
+           Kern-Vorlage in derselben Schlange wie alles andere, die
+           Sparschaltung legte die Schlange still, und die Ankunft kam
+           aus einer 128er Vorlage. Was am Ende den ganzen Schirm
+           fuellt, darf nie wegoptimiert werden. */
+        pflichten.push(function () { KERN_GRUND = kernGrundScheibe(GROSS); });
         spaeter(function () { GLAS_NAH = glasBauen(GROSS); });
-        spaeter(function () { KERN_NAH = kernScheibe(GROSS, kernBild); });
+      }
+      if (pflichten.length) {
+        var pf = pflichten.shift();
+        try { pf(); } catch (e) {}
+        return;
       }
       if (!arbeiten.length || sparsam) return;
       var a = arbeiten.shift();
@@ -1151,7 +1276,29 @@
       V = Math.max(0.2, (zielZ - 70) / flugZeit);
     }
     tempoSetzen();
-    var sparsam = false, dtSumme = 0, dtZahl = 0, messAb = 0, hoefe = true;
+    var sparsam = false, messAb = 0, hoefe = true, fenster = [];
+    var dichteFenster = [], dichteAb = 0, dichteStufen = 0;
+    /* STOCKT ES? — die eine Frage, die beide Regler stellen.
+
+       Nicht "sind die Bilder langsamer als X", sondern "verpasst dieses
+       Geraet seinen eigenen Takt". Der Takt steht nirgends geschrieben;
+       das schnellste Bild im Fenster ist die beste Auskunft darueber,
+       wie schnell dieser Schirm ueberhaupt kann. Jedes Bild, das
+       deutlich laenger braucht als dieses, hat einen Takt verpasst.
+
+       Der zweite Fall: liegt schon das SCHNELLSTE Bild ueber zwanzig
+       Millisekunden, ist gar kein Takt mehr zu halten — dann stockt es,
+       auch wenn es gleichmaessig stockt. */
+    function stockt(werte, anteil) {
+      if (werte.length < 6) return false;
+      var boden = Infinity;
+      for (var i = 0; i < werte.length; i++) if (werte[i] < boden) boden = werte[i];
+      if (!(boden > 0)) return false;
+      if (boden > 20) return true;
+      var lahm = 0;
+      for (var j = 0; j < werte.length; j++) if (werte[j] > boden * 1.6) lahm++;
+      return lahm / werte.length > anteil;
+    }
     var bildnummer = 0, gemeldet = false, angekommen = 0;
     var fertig = typeof wahl.fertig === "function" ? wahl.fertig : function () {};
 
@@ -1162,7 +1309,9 @@
        [4] Bilddauer  [5] groesste gemalte Marke in Pixeln
        [6] Seitenverhaeltnis der gemalten Scheiben (muss 1 sein)
        [7] groesste Abweichung der Tiefenschritte vom Sollschritt
-       [8] [9] Lage des App-Zeichens auf dem Schirm, als Anteil */
+       [8] [9] Lage des App-Zeichens auf dem Schirm, als Anteil
+       [10] wie breit das App-Zeichen gemalt wird, als Anteil des
+            Schirms — daran ist abzulesen, WANN es den Schirm fuellt */
     var spur = [];
     window.rcpKosmosSpur = spur;
     /* Die MALZEIT je Bild — getrennt von der Bilddauer. Die Bilddauer
@@ -1174,6 +1323,17 @@
        jedes einzelne notiert. */
     var malzeit = [];
     window.rcpKosmosMalzeit = malzeit;
+    /* DIE LEITER DER DICHTE, mitgeschrieben.
+
+       Sie entscheidet, ob in voller Aufloesung gemalt wird — und sie
+       ist die einzige Sicherung dagegen, dass ein schwaches Geraet an
+       dieser Aufloesung erstickt. Eine Sicherung, die man nicht
+       nachsehen kann, ist keine: ohne diese Zeilen liess sich nicht
+       belegen, ob sie greift, und der erste Entwurf griff auf JEDEM
+       Geraet, der zweite auf keinem. Je Eintrag: Zeit, Dichte,
+       Bilder im Fenster, kuerzeste und mittlere Bilddauer, Urteil. */
+    var leiter = [];
+    window.rcpKosmosLeiter = leiter;
 
     function bild(jetzt) {
       if (!laeuft) return;
@@ -1232,18 +1392,111 @@
          braucht das Klemmen bei 64 ms (ein Sprung von 190 ms darf die
          Kamera nicht schleudern), die Regelung darf davon aber nicht
          geblendet werden — mit dem Deckel kann sie ein Geraet bei 64 ms
-         nicht von einem bei 190 unterscheiden. */
+         nicht von einem bei 190 unterscheiden.
+
+         UND SIE VERGLEICHT MIT DEM EIGENEN TAKT, nicht mit einer festen
+         Zahl. Hier stand "Mittel ueber 12 ms". Das war kein Regler,
+         sondern ein Schalter, der immer an ist: die Bilddauer ist der
+         Abstand zweier Bilder, und auf einem Schirm mit 60 Hz betraegt
+         der 16,7 ms — auch dann, wenn die Szene in einer halben
+         Millisekunde fertig ist. Gemessen griff die Sparschaltung
+         darum auf JEDEM Geraet, ausnahmslos, und die halbierten Sterne
+         waren nie eine Entscheidung, sondern ein Dauerzustand.
+
+         Der Takt des Schirms ist nicht bekannt — aber er ist ablesbar:
+         es ist das SCHNELLSTE Bild im Fenster. Alles, was deutlich
+         laenger braucht, hat einen Takt verpasst. Gezaehlt werden die
+         verpassten. */
       if (!sparsam && t > 150) {
         if (!messAb) messAb = t;
-        dtSumme += dtRoh; dtZahl++;
-        if (dtZahl >= 10 || t - messAb >= 260) {
-          if (dtSumme / dtZahl > 12) {
+        fenster.push(dtRoh);
+        if (fenster.length >= 10 || t - messAb >= 260) {
+          if (stockt(fenster, 0.3)) {
             sparsam = true;
             sterne.length = Math.floor(sterne.length / 2);
             hoefe = false;
-            if (DPR > 1) { dichteDeckel = 1; messen(true); }
           }
-          dtSumme = 0; dtZahl = 0; messAb = t;
+          fenster.length = 0; messAb = t;
+        }
+      }
+
+      /* DIE DICHTE WIRD GETRENNT BEURTEILT — UND SPAETER.
+
+         Das war der eigentliche Fund hinter "immer noch unscharf": die
+         Sparschaltung urteilt ab 150 Millisekunden, und in diesem
+         Fenster baut die Liste ihre Karten. Gemessen wurde also der
+         SEITENAUFBAU, nicht das Geraet — und das Urteil galt danach
+         fuer den ganzen Flug. Auf dem Prueftisch griff sie jedes Mal:
+         Dichte 1 auf einem Schirm mit Dichte 3, alles dreifach
+         hochgezogen.
+
+         Die billigen Abstriche (halb so viele Sterne, keine Hoefe,
+         keine grossen Nebenvorlagen) duerfen ruhig frueh und
+         vorsichtig fallen — sie kosten nichts und sind nicht zu sehen.
+         Die Dichte dagegen ist das, was man sieht. Sie wird darum erst
+         beurteilt, wenn die Seite steht (ab 900 ms), ueber ein volles
+         Fenster von 500 ms, und dann in EINEM ganzen Schritt.
+
+         Nur abwaerts, und hoechstens zweimal: jede Aenderung legt die
+         Leinwand neu an, und "kein Stoppen" ist eine Zusage.
+
+         Geurteilt wird nach VERPASSTEN TAKTEN, nicht nach einer festen
+         Millisekundenzahl — aus demselben Grund wie oben. Der erste
+         Anlauf verlangte "Mittel unter 14 ms" und ging darum selbst
+         ohne Bremse bis auf Dichte 1 herunter: auf einem 60-Hz-Schirm
+         gibt es kein Bild unter 16,7 ms zu gewinnen. Gemessen fiel die
+         Leiter bei 1x, 4x und 6x Bremse gleichermassen bis ganz unten
+         — ein Regler, der auf jedem Geraet dasselbe tut, misst nichts.
+
+         Ein Viertel verpasster Takte im Fenster ist die Grenze.
+
+         UND ES GIBT EINEN LETZTEN TERMIN: 5200 ms.
+
+         Er stand erst auf 3600 — mit dem Gedanken, im Anflug nichts
+         mehr anzufassen, weil ein Wechsel die Leinwand neu anlegt und
+         weil dort die Aufloesung am meisten zaehlt. Die Messung hat den
+         Gedanken widerlegt: die Arbeit je Bild ist waehrend der Reise
+         etwa ein Viertel dessen, was sie bei der Ankunft ist (gemessen
+         10 ms gegen 40, und die Bildrate fiel von 60 auf 16). Ein
+         Regler, der nur die billige Haelfte pruefen darf und die teure
+         ausnimmt, urteilt ueber den falschen Abschnitt — er sah 60
+         Bilder je Sekunde und gab die volle Dichte frei, kurz bevor sie
+         zusammenbrach.
+
+         Ein Neuanlegen kostet EIN Bild. Zwei Sekunden mit 16 Bildern je
+         Sekunde kosten ungleich mehr. Also wird bis in den Anflug
+         hinein geurteilt, und nur die letzte Sekunde bleibt
+         unangetastet.
+
+         Das Fenster wird NICHT geleert, wenn zu wenige Bilder darin
+         stehen. Erst hiess es "500 ms sind um, urteile" — und auf einem
+         wirklich langsamen Geraet passen in 500 ms nur fuenf Bilder,
+         also zu wenige zum Urteilen, also wurde verworfen und von vorn
+         gesammelt, immer wieder. Bei sechsfacher Bremse ging die Leiter
+         darum kein einziges Mal herunter: der Regler war ausgerechnet
+         dort blind, wo er gebraucht wurde. */
+      if (t > 900 && t < 5200 && dichteStufen < 2 && DPR > geraeteDichte / 4) {
+        if (!dichteAb) dichteAb = t;
+        dichteFenster.push(dtRoh);
+        if (t - dichteAb >= 500 && dichteFenster.length >= 6) {
+          /* EINMAL fragen, dann handeln UND aufschreiben. Erst stand die
+             Frage zweimal da — einmal im Zweig, einmal im Mitschrieb.
+             Eine Gegenprobe, die den Zweig aenderte, lief damit ins
+             Leere: der Mitschrieb sagte weiter das Richtige, waehrend
+             gehandelt wurde wie im Fehlerfall, und die Pruefreihe blieb
+             gruen. Ein Protokoll, das nicht von der Entscheidung selbst
+             stammt, bezeugt nichts. */
+          var eng = stockt(dichteFenster, 0.25);
+          if (leiter.length < 40) leiter.push([Math.round(t), DPR,
+            dichteFenster.length, Math.round(Math.min.apply(null, dichteFenster)),
+            Math.round(dichteFenster.reduce(function (a, b) { return a + b; }, 0) / dichteFenster.length),
+            eng ? 1 : 0]);
+          if (eng) {
+            dichteStufen++;
+            dichteDeckel = glatteStufe(DPR * 0.99);
+            messen(true);
+          }
+          dichteFenster.length = 0; dichteAb = t;
         }
       }
 
@@ -1429,7 +1682,7 @@
       reihe.sort(function (a, b) { return b.kz - a.kz; });
 
       var maxGemalt = 0, formVerhaeltnis = 1;
-      var kernOrtX = -1, kernOrtY = -1;
+      var kernOrtX = -1, kernOrtY = -1, kernGross = 0;
 
       function kernMalen() {
         var kf = F / kernZ;
@@ -1442,6 +1695,11 @@
         kernOrtX = kx / B;
         kernOrtY = ky / H;
         var kg = klemm(300 * kf, 8, Math.max(B, H) * 1.15);
+        /* [10]: wie gross das Zeichen gemalt wird, als Vielfaches der
+           Schirmbreite. Damit weiss die Nachschau, WANN es den Schirm
+           fuellt — und kann ihre Schaerfemessung genau dorthin legen,
+           statt sie an vorbeiziehenden Marken zu verrechnen. */
+        kernGross = kg / B;
         var kd = blenden * klemm((6400 - kernZ) / 3800, 0, 1);
         var puls = 1 + 0.03 * Math.sin(t * 0.0021);
         /* Die Lichter des Kerns sind GEDECKELT, nicht mitwachsend: als
@@ -1463,8 +1721,18 @@
         if (kg > 14) {
           g.globalAlpha = kd;
           g.globalCompositeOperation = "source-over";
-          g.drawImage((kg > 150 && KERN_NAH && !sparsam) ? KERN_NAH : KERN_FERN,
-            kx - kg / 2, ky - kg / 2, kg, kg);
+          /* GROSS: der weiche Grund aus der Vorlage, die harten Kerzen
+             gezeichnet. KLEIN: alles aus der kleinen Vorlage — dort ist
+             eine Kerze zwei Pixel breit und kein Pfad wert. */
+          if (kg > 128 && KERN_GRUND) {
+            g.drawImage(KERN_GRUND, kx - kg / 2, ky - kg / 2, kg, kg);
+            g.save();
+            g.translate(kx - kg / 2, ky - kg / 2);
+            kernKerzen(g, kg);
+            g.restore();
+          } else {
+            g.drawImage(KERN_FERN, kx - kg / 2, ky - kg / 2, kg, kg);
+          }
           if (kg < GRENZE * 0.55) {
             g.globalCompositeOperation = "lighter";
             g.globalAlpha = kd * 0.32;
@@ -1630,7 +1898,8 @@
           formVerhaeltnis,
           Math.round(symAbw * 1000),
           Math.round(kernOrtX * 1000) / 1000,
-          Math.round(kernOrtY * 1000) / 1000]);
+          Math.round(kernOrtY * 1000) / 1000,
+          Math.round(kernGross * 1000) / 1000]);
       }
 
       /* SPUELEN, aber nur auf dem Prueftisch. Chromium zeichnet die
