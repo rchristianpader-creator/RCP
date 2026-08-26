@@ -925,7 +925,13 @@
       leinwand.height = Math.round(H * DPR);
       leinwand.style.width = B + "px";
       leinwand.style.height = H + "px";
-      MX = B / 2; MY = H * 0.46;
+      /* Die Mitte ist die MITTE. Hier stand 0,46 — vier Prozent ueber
+         der Bildmitte, als optischer Ausgleich gedacht. Auf dem
+         Ladebildschirm steht aber nichts anderes mehr im Bild, wogegen
+         auszugleichen waere, und am Ende landet das App-Zeichen genau
+         hier. Gemeldet als "nicht mittig", und die Messung gab recht:
+         46,8 Prozent Hoehe. */
+      MX = B / 2; MY = H / 2;
       /* Die Brennweite: aus der Schirmhoehe, damit die Gasse auf jedem
          Geraet denselben Bildwinkel hat. Die Orte im Raum sind von der
          Schirmgroesse unabhaengig — ein Drehen des Geraets aendert den
@@ -1155,8 +1161,8 @@
        [3] wie viele Marken schon an der Kamera vorbeigezogen sind
        [4] Bilddauer  [5] groesste gemalte Marke in Pixeln
        [6] Seitenverhaeltnis der gemalten Scheiben (muss 1 sein)
-       [7] groesste Abweichung der
-       Tiefenschritte vom Sollschritt (Symmetrie der Gasse, tausendstel) */
+       [7] groesste Abweichung der Tiefenschritte vom Sollschritt
+       [8] [9] Lage des App-Zeichens auf dem Schirm, als Anteil */
     var spur = [];
     window.rcpKosmosSpur = spur;
     /* Die MALZEIT je Bild — getrennt von der Bilddauer. Die Bilddauer
@@ -1273,8 +1279,27 @@
 
       driftX += 0.010 * glatt(500, 2200, t) * (1 - abriss) * dt;
       driftY -= 0.006 * glatt(500, 2200, t) * (1 - abriss) * dt;
-      var camX = klemm(driftX, -55, 55);
-      var camY = klemm(driftY, -40, 40);
+      /* DIE DRIFT LAEUFT AUF DIE ACHSE ZURUECK, je naeher das Ziel.
+
+         Sie ist eine seitliche Kamerabewegung in WELTmassen, und die
+         Perspektive vervielfacht sie mit der Naehe: fuenfzig Einheiten
+         sind in der Ferne ein paar Pixel, kurz vor dem Zeichen aber
+         ueber fuenfhundert. Physikalisch richtig — man fliegt dann eben
+         AN dem Zeichen VORBEI statt hinein. Gewollt ist das Gegenteil.
+
+         Also nimmt die Drift ab, sobald das Ziel in Sicht kommt, und
+         ist bei der Ankunft null. Die Kamera atmet unterwegs und liegt
+         am Ende genau auf der Achse — das Zeichen landet mittig.
+
+         QUADRATISCH, nicht linear: der Versatz auf dem Schirm ist Drift
+         mal Perspektive, und die Perspektive waechst mit eins durch
+         Abstand. Eine Drift, die LINEAR mit dem Abstand abnimmt, hebt
+         sich mit ihr exakt auf — gemessen blieb der Versatz konstant
+         bei knapp vierzehn Pixeln, egal wie nah. Erst das Quadrat
+         gewinnt gegen die Perspektive. */
+      var einlauf = Math.pow(klemm((zielZ - fahrt) / 2600, 0, 1), 2);
+      var camX = klemm(driftX, -55, 55) * einlauf;
+      var camY = klemm(driftY, -40, 40) * einlauf;
       var roll = -0.035 + 0.065 * Math.min(1, t / 5600);
       /* Das Rad der Helix: die ganze Gasse dreht traege um die Achse
          weiter — langsam genug, dass man es nicht benennen kann. */
@@ -1404,11 +1429,18 @@
       reihe.sort(function (a, b) { return b.kz - a.kz; });
 
       var maxGemalt = 0, formVerhaeltnis = 1;
+      var kernOrtX = -1, kernOrtY = -1;
 
       function kernMalen() {
         var kf = F / kernZ;
         var kx = MX + (0 - camX) * kf;
         var ky = MY + (0 - camY) * kf;
+        /* Fuer die Nachschau: wo steht das Zeichen, als Anteil des
+           Schirms? Ueber die Helligkeit geraten waere es nicht — dort
+           reden die anderen Marken mit, und der Schwerpunkt wandert mit
+           ihnen. Hier steht die Zahl, mit der wirklich gemalt wird. */
+        kernOrtX = kx / B;
+        kernOrtY = ky / H;
         var kg = klemm(300 * kf, 8, Math.max(B, H) * 1.15);
         var kd = blenden * klemm((6400 - kernZ) / 3800, 0, 1);
         var puls = 1 + 0.03 * Math.sin(t * 0.0021);
@@ -1596,7 +1628,9 @@
           Math.round(dt * 10) / 10,
           Math.round(maxGemalt),
           formVerhaeltnis,
-          Math.round(symAbw * 1000)]);
+          Math.round(symAbw * 1000),
+          Math.round(kernOrtX * 1000) / 1000,
+          Math.round(kernOrtY * 1000) / 1000]);
       }
 
       /* SPUELEN, aber nur auf dem Prueftisch. Chromium zeichnet die
