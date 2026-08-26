@@ -267,6 +267,31 @@
          Der Verlauf ist derselbe wie die alte Vorlage — nur wird jetzt
          normal darueber geblendet statt additiv addiert. Auf beinahe
          schwarzem Grund ist das dasselbe Licht. */
+      /* GLUT UND SPINNE ALS EBENEN — derselbe Grund wie beim Blitz.
+
+         Beides sind weiche Lichtscheiben um das App-Zeichen, die sich
+         allein in Groesse und Helligkeit aendern. Als Vollbild-Blit auf
+         der Leinwand waren sie zusammen 4,6 der 10,8 Millisekunden bei
+         der Ankunft — der groesste Posten, den die Szene hatte. Als
+         Ebene kosten sie den Hauptfaden nichts: Verschiebung, Groesse
+         und Deckkraft sind genau die drei Dinge, die der Kompositor
+         allein kann.
+
+         Sie sitzen mit fester Kantenlaenge von 200 Punkten da und
+         werden ueber transform an ihren Ort und auf ihre Groesse
+         gebracht — so bleibt der Verlauf immer derselbe, und es wird
+         nie eine Vorlage hochgerechnet.
+
+         Die GLUT liegt UNTER der Leinwand: sie ist der Hof HINTER dem
+         Zeichen, und dort gehoert sie hin — die Marken ziehen vor ihr
+         vorbei. Die SPINNE liegt darueber, denn ihr Stern liegt auf dem
+         Zeichen. */
+      ".kosmosglut,.kosmosspinne{position:absolute;left:0;top:0;width:200px;height:200px;",
+      "margin:-100px 0 0 -100px;opacity:0;will-change:transform,opacity;",
+      "transform-origin:50% 50%;pointer-events:none}",
+      ".kosmosglut{background:radial-gradient(circle at 50% 50%,",
+      "rgba(228,242,238,.7) 0%,rgba(166,214,202,.4) 16%,rgba(100,186,166,.16) 36%,",
+      "rgba(56,140,122,.05) 66%,rgba(0,0,0,0) 100%)}",
       ".kosmosblitz{position:absolute;inset:-5%;opacity:0;will-change:opacity;",
       "background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.95) 0%,",
       "rgba(228,244,238,.6) 10%,rgba(178,220,206,.28) 26%,",
@@ -970,7 +995,7 @@
     unten.className = "kosmosliquid";
     unten.setAttribute("aria-hidden", "true");
     unten.innerHTML = '<i class="kosmosfeld eins"></i><i class="kosmosfeld zwei"></i>' +
-      '<i class="kosmosfeld drei"></i><i class="kosmosflut"></i>';
+      '<i class="kosmosfeld drei"></i><i class="kosmosflut"></i><i class="kosmosglut"></i>';
     huelle.appendChild(unten);
 
     leinwand.className = "kosmosleinwand";
@@ -980,8 +1005,8 @@
     var oben = document.createElement("div");
     oben.className = "kosmosglas";
     oben.setAttribute("aria-hidden", "true");
-    oben.innerHTML = '<i class="kosmoszug"></i><i class="kosmosblitz"></i>' +
-      '<i class="kosmoskorn"></i><i class="kosmosrand"></i>';
+    oben.innerHTML = '<i class="kosmoszug"></i><i class="kosmosspinne"></i>' +
+      '<i class="kosmosblitz"></i><i class="kosmoskorn"></i><i class="kosmosrand"></i>';
     huelle.appendChild(oben);
 
     /* Zwei Deckel uebereinander: die Pixeldichte (hoechstens 2, die
@@ -1015,7 +1040,7 @@
        auf einem Geraet mit Dichte 2 den krummen Faktor 1,333 — teurer
        UND unschaerfer als das glatte 1. Unter 1 geht es nie. */
     var geraeteDichte = window.devicePixelRatio || 1;
-    var dichteDeckel = Math.max(1, geraeteDichte / 2);
+    var dichteDeckel = Math.min(geraeteDichte, 3);
     /* Die naechstkleinere Dichte, die den Kompositor GANZZAHLIG
        hochziehen laesst: bei Geraetedichte 3 sind das 3, 1,5 und 1. */
     function glatteStufe(hoechstens) {
@@ -1031,13 +1056,6 @@
 
     var wuerfel = wuerfelWerk(20260825);
     var KORN = korn(128, wuerfel);
-    var GLUT = glut(256, [
-      [0, "rgba(228,242,238,0.7)"],
-      [0.16, "rgba(166,214,202,0.4)"],
-      [0.36, "rgba(100,186,166,0.16)"],
-      [0.66, "rgba(56,140,122,0.05)"],
-      [1, "rgba(0,0,0,0)"]
-    ]);
     var SPINNE = spinne(160);
     var STREIF = streifen(512, 48, "rgba(150,214,196,0.5)");
     /* Die Glasscheibe fuer alle Marken — in ZWEI Stufen.
@@ -1416,6 +1434,30 @@
     window.rcpKosmosLeiter = leiter;
     var blitzEbene = oben.querySelector(".kosmosblitz");
     var blitzStand = -1;
+    var glutEbene = unten.querySelector(".kosmosglut");
+    var spinneEbene = oben.querySelector(".kosmosspinne");
+    var glutStand = "", spinneStand = "";
+    /* Die Spinne traegt ein Sternmuster, keinen glatten Verlauf — das
+       geht nur als Bild. Einmal gebacken, dann vom Kompositor bewegt. */
+    try {
+      if (spinneEbene) spinneEbene.style.backgroundImage = "url(" + SPINNE.toDataURL() + ")";
+      if (spinneEbene) spinneEbene.style.backgroundSize = "100% 100%";
+    } catch (e) {}
+    /* Ein Setzer, der nur schreibt, wenn sich etwas geaendert hat: eine
+       Zuweisung an style loest auch dann Arbeit aus, wenn derselbe Wert
+       daraufsteht. */
+    function lichtSetzen(el, alt2, x, y, gr, deck) {
+      if (!el) return alt2;
+      var neu2 = deck <= 0.004 ? "0"
+        : Math.round(x) + "," + Math.round(y) + "," + Math.round(gr) + "," +
+          (Math.round(deck * 100) / 100);
+      if (neu2 === alt2) return alt2;
+      if (neu2 === "0") { el.style.opacity = "0"; return neu2; }
+      el.style.transform = "translate(" + x.toFixed(1) + "px," + y.toFixed(1) +
+        "px) scale(" + (gr / 200).toFixed(4) + ")";
+      el.style.opacity = Math.min(1, deck).toFixed(3);
+      return neu2;
+    }
 
     function bild(jetzt) {
       if (!laeuft) return;
@@ -1759,6 +1801,7 @@
       }
       var kernZ = zielZ - fahrt;
       var kernDran = kernZ > 70;
+      var kernAktiv = kernDran;
       reihe.sort(function (a, b) { return b.kz - a.kz; });
 
       var maxGemalt = 0, formVerhaeltnis = 1, maxOrtX = -1, maxOrtY = -1;
@@ -1788,12 +1831,12 @@
            Bild, und die Drossel-Messung brach von 60 auf 20 ein. Was
            breiter ist als der Schirm, malt ohnehin nur Unsichtbares. */
         var GRENZE = Math.max(B, H);
+        /* Der Hof: keine Fuellung mehr auf der Leinwand, sondern eine
+           Ebene darunter. */
+        var gg2 = Math.min(kg * 3.0 * puls, GRENZE * 0.95);
+        glutStand = lichtSetzen(glutEbene, glutStand, kx, ky, gg2,
+          kg < GRENZE * 0.75 ? kd * 0.42 : 0);
         g.globalCompositeOperation = "lighter";
-        if (kg < GRENZE * 0.75) {
-          g.globalAlpha = kd * 0.42;
-          var gg2 = Math.min(kg * 3.0 * puls, GRENZE * 0.95);
-          g.drawImage(GLUT, kx - gg2 / 2, ky - gg2 / 2, gg2, gg2);
-        }
         g.globalAlpha = kd * 0.18;
         var bb = Math.min(kg * 6 * (0.7 + 0.3 * puls), GRENZE * 1.15);
         var bh2 = Math.min(kg * 0.32, GRENZE * 0.09);
@@ -1828,12 +1871,9 @@
           } else {
             g.drawImage(KERN_FERN, kx - kg / 2, ky - kg / 2, kg, kg);
           }
-          if (kg < GRENZE * 0.55) {
-            g.globalCompositeOperation = "lighter";
-            g.globalAlpha = kd * 0.32;
-            var sg = Math.min(kg * 2.2, GRENZE * 0.85);
-            g.drawImage(SPINNE, kx - sg / 2, ky - sg / 2, sg, sg);
-          }
+          var sg = Math.min(kg * 2.2, GRENZE * 0.85);
+          spinneStand = lichtSetzen(spinneEbene, spinneStand, kx, ky, sg,
+            kg < GRENZE * 0.55 ? kd * 0.32 : 0);
         }
         g.globalAlpha = 1;
       }
@@ -1964,6 +2004,15 @@
         }
       }
       if (kernDran) kernMalen();
+      /* Ist der Kern durch — die Kamera ist in ihm —, muessen seine
+         Lichter AUSGEHEN. Auf der Leinwand geschah das von selbst
+         (nicht gemalt ist nicht da); eine Ebene dagegen behaelt ihren
+         letzten Stand und stuende sonst den ganzen Nachlauf ueber hell
+         im Bild. */
+      if (!kernAktiv) {
+        glutStand = lichtSetzen(glutEbene, glutStand, 0, 0, 1, 0);
+        spinneStand = lichtSetzen(spinneEbene, spinneStand, 0, 0, 1, 0);
+      }
 
       /* HIER STAND DER SCHRIFTZUG. "Aktien-Liste" trat am Ende unter
          das Zeichen — meine Zutat, nicht die Bestellung, und
