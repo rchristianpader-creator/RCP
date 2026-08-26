@@ -5,19 +5,60 @@
 <meta name="color-scheme" content="dark">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#0a0d0c">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=168">
-<link rel="apple-touch-icon" href="/icon-180.png?v=168">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=169">
+<link rel="apple-touch-icon" href="/icon-180.png?v=169">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Aktien-Liste · Ralph Christian Pader</title>
+<script>
+  /* HIER faellt die Entscheidung ueber das Aussehen des Auftakts — im
+     Kopf, VOR dem Stylesheet, und damit vor jedem Anstrich.
+
+     Zwei Anlaeufe davor haben es nicht getan, und beide waren
+     lehrreich. Zuerst stand die Entscheidung im Auftakt-Block, fast
+     dreitausend Zeilen weiter unten; dann direkt unter dem Markup des
+     Ladebildschirms. Gemessen (Mobilfunk 220 kB/s, Rechner sechsfach
+     gebremst) half der zweite Anlauf so gut wie nichts: 120 statt 138
+     Millisekunden, in denen der gewoehnliche Ladebildschirm im Bild
+     stand. Es liegt naemlich nicht an der Zeilennummer, sondern am
+     Stylesheet: ein Skript UNTER einem <link rel=stylesheet> wartet auf
+     dessen Ankunft, und der erste Anstrich geschieht davor.
+
+     Ein Skript DARUEBER wartet auf nichts. Es haengt die Klasse an das
+     Wurzelelement — das gibt es schon, den Auftakt selbst noch nicht —,
+     und das Regelwerk richtet sich danach. Dieselbe Kunst, mit der
+     Seiten das Aufblitzen des hellen Themas vermeiden: entscheiden,
+     bevor irgendetwas zu sehen ist.
+
+     Die Szenendatei wird gleich mitbestellt: sie ist damit unterwegs,
+     waehrend der Rest des Dokuments noch gelesen wird. */
+  (function () {
+    var kosmisch = false;
+    try { kosmisch = localStorage.getItem("rcp:chef") === "1"; } catch (e) {}
+    if (kosmisch && window.matchMedia &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches) kosmisch = false;
+    window.rcpKosmisch = kosmisch;
+    if (!kosmisch) return;
+    document.documentElement.className += " kosmisch";
+    var d = document.createElement("script");
+    d.src = "/kosmos.js?v=169";
+    d.onerror = function () {
+      window.rcpKosmisch = false;
+      document.documentElement.className =
+        document.documentElement.className.replace(/\bkosmisch\b/g, "");
+    };
+    window.rcpKosmosDatei = d;
+    document.head.appendChild(d);
+  })();
+</script>
 <!-- Das Aussehen liegt in einer eigenen Datei: sie ist Zwischenspeicher
      zuerst und geht einmal je Stand ueber die Leitung, waehrend dieses
      Dokument bei jedem Start neu geholt wird. Weit vorn im Kopf, damit kein
      Skript darunter auf Masse zugreift, die es noch nicht gibt. -->
-<link rel="stylesheet" href="/stil.css?v=168">
+<link rel="stylesheet" href="/stil.css?v=169">
 <style>
 /* Ein Netz unter der Teilung.
 
@@ -46,14 +87,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=168">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=169">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=168">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=169">
 
 <script>
 /* Im Browser oder als App?
@@ -207,7 +248,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=168" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=169" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -334,7 +375,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=168" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=169" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -382,7 +423,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=168" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=169" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -401,7 +442,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=168" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=169" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -518,7 +559,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=168" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=169" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -1368,7 +1409,7 @@
     var geladen = !!window.rcpStern, gescheitert = false;
     if (!geladen) {
       var datei = document.createElement("script");
-      datei.src = "/stern.js?v=168";
+      datei.src = "/stern.js?v=169";
       datei.onload = function () { geladen = true; };
       datei.onerror = function () { gescheitert = true; };
       document.head.appendChild(datei);
@@ -3038,31 +3079,29 @@ if ("serviceWorker" in navigator) {
      wird, entscheidet schluss() — der Fahrplan gehoert dem Ladebildschirm,
      nicht der Szene. */
   var szene = null;
-  var kosmisch = false;
-  try { kosmisch = localStorage.getItem("rcp:chef") === "1"; } catch (e) {}
-  if (kosmisch && window.matchMedia &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches) kosmisch = false;
+  /* Die Entscheidung ist im Kopf gefallen, vor dem ersten Anstrich.
+     Hier wird sie nur gelesen — sie ein zweites Mal zu treffen hiesse,
+     zwei Stellen zu haben, die auseinanderlaufen koennen. Die Klasse
+     kommt zusaetzlich an den Auftakt selbst: das Regelwerk richtet sich
+     nach der Wurzel, aber von aussen (Pruefreihen, spaetere Regeln)
+     will man sie auch am Kasten sehen. */
+  var kosmisch = !!window.rcpKosmisch;
   if (kosmisch) {
     kasten.classList.add("kosmisch");
-    var kdatei = document.createElement("script");
-    kdatei.src = "/kosmos.js?v=168";
-    kdatei.onload = function () {
+    var bauen = function () {
       /* KEIN Abbruch, wenn fertig schon gefallen ist. fertig faellt, sobald
          alle drei Schritte geladen sind — auf einem schnellen Geraet mit
          warmem Speicher ist das frueher, als diese Datei ankommt. Der
-         Deckel bleibt trotzdem bis zur Mindestzeit stehen, und genau diese
-         Sekunden gehoeren der Szene. Mit dem Abbruch stand hier: Klasse
-         gesetzt, Scheibe versteckt, keine Szene — vier Sekunden
-         Schwarzbild, und zwar ausgerechnet auf den schnellsten Geraeten. */
-      if (!window.rcpKosmos || !kasten.parentNode) return;
+         Deckel bleibt trotzdem stehen, bis die Szene sich meldet. Mit dem
+         Abbruch stand hier: Klasse gesetzt, Scheibe versteckt, keine
+         Szene — Schwarzbild auf den schnellsten Geraeten. */
+      if (szene || !window.rcpKosmos || !kasten.parentNode) return;
       var marken = getComputedStyle(document.documentElement);
       szene = window.rcpKosmos(kasten, {
-        kern: "/icon-192.png?v=168",
+        kern: "/icon-192.png?v=169",
         farben: [marken.getPropertyValue("--marke-hell").trim(),
                  marken.getPropertyValue("--marke-mitte").trim(),
                  marken.getPropertyValue("--marke-tief").trim()],
-        bahn: 9000000,
-        ende: 2000,
         /* Die Szene nimmt den Deckel selbst ab: ihr Ende ist die
            Ankunft im App-Zeichen, und erst DANACH liegt die Seite frei
            — nicht zu einer Uhrzeit, die den Flug abschneidet. */
@@ -3070,10 +3109,15 @@ if ("serviceWorker" in navigator) {
       });
       if (window.rcpPositionen) szene.planeten(window.rcpPositionen);
     };
-    /* Datei nicht ladbar: dann eben die Scheibe — der alte Auftakt steht
-       ja noch komplett darunter. */
-    kdatei.onerror = function () { kasten.classList.remove("kosmisch"); };
-    document.head.appendChild(kdatei);
+    /* Die Datei ist im Kopf bestellt worden und kann laengst da sein —
+       dann sofort bauen, sonst auf sie warten. */
+    if (window.rcpKosmos) bauen();
+    else if (window.rcpKosmosDatei) {
+      window.rcpKosmosDatei.addEventListener("load", bauen);
+      window.rcpKosmosDatei.addEventListener("error", function () {
+        kasten.classList.remove("kosmisch");
+      });
+    }
     document.addEventListener("rcp:karten", function (e) {
       if (szene && Array.isArray(e.detail)) szene.planeten(e.detail);
     });
@@ -3419,7 +3463,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=168";
+      i.src = "/icon-512.png?v=169";
     });
     return symbolBild;
   }
