@@ -346,27 +346,35 @@
        (0,006 der Kante), damit die Linie in jeder Aufloesung gleich
        fein aussieht — eine feste Pixelbreite waere auf der grossen
        Fassung ein Faden und auf der kleinen ein Balken. */
-    var fein = Math.max(0.75, gr * 0.006);
+    /* SO LEISE WIE IN DER APP. Der erste Anlauf setzte den Lichtbogen
+       auf 0,62 Weiss — gemeldet als "weisse Raender", und zu Recht:
+       --glas-kante in stil.css traegt oben 0,28 und unten 0,3 Schwarz,
+       mehr nicht. Ein Rand, den man als Rand WAHRNIMMT, ist schon zu
+       stark; er soll die Scheibe nur vom Grund loesen.
+
+       Auch die Breite bleibt duenn: eine Linie, die mit der Scheibe
+       mitwaechst, wird beim nahen Vorbeiflug zum Reifen. */
+    var fein = Math.max(0.75, gr * 0.004);
     x.lineWidth = fein;
-    x.strokeStyle = "rgba(255,255,255,0.09)";
+    x.strokeStyle = "rgba(255,255,255,0.05)";
     x.beginPath(); x.arc(m, m, r - fein / 2, 0, 6.2832); x.stroke();
 
     x.lineCap = "round";
-    x.lineWidth = fein * 1.7;
+    x.lineWidth = fein * 1.4;
     var bo = x.createLinearGradient(m - r, m - r, m + r * 0.3, m + r * 0.3);
     bo.addColorStop(0, "rgba(255,255,255,0)");
-    bo.addColorStop(0.35, "rgba(255,255,255,0.62)");
+    bo.addColorStop(0.35, "rgba(255,255,255,0.26)");
     bo.addColorStop(1, "rgba(255,255,255,0)");
     x.strokeStyle = bo;
     x.beginPath();
     x.arc(m, m, r - fein, 3.5343, 5.6549);   /* oben links */
     x.stroke();
 
-    x.lineWidth = fein * 1.2;
+    x.lineWidth = fein;
     var ge = x.createLinearGradient(m + r, m + r, m - r * 0.3, m - r * 0.3);
-    ge.addColorStop(0, "rgba(190,226,216,0)");
-    ge.addColorStop(0.4, "rgba(190,226,216,0.3)");
-    ge.addColorStop(1, "rgba(190,226,216,0)");
+    ge.addColorStop(0, "rgba(180,214,206,0)");
+    ge.addColorStop(0.4, "rgba(180,214,206,0.12)");
+    ge.addColorStop(1, "rgba(180,214,206,0)");
     x.strokeStyle = ge;
     x.beginPath();
     x.arc(m, m, r - fein, 0.3927, 2.3562);   /* unten rechts */
@@ -604,14 +612,115 @@
   }
 
   function zeichenAusBild(bild, gr) {
-    var c = tafel(gr, gr), x = c.getContext("2d");
     var bw = bild.naturalWidth || bild.width || 1;
     var bh = bild.naturalHeight || bild.height || 1;
+    /* ERST FREISTELLEN, DANN SKALIEREN. Andersherum wird die weiche
+       Kante des Bildes beim Vergroessern mitgezogen und ist danach
+       doppelt so breit — der Saum, den man wegnehmen will, waechst
+       also, bevor man ihn anfasst. Auf den Originalpunkten ist er ein
+       Punkt breit und sauber zu treffen. */
+    var roh = tafel(bw, bh);
+    var rx = roh.getContext("2d");
+    try { rx.drawImage(bild, 0, 0, bw, bh); } catch (e) {}
+    weissWeg(rx, bw, bh);
+
+    var c = tafel(gr, gr), x = c.getContext("2d");
     var f = Math.min(gr / bw, gr / bh);
-    try { x.drawImage(bild, (gr - bw * f) / 2, (gr - bh * f) / 2, bw * f, bh * f); } catch (e) {}
+    try { x.drawImage(roh, (gr - bw * f) / 2, (gr - bh * f) / 2, bw * f, bh * f); } catch (e) {}
+    try { roh.width = 0; roh.height = 0; } catch (e) {}
     return c;
   }
 
+  /* DER WEISSE GRUND MUSS WEG.
+
+     Viele Logo-Dienste liefern die Marken nicht freigestellt, sondern
+     auf weissem Grund. In der Liste faellt das bei dreissig Pixeln kaum
+     auf; im Kosmos zieht dieselbe Marke ueber den halben Schirm, und
+     dann steht ein weisses Feld auf dunklem Glas — gemeldet als
+     "weisse Raender".
+
+     Weggenommen wird VON DEN ECKEN HER, nicht ueberall: ein einfaches
+     "alles Helle durchsichtig" wuerde weisse Buchstaben INNERHALB des
+     Logos mit ausradieren. Die Flut laeuft nur ueber zusammenhaengende
+     Flaechen, die vom Rand aus erreichbar sind — ein "O" behaelt seinen
+     Punkt, ein Schriftzug seine Farbe.
+
+     Und nur, wenn der Rand ueberhaupt hell und einheitlich ist: ein
+     Logo mit dunklem oder buntem Grund bleibt unangetastet. */
+  function weissWeg(x, gr, ho) {
+    ho = ho || gr;
+    var d;
+    try { d = x.getImageData(0, 0, gr, ho); } catch (e) { return; }
+    var p = d.data, n = gr * ho;
+    /* Taugt der Rand als Grund? Vier Ecken ansehen: alle hell, alle
+       deckend, alle einander aehnlich. */
+    var ecken = [0, (gr - 1) * 4, (ho - 1) * gr * 4, (n - 1) * 4];
+    var r0 = 0, g0 = 0, b0 = 0;
+    for (var e = 0; e < 4; e++) {
+      var i = ecken[e];
+      if (p[i + 3] < 240) return;
+      var w = (p[i] + p[i + 1] + p[i + 2]) / 3;
+      if (w < 205) return;
+      r0 += p[i] / 4; g0 += p[i + 1] / 4; b0 += p[i + 2] / 4;
+    }
+
+    /* HART UND WEICH.
+
+       Ein reiner Schnitt an einer Schwelle hinterlaesst genau das, was
+       er verhindern soll: den weichgezeichneten Saum, mit dem jedes
+       Bild seine Kanten glaettet. Diese Punkte sind halb Grund, halb
+       Marke — nimmt man sie ganz weg, franst die Marke aus; laesst man
+       sie stehen, liegt ein heller Kranz um sie herum. Beides ist als
+       "weisse Raender" zu sehen.
+
+       Also zwei Schwellen. Was dem Grund sehr nahe ist, faellt ganz
+       weg, und die Flut laeuft weiter. Was ihm NUR NAHE ist, bekommt
+       eine Teildeckung — und seine Farbe wird zurueckgerechnet: der
+       Punkt ist eine Mischung aus Grund und Marke, und wer die Mischung
+       kennt und den Grund, kennt auch die Marke. Genau das macht ein
+       Bildbearbeiter, wenn er einen weissen Hintergrund freistellt. */
+    var HART = 24, WEICH = 96;
+    var gesehen = new Uint8Array(n);
+    var stapel = [0, gr - 1, (ho - 1) * gr, n - 1];
+    while (stapel.length) {
+      var k = stapel.pop();
+      if (k < 0 || k >= n || gesehen[k]) continue;
+      gesehen[k] = 1;
+      var j = k * 4;
+      if (p[j + 3] < 200) continue;
+      var ab = Math.max(Math.abs(p[j] - r0),
+                        Math.abs(p[j + 1] - g0),
+                        Math.abs(p[j + 2] - b0));
+      if (ab <= HART) {
+        p[j + 3] = 0;
+      } else if (ab < WEICH) {
+        var al = (ab - HART) / (WEICH - HART);
+        /* Bei sehr kleiner Teildeckung NICHT zurueckrechnen: die
+           Formel teilt durch die Deckung, und bei einem Zehntel
+           vervielfacht sie jeden Rauschpunkt zu einem hellen Fleck —
+           genau die gestrichelten Kraenze, die als Saum zu sehen waren.
+           Was so duenn ist, gehoert ohnehin zum Grund. */
+        if (al < 0.42) {
+          p[j + 3] = 0;
+        } else {
+          /* Farbe zurueckrechnen: c = a*Marke + (1-a)*Grund. */
+          p[j] = klemm((p[j] - (1 - al) * r0) / al, 0, 255);
+          p[j + 1] = klemm((p[j + 1] - (1 - al) * g0) / al, 0, 255);
+          p[j + 2] = klemm((p[j + 2] - (1 - al) * b0) / al, 0, 255);
+          p[j + 3] = Math.round(al * p[j + 3]);
+          continue;   /* die Kante ist erreicht — nicht weiterfluten */
+        }
+      } else {
+        continue;   /* die Marke selbst */
+      }
+      var sp = k % gr;
+      if (sp > 0) stapel.push(k - 1);
+      if (sp < gr - 1) stapel.push(k + 1);
+      stapel.push(k - gr);
+      stapel.push(k + gr);
+    }
+    try { x.putImageData(d, 0, 0); } catch (e) {}
+  }
 
   /* Die Fetch.ai-Marke, gezeichnet: drei mal drei Felder, Quadrate oben
      links zu Kreisen unten rechts — dieselbe Geometrie wie MARKEN in
@@ -981,7 +1090,13 @@
           (function (k, quelle) {
             var b = new Image();
             b.onload = function () {
-              k.zeichen = zeichenAusBild(b, ZEICHENGR);
+              /* SO GROSS WIE DIE QUELLE ES HERGIBT, nicht groesser.
+                 Ein Logo von 128 Pixeln auf 512 zu backen gewinnt kein
+                 Korn Schaerfe und kostet nur Speicher; eines von 512
+                 auf 256 zu stauchen wirft welche weg. Hoechstens das
+                 Doppelte der Vorlage, gedeckelt bei der Nahgroesse. */
+              var eig = Math.max(b.naturalWidth || 0, b.naturalHeight || 0) || 128;
+              k.zeichen = zeichenAusBild(b, klemm(eig * 2, 128, GROSS));
               if (k.fern) { try { k.fern.width = 0; k.fern.height = 0; } catch (e) {} }
               k.fern = fernScheibe(GLAS_FERN, k.zeichen, FERNGR);
               k.eigen = null;

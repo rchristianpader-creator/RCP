@@ -63,7 +63,7 @@ const OHNE_LOGO = /^(\^|GC=F|SI=F|CL=F|HG=F|NG=F|ZC=F|.*-USD$)/i;
    Trennzeichen gekuerzt. */
 const QUELLEN = [
   (s) => "https://financialmodelingprep.com/image-stock/" + encodeURIComponent(s) + ".png",
-  (s) => "https://assets.parqet.com/logos/symbol/" + encodeURIComponent(s) + "?format=png&size=128",
+  (s) => "https://assets.parqet.com/logos/symbol/" + encodeURIComponent(s) + "?format=png&size=512",
   (s) => "https://eodhd.com/img/logos/US/" + encodeURIComponent(s) + ".png"
 ];
 
