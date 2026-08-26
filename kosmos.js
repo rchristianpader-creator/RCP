@@ -240,20 +240,27 @@
       "55%{transform:translate3d(-28%,-22%,0) scale(1.28)}100%{transform:none}}",
       "@keyframes kosmosFeldDrei{0%{transform:translate3d(-8%,40%,0) scale(1.42)}",
       "55%{transform:translate3d(22%,-30%,0) scale(.66)}100%{transform:none}}",
-      ".kosmoszug{position:absolute;top:-40%;bottom:-40%;left:-70%;width:55%;",
-      "background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.04) 26%,",
-      "rgba(255,255,255,.09) 44%,rgba(255,255,255,.17) 50%,rgba(255,255,255,.09) 56%,",
-      "rgba(255,255,255,.04) 74%,rgba(255,255,255,0) 100%);will-change:transform;",
-      "animation:kosmosZug 2.6s cubic-bezier(.5,0,.3,1) .3s 2 both}",
-      "@keyframes kosmosZug{from{transform:rotate(14deg) translate3d(0,0,0)}",
-      "to{transform:rotate(14deg) translate3d(430%,0,0)}}",
+      /* KEIN LICHTBALKEN MEHR.
+
+         Hier zog ein diagonaler weisser Streifen zweimal ueber den
+         ganzen Schirm — von oben nach unten, quer durch alles. Er war
+         das Lauteste im Bild und hatte mit der Szene nichts zu tun: er
+         kam nicht aus dem Kern, er ging nicht auf ihn zu, er lief
+         einfach durch. Bestellt ist statt seiner das RUNDE Licht, das
+         die Szene ohnehin schon hat.
+
+         Also traegt die Flut den Auftritt allein — ein Ring, der aus
+         der Mitte waechst, also von dort, wo das App-Zeichen liegt und
+         wohin die Reise geht. Sie ist dafuer etwas kraeftiger und
+         langsamer als vorher, weil sie jetzt nicht mehr die zweite
+         Stimme ist, sondern die einzige. */
       ".kosmosflut{position:absolute;top:50%;left:50%;width:150%;aspect-ratio:1;",
       "margin:-75% 0 0 -75%;border-radius:50%;will-change:transform,opacity;",
-      "background:radial-gradient(closest-side,rgba(255,255,255,0) 52%,",
-      "rgba(214,232,255,.13) 68%,rgba(214,232,255,.04) 82%,rgba(214,232,255,0) 100%);",
-      "animation:kosmosFlut 3.2s cubic-bezier(.22,.7,.2,1) .2s 2 both}",
-      "@keyframes kosmosFlut{0%{transform:scale(.12);opacity:0}18%{opacity:1}",
-      "100%{transform:scale(1.5);opacity:0}}",
+      "background:radial-gradient(closest-side,rgba(255,255,255,0) 48%,",
+      "rgba(214,232,255,.17) 66%,rgba(214,232,255,.06) 82%,rgba(214,232,255,0) 100%);",
+      "animation:kosmosFlut 4.2s cubic-bezier(.22,.7,.2,1) .2s 2 both}",
+      "@keyframes kosmosFlut{0%{transform:scale(.1);opacity:0}16%{opacity:1}",
+      "100%{transform:scale(1.6);opacity:0}}",
       /* DER BLITZ ALS EBENE, nicht als Vollbild-Blit.
 
          Er lag als drawImage auf der Leinwand: eine schirmfuellende
@@ -292,18 +299,29 @@
       ".kosmosglut{background:radial-gradient(circle at 50% 50%,",
       "rgba(228,242,238,.7) 0%,rgba(166,214,202,.4) 16%,rgba(100,186,166,.16) 36%,",
       "rgba(56,140,122,.05) 66%,rgba(0,0,0,0) 100%)}",
-      ".kosmosblitz{position:absolute;inset:-5%;opacity:0;will-change:opacity;",
+      ".kosmosblitz{position:absolute;inset:-5%;opacity:0;border-radius:50%;",
+      "will-change:transform,opacity;transform-origin:50% 50%;transform:scale(.42);",
       "background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.95) 0%,",
       "rgba(228,244,238,.6) 10%,rgba(178,220,206,.28) 26%,",
       "rgba(110,180,160,.07) 55%,rgba(0,0,0,0) 100%)}",
       ".kosmosrand{position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 46%,",
       "rgba(0,0,0,0) 30%,rgba(0,0,0,.3) 62%,rgba(2,4,4,.82) 100%)}",
-      ".kosmoskorn{position:absolute;inset:-8%;opacity:.09;will-change:transform;",
-      "animation:kosmosKorn .5s steps(1) infinite}",
-      "@keyframes kosmosKorn{0%{transform:translate3d(0,0,0)}33%{transform:translate3d(-11px,7px,0)}",
-      "66%{transform:translate3d(6px,-9px,0)}100%{transform:translate3d(0,0,0)}}",
-      "@media (prefers-reduced-motion: reduce){.kosmosfeld,.kosmoszug,.kosmosflut,",
-      ".kosmoskorn{animation:none}.kosmoszug,.kosmosflut{opacity:0}}"
+      /* DAS KORN STEHT STILL.
+
+         Es sprang sechsmal je Sekunde um elf Punkt — "animation:
+         kosmosKorn .5s steps(1) infinite". Als Filmkorn gedacht, und
+         als Filmkorn ist Springen richtig: echtes Korn ist in jedem
+         Einzelbild neu. Nur ist echtes Korn auch in jedem Einzelbild
+         ANDERS, waehrend hier dasselbe Bild ruckweise verschoben wird —
+         und eine verschobene Struktur liest sich nicht als Korn,
+         sondern als Wackeln. Gemeldet als "es zappelt", und das war
+         woertlich so gebaut.
+
+         Seit die Szene in voller Geraetedichte malt, faellt es umso
+         mehr auf: das Korn ist jetzt scharf. Also steht es still. */
+      ".kosmoskorn{position:absolute;inset:-8%;opacity:.075}",
+      "@media (prefers-reduced-motion: reduce){.kosmosfeld,.kosmosflut",
+      "{animation:none}.kosmosflut{opacity:0}}"
     ].join("");
     document.head.appendChild(s);
   }
@@ -1118,7 +1136,7 @@
     var oben = document.createElement("div");
     oben.className = "kosmosglas";
     oben.setAttribute("aria-hidden", "true");
-    oben.innerHTML = '<i class="kosmoszug"></i><i class="kosmosspinne"></i>' +
+    oben.innerHTML = '<i class="kosmosspinne"></i>' +
       '<i class="kosmosblitz"></i><i class="kosmoskorn"></i><i class="kosmosrand"></i>';
     huelle.appendChild(oben);
 
@@ -1566,7 +1584,7 @@
     var leiter = [];
     window.rcpKosmosLeiter = leiter;
     var blitzEbene = oben.querySelector(".kosmosblitz");
-    var blitzStand = -1;
+    var blitzStand = -1, blitzGross = -1;
     var glutEbene = unten.querySelector(".kosmosglut");
     var spinneEbene = oben.querySelector(".kosmosspinne");
     var glutStand = "", spinneStand = "";
@@ -2205,12 +2223,23 @@
           ? Math.pow(naehe, 2.4) * 0.9 * (1 + 1.6 * Math.max(0, abriss - 1))
           : 0;
         var neuBlitz = Math.round(Math.min(1, hell2 * blenden) * 100) / 100;
-        /* Nur schreiben, wenn sich etwas geaendert hat: eine Zuweisung
-           an style loest auch dann Arbeit aus, wenn derselbe Wert
-           daraufsteht. */
-        if (neuBlitz !== blitzStand && blitzEbene) {
-          blitzStand = neuBlitz;
+        /* DER UEBERGANG ZUR APP IST DIESES LICHT.
+
+           Vorher wurde der Deckel schlicht ausgeblendet, waehrend das
+           Licht nur heller wurde — zwei Vorgaenge nebeneinander, von
+           denen keiner den anderen erklaerte. Jetzt WAECHST das Licht
+           aus der Mitte, also von dort, wo das App-Zeichen liegt und
+           wohin die ganze Reise ging: es geht auf, deckt zu, und
+           darunter steht die Liste. Ein Uebergang, der aus der Szene
+           kommt statt neben ihr herzulaufen.
+
+           Groesse und Deckkraft, sonst nichts — beides fuehrt der
+           Kompositor, der Hauptfaden zahlt nichts dafuer. */
+        var blitzGr = Math.round((0.42 + 1.05 * Math.min(1, hell2)) * 100) / 100;
+        if ((neuBlitz !== blitzStand || blitzGr !== blitzGross) && blitzEbene) {
+          blitzStand = neuBlitz; blitzGross = blitzGr;
           blitzEbene.style.opacity = neuBlitz;
+          blitzEbene.style.transform = "scale(" + blitzGr + ")";
         }
       }
 
