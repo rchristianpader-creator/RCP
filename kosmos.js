@@ -60,6 +60,19 @@
   var GROSS = 512;      /* die Glasscheibe und die eigenen Marken */
   var ZEICHENGR = 256;  /* die gezeichneten Zeichen darauf          */
   var FERNGR = 128;     /* fertige kleine Scheibe fuer die Ferne     */
+  /* WIE VIEL DER SCHEIBE DAS ZEICHEN EINNIMMT.
+
+     Stand auf 0,62 — und auf dem Bild sass das Logo als kleiner Fleck
+     mitten in einem grossen Glaskreis, statt darin zu SITZEN. Gemeldet
+     als "die Logos sollen in einem Liquid-Glass-Kreis drin sein". Mit
+     0,7 fuellt es den Kreis, wie es die App auf ihren Karten tut, und
+     ganz nebenbei bekommt es dreizehn Prozent mehr Kantenlaenge — also
+     mehr Punkte fuer dieselbe Marke, was der Schaerfe zugutekommt.
+     Weiter darf es nicht: der Glasrand braucht Luft, sonst klebt das
+     Zeichen an ihm. */
+  var ZEICHENANTEIL = 0.7;
+  var MITTELGR = 288;   /* die Stufe zwischen fern und nah — ohne sie */
+                        /* wird aus 512 auf ein Fuenftel verkleinert  */
   var DAUER_BAHN = 4600;   /* nur noch fuer die Vertraege nach aussen    */
   var DAUER_ENDE = 2000;
 
@@ -328,7 +341,29 @@
      Jetzt: eine geteilte Glasscheibe in voller Groesse, und das Zeichen
      wird beim Malen darueber gesetzt. Zwei Bilder statt einem, aber
      kein Backen mehr im Flug — und scharf ist beides. */
-  function scheibenGrund(x, gr) {
+  /* DAS GLAS DER MARKEN — weich gebacken, Rand gezeichnet.
+
+     Zwei Dinge waren falsch, und beide standen hier.
+
+     ERSTENS DIE WERTE. Das Glas lief mit der HALBEN Staerke dessen, was
+     stil.css fuer jede Karte der App vorschreibt: Fuellung 0,07 statt
+     0,1, Schimmer 0,14 statt 0,22, Rand 0,05 statt 0,28. So gedaempft
+     ist es kein Glas mehr, sondern ein Hauch — auf dem Bild schwamm das
+     Logo in einem Kreis, den man kaum sah. "Die Logos sollen in einem
+     Liquid-Glass-Kreis drin sein": das sind sie, sie waren nur
+     unsichtbar. Jetzt stehen hier die Zahlen aus stil.css, keine
+     eigenen. (Zu hell wird es davon nicht: gemeldet war einmal ein
+     Lichtbogen mit 0,62 — mehr als das Doppelte des Apprands.)
+
+     ZWEITENS DIE SCHAERFE. Alles lag in einer Vorlage von 512 Punkten,
+     die beim nahen Vorbeiflug auf ueber 900 Geraetepunkte gezogen wurde
+     — gemessen brauchte die Randkante DREI Geraetepunkte, wo das
+     gezeichnete App-Zeichen einen braucht. Der Rand ist eine harte
+     Kante; harte Kanten gehoeren nicht in eine Vorlage. Also dieselbe
+     Teilung wie beim Kern: die weiche Fuellung bleibt gebacken (ein
+     Verlauf hat keine Kante, den sieht man hochgezogen nicht), der Rand
+     wird bei der wirklichen Groesse gezeichnet. */
+  function glasFuellung(x, gr) {
     var m = gr / 2, r = m - gr * 0.03;
     x.save();
     x.beginPath(); x.arc(m, m, r, 0, 6.2832); x.clip();
@@ -337,50 +372,51 @@
        billig, egal wie scharf es ist. */
     x.fillStyle = "rgba(10,13,12,0.34)";
     x.fillRect(0, 0, gr, gr);
+    /* --glas-fuellung-karte */
     var fv = x.createLinearGradient(0, 0, 0, gr);
-    fv.addColorStop(0, "rgba(255,255,255,0.07)");
-    fv.addColorStop(1, "rgba(255,255,255,0.04)");
+    fv.addColorStop(0, "rgba(255,255,255,0.1)");
+    fv.addColorStop(1, "rgba(255,255,255,0.075)");
     x.fillStyle = fv;
     x.fillRect(0, 0, gr, gr);
+    /* --glas-schimmer, 148 Grad */
     var sv = x.createLinearGradient(m - r, m - r, m + r * 0.45, m + r * 0.45);
-    sv.addColorStop(0, "rgba(255,255,255,0.14)");
-    sv.addColorStop(0.24, "rgba(255,255,255,0.07)");
-    sv.addColorStop(0.5, "rgba(255,255,255,0.025)");
+    sv.addColorStop(0, "rgba(255,255,255,0.22)");
+    sv.addColorStop(0.24, "rgba(255,255,255,0.12)");
+    sv.addColorStop(0.5, "rgba(255,255,255,0.04)");
     sv.addColorStop(0.72, "rgba(255,255,255,0)");
     x.fillStyle = sv;
     x.fillRect(0, 0, gr, gr);
     x.restore();
+    return r;
+  }
 
-    /* DER RAND — hier entscheidet sich "edel". Vorher lagen zwei volle
-       Kreise uebereinander, beide gleich stark rundherum: das liest
-       sich als aufgemalter Ring. Echtes Glas faengt Licht NICHT
-       gleichmaessig — es sammelt es dort, wo die Woelbung zur Quelle
-       zeigt, und laesst den Rest fast dunkel.
+  /* DER RAND — hier entscheidet sich "edel". Echtes Glas faengt Licht
+     NICHT gleichmaessig: es sammelt es dort, wo die Woelbung zur Quelle
+     zeigt, und laesst den Rest fast dunkel. Also ein feiner Grundrand,
+     darueber ein kurzer heller BOGEN oben links und ein zweiter,
+     kuehler und schwaecher, unten rechts als Gegenlicht.
 
-       Also: ein sehr feiner Grundrand, ueber den ein kurzer heller
-       BOGEN oben links laeuft und ein zweiter, kuehler und schwaecher,
-       unten rechts als Gegenlicht. Die Staerke haengt an der Groesse
-       (0,006 der Kante), damit die Linie in jeder Aufloesung gleich
-       fein aussieht — eine feste Pixelbreite waere auf der grossen
-       Fassung ein Faden und auf der kleinen ein Balken. */
-    /* SO LEISE WIE IN DER APP. Der erste Anlauf setzte den Lichtbogen
-       auf 0,62 Weiss — gemeldet als "weisse Raender", und zu Recht:
-       --glas-kante in stil.css traegt oben 0,28 und unten 0,3 Schwarz,
-       mehr nicht. Ein Rand, den man als Rand WAHRNIMMT, ist schon zu
-       stark; er soll die Scheibe nur vom Grund loesen.
+     Die Staerke haengt an der Groesse (0,004 der Kante), damit die
+     Linie in jeder Aufloesung gleich fein aussieht — eine feste
+     Pixelbreite waere auf der grossen Fassung ein Faden und auf der
+     kleinen ein Balken. Und duenn bleibt sie: eine Linie, die mit der
+     Scheibe mitwaechst, wird beim nahen Vorbeiflug zum Reifen.
 
-       Auch die Breite bleibt duenn: eine Linie, die mit der Scheibe
-       mitwaechst, wird beim nahen Vorbeiflug zum Reifen. */
+     Die Zahlen sind die von --glas-kante: oben 0,28 Weiss, unten 0,3
+     Schwarz, dazwischen ein schwaches 0,1. */
+  function glasRand(x, gr) {
+    var m = gr / 2, r = m - gr * 0.03;
     var fein = Math.max(0.75, gr * 0.004);
+    x.save();
     x.lineWidth = fein;
-    x.strokeStyle = "rgba(255,255,255,0.05)";
+    x.strokeStyle = "rgba(255,255,255,0.1)";
     x.beginPath(); x.arc(m, m, r - fein / 2, 0, 6.2832); x.stroke();
 
     x.lineCap = "round";
     x.lineWidth = fein * 1.4;
     var bo = x.createLinearGradient(m - r, m - r, m + r * 0.3, m + r * 0.3);
     bo.addColorStop(0, "rgba(255,255,255,0)");
-    bo.addColorStop(0.35, "rgba(255,255,255,0.26)");
+    bo.addColorStop(0.35, "rgba(255,255,255,0.28)");
     bo.addColorStop(1, "rgba(255,255,255,0)");
     x.strokeStyle = bo;
     x.beginPath();
@@ -389,14 +425,20 @@
 
     x.lineWidth = fein;
     var ge = x.createLinearGradient(m + r, m + r, m - r * 0.3, m - r * 0.3);
-    ge.addColorStop(0, "rgba(180,214,206,0)");
-    ge.addColorStop(0.4, "rgba(180,214,206,0.12)");
-    ge.addColorStop(1, "rgba(180,214,206,0)");
+    ge.addColorStop(0, "rgba(6,10,10,0)");
+    ge.addColorStop(0.4, "rgba(6,10,10,0.3)");
+    ge.addColorStop(1, "rgba(6,10,10,0)");
     x.strokeStyle = ge;
     x.beginPath();
     x.arc(m, m, r - fein, 0.3927, 2.3562);   /* unten rechts */
     x.stroke();
-    x.lineCap = "butt";
+    x.restore();
+  }
+
+  /* Beides zusammen — fuer die gebackenen Fassungen der Ferne. */
+  function scheibenGrund(x, gr) {
+    var r = glasFuellung(x, gr);
+    glasRand(x, gr);
     return r;
   }
 
@@ -619,7 +661,7 @@
     var c = tafel(gr, gr), x = c.getContext("2d");
     x.drawImage(glas, 0, 0, gr, gr);
     if (zeichen) {
-      var zs = gr * 0.62;
+      var zs = gr * ZEICHENANTEIL;
       var zb = zeichen.naturalWidth || zeichen.width || 1;
       var zh = zeichen.naturalHeight || zeichen.height || 1;
       var f = Math.min(zs / zb, zs / zh);
@@ -1014,7 +1056,15 @@
       scheibenGrund(c.getContext("2d"), gr);
       return c;
     }
+    /* Die nahe Fassung OHNE Rand: der wird beim Malen gezogen, in der
+       wirklichen Groesse. Nur so ist er scharf. */
+    function glasWeich(gr) {
+      var c = tafel(gr, gr);
+      glasFuellung(c.getContext("2d"), gr);
+      return c;
+    }
     var GLAS_FERN = glasBauen(128);
+    var GLAS_MITTEL = glasBauen(MITTELGR);
     var GLAS_NAH = null;
 
     function messen(erzwungen) {
@@ -1102,7 +1152,7 @@
            aus einer 128er Vorlage. Was am Ende den ganzen Schirm
            fuellt, darf nie wegoptimiert werden. */
         pflichten.push(function () { KERN_GRUND = kernGrundScheibe(GROSS); });
-        spaeter(function () { GLAS_NAH = glasBauen(GROSS); });
+        spaeter(function () { GLAS_NAH = glasWeich(GROSS); });
       }
       if (pflichten.length) {
         var pf = pflichten.shift();
@@ -1214,6 +1264,7 @@
           } else {
             k.klein = sinnBild(sy, 96) || textScheibe(96, zeichenFuer(sy) || "?");
             k.fern = fernScheibe(GLAS_FERN, k.klein, FERNGR);
+            k.mittel = null;
             spaeter(function () {
               if (!k.zeichen) {
                 k.zeichen = sinnBild(sy, ZEICHENGR) ||
@@ -1240,6 +1291,25 @@
               k.zeichen = zeichenAusBild(b, klemm(eig * 2, 128, GROSS));
               if (k.fern) { try { k.fern.width = 0; k.fern.height = 0; } catch (e) {} }
               k.fern = fernScheibe(GLAS_FERN, k.zeichen, FERNGR);
+              /* UND EINE MITTLERE STUFE.
+
+                 Das ist die eigentliche Antwort auf "die Logos sind
+                 unscharf". Zwischen der fernen Scheibe (128) und der
+                 nahen Fassung (512) klaffte eine Luecke: eine Marke von
+                 118 CSS-Punkten wird bei Dichte 1,5 mit 177 Punkten
+                 gemalt, ihr Logo also mit 110 — aus einer Vorlage von
+                 512. Das ist eine Verkleinerung auf ein Fuenftel, und
+                 der schnelle Filter des Browsers taugt dafuer nicht: er
+                 tastet ab, statt zu mitteln, und genau davon wird eine
+                 Kante weich und flimmerig.
+
+                 Der teure Weg waere "high" als Filterqualitaet —
+                 gemessen 2,7-fache Kosten und die halbe Bildrate im
+                 Anflug. Der billige Weg ist der, den jede Grafikkarte
+                 geht: eine Zwischenstufe vorhalten und die nehmen, die
+                 am naechsten liegt. Sie kostet EINMAL Bauzeit und beim
+                 Malen keinen Deut mehr — es bleibt ein Blit. */
+              spaeter(function () { k.mittel = fernScheibe(GLAS_MITTEL, k.zeichen, MITTELGR); });
               k.eigen = null;
               k.bereit = true;
               window.rcpKosmosLogos.geladen++;
@@ -1584,6 +1654,15 @@
          Vorlagen in passenden Stufen vorliegen, wird ohnehin kaum noch
          gestreckt; teuer war gerade das Herunterfiltern aus grossen
          Texturen. */
+      /* NIEDRIGE FILTERQUALITAET — und der Verzicht ist gemessen.
+
+         "high" laesst den Browser mit Zwischenstufen verkleinern, und
+         genau das rettet beim VERKLEINERN die Kanten. Es bringt an den
+         Marken auch wirklich etwas: eine Kantenbreite, sieben statt
+         sechs Geraetepunkte. Es kostet aber das 2,7-fache — die
+         Malzeit der Reise stieg von 3,1 auf 8,2 ms, die des Anflugs von
+         9,7 auf 24,7, und die Bildrate im Anflug fiel von 59 auf 33.
+         Ein Pixel Kante fuer die halbe Bildrate ist kein Handel. */
       g.imageSmoothingQuality = "low";
 
       /* ---- Die Sterne ---- */
@@ -1682,7 +1761,7 @@
       var kernDran = kernZ > 70;
       reihe.sort(function (a, b) { return b.kz - a.kz; });
 
-      var maxGemalt = 0, formVerhaeltnis = 1;
+      var maxGemalt = 0, formVerhaeltnis = 1, maxOrtX = -1, maxOrtY = -1;
       var kernOrtX = -1, kernOrtY = -1, kernGross = 0;
 
       function kernMalen() {
@@ -1765,7 +1844,14 @@
         var nah = klemm((kp2.kz - 110) / 320, 0, 1);
         var deck = blenden * Math.pow(fern, 0.85) * nah * glatt(kp2.auf, kp2.auf + 320, t);
         if (deck <= 0.01) continue;
-        if (gr > maxGemalt && deck > 0.2) maxGemalt = gr;
+        if (gr > maxGemalt && deck > 0.2) {
+          maxGemalt = gr;
+          /* [11] [12]: WO die groesste Marke steht. Ohne das laesst sich
+             ihre Schaerfe nicht messen — man wuesste nicht, welchen Teil
+             des Bildes man ansehen muss, und maesse am Ende wieder das
+             App-Zeichen statt der Marke. */
+          maxOrtX = px3 / B; maxOrtY = py3 / H;
+        }
         /* GESEHEN heisst: ab jetzt saehe man einen Bildtausch. Ein Logo,
            das frueher eintrifft — die Scheibe noch klein und matt im
            Nebel —, darf lautlos einwechseln; danach nie mehr.
@@ -1806,7 +1892,26 @@
         var malBreit = gr, malHoch = gr;
         g.globalAlpha = deck;
         g.globalCompositeOperation = "source-over";
-        if ((gr <= 150 || sparsam || !GLAS_NAH || (!kp2.zeichen && !kp2.eigen)) && kp2.fern) {
+        /* WANN DIE KLEINE VORLAGE NOCH REICHT — gerechnet, nicht
+           geraten. Hier stand die feste Grenze 150: bis dahin kam die
+           Marke aus der fernen Fassung von 128 Punkten. Bei Pixeldichte
+           1,5 sind 150 CSS-Punkte aber 225 Leinwandpunkte, also fast
+           das Doppelte der Vorlage — gemessen brauchte die Kante eines
+           Logos so vier bis fuenf Geraetepunkte. Genau das ist das
+           "unscharf": nicht das App-Zeichen am Ende, sondern die
+           Marken, die man die ganze Reise ueber ansieht.
+
+           Die richtige Grenze steht schon da: eine Vorlage reicht,
+           solange sie nicht hochgerechnet wird. Also vergleicht man
+           ihre Punkte mit den Punkten, die gemalt werden — und weil
+           darin die Dichte steckt, verschiebt sich die Grenze von
+           selbst mit, wenn die Leiter die Dichte aendert. */
+        var gemalt = gr * DPR;
+        if (gemalt > FERNGR && gemalt <= MITTELGR && kp2.mittel && !sparsam) {
+          /* Die Zwischenstufe: dieselbe eine Zeichnung, nur aus einer
+             Vorlage, die der gemalten Groesse nahekommt. */
+          g.drawImage(kp2.mittel, px3 - malBreit / 2, py3 - malHoch / 2, malBreit, malHoch);
+        } else if ((gemalt <= FERNGR || sparsam || !GLAS_NAH || (!kp2.zeichen && !kp2.eigen)) && kp2.fern) {
           /* FERN: eine fertige Scheibe, ein Malbefehl. */
           g.drawImage(kp2.fern, px3 - malBreit / 2, py3 - malHoch / 2, malBreit, malHoch);
         } else if (kp2.eigen && !sparsam) {
@@ -1818,9 +1923,15 @@
              dafuer object-fit: contain). Ein breites Wortlogo in ein
              Quadrat gepresst ist sofort als falsch zu erkennen. */
           g.drawImage(GLAS_NAH, px3 - malBreit / 2, py3 - malHoch / 2, malBreit, malHoch);
+          /* Und der Rand als Strich, bei der Groesse, in der die Marke
+             wirklich steht — nicht aus einer Vorlage hochgezogen. */
+          g.save();
+          g.translate(px3 - malBreit / 2, py3 - malHoch / 2);
+          glasRand(g, malBreit);
+          g.restore();
           var zn = kp2.zeichen;
           if (zn) {
-            var zs = gr * 0.62;
+            var zs = gr * ZEICHENANTEIL;
             var zb = zn.naturalWidth || zn.width || 1;
             var zh = zn.naturalHeight || zn.height || 1;
             var zf = Math.min(zs / zb, zs / zh);
@@ -1892,7 +2003,9 @@
           Math.round(symAbw * 1000),
           Math.round(kernOrtX * 1000) / 1000,
           Math.round(kernOrtY * 1000) / 1000,
-          Math.round(kernGross * 1000) / 1000]);
+          Math.round(kernGross * 1000) / 1000,
+          Math.round(maxOrtX * 1000) / 1000,
+          Math.round(maxOrtY * 1000) / 1000]);
       }
 
       /* SPUELEN, aber nur auf dem Prueftisch. Chromium zeichnet die
