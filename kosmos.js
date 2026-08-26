@@ -429,6 +429,16 @@
     sv.addColorStop(0.72, "rgba(255,255,255,0)");
     x.fillStyle = sv;
     x.fillRect(0, 0, gr, gr);
+    /* DER GLANZPUNKT — das eine Merkmal, an dem man Glas ohne
+       Nachdenken erkennt: ein kleiner heller Fleck dort, wo die
+       Woelbung zur Lichtquelle zeigt. Weich, also gebacken. */
+    var gl = x.createRadialGradient(gr * 0.31, gr * 0.26, 0,
+      gr * 0.31, gr * 0.26, gr * 0.24);
+    gl.addColorStop(0, "rgba(255,255,255,0.30)");
+    gl.addColorStop(0.45, "rgba(255,255,255,0.09)");
+    gl.addColorStop(1, "rgba(255,255,255,0)");
+    x.fillStyle = gl;
+    x.fillRect(0, 0, gr, gr);
     x.restore();
     return r;
   }
@@ -447,19 +457,37 @@
 
      Die Zahlen sind die von --glas-kante: oben 0,28 Weiss, unten 0,3
      Schwarz, dazwischen ein schwaches 0,1. */
+  /* DER RAND — hier entscheidet sich "edel". Echtes Glas faengt Licht
+     NICHT gleichmaessig: es sammelt es dort, wo die Woelbung zur Quelle
+     zeigt, und laesst den Rest fast dunkel. Also ein feiner Grundrand,
+     darueber ein kurzer heller BOGEN oben links und ein zweiter,
+     kuehler und schwaecher, unten rechts als Gegenlicht.
+
+     LAUTER ALS ZUVOR. Der Bogen stand auf 0,28 — dem Wert, den
+     --glas-kante in stil.css fuer eine EIN Punkt hohe Kante auf einer
+     Karte vorschreibt. Eine Scheibe im Flug ist aber dreihundert Punkte
+     gross, und dieselbe Zahl liest sich dort als Hauch statt als Kante.
+     Jetzt 0,42 fuer den Bogen und 0,16 fuer den Grundrand.
+
+     UND DIE VERLAEUFE WERDEN JE AUFRUF GEBAUT, nicht einmal in
+     Einheitsmassen. Ein Versuch legte sie in ein Einheitsquadrat und
+     skalierte den Zeichner hinein — das spart sechsundzwanzig Objekte je
+     Bild, macht aber jeden Strich zu einem transformierten Strich, und
+     gemessen war das TEURER: die Malzeit stieg von 6,1 auf 7,9 ms. Was
+     Rechenzeit spart, spart nicht immer Zeit. */
   function glasRand(x, gr) {
     var m = gr / 2, r = m - gr * 0.03;
     var fein = Math.max(0.75, gr * 0.004);
     x.save();
     x.lineWidth = fein;
-    x.strokeStyle = "rgba(255,255,255,0.1)";
+    x.strokeStyle = "rgba(255,255,255,0.16)";
     x.beginPath(); x.arc(m, m, r - fein / 2, 0, 6.2832); x.stroke();
 
     x.lineCap = "round";
     x.lineWidth = fein * 1.4;
     var bo = x.createLinearGradient(m - r, m - r, m + r * 0.3, m + r * 0.3);
     bo.addColorStop(0, "rgba(255,255,255,0)");
-    bo.addColorStop(0.35, "rgba(255,255,255,0.28)");
+    bo.addColorStop(0.35, "rgba(255,255,255,0.42)");
     bo.addColorStop(1, "rgba(255,255,255,0)");
     x.strokeStyle = bo;
     x.beginPath();
@@ -469,7 +497,7 @@
     x.lineWidth = fein;
     var ge = x.createLinearGradient(m + r, m + r, m - r * 0.3, m - r * 0.3);
     ge.addColorStop(0, "rgba(6,10,10,0)");
-    ge.addColorStop(0.4, "rgba(6,10,10,0.3)");
+    ge.addColorStop(0.4, "rgba(6,10,10,0.34)");
     ge.addColorStop(1, "rgba(6,10,10,0)");
     x.strokeStyle = ge;
     x.beginPath();
@@ -2289,10 +2317,65 @@
        damit genau die Abkuerzung aushebeln, die Serien abfangen soll. */
     function beiGroesse() { messen(); }
 
+    /* DIE SZENE MISST SICH SELBST — AUF DEM GERAET, AUF DEM SIE LAEUFT.
+
+       Der berechtigte Einwand: es ist EIN System, warum verhaelt es sich
+       auf dem Prueftisch anders als im Betrieb? Zum Teil kann es nicht
+       anders — ein Prueftisch ohne Grafikkarte rastert mit dem
+       Hauptprozessor, und das ist um ein Vielfaches langsamer als ein
+       Telefon. Absolute Millisekunden von dort sagen ueber das Telefon
+       wenig.
+
+       Was aber auf BEIDEN dasselbe bedeutet, sind verpasste Takte: hat
+       das Geraet ein Bild ausgelassen oder nicht. Diese Zahl haengt
+       nicht an der Rasterart, sondern nur daran, ob die Szene mit dem
+       Schirm mitkommt.
+
+       Also schreibt die Szene ihre eigene Bilanz auf, jedes Mal, auch
+       im Betrieb. Sie steht danach im Speicher des Geraets und wird in
+       der Verwaltung angezeigt. Damit ist die Frage nicht mehr "was
+       sagt der Prueftisch", sondern "was sagt das Telefon". */
+    function bilanzSchreiben() {
+      try {
+        if (spur.length < 20) return;
+        var dts = [];
+        for (var i = 1; i < spur.length; i++) {
+          var e = spur[i][4];
+          if (e > 0 && e < 400) dts.push(e);
+        }
+        if (dts.length < 20) return;
+        var sortiert = dts.slice().sort(function (a, b) { return a - b; });
+        /* Der Takt des Schirms ist das schnellste Zehntel — nicht das
+           einzelne schnellste Bild, das waere ein Ausreisser. */
+        var takt = sortiert[Math.floor(sortiert.length * 0.1)];
+        var verpasst = 0;
+        for (var j = 0; j < dts.length; j++) if (dts[j] > takt * 1.6) verpasst++;
+        var mz = malzeit.slice().sort(function (a, b) { return a - b; });
+        var bilanz = {
+          zeit: new Date().toISOString().slice(0, 16).replace("T", " "),
+          geraet: Math.round((window.devicePixelRatio || 1) * 100) / 100,
+          dichte: Math.round(DPR * 100) / 100,
+          schirm: B + "x" + H,
+          bilder: dts.length,
+          takt: Math.round(takt * 10) / 10,
+          mitte: Math.round(sortiert[Math.floor(sortiert.length / 2)] * 10) / 10,
+          p90: Math.round(sortiert[Math.floor(sortiert.length * 0.9)] * 10) / 10,
+          verpasst: verpasst,
+          anteil: Math.round(verpasst / dts.length * 1000) / 10,
+          malMitte: mz.length ? Math.round(mz[Math.floor(mz.length / 2)] * 100) / 100 : null,
+          stufen: leiter.length ? leiter[leiter.length - 1][1] : null,
+          dauer: spur[spur.length - 1][0]
+        };
+        window.rcpKosmosBilanz = bilanz;
+        localStorage.setItem("rcp:flug", JSON.stringify(bilanz));
+      } catch (e) {}
+    }
+
     function aufraeumen() {
       if (kennung) window.cancelAnimationFrame(kennung);
       kennung = 0;
       window.removeEventListener("resize", beiGroesse);
+      bilanzSchreiben();
     }
 
     window.addEventListener("resize", beiGroesse);

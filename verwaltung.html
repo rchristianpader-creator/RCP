@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#0a0d0c">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=183">
-<link rel="apple-touch-icon" href="/icon-180.png?v=183">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=184">
+<link rel="apple-touch-icon" href="/icon-180.png?v=184">
 <title>Verwaltung · Aktien-Liste</title>
 <style>
   :root {
@@ -876,6 +876,23 @@
     <div id="jetztListe"><div class="leer">wird geladen …</div></div>
   </section>
 
+  <!-- DIE BILANZ DES LETZTEN FLUGES, von diesem Geraet.
+
+       Der Einwand war: es ist EIN System, warum verhaelt es sich in der
+       Messung anders als im Betrieb? Zum Teil kann es nicht anders — ein
+       Prueftisch ohne Grafikkarte rastert mit dem Hauptprozessor und ist
+       um ein Vielfaches langsamer. Absolute Millisekunden von dort sagen
+       ueber ein Telefon wenig.
+
+       Verpasste Takte dagegen bedeuten ueberall dasselbe: hat das Geraet
+       ein Bild ausgelassen oder nicht. Die Szene schreibt das jetzt bei
+       jedem Lauf selbst auf, hier steht es. Damit ist die Frage nicht
+       mehr "was sagt der Prueftisch", sondern "was sagt dieses Geraet". -->
+  <section class="jetzt" id="flugKasten" hidden>
+    <div class="titel">Letzter Auftakt auf diesem Gerät</div>
+    <div id="flugZeile" class="leer">noch kein Flug aufgezeichnet</div>
+  </section>
+
   <a class="weiter" href="/positionen.html">
     <span class="was">Positionen</span>
     <span class="wie">Symbole hinzufügen, ändern, sortieren</span>
@@ -1013,8 +1030,34 @@
   }
 
   var szene = null;
+  /* Die Bilanz des VORIGEN Fluges zeigen — die dieses Fluges wird erst
+     geschrieben, wenn er zu Ende ist. */
+  (function () {
+    try {
+      var roh = localStorage.getItem("rcp:flug");
+      if (!roh) return;
+      var b = JSON.parse(roh);
+      var kasten2 = document.getElementById("flugKasten");
+      var zeile = document.getElementById("flugZeile");
+      if (!kasten2 || !zeile || !b) return;
+      var urteil = b.anteil <= 2 ? "flüssig" : (b.anteil <= 8 ? "knapp" : "ruckelt");
+      zeile.className = "";
+      zeile.innerHTML =
+        '<div><b>' + urteil + '</b> — ' + b.verpasst + ' von ' + b.bilder +
+        ' Bildern verpasst (' + b.anteil + ' %)</div>' +
+        '<div style="opacity:.72;font-size:12px;margin-top:4px">' +
+        'Takt ' + b.takt + ' ms · Mitte ' + b.mitte + ' ms · p90 ' + b.p90 + ' ms<br>' +
+        'Schirm ' + b.schirm + ' bei Pixeldichte ' + b.geraet +
+        ', gemalt mit ' + b.dichte + '<br>' +
+        'Malzeit ' + (b.malMitte === null ? "–" : b.malMitte + " ms") +
+        ' · Dauer ' + Math.round(b.dauer / 100) / 10 + ' s · ' + b.zeit +
+        '</div>';
+      kasten2.hidden = false;
+    } catch (e) {}
+  }());
+
   var datei = document.createElement("script");
-  datei.src = "/kosmos.js?v=183";
+  datei.src = "/kosmos.js?v=184";
   datei.onload = function () {
     if (wegGewesen || !window.rcpKosmos) return weg();
     var marken = getComputedStyle(document.documentElement);
