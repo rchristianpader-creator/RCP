@@ -1803,8 +1803,23 @@
           g.globalCompositeOperation = "source-over";
           /* GROSS: der weiche Grund aus der Vorlage, die harten Kerzen
              gezeichnet. KLEIN: alles aus der kleinen Vorlage — dort ist
-             eine Kerze zwei Pixel breit und kein Pfad wert. */
-          if (kg > 128 && KERN_GRUND) {
+             eine Kerze zwei Pixel breit und kein Pfad wert.
+
+             DIE GRENZE IN LEINWANDPUNKTEN, nicht in CSS-Punkten. Hier
+             stand schlicht "kg > 128" — und kg zaehlt CSS-Punkte. Bei
+             Pixeldichte 1,5 wurde die 128er Vorlage damit bis auf 192
+             Leinwandpunkte gezogen, auf einem Telefon mit Dichte 3 also
+             bis auf 384 Geraetepunkte. Dreifach hochgerechnet, ueber
+             eine ganze Sekunde des Anflugs — und das ist die Sekunde,
+             in der man nichts anderes ansieht.
+
+             Gefunden habe ich es nicht durch Messen, sondern durch
+             HINSEHEN: meine Zahlen galten dem Hoehepunkt, wo das
+             Zeichen den Schirm fuellt und laengst gezeichnet wird. Im
+             Bild davor sass ein kleines, matschiges Kaestchen. Dieselbe
+             Grenze hatte ich bei den Marken schon richtiggestellt und
+             hier stehen lassen. */
+          if (kg * DPR > FERNGR && KERN_GRUND) {
             g.drawImage(KERN_GRUND, kx - kg / 2, ky - kg / 2, kg, kg);
             g.save();
             g.translate(kx - kg / 2, ky - kg / 2);
