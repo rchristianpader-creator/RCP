@@ -3400,38 +3400,60 @@
     to   { opacity: 1; transform: none; }
   }
 
-  /* Und ein Licht, das mit hinunterlaeuft.
+  /* DAS LICHT DES UEBERGANGS IST EIN RING, KEINE WELLE VON OBEN.
 
-     Es haengt nicht an einem einzelnen Block, sondern faehrt ueber die ganze
-     Seite — dieselbe Bewegung wie im Ladebildschirm, nur andersherum: dort
-     ging das Licht quer, hier laeuft es der Staffel hinterher nach unten.
-     Damit ist der Uebergang eine Bewegung und nicht zwei. */
+     Hier lief eine helle Wellenfront ueber die ganze Seite, von oben nach
+     unten, der Staffel der Karten hinterher. Sie war gut gemeint — der
+     Uebergang sollte EINE Bewegung sein — aber sie kam von nirgendwo: der
+     Auftakt davor endet in der MITTE, im App-Zeichen, und ein Licht, das
+     danach von der oberen Kante herunterfaehrt, hat mit diesem Ende nichts
+     zu tun. Gemeldet als "der Lichtstrahl-Uebergang nicht mehr von oben
+     nach unten, sondern das runde Licht aus der Animation".
+
+     Jetzt geht das Licht dort auf, wo die Reise geendet hat: ein Ring aus
+     der Mitte, der nach aussen laeuft und dabei verglueht — dieselbe
+     Bewegung und dieselbe Farbe wie die Flut im Auftakt (kosmos.js,
+     .kosmosflut). Ein Uebergang, der die Szene davor fortsetzt statt sie
+     abzuloesen.
+
+     Die Karten fahren weiter von unten herein; das ist ihre eigene
+     Bewegung und bleibt. */
   .einzug-licht {
     position: fixed;
-    left: -20%;
-    right: -20%;
-    top: -45%;
-    height: 45%;
+    top: 50%;
+    left: 50%;
+    width: 170%;
+    aspect-ratio: 1;
+    margin: -85% 0 0 -85%;
+    border-radius: 50%;
     z-index: 250;
     pointer-events: none;
-    /* Eine Wellenfront, kein Nebel. Der erste Anlauf lief weich aus und war
-       im Bild kaum zu finden; jetzt steht die Spitze schmal und hell kurz
-       vor der Unterkante, faellt dahinter fast senkrecht ab und zieht einen
-       langen Schweif nach oben. So liest es sich als Kante, die durchs Bild
-       laeuft — und eine Kante sieht man. */
-    background: linear-gradient(180deg,
-      rgba(255, 255, 255, 0) 0%,
-      rgba(255, 255, 255, 0.06) 40%,
-      rgba(255, 255, 255, 0.20) 66%,
-      rgba(255, 255, 255, 0.42) 83%,
-      rgba(226, 240, 255, 0.72) 92%,
-      rgba(226, 240, 255, 0.30) 97%,
+    will-change: transform, opacity;
+    /* Ein RING, keine Scheibe: innen durchsichtig, damit die Liste
+       darunter sofort zu sehen ist, und die Helligkeit sitzt in der
+       laufenden Kante. Eine Kante sieht man, einen Nebel nicht. */
+    background: radial-gradient(closest-side,
+      rgba(255, 255, 255, 0) 46%,
+      rgba(226, 240, 255, 0.30) 64%,
+      rgba(226, 240, 255, 0.62) 74%,
+      rgba(255, 255, 255, 0.22) 84%,
       rgba(255, 255, 255, 0) 100%);
-    animation: einzugLicht 1.15s cubic-bezier(0.42, 0, 0.24, 1) both;
+    /* MIT VERZOEGERUNG, sonst laeuft er im Verborgenen ab. Der Deckel
+       liegt auf Ebene 300, dieses Licht auf 250 — es beginnt also
+       hinter einem noch deckenden Schirm. Die alte Welle von oben hatte
+       dasselbe Problem, nur fiel es weniger auf, weil von ihr ohnehin
+       nur die zweite Haelfte etwas zu sehen war.
+
+       Drei Zehntelsekunden: so lange braucht der Deckel, um weitgehend
+       durchsichtig zu werden. Dann geht der Ring auf — er setzt das
+       Licht fort, mit dem der Auftakt endet, statt darunter zu
+       verpuffen. */
+    animation: einzugLicht 1.05s cubic-bezier(0.32, 0.06, 0.2, 1) 0.3s both;
   }
   @keyframes einzugLicht {
-    from { transform: translate3d(0, 0, 0); }
-    to   { transform: translate3d(0, 330%, 0); }
+    from { transform: scale(0.06); opacity: 0; }
+    18%  { opacity: 1; }
+    to   { transform: scale(1.35); opacity: 0; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -3535,7 +3557,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=181");
+    background-image: url("/kerzen.svg?v=182");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -3549,7 +3571,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=181");
+    background-image: url("/kerzen-blass.svg?v=182");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
