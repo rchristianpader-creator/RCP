@@ -241,6 +241,23 @@
       "animation:kosmosFlut 3.2s cubic-bezier(.22,.7,.2,1) .2s 2 both}",
       "@keyframes kosmosFlut{0%{transform:scale(.12);opacity:0}18%{opacity:1}",
       "100%{transform:scale(1.5);opacity:0}}",
+      /* DER BLITZ ALS EBENE, nicht als Vollbild-Blit.
+
+         Er lag als drawImage auf der Leinwand: eine schirmfuellende
+         additive Fuellung, JEDES Bild, ueber den ganzen Anflug und den
+         Nachlauf — gemessen 1,7 der 8,2 Millisekunden bei der Ankunft.
+         Dieselbe Erkenntnis wie beim Nebel, nur eine Ebene weiter oben:
+         was sich nur in der Helligkeit aendert, gehoert dem Kompositor.
+         Die Deckkraft je Bild zu setzen kostet den Hauptfaden nichts;
+         sie zu MALEN kostet ihn ein volles Bild.
+
+         Der Verlauf ist derselbe wie die alte Vorlage — nur wird jetzt
+         normal darueber geblendet statt additiv addiert. Auf beinahe
+         schwarzem Grund ist das dasselbe Licht. */
+      ".kosmosblitz{position:absolute;inset:-5%;opacity:0;will-change:opacity;",
+      "background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.95) 0%,",
+      "rgba(228,244,238,.6) 10%,rgba(178,220,206,.28) 26%,",
+      "rgba(110,180,160,.07) 55%,rgba(0,0,0,0) 100%)}",
       ".kosmosrand{position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 46%,",
       "rgba(0,0,0,0) 30%,rgba(0,0,0,.3) 62%,rgba(2,4,4,.82) 100%)}",
       ".kosmoskorn{position:absolute;inset:-8%;opacity:.09;will-change:transform;",
@@ -921,7 +938,8 @@
     var oben = document.createElement("div");
     oben.className = "kosmosglas";
     oben.setAttribute("aria-hidden", "true");
-    oben.innerHTML = '<i class="kosmoszug"></i><i class="kosmoskorn"></i><i class="kosmosrand"></i>';
+    oben.innerHTML = '<i class="kosmoszug"></i><i class="kosmosblitz"></i>' +
+      '<i class="kosmoskorn"></i><i class="kosmosrand"></i>';
     huelle.appendChild(oben);
 
     /* Zwei Deckel uebereinander: die Pixeldichte (hoechstens 2, die
@@ -998,24 +1016,6 @@
     }
     var GLAS_FERN = glasBauen(128);
     var GLAS_NAH = null;
-    var BLITZ = glut(256, [
-      [0, "rgba(255,255,255,0.95)"],
-      [0.1, "rgba(228,244,238,0.6)"],
-      [0.26, "rgba(178,220,206,0.28)"],
-      [0.55, "rgba(110,180,160,0.07)"],
-      [1, "rgba(0,0,0,0)"]
-    ]);
-    /* Der Schattenhof: ein weicher dunkler Halo HINTER jeder Scheibe.
-       Er hebt das Glas vom Nebel ab, wie es eine Kompositoerin mit
-       einer Kontaktabdunklung taete — die eine stille Zutat, an der
-       man teures Compositing von uebereinandergelegten Bildern
-       unterscheidet. */
-    var SCHATTEN = glut(256, [
-      [0, "rgba(4,6,6,0.6)"],
-      [0.5, "rgba(4,6,6,0.32)"],
-      [0.78, "rgba(4,6,6,0.1)"],
-      [1, "rgba(0,0,0,0)"]
-    ]);
 
     function messen(erzwungen) {
       var nb = huelle.clientWidth || window.innerWidth;
@@ -1126,7 +1126,17 @@
        Jeder hat Ort, Topf (Farbtemperatur), Grundhelligkeit und sein
        Flimmern; gemalt wird er als Punkt — zum Strich wird er nur, wenn
        seine BILDbewegung schneller ist als die Verschlusszeit. */
-    var ANZ = Math.round(klemm((B * H) / 2000, 110, 260));
+    /* DIE HALBE ZAHL — weil es immer die halbe Zahl war.
+
+       Hier stand die doppelte, und die Sparschaltung halbierte sie.
+       Da diese aber auf JEDEM Geraet griff (sie verglich die Bilddauer
+       mit einer festen Zahl, und die Bilddauer ist auf einem 60-Hz-
+       Schirm immer 16,7 ms), sind nie mehr Sterne gemalt worden als
+       diese Haelfte. Jetzt, wo der Regler misst statt zu schalten, kaeme
+       auf einmal die doppelte Zahl heraus — eine Aenderung, die niemand
+       bestellt hat und die zu bezahlen waere. Also steht hier, was
+       ohnehin zu sehen war. */
+    var ANZ = Math.round(klemm((B * H) / 4000, 55, 130));
     var WELTBREIT = Math.max(B, H) * 2.6;
     var sterne = [];
     for (var i = 0; i < ANZ; i++) {
@@ -1276,7 +1286,7 @@
       V = Math.max(0.2, (zielZ - 70) / flugZeit);
     }
     tempoSetzen();
-    var sparsam = false, messAb = 0, hoefe = true, fenster = [];
+    var sparsam = false, messAb = 0, fenster = [];
     var dichteFenster = [], dichteAb = 0, dichteStufen = 0;
     /* STOCKT ES? — die eine Frage, die beide Regler stellen.
 
@@ -1334,6 +1344,8 @@
        Bilder im Fenster, kuerzeste und mittlere Bilddauer, Urteil. */
     var leiter = [];
     window.rcpKosmosLeiter = leiter;
+    var blitzEbene = oben.querySelector(".kosmosblitz");
+    var blitzStand = -1;
 
     function bild(jetzt) {
       if (!laeuft) return;
@@ -1414,7 +1426,6 @@
           if (stockt(fenster, 0.3)) {
             sparsam = true;
             sterne.length = Math.floor(sterne.length / 2);
-            hoefe = false;
           }
           fenster.length = 0; messAb = t;
         }
@@ -1579,7 +1590,6 @@
       g.globalCompositeOperation = "lighter";
       var punkte = [[], [], [], []];
       var striche = [[], [], [], []];
-      var funken = [];
       for (var si = 0; si < sterne.length; si++) {
         var s = sterne[si];
         var z2 = s.z - fahrt;
@@ -1607,7 +1617,6 @@
           striche[s.topf].push(s.px, s.py, sx2, sy2, hell);
         } else {
           punkte[s.topf].push(sx2, sy2, hell, klemm(f2 * 260, 0.5, 1.9));
-          if (hell > 0.55 && !sparsam) funken.push(sx2, sy2, hell);
         }
         s.px = sx2; s.py = sy2; s.war = true;
       }
@@ -1642,14 +1651,6 @@
           g.fillStyle = "rgba(" + art.farbe + "," + (blenden * (0.16 + stp * 0.16)).toFixed(3) + ")";
           g.fill();
         }
-      }
-      /* Das weiche Glimmen der hellen Punkte — der Unterschied zwischen
-         Pixeln und Sternen. */
-      for (var fu = 0; fu < funken.length; fu += 3) {
-        var fh = funken[fu + 2];
-        g.globalAlpha = blenden * (fh - 0.55) * 0.42;
-        var fgr = 5 + 8 * fh;
-        g.drawImage(GLUT, funken[fu] - fgr / 2, funken[fu + 1] - fgr / 2, fgr, fgr);
       }
       g.globalAlpha = 1;
 
@@ -1774,26 +1775,15 @@
            Wahrheitswert statt eines Bildes. Zwei Dinge, ein Name. */
         if (!kp2.gesehen && (gr > 90 || deck > 0.55)) kp2.gesehen = true;
 
-        /* NUR der Schattenhof — das Glimmen ist weg.
+        /* KEIN SCHATTENHOF MEHR.
 
-           Weich leuchtende Hoefe um jedes Ding sind der sicherste Weg
-           zu "billig": sie verwaschen die Kante, und eine verwaschene
-           Kante liest sich als schlecht freigestellt. Teuer wirkt das
-           Gegenteil — harte Kante, klare Trennung, und die Tiefe kommt
-           aus der KONTAKTABDUNKLUNG hinter dem Ding, nicht aus Licht
-           davor. Das grosse Leuchten hat in dieser Szene genau eine
-           Quelle: das App-Zeichen am Ende. */
-        /* 1,15 statt 1,5: die Flaeche faellt auf 59 Prozent, und der
-           Hof traegt ohnehin nur an der Kante Information — sein
-           Aussenrand ist bei Deckkraft null. Und ab einer Scheibe, die
-           mehr als sechs Zehntel des Schirms fuellt, faellt er ganz
-           weg: dort liegt der ganze Hof hinter der Scheibe. */
-        if (hoefe && gr < Math.min(B, H) * 0.6) {
-          g.globalCompositeOperation = "source-over";
-          g.globalAlpha = deck * 0.7;
-          var sh = gr * 1.15;
-          g.drawImage(SCHATTEN, px3 - sh / 2, py3 - sh / 2, sh, sh);
-        }
+           Hier lag ein weicher dunkler Hof hinter jeder Scheibe — als
+           Kontaktabdunklung gedacht, die das Glas vom Nebel abhebt. Er
+           ist nie zu sehen gewesen: die Sparschaltung schaltete ihn ab,
+           und sie griff auf jedem Geraet. Gemessen kostet er 0,9 der
+           4,0 Millisekunden je Bild der Reise — dreizehn weiche Blits,
+           einer je Marke. Ein Viertel der Rechenzeit fuer eine Zutat,
+           die noch nie jemand gesehen hat, ist kein Handel.
 
         /* DIE MARKE BLEIBT RUND. Hier stand die Muenzdrehung: die
            Breite folgte dem Kosinus eines eigenen Drehwinkels, die
@@ -1860,19 +1850,22 @@
          Moment des Eintauchens deckt er den Schnitt zur Seite. Vorher
          hing er am Abriss-Fortschritt und zuendete auch dann, wenn das
          Zeichen noch weit war — ein Blitz ohne Ursache. */
-      if (abriss > 0) {
+      {
         var naehe = klemm((1150 - (zielZ - fahrt)) / 1050, 0, 1);
         /* Im Nachlauf (abriss > 1) zieht der Blitz weiter an, bis er
            deckt — so hat das Auge bis zum letzten Bild Bewegung, und
            der Uebergang zur Seite ist ein Aufloesen statt eines
            Standbilds. */
-        var hell2 = Math.pow(naehe, 2.4) * 0.9 * (1 + 1.6 * Math.max(0, abriss - 1));
-        if (hell2 > 0.004) {
-          g.globalCompositeOperation = "lighter";
-          g.globalAlpha = hell2 * blenden;
-          var bg = Math.max(B, H) * 1.05;
-          g.drawImage(BLITZ, MX - bg / 2, MY - bg / 2, bg, bg);
-          g.globalAlpha = 1;
+        var hell2 = abriss > 0
+          ? Math.pow(naehe, 2.4) * 0.9 * (1 + 1.6 * Math.max(0, abriss - 1))
+          : 0;
+        var neuBlitz = Math.round(Math.min(1, hell2 * blenden) * 100) / 100;
+        /* Nur schreiben, wenn sich etwas geaendert hat: eine Zuweisung
+           an style loest auch dann Arbeit aus, wenn derselbe Wert
+           daraufsteht. */
+        if (neuBlitz !== blitzStand && blitzEbene) {
+          blitzStand = neuBlitz;
+          blitzEbene.style.opacity = neuBlitz;
         }
       }
 
