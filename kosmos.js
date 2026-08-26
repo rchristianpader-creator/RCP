@@ -44,6 +44,22 @@
      Der Nachlauf ist die Strecke NACH der Ankunft, in der der Blitz
      deckt, waehrend die Seite den Deckel abzieht. */
   var FLUGZEIT = 6200;
+  /* ZWEI AUFLOESUNGEN JE MARKE.
+
+     Die Scheiben wurden bei 96 Pixeln gebacken und im nahen Vorbeiflug
+     auf ueber siebenhundert Geraetepunkte gezogen — achtfach. Kein
+     Bild ueberlebt das; "zu geringe Aufloesung" war schlicht richtig.
+
+     Alle bei 512 zu backen ginge auch nicht: sechzehn Marken waeren
+     siebzehn Megabyte, und das auf einem Telefon, das daneben die App
+     aufbaut. Also zwei Stufen — klein fuer die Ferne, gross fuer die
+     Nahzone —, und die grosse wird erst gebaut, wenn eine Marke wirklich
+     naeher kommt, und wieder freigegeben, wenn sie vorbei ist. Weil die
+     Gasse eine Prozession ist, sind nie mehr als zwei gleichzeitig
+     gross. */
+  var GROSS = 512;      /* die Glasscheibe und die eigenen Marken */
+  var ZEICHENGR = 256;  /* die gezeichneten Zeichen darauf          */
+  var FERNGR = 128;     /* fertige kleine Scheibe fuer die Ferne     */
   var DAUER_BAHN = 4600;   /* nur noch fuer die Vertraege nach aussen    */
   var DAUER_ENDE = 2000;
 
@@ -283,48 +299,86 @@
      passen." Ein Hauch Frost unter der Fuellung, damit Schrift und
      Logo vor dem bewegten Himmel lesbar bleiben — die Rolle, die in
      der App der ruhige Grund uebernimmt. */
+  /* DAS GLAS IST BEI ALLEN GLEICH — also wird es EINMAL gebaut.
+
+     Der erste Anlauf an der Aufloesung buk jede Marke einzeln bei 512
+     Pixeln neu, samt ihrem Glas: Verlaeufe, Boegen, Randlichter, je
+     Marke. Gemessen kostete das bei vierfacher Bremse 10,6 statt 5,8 ms
+     je Bild, und einzelne Bilder bis 65 ms — der Bau fiel jeweils in
+     EIN Bild. Dabei unterscheiden sich die Scheiben gar nicht im Glas,
+     sondern nur im Zeichen darauf.
+
+     Jetzt: eine geteilte Glasscheibe in voller Groesse, und das Zeichen
+     wird beim Malen darueber gesetzt. Zwei Bilder statt einem, aber
+     kein Backen mehr im Flug — und scharf ist beides. */
   function scheibenGrund(x, gr) {
     var m = gr / 2, r = m - gr * 0.03;
     x.save();
     x.beginPath(); x.arc(m, m, r, 0, 6.2832); x.clip();
-    x.fillStyle = "rgba(10,13,12,0.44)";
+    /* Der Grund: dunkel und ruhig. Weniger Frost als vorher — er sass
+       wie Milch vor dem Logo, und ein Zeichen hinter Milch wirkt
+       billig, egal wie scharf es ist. */
+    x.fillStyle = "rgba(10,13,12,0.34)";
     x.fillRect(0, 0, gr, gr);
-    /* Die Werte der App, auf SZENENMASS gedimmt: eine Karte bedeckt in
-       der Liste eine Handflaeche, eine nahe Scheibe hier den halben
-       Schirm — dieselben Weissanteile wirken auf der grossen Flaeche
-       doppelt so hell. Also alle Schichten auf rund siebzig Prozent,
-       damit die WIRKUNG dieselbe ist, nicht die Zahl. */
     var fv = x.createLinearGradient(0, 0, 0, gr);
     fv.addColorStop(0, "rgba(255,255,255,0.07)");
-    fv.addColorStop(1, "rgba(255,255,255,0.05)");
+    fv.addColorStop(1, "rgba(255,255,255,0.04)");
     x.fillStyle = fv;
     x.fillRect(0, 0, gr, gr);
     var sv = x.createLinearGradient(m - r, m - r, m + r * 0.45, m + r * 0.45);
-    sv.addColorStop(0, "rgba(255,255,255,0.15)");
-    sv.addColorStop(0.24, "rgba(255,255,255,0.08)");
-    sv.addColorStop(0.5, "rgba(255,255,255,0.03)");
+    sv.addColorStop(0, "rgba(255,255,255,0.14)");
+    sv.addColorStop(0.24, "rgba(255,255,255,0.07)");
+    sv.addColorStop(0.5, "rgba(255,255,255,0.025)");
     sv.addColorStop(0.72, "rgba(255,255,255,0)");
     x.fillStyle = sv;
     x.fillRect(0, 0, gr, gr);
     x.restore();
-    /* Die Kante faengt Licht: oben hell, unten dunkel — dieselben drei
-       Linien wie --glas-kante, als Bogenstrich. */
-    x.lineWidth = Math.max(1, gr * 0.014);
-    var k = x.createLinearGradient(0, 0, 0, gr);
-    k.addColorStop(0, "rgba(255,255,255,0.22)");
-    k.addColorStop(0.35, "rgba(255,255,255,0.06)");
-    k.addColorStop(1, "rgba(0,0,0,0.3)");
-    x.strokeStyle = k;
-    x.beginPath(); x.arc(m, m, r - x.lineWidth, 0, 6.2832); x.stroke();
-    x.lineWidth = Math.max(1, gr * 0.011);
-    x.strokeStyle = "rgba(255,255,255,0.13)";
-    x.beginPath(); x.arc(m, m, r - x.lineWidth / 2, 0, 6.2832); x.stroke();
+
+    /* DER RAND — hier entscheidet sich "edel". Vorher lagen zwei volle
+       Kreise uebereinander, beide gleich stark rundherum: das liest
+       sich als aufgemalter Ring. Echtes Glas faengt Licht NICHT
+       gleichmaessig — es sammelt es dort, wo die Woelbung zur Quelle
+       zeigt, und laesst den Rest fast dunkel.
+
+       Also: ein sehr feiner Grundrand, ueber den ein kurzer heller
+       BOGEN oben links laeuft und ein zweiter, kuehler und schwaecher,
+       unten rechts als Gegenlicht. Die Staerke haengt an der Groesse
+       (0,006 der Kante), damit die Linie in jeder Aufloesung gleich
+       fein aussieht — eine feste Pixelbreite waere auf der grossen
+       Fassung ein Faden und auf der kleinen ein Balken. */
+    var fein = Math.max(0.75, gr * 0.006);
+    x.lineWidth = fein;
+    x.strokeStyle = "rgba(255,255,255,0.09)";
+    x.beginPath(); x.arc(m, m, r - fein / 2, 0, 6.2832); x.stroke();
+
+    x.lineCap = "round";
+    x.lineWidth = fein * 1.7;
+    var bo = x.createLinearGradient(m - r, m - r, m + r * 0.3, m + r * 0.3);
+    bo.addColorStop(0, "rgba(255,255,255,0)");
+    bo.addColorStop(0.35, "rgba(255,255,255,0.62)");
+    bo.addColorStop(1, "rgba(255,255,255,0)");
+    x.strokeStyle = bo;
+    x.beginPath();
+    x.arc(m, m, r - fein, 3.5343, 5.6549);   /* oben links */
+    x.stroke();
+
+    x.lineWidth = fein * 1.2;
+    var ge = x.createLinearGradient(m + r, m + r, m - r * 0.3, m - r * 0.3);
+    ge.addColorStop(0, "rgba(190,226,216,0)");
+    ge.addColorStop(0.4, "rgba(190,226,216,0.3)");
+    ge.addColorStop(1, "rgba(190,226,216,0)");
+    x.strokeStyle = ge;
+    x.beginPath();
+    x.arc(m, m, r - fein, 0.3927, 2.3562);   /* unten rechts */
+    x.stroke();
+    x.lineCap = "butt";
     return r;
   }
 
+  /* Die Zeichen liegen ab jetzt auf DURCHSICHTIGEM Grund: das Glas
+     kommt beim Malen darunter. */
   function textScheibe(gr, text) {
     var c = tafel(gr, gr), x = c.getContext("2d");
-    scheibenGrund(x, gr);
     /* Schrift wie auf den Karten: 700, in --muted (#9aa5a2) — nicht
        reinweiss, das kennt die App an dieser Stelle nicht. */
     x.fillStyle = "#9aa5a2";
@@ -348,7 +402,6 @@
      der aeusserste Rueckfall (Indizes, Unbekanntes). */
   function barrenScheibe(gr, hell, mitte, dunkel) {
     var c = tafel(gr, gr), x = c.getContext("2d");
-    scheibenGrund(x, gr);
     function barren(mx, my, b, h) {
       var s = b * 0.14;
       x.beginPath();
@@ -381,7 +434,6 @@
   }
   function muenzeBtc(gr) {
     var c = tafel(gr, gr), x = c.getContext("2d");
-    scheibenGrund(x, gr);
     var m = gr / 2, r = gr * 0.3;
     var v = x.createRadialGradient(m - r * 0.4, m - r * 0.5, r * 0.1, m, m, r);
     v.addColorStop(0, "#f9a83b");
@@ -405,7 +457,6 @@
   }
   function rauteEth(gr) {
     var c = tafel(gr, gr), x = c.getContext("2d");
-    scheibenGrund(x, gr);
     var m = gr / 2;
     var o = gr * 0.20, u = gr * 0.80, mitte = gr * 0.52, b = gr * 0.20;
     /* Die Raute: oben zwei Flaechen, unten zwei — die rechte jeweils
@@ -426,7 +477,6 @@
   }
   function tropfenScheibe(gr) {
     var c = tafel(gr, gr), x = c.getContext("2d");
-    scheibenGrund(x, gr);
     var m = gr / 2;
     x.beginPath();
     x.moveTo(m, gr * 0.22);
@@ -451,7 +501,6 @@
   }
   function flammeScheibe(gr) {
     var c = tafel(gr, gr), x = c.getContext("2d");
-    scheibenGrund(x, gr);
     var m = gr / 2;
     function flamme(f, farbe1, farbe2) {
       x.beginPath();
@@ -472,7 +521,6 @@
   }
   function aehreScheibe(gr) {
     var c = tafel(gr, gr), x = c.getContext("2d");
-    scheibenGrund(x, gr);
     var m = gr / 2;
     x.strokeStyle = "#c9a94e";
     x.lineWidth = Math.max(1.5, gr * 0.024);
@@ -521,24 +569,49 @@
     return null;
   }
 
-  function bildScheibe(gr, bild) {
+  /* Ein geladenes Logo wird EINMAL auf eine Leinwand gebrannt, statt
+     bei jedem Bild neu gezeichnet zu werden.
+
+     Der Anlauf davor setzte das <img> direkt in die Szene — in voller
+     eigener Aufloesung, was richtig gedacht war. Nur rastert der
+     Browser ein Bild bei jedem drawImage neu, wenn es skaliert wird,
+     und bei einem SVG ohnehin. Einmal brennen kostet einen Augenblick
+     und spart ihn danach sechzigmal je Sekunde.
+
+     Das Seitenverhaeltnis bleibt, wie es ist — dieselbe Regel, die in
+     der Liste als object-fit: contain steht. Der Grund bleibt
+     durchsichtig: das Glas liegt beim Malen darunter. */
+  /* Die FERNE Fassung: Glas und Zeichen fertig zusammengesetzt, klein.
+
+     In der Ferne ist eine Marke zwanzig Pixel gross — dort zweimal zu
+     malen (Glas, dann Zeichen) kostet doppelt, und zu sehen ist der
+     Unterschied ohnehin nicht. Nah dagegen entscheidet die Schaerfe,
+     und dort werden beide Lagen einzeln in voller Groesse gesetzt.
+
+     Es ist derselbe Gedanke wie bei den Glasstufen, eine Ebene tiefer:
+     Aufwand dorthin, wo das Auge ihn einloest. */
+  function fernScheibe(glas, zeichen, gr) {
     var c = tafel(gr, gr), x = c.getContext("2d");
-    var r = scheibenGrund(x, gr);
-    x.save();
-    x.beginPath(); x.arc(gr / 2, gr / 2, r * 0.99, 0, 6.2832); x.clip();
-    /* Das Seitenverhaeltnis bleibt, wie es ist — dieselbe Regel, die in
-       der Liste als object-fit: contain steht. Ein breites Wortlogo in
-       ein Quadrat gepresst ist sofort als falsch zu erkennen. Und wie in
-       der Liste liegt das Logo AUF dem Glas, ohne zweiten Glanz darueber
-       — die App legt keinen darauf, also legt die Szene auch keinen. */
-    var s = gr * 0.62;
-    var bw = bild.naturalWidth || bild.width || 1;
-    var bh = bild.naturalHeight || bild.height || 1;
-    var f = Math.min(s / bw, s / bh);
-    try { x.drawImage(bild, (gr - bw * f) / 2, (gr - bh * f) / 2, bw * f, bh * f); } catch (e) {}
-    x.restore();
+    x.drawImage(glas, 0, 0, gr, gr);
+    if (zeichen) {
+      var zs = gr * 0.62;
+      var zb = zeichen.naturalWidth || zeichen.width || 1;
+      var zh = zeichen.naturalHeight || zeichen.height || 1;
+      var f = Math.min(zs / zb, zs / zh);
+      try { x.drawImage(zeichen, (gr - zb * f) / 2, (gr - zh * f) / 2, zb * f, zh * f); } catch (e) {}
+    }
     return c;
   }
+
+  function zeichenAusBild(bild, gr) {
+    var c = tafel(gr, gr), x = c.getContext("2d");
+    var bw = bild.naturalWidth || bild.width || 1;
+    var bh = bild.naturalHeight || bild.height || 1;
+    var f = Math.min(gr / bw, gr / bh);
+    try { x.drawImage(bild, (gr - bw * f) / 2, (gr - bh * f) / 2, bw * f, bh * f); } catch (e) {}
+    return c;
+  }
+
 
   /* Die Fetch.ai-Marke, gezeichnet: drei mal drei Felder, Quadrate oben
      links zu Kreisen unten rechts — dieselbe Geometrie wie MARKEN in
@@ -684,6 +757,24 @@
     ]);
     var SPINNE = spinne(160);
     var STREIF = streifen(512, 48, "rgba(150,214,196,0.5)");
+    /* Die Glasscheibe fuer alle Marken — in ZWEI Stufen.
+
+       Eine einzige grosse Vorlage war der naechste Fehler: eine ferne
+       Marke ist zwanzig Pixel gross, und zwanzig Pixel aus einer
+       512er Textur zu filtern kostet mehr, als die ganze Scheibe wert
+       ist. Gemessen sprang die Malzeit dadurch von 1,2 auf 3,5 ms.
+
+       Also dasselbe, was jede Grafikkarte von selbst taete: eine kleine
+       Vorlage fuer die Ferne, eine grosse fuer die Naehe. Es sind zwei
+       Leinwaende fuer ALLE Marken zusammen — der Speicher merkt es
+       nicht, und die Schaerfe bleibt dort, wo man sie sieht. */
+    function glasBauen(gr) {
+      var c = tafel(gr, gr);
+      scheibenGrund(c.getContext("2d"), gr);
+      return c;
+    }
+    var GLAS_FERN = glasBauen(128);
+    var GLAS_NAH = null;
     var BLITZ = glut(256, [
       [0, "rgba(255,255,255,0.95)"],
       [0.1, "rgba(228,244,238,0.6)"],
@@ -741,12 +832,46 @@
       if (kornbild) kornbild.style.backgroundImage = "url(" + KORN.toDataURL() + ")";
     } catch (e) {}
 
-    var KERN = kernScheibe(220, null);
+    /* Der Kern in ZWEI Stufen, aus demselben Grund wie das Glas: die
+       ganze Reise ueber ist er ein Punkt von zwanzig Pixeln, und ihn
+       dort aus einer 512er Vorlage herunterzufiltern kostet mehr als
+       die Ankunft selbst. Erst im Anflug wird die grosse gebraucht —
+       dann aber wirklich, denn dort fuellt er den Schirm. */
+    var KERN_FERN = kernScheibe(128, null);
+    var KERN_NAH = null;
+    var kernBild = null;
     if (wahl.kern) {
       var kb = new Image();
-      kb.onload = function () { KERN = kernScheibe(220, kb); };
+      kb.onload = function () {
+        kernBild = kb;
+        KERN_FERN = kernScheibe(128, kb);
+        if (KERN_NAH) { try { KERN_NAH.width = 0; KERN_NAH.height = 0; } catch (e) {} }
+        KERN_NAH = null;
+      };
       kb.onerror = function () {};
       kb.src = wahl.kern;
+    }
+
+    /* SPAETERE ARBEITEN, eine je Bild.
+
+       Die grossen Vorlagen (Glas, Kern, die eigene Marke) kosten je ein
+       paar Millisekunden — im Konstruktor alle zusammen erzeugten sie
+       genau die Ausreisser von sechzig Millisekunden, die als Ruckler
+       am Anfang zu sehen waren. Gebraucht werden sie erst im Anflug.
+       Also stehen sie in einer Schlange und werden einzeln abgearbeitet,
+       in den ruhigen Bildern der Reise. */
+    var arbeiten = [];
+    var spaeterBereit = false;
+    function spaeter(tun) { arbeiten.push(tun); }
+    function eineArbeit() {
+      if (!spaeterBereit) {
+        spaeterBereit = true;
+        spaeter(function () { GLAS_NAH = glasBauen(GROSS); });
+        spaeter(function () { KERN_NAH = kernScheibe(GROSS, kernBild); });
+      }
+      if (!arbeiten.length || sparsam) return;
+      var a = arbeiten.shift();
+      try { a(); } catch (e) {}
     }
 
     /* ---- DER RAUM ----
@@ -808,8 +933,7 @@
         var e = {
           sym: sym,
           gr0: 168 + ((i * 37) % 5) * 18,
-          bild: sym === "FET-USD" ? fetScheibe(96, wahl.farben)
-                                  : (sinnBild(sym, 96) || textScheibe(96, zeichenFuer(sym) || "?"))
+          zeichen: null, eigen: null
         };
         /* Dieselbe Vorfahrt wie in der Liste: eine EIGENE Adresse geht
            immer vor. Ohne p.logo fragt fuer Krypto und Rohstoffe niemand
@@ -826,6 +950,28 @@
            mehr, was man schon gesehen hat. Die Zeichen-Scheiben (Gold,
            Bitcoin, ...) sind sofort bereit: das Zeichen IST dort die
            echte Darstellung, wie auf den Karten. */
+        /* Das ZEICHEN, nicht die fertige Scheibe: das Glas kommt beim
+           Malen darunter. Fetch.ai bringt ihre eigene volle Scheibe mit
+           (Indigo statt Glas) — sie ist der eine Sonderfall. */
+        /* Die kleine Fassung sofort — sie ist billig und wird als
+           erstes gebraucht. Die grosse steht in der Schlange: sechzehn
+           Zeichen bei 256 Pixeln in EINEM Bild waren die letzten
+           Ausreisser von sechzig Millisekunden. */
+        (function (k, sy) {
+          if (sy === "FET-USD") {
+            k.fern = fetScheibe(FERNGR, wahl.farben);
+            spaeter(function () { k.eigen = fetScheibe(GROSS, wahl.farben); });
+          } else {
+            k.klein = sinnBild(sy, 96) || textScheibe(96, zeichenFuer(sy) || "?");
+            k.fern = fernScheibe(GLAS_FERN, k.klein, FERNGR);
+            spaeter(function () {
+              if (!k.zeichen) {
+                k.zeichen = sinnBild(sy, ZEICHENGR) ||
+                  textScheibe(ZEICHENGR, zeichenFuer(sy) || "?");
+              }
+            });
+          }
+        })(e, sym);
         e.bereit = true;
         if (p.logo || (sym && !ohneLogo(sym))) {
           e.bereit = false;
@@ -835,7 +981,10 @@
           (function (k, quelle) {
             var b = new Image();
             b.onload = function () {
-              if (!k.gross) k.bild = bildScheibe(96, b);
+              k.zeichen = zeichenAusBild(b, ZEICHENGR);
+              if (k.fern) { try { k.fern.width = 0; k.fern.height = 0; } catch (e) {} }
+              k.fern = fernScheibe(GLAS_FERN, k.zeichen, FERNGR);
+              k.eigen = null;
               k.bereit = true;
               window.rcpKosmosLogos.geladen++;
             };
@@ -981,6 +1130,7 @@
       /* "abriss" ist kein Zeitabschnitt mehr, sondern die NAEHE zum
          Ziel: er steuert nur noch, wie hell es blitzt und wie schnell
          sich die Scheiben drehen — nicht mehr die Fahrt. */
+      eineArbeit();
       var abriss = klemm((1400 - (zielZ - fahrt)) / 1330, 0, 1) +
         (angekommen ? klemm((t - angekommen) / 700, 0, 0.45) : 0);
       var blenden = glatt(0, 500, t);
@@ -1036,6 +1186,14 @@
          DURCHSICHTIG; was darunter liegt, scheint hindurch. */
       g.setTransform(DPR, 0, 0, DPR, 0, 0);
       g.clearRect(0, 0, B, H);
+      /* Die Filterqualitaet beim Skalieren. Der Browser rechnet
+         standardmaessig aufwendig (mehrere Zwischenstufen) — bei einer
+         Szene, die sich bewegt und Korn ueber sich hat, ist der
+         Unterschied nicht zu sehen, die Rechnung aber schon. Seit die
+         Vorlagen in passenden Stufen vorliegen, wird ohnehin kaum noch
+         gestreckt; teuer war gerade das Herunterfiltern aus grossen
+         Texturen. */
+      g.imageSmoothingQuality = "low";
 
       /* ---- Die Sterne ---- */
       g.globalCompositeOperation = "lighter";
@@ -1171,7 +1329,8 @@
         if (kg > 14) {
           g.globalAlpha = kd;
           g.globalCompositeOperation = "source-over";
-          g.drawImage(KERN, kx - kg / 2, ky - kg / 2, kg, kg);
+          g.drawImage((kg > 150 && KERN_NAH && !sparsam) ? KERN_NAH : KERN_FERN,
+            kx - kg / 2, ky - kg / 2, kg, kg);
           if (kg < GRENZE * 0.55) {
             g.globalCompositeOperation = "lighter";
             g.globalAlpha = kd * 0.32;
@@ -1204,10 +1363,14 @@
         var deck = blenden * Math.pow(fern, 0.85) * nah * glatt(kp2.auf, kp2.auf + 320, t);
         if (deck <= 0.01) continue;
         if (gr > maxGemalt && deck > 0.2) maxGemalt = gr;
-        /* GROSS heisst: ab jetzt sieht man einen Bildtausch. Ein Logo,
+        /* GESEHEN heisst: ab jetzt saehe man einen Bildtausch. Ein Logo,
            das frueher eintrifft — die Scheibe noch klein und matt im
-           Nebel —, darf lautlos einwechseln; danach nie mehr. */
-        if (!kp2.gross && (gr > 90 || deck > 0.55)) kp2.gross = true;
+           Nebel —, darf lautlos einwechseln; danach nie mehr.
+
+           Der Merker hiess einmal "gross" — und seit "gross" die grosse
+           Scheibe ist, setzte er sie auf true und drawImage bekam einen
+           Wahrheitswert statt eines Bildes. Zwei Dinge, ein Name. */
+        if (!kp2.gesehen && (gr > 90 || deck > 0.55)) kp2.gesehen = true;
 
         /* NUR der Schattenhof — das Glimmen ist weg.
 
@@ -1251,7 +1414,29 @@
         var malBreit = gr, malHoch = gr;
         g.globalAlpha = deck;
         g.globalCompositeOperation = "source-over";
-        g.drawImage(kp2.bild, px3 - malBreit / 2, py3 - malHoch / 2, malBreit, malHoch);
+        if ((gr <= 150 || sparsam || !GLAS_NAH || (!kp2.zeichen && !kp2.eigen)) && kp2.fern) {
+          /* FERN: eine fertige Scheibe, ein Malbefehl. */
+          g.drawImage(kp2.fern, px3 - malBreit / 2, py3 - malHoch / 2, malBreit, malHoch);
+        } else if (kp2.eigen && !sparsam) {
+          /* Eine eigene volle Scheibe (Fetch.ai). */
+          g.drawImage(kp2.eigen, px3 - malBreit / 2, py3 - malHoch / 2, malBreit, malHoch);
+        } else {
+          /* Erst das geteilte Glas, dann das Zeichen darauf — mit
+             demselben Seitenverhaeltnis wie in der Liste (dort steht
+             dafuer object-fit: contain). Ein breites Wortlogo in ein
+             Quadrat gepresst ist sofort als falsch zu erkennen. */
+          g.drawImage(GLAS_NAH, px3 - malBreit / 2, py3 - malHoch / 2, malBreit, malHoch);
+          var zn = kp2.zeichen;
+          if (zn) {
+            var zs = gr * 0.62;
+            var zb = zn.naturalWidth || zn.width || 1;
+            var zh = zn.naturalHeight || zn.height || 1;
+            var zf = Math.min(zs / zb, zs / zh);
+            try {
+              g.drawImage(zn, px3 - zb * zf / 2, py3 - zh * zf / 2, zb * zf, zh * zf);
+            } catch (e) {}
+          }
+        }
         g.globalAlpha = 1;
         if (malHoch > 0) {
           var vh = malBreit / malHoch;
