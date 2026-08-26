@@ -1136,7 +1136,6 @@
        Drift und eine traege Rolle: eine Kamera, die haargenau auf der
        Achse klebt, sieht nach Werkzeug aus, nicht nach Hand. */
     var fahrt = 0, driftX = 0, driftY = 0;
-    var markeDa = 0;
     /* Die eine Geschwindigkeit. Sie steht fest, sobald die Gasse steht:
        die ganze Strecke geteilt durch die Zeit, die der Flug dauern
        soll. eile ist der Tipp des Ungeduldigen — die EINZIGE Stelle,
@@ -1271,18 +1270,6 @@
          darum nicht mehr die Fahrt, sondern nur noch den Weg, der noch
          vor ihr liegt — geschnitten wird nichts. */
       fahrt += V * eile * dt;
-
-      /* Der Schriftzug haengt an der NAEHE zum Zeichen, nicht mehr an
-         einem Abschnitt der Uhr: er tritt zu, wenn das Zeichen gross
-         genug steht, und geht, wenn man hineinfaehrt. */
-      var zielAb = zielZ - fahrt;
-      /* Zu, solange das Zeichen weit ist (ueber 2100), auf, sobald es
-         nah steht (unter 1500), und wieder zu, wenn man hineinfaehrt
-         (unter 330). glatt() steigt IMMER von a nach b — fuer ein
-         Zunehmen bei ABNEHMENDEM Abstand muss der Wert also abgezogen
-         werden. Andersherum stand der Name die ganze Reise ueber im
-         Bild, vom ersten Augenblick an. */
-      markeDa = (1 - glatt(1500, 2100, zielAb)) * glatt(150, 330, zielAb);
 
       driftX += 0.010 * glatt(500, 2200, t) * (1 - abriss) * dt;
       driftY -= 0.006 * glatt(500, 2200, t) * (1 - abriss) * dt;
@@ -1562,31 +1549,11 @@
       }
       if (kernDran) kernMalen();
 
-      /* ---- DER SCHRIFTZUG ----
-
-         Die kosmische Fassung blendete .auftakt-mitte aus — und damit
-         verschwand der Name der App spurlos. Ein Auftritt ohne Namen
-         ist Dekoration; ein Markenauftritt endet mit dem Wort. Er
-         steht unter dem Zeichen, in der Schrift des Ladebildschirms
-         (700, -0,4 px Laufweite), tritt im Halt zu und faehrt beim
-         Eintauchen mit dem Zeichen aus dem Bild. */
-      if (markeDa > 0.004) {
-        var kfM = F / Math.max(120, zielZ - fahrt);
-        var kgM = klemm(300 * kfM, 8, Math.max(B, H) * 1.15);
-        var schrift = klemm(Math.min(B, H) * 0.068, 15, 34);
-        var linie = MY + kgM * 0.5 + schrift * 1.55;
-        var mit = klemm(1 - markeDa, 0, 1);
-        g.globalCompositeOperation = "source-over";
-        g.globalAlpha = markeDa;
-        g.textAlign = "center";
-        g.textBaseline = "middle";
-        try { g.letterSpacing = "-0.4px"; } catch (e) {}
-        g.font = "700 " + Math.round(schrift) + "px -apple-system, 'Segoe UI', Roboto, sans-serif";
-        g.fillStyle = "#ffffff";
-        g.fillText("Aktien-Liste", MX, linie + mit * 10);
-        try { g.letterSpacing = "0px"; } catch (e) {}
-        g.globalAlpha = 1;
-      }
+      /* HIER STAND DER SCHRIFTZUG. "Aktien-Liste" trat am Ende unter
+         das Zeichen — meine Zutat, nicht die Bestellung, und
+         ausdruecklich nicht gewollt. Er ist ersatzlos fort: die Szene
+         endet im Zeichen, und das Zeichen spricht fuer sich. Der Name
+         steht ohnehin ueberall in der App, gleich darunter. */
 
       /* Der Blitz der Ankunft — er kommt aus der NAEHE, nicht aus der
          Uhr: je dichter die Kamera am Zeichen, desto heller, und im
