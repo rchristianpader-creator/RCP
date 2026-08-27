@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="dark">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#0a0d0c">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=189">
-<link rel="apple-touch-icon" href="/icon-180.png?v=189">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=190">
+<link rel="apple-touch-icon" href="/icon-180.png?v=190">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -34,17 +34,29 @@
      bevor irgendetwas zu sehen ist.
 
      Die Szenendatei wird gleich mitbestellt: sie ist damit unterwegs,
-     waehrend der Rest des Dokuments noch gelesen wird. */
+     waehrend der Rest des Dokuments noch gelesen wird.
+
+     UND ZWAR FUER ALLE. Bis hierher hing der Kosmos am Vermerk
+     "rcp:chef" — nur die Verwaltung sah ihn. Das war Vorsicht, keine
+     Absicht: eine Szene, die dreizehn Marken durch eine Gasse fliegt,
+     durfte nicht ungeprueft auf fremde Geraete. Geprueft ist sie
+     inzwischen — sie misst am laufenden Bild, ob das Geraet mitkommt,
+     und nimmt die Dichte selbst zurueck, wenn nicht; die Bilanz jedes
+     Laufs steht in der Verwaltung.
+
+     Ein einziger Grund haelt sie noch zurueck, und der kommt vom
+     Menschen, nicht von der Maschine: wer am Geraet eingestellt hat,
+     dass er wenig Bewegung will, bekommt weiter die ruhige Scheibe.
+     Faellt die Datei aus, ebenso — der alte Auftakt steht darunter und
+     traegt den Start allein. */
   (function () {
-    var kosmisch = false;
-    try { kosmisch = localStorage.getItem("rcp:chef") === "1"; } catch (e) {}
-    if (kosmisch && window.matchMedia &&
-        window.matchMedia("(prefers-reduced-motion: reduce)").matches) kosmisch = false;
+    var kosmisch = !(window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches);
     window.rcpKosmisch = kosmisch;
     if (!kosmisch) return;
     document.documentElement.className += " kosmisch";
     var d = document.createElement("script");
-    d.src = "/kosmos.js?v=189";
+    d.src = "/kosmos.js?v=190";
     d.onerror = function () {
       window.rcpKosmisch = false;
       document.documentElement.className =
@@ -58,7 +70,7 @@
      zuerst und geht einmal je Stand ueber die Leitung, waehrend dieses
      Dokument bei jedem Start neu geholt wird. Weit vorn im Kopf, damit kein
      Skript darunter auf Masse zugreift, die es noch nicht gibt. -->
-<link rel="stylesheet" href="/stil.css?v=189">
+<link rel="stylesheet" href="/stil.css?v=190">
 <style>
 /* Ein Netz unter der Teilung.
 
@@ -87,14 +99,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=189">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=190">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=189">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=190">
 
 <script>
 /* Im Browser oder als App?
@@ -248,7 +260,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=189" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=190" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -375,7 +387,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=189" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=190" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -423,7 +435,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=189" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=190" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -442,7 +454,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=189" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=190" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -559,7 +571,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=189" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=190" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -1409,7 +1421,7 @@
     var geladen = !!window.rcpStern, gescheitert = false;
     if (!geladen) {
       var datei = document.createElement("script");
-      datei.src = "/stern.js?v=189";
+      datei.src = "/stern.js?v=190";
       datei.onload = function () { geladen = true; };
       datei.onerror = function () { gescheitert = true; };
       document.head.appendChild(datei);
@@ -3066,14 +3078,19 @@ if ("serviceWorker" in navigator) {
   var MINDESTENS = 4000;
   var HOECHSTENS = 5200;
 
-  /* DER KOSMOS STATT DER SCHEIBE — nur fuer die Verwaltung.
+  /* DER KOSMOS STATT DER SCHEIBE — fuer alle.
 
-     Traegt der letzte Kontoabruf den Vermerk, wird derselbe Ladebildschirm
-     zur Buehne fuer kosmos.js: alle Marken der Liste kreisen um den Kern,
-     bis der Deckel abgeht. Der ganze uebrige Fahrplan — die vier Sekunden,
-     die drei Schritte, der Einzug — bleibt unangetastet: die Szene ist
-     Anstrich auf demselben Geruest, kein zweiter Ablauf. Fuer alle anderen
-     aendert sich kein Bild.
+     Derselbe Ladebildschirm wird zur Buehne fuer kosmos.js: alle Marken
+     der Liste ziehen durch die Gasse, bis der Deckel abgeht. Der ganze
+     uebrige Fahrplan — die vier Sekunden, die drei Schritte, der Einzug —
+     bleibt unangetastet: die Szene ist Anstrich auf demselben Geruest,
+     kein zweiter Ablauf. Wer wenig Bewegung will, sieht weiter die
+     Scheibe; darueber ist im Kopf entschieden worden.
+
+     Auch die leere Liste ist ein gueltiger Fall — und seit der Kosmos
+     allen gehoert, ein haeufiger: ein frisch angelegtes Konto hat noch
+     keine Marke. Die Gasse steht dann leer, der Flug dauert gleich lang
+     und endet gleich, nur zieht nichts vorbei.
 
      Die Bahn bekommt kein eigenes Ende (bahn: riesig): WANN abgerissen
      wird, entscheidet schluss() — der Fahrplan gehoert dem Ladebildschirm,
@@ -3086,8 +3103,38 @@ if ("serviceWorker" in navigator) {
      nach der Wurzel, aber von aussen (Pruefreihen, spaetere Regeln)
      will man sie auch am Kasten sehen. */
   var kosmisch = !!window.rcpKosmisch;
+  /* ZURUECK ZUM GLAS. Ein Weg, zwei Anlaesse: die Szenendatei kommt gar
+     nicht an, oder sie kommt zu spaet. Beide Male traegt der alte
+     Auftakt den Start allein — dafuer steht er noch da. */
+  function zurueckZumGlas() {
+    kosmisch = false;
+    window.rcpKosmisch = false;
+    kasten.classList.remove("kosmisch");
+    document.documentElement.className =
+      document.documentElement.className.replace(/\bkosmisch\b/g, "");
+  }
   if (kosmisch) {
     kasten.classList.add("kosmisch");
+    /* DIE FRIST — gemessen, nicht geschaetzt.
+
+       Seit der Kosmos allen gehoert, liegt seine Datei bei JEDEM Start
+       auf dem Hauptweg, und beim ersten Start eines Geraets ist der
+       Speicher leer. Die Szene faengt an zu fliegen, wenn die Datei da
+       ist, und fliegt von da an ihre 4,4 Sekunden. Kommt die Datei spaet,
+       addiert sich beides. Gemessen auf dem Prueftisch (unkomprimiert,
+       also der schlechtere Fall): bei Mobilfunk stand der Ladebildschirm
+       so 8,0 Sekunden, bei einer richtig schlechten Leitung 16,3 — nach
+       einer Runde, in der es ausdruecklich um seine Laenge ging.
+
+       Also eine Frist. Ist die Datei bis dahin nicht geflogen, fliegt sie
+       gar nicht: das Glas uebernimmt, und der Start dauert so lange wie
+       immer. Wer eine gute Leitung hat, merkt davon nichts — dort ist die
+       Datei nach Zehnteln da —, und ab dem zweiten Start liegt sie
+       ohnehin im Vorrat des Service Workers.
+
+       Die Zahl: 1,4 Sekunden. Darueber wuerde der Ladebildschirm die sechs
+       Sekunden reissen, und genau davon kam die Beschwerde. */
+    var FRIST = 1400;
     var bauen = function () {
       /* KEIN Abbruch, wenn fertig schon gefallen ist. fertig faellt, sobald
          alle drei Schritte geladen sind — auf einem schnellen Geraet mit
@@ -3096,6 +3143,7 @@ if ("serviceWorker" in navigator) {
          Abbruch stand hier: Klasse gesetzt, Scheibe versteckt, keine
          Szene — Schwarzbild auf den schnellsten Geraeten. */
       if (szene || !window.rcpKosmos || !kasten.parentNode) return;
+      if (Date.now() - begonnen > FRIST) { zurueckZumGlas(); return; }
       var marken = getComputedStyle(document.documentElement);
       szene = window.rcpKosmos(kasten, {
         /* Kein "kern" mehr: das App-Zeichen wird in der Szene
@@ -3118,9 +3166,13 @@ if ("serviceWorker" in navigator) {
     if (window.rcpKosmos) bauen();
     else if (window.rcpKosmosDatei) {
       window.rcpKosmosDatei.addEventListener("load", bauen);
-      window.rcpKosmosDatei.addEventListener("error", function () {
-        kasten.classList.remove("kosmisch");
-      });
+      window.rcpKosmosDatei.addEventListener("error", zurueckZumGlas);
+      /* Die Frist braucht eine eigene Uhr. Die Pruefung in bauen() allein
+         greift erst, wenn die Datei ANKOMMT — bei einer wirklich lahmen
+         Leitung also nach acht Sekunden, und bis dahin stuende der Schirm
+         schwarz: die Klasse haelt das Glas versteckt, und niemand haette
+         sie abgeraeumt. Deshalb wird zur Frist selbst umgeschaltet. */
+      setTimeout(function () { if (!szene) zurueckZumGlas(); }, FRIST + 20);
     }
     document.addEventListener("rcp:karten", function (e) {
       if (szene && Array.isArray(e.detail)) szene.planeten(e.detail);
@@ -3336,7 +3388,6 @@ if ("serviceWorker" in navigator) {
   }
 
   function abmelden() {
-    try { localStorage.removeItem("rcp:chef"); } catch (e) {}
     fetch(API + "?tat=abmelden", { method: "POST", credentials: "same-origin" })
       .catch(function () {})
       .then(function () {
@@ -3400,14 +3451,11 @@ if ("serviceWorker" in navigator) {
         }
 
         knopfSetzen(a);
-        /* Der Vermerk fuer den kosmischen Auftakt. Der Ladebildschirm
-           steht, BEVOR irgendeine Antwort da sein kann — welche Fassung er
-           zeigt, muss er also aus dem letzten Besuch wissen. Beim
-           allerersten Start nach der Anmeldung gibt es den Vermerk noch
-           nicht, und die Verwaltung sieht einmal den alten Auftakt; ab dem
-           zweiten Start den Kosmos. Rein kosmetisch — was die Verwaltung
-           SIEHT, entscheidet weiter der Server. */
-        try { localStorage.setItem("rcp:chef", a.chef ? "1" : "0"); } catch (e) {}
+        /* Hier stand der Vermerk "rcp:chef" — der Merkzettel, an dem der
+           Ladebildschirm erkannte, ob er den Kosmos zeigen darf. Er wird
+           nicht mehr gelesen: der Kosmos ist fuer alle da und braucht
+           keine Erlaubnis mehr aus dem letzten Besuch. Was die Verwaltung
+           SIEHT, entscheidet ohnehin der Server, nie dieser Zettel. */
         if (!erstesMal) return;
 
         // Der Auftakt zeigt den Namen, sobald er bekannt ist
@@ -3470,7 +3518,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=189";
+      i.src = "/icon-512.png?v=190";
     });
     return symbolBild;
   }
