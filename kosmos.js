@@ -1289,8 +1289,29 @@
          GANZE SCHRITTE: greift der Deckel, wird auf den naechsten
          glatten Teiler der Geraetedichte gerundet, nicht auf einen
          krummen Zwischenwert. */
-      var deckel = Math.sqrt(3300000 / (B * H));
-      if (DPR > deckel) DPR = Math.max(0.5, glatteStufe(deckel));
+      /* 4,3 Millionen — und mit Spielraum.
+
+         Der Deckel stand auf 3,3 Millionen. Ein iPhone mit 440 mal 894
+         Punkten braucht bei voller Dichte 3,54 Millionen: SIEBEN PROZENT
+         zu viel. Und weil danach auf die naechste glatte Stufe gerundet
+         wird, fiel die Dichte nicht auf 2,9, sondern gleich auf 1,5 —
+         ein Zehntel zu viel Flaeche kostete die halbe Aufloesung.
+
+         Genau das stand in der Bilanz des Geraets: "Schirm 440x894 bei
+         Pixeldichte 3, gemalt mit 1.5". Mein Prueftisch misst 390 mal
+         844 und liegt mit 3,17 knapp UEBER dem Deckel — dort greift er
+         nie. Deshalb konnte ich die Unschaerfe hier nicht erzeugen, so
+         oft ich auch gesucht habe.
+
+         Zwei Aenderungen: der Deckel steigt auf 4,3 Millionen, sodass
+         ein Telefon in voller Dichte durchgeht. Und er wird ignoriert,
+         wenn er ohnehin dicht an der Geraetedichte liegt — eine Kante,
+         an der ein Zehntel Flaeche die halbe Aufloesung kostet, ist
+         keine Regel, sondern eine Falle. */
+      var deckel = Math.sqrt(4300000 / (B * H));
+      if (DPR > deckel && deckel < geraeteDichte * 0.92) {
+        DPR = Math.max(0.5, glatteStufe(deckel));
+      }
       leinwand.width = Math.round(B * DPR);
       leinwand.height = Math.round(H * DPR);
       leinwand.style.width = B + "px";

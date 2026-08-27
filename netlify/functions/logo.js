@@ -61,9 +61,28 @@ const OHNE_LOGO = /^(\^|GC=F|SI=F|CL=F|HG=F|NG=F|ZC=F|.*-USD$)/i;
    Und ein Kuerzel wie BRK-B oder SAP.DE schreibt jede Quelle anders. Statt
    zu raten, wird beides versucht: wie es ankommt und auf den Teil vor dem
    Trennzeichen gekuerzt. */
+/* DIE GROSSE QUELLE ZUERST.
+
+   Hier stand financialmodelingprep an erster Stelle. Die Quelle kennt
+   keine Groessenangabe und liefert rund hundert bis hundertachtundzwanzig
+   Punkte — und weil sie ZUERST gefragt wird, gewinnt sie fast immer.
+   Parqet, das size=512 versteht, kam nur zum Zug, wenn die erste nichts
+   hatte.
+
+   Aufgefallen ist das erst, als die Szene aufschrieb, wie gross die
+   Logos wirklich ankommen: "Logos 100 … 128 Punkte" auf dem Telefon,
+   waehrend mein Prueftisch 512 lieferte. Ein Prueftisch, dessen Bilder
+   groesser sind als die echten, kann diese Unschaerfe nicht zeigen —
+   und genau deshalb habe ich sie viermal woanders gesucht.
+
+   Im Flug wird eine Marke bis zu achthundert Geraetepunkte gross. Aus
+   128 Punkten ist das sechsfach hochgerechnet; aus 512 anderthalbfach.
+   Also erst die Quelle mit Groessenangabe, dann die anderen als
+   Rueckfall. Die Liste bekommt dieselben Bilder — dort sind sie dreissig
+   Punkte gross, da schadet mehr Aufloesung nicht. */
 const QUELLEN = [
-  (s) => "https://financialmodelingprep.com/image-stock/" + encodeURIComponent(s) + ".png",
   (s) => "https://assets.parqet.com/logos/symbol/" + encodeURIComponent(s) + "?format=png&size=512",
+  (s) => "https://financialmodelingprep.com/image-stock/" + encodeURIComponent(s) + ".png",
   (s) => "https://eodhd.com/img/logos/US/" + encodeURIComponent(s) + ".png"
 ];
 
