@@ -37,6 +37,21 @@ const FRISCH = 28 * 24 * 60 * 60 * 1000;
    vorbei war. */
 const FRISCH_LEER = 6 * 60 * 60 * 1000;
 const HOECHSTENS = 512 * 1024;
+/* DER STAND DER QUELLENKETTE.
+
+   Ein Logo liegt vier Wochen im Vorrat. Aendert sich die REIHENFOLGE der
+   Quellen, aendert das am Vorrat gar nichts — er liefert weiter das alte
+   Bild, und die Aenderung wirkt erst, wenn die vier Wochen um sind.
+
+   Genau das ist passiert: die Quelle mit Groessenangabe stand ab v187
+   vorn, und die Bilanz des Geraets meldete unveraendert "Logos 100 …
+   128 Punkte". Nicht weil die Umstellung falsch war, sondern weil sie
+   niemanden erreichte.
+
+   Diese Zahl wird bei jedem Eintrag mitgeschrieben. Passt sie nicht mehr,
+   gilt der Eintrag als alt und wird neu geholt — einmal je Symbol. Wer
+   die Kette aendert, zaehlt hier hoch. */
+const QUELLENSTAND = 2;
 const TYPEN = ["image/png", "image/svg+xml", "image/webp", "image/jpeg"];
 
 /* Rohstoffe und Indizes haben kein Firmenlogo, und danach zu suchen ist
@@ -47,10 +62,11 @@ const OHNE_LOGO = /^(\^|GC=F|SI=F|CL=F|HG=F|NG=F|ZC=F|.*-USD$)/i;
 /* Von fein nach grob. Jede Quelle bekommt das Kuerzel, wie Yahoo es
    schreibt, und darf daraus machen, was sie braucht.
 
-   Financial Modeling Prep steht jetzt vorn. Zwei Gruende: die Adresse ist
-   nach dem Kuerzel benannt, so wie Yahoo es schreibt — also genau das, was
-   hier ankommt — und es ist dieselbe Stelle, von der die Seite ohnehin ihre
-   Kurse holt. Was dort ein Kuerzel ist, ist dort auch ein Bild.
+   Financial Modeling Prep stand einmal vorn — die Adresse ist nach dem
+   Kuerzel benannt, so wie Yahoo es schreibt, und es ist dieselbe Stelle,
+   von der die Seite ihre Kurse holt. Das Argument stimmt fuer die
+   Trefferquote und uebersieht die Groesse: die Quelle kennt keine
+   Groessenangabe. Siehe unten.
 
    companiesmarketcap ist rausgeflogen. Die Seite benennt ihre Bilder nach
    dem Firmennamen, nicht nach dem Kuerzel — .../128/AAPL.png hat also nie
@@ -112,7 +128,7 @@ export default async (request) => {
 
   const speicher = laden();
   const alt = await gespeichert(speicher, sym);
-  if (alt) {
+  if (alt && alt.quellen === QUELLENSTAND) {
     const frist = alt.leer ? FRISCH_LEER : FRISCH;
     if (Date.now() - alt.stand < frist) {
       return alt.leer ? leer(404, FRISCH_LEER) : bild(alt, FRISCH);
@@ -124,9 +140,10 @@ export default async (request) => {
     /* Lieber ein altes Logo als keins: nur wenn noch nie eins da war,
        wird das Fehlen gemerkt. */
     if (alt && !alt.leer) return bild(alt, FRISCH_LEER);
-    await merken(speicher, sym, { leer: true, stand: Date.now() });
+    await merken(speicher, sym, { leer: true, stand: Date.now(), quellen: QUELLENSTAND });
     return leer(404, FRISCH_LEER);
   }
+  frisch.quellen = QUELLENSTAND;
   await merken(speicher, sym, frisch);
   return bild(frisch, FRISCH);
 };
@@ -183,6 +200,56 @@ async function holenMitRueckfall(sym) {
    mehr, sondern eine Liste.
 
    Nichts Geheimes darin — es sind oeffentliche Adressen ohne Schluessel. */
+/* WIE VIELE PUNKTE HAT DIESES BILD?
+
+   Die Bytezahl sagt es nicht: ein gut gepacktes Bild mit 512 Punkten
+   kann kleiner sein als ein schlecht gepacktes mit 128. Und genau die
+   Punktzahl ist die Frage, seit die Bilanz des Geraets "Logos 100 …
+   128 Punkte" meldete — im Flug wird eine Marke bis zu achthundert
+   Geraetepunkte gross.
+
+   Gelesen wird aus dem Kopf der Datei, ohne sie zu entpacken: PNG hat
+   Breite und Hoehe an fester Stelle, JPEG in einem seiner Abschnitte,
+   WEBP im Kopf, und SVG traegt sie als Text. */
+function masse(roh, typ) {
+  try {
+    if (roh.length > 24 && roh[0] === 0x89 && roh[1] === 0x50) {
+      const w = (roh[16] << 24) | (roh[17] << 16) | (roh[18] << 8) | roh[19];
+      const h = (roh[20] << 24) | (roh[21] << 16) | (roh[22] << 8) | roh[23];
+      return w + "x" + h;
+    }
+    if (roh.length > 30 && roh[0] === 0x52 && roh[1] === 0x49 && roh[8] === 0x57) {
+      /* WEBP, einfache Form (VP8X oder VP8 ) */
+      if (roh[12] === 0x56 && roh[13] === 0x50 && roh[14] === 0x38 && roh[15] === 0x58) {
+        const w = 1 + (roh[24] | (roh[25] << 8) | (roh[26] << 16));
+        const h = 1 + (roh[27] | (roh[28] << 8) | (roh[29] << 16));
+        return w + "x" + h;
+      }
+      return "webp";
+    }
+    if (roh.length > 4 && roh[0] === 0xff && roh[1] === 0xd8) {
+      let i = 2;
+      while (i + 9 < roh.length) {
+        if (roh[i] !== 0xff) { i++; continue; }
+        const m = roh[i + 1];
+        if (m >= 0xc0 && m <= 0xcf && m !== 0xc4 && m !== 0xc8 && m !== 0xcc) {
+          return ((roh[i + 7] << 8) | roh[i + 8]) + "x" + ((roh[i + 5] << 8) | roh[i + 6]);
+        }
+        i += 2 + ((roh[i + 2] << 8) | roh[i + 3]);
+      }
+      return "jpeg";
+    }
+    if (typ === "image/svg+xml") {
+      const txt = new TextDecoder().decode(roh.slice(0, 900));
+      const w = /width="(\d+)/.exec(txt), h = /height="(\d+)/.exec(txt);
+      if (w && h) return w[1] + "x" + h[1];
+      const vb = /viewBox="[\d.\s-]*?([\d.]+)\s+([\d.]+)"/.exec(txt);
+      return vb ? Math.round(+vb[1]) + "x" + Math.round(+vb[2]) + " (viewBox)" : "svg";
+    }
+  } catch (e) {}
+  return "unbekannt";
+}
+
 async function pruefen(sym) {
   const zeilen = [];
   for (const schreibweise of schreibweisen(sym)) {
@@ -198,6 +265,7 @@ async function pruefen(sym) {
         z.typ = (res.headers.get("content-type") || "").split(";")[0].trim().toLowerCase();
         const roh = new Uint8Array(await res.arrayBuffer());
         z.groesse = roh.length;
+        z.punkte = masse(roh, z.typ);
         if (!res.ok) z.urteil = "Status nicht ok";
         else if (TYPEN.indexOf(z.typ) < 0) z.urteil = "kein Bildtyp, den wir nehmen";
         else if (roh.length < 120) z.urteil = "zu klein, vermutlich Platzhalter";
