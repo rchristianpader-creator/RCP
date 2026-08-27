@@ -1082,11 +1082,29 @@
 
      Also: der Grund samt Schein und Rand einmal gebacken, die vier
      Kerzen je Bild gezeichnet. Sie bedecken ein Siebtel der Flaeche. */
-  function kernGrund(x, gr) {
+  /* DER KERN IN ZWEI TEILEN — weich und hart, und die trennt man.
+
+     Am Hoehepunkt wird das Glas des App-Zeichens auf rund 2070
+     Geraetepunkte gezogen, aus einer Vorlage von 512: vierfach. Es ist
+     das groesste Ding auf dem Schirm im letzten Augenblick, in dem man
+     sonst nichts ansieht.
+
+     Der erste Anlauf hat DEN GANZEN Kern je Bild gezeichnet — scharf,
+     aber gemessen 4,0 auf 5,0 Prozent verpasste Takte. Zwei Fuellungen
+     ueber den ganzen Schirm kosten das, mit oder ohne Schere (ohne
+     Schere gemessen 5,3 — kein Gewinn; die Schere war nicht der Preis).
+
+     Der Kern besteht aber aus zweierlei, und nur eines davon braucht
+     Aufloesung: die Flaeche ist ein weicher Verlauf — vierfach
+     hochgezogen sieht ein weicher Verlauf genauso aus wie vorher. Die
+     Haarlinie am Rand nicht: die wird zu Matsch. Also bleibt die
+     Flaeche eine Vorlage, und nur der Rand wird gezeichnet. Ein Strich
+     statt zweier Vollbild-Fuellungen. */
+  function kernFlaeche(x, gr) {
     var r = gr * 0.03, s = gr - r * 2, e = gr * 0.235;
-    x.save();
+    /* Kein Clip: der gerundete Kasten IST die Form. Zweimal derselbe
+       Pfad, zweimal gefuellt — nach fill() bleibt er stehen. */
     kasten(x, r, r, s, s, e);
-    x.clip();
     /* An der Bilddatei abgelesen: oben rgb(38,50,55), unten
        rgb(9,12,11) — dieselbe Glasscheibe wie ueberall in der App. */
     var gd = x.createLinearGradient(0, r, 0, r + s);
@@ -1094,15 +1112,17 @@
     gd.addColorStop(0.45, "#161d1c");
     gd.addColorStop(1, "#090c0b");
     x.fillStyle = gd;
-    x.fillRect(r, r, s, s);
+    x.fill();
     /* Der Schein von oben links, wie ihn das Zeichen traegt. */
     var sch = x.createLinearGradient(r, r, r + s * 0.72, r + s * 0.52);
     sch.addColorStop(0, "rgba(214,236,232,0.16)");
     sch.addColorStop(0.35, "rgba(160,200,196,0.05)");
     sch.addColorStop(1, "rgba(0,0,0,0)");
     x.fillStyle = sch;
-    x.fillRect(r, r, s, s);
-    x.restore();
+    x.fill();
+  }
+  function kernRand(x, gr) {
+    var r = gr * 0.03, s = gr - r * 2, e = gr * 0.235;
     x.lineWidth = Math.max(1, gr * 0.012);
     var kk = x.createLinearGradient(0, 0, 0, gr);
     kk.addColorStop(0, "rgba(255,255,255,0.28)");
@@ -1111,6 +1131,10 @@
     x.strokeStyle = kk;
     kasten(x, r + x.lineWidth / 2, r + x.lineWidth / 2, s - x.lineWidth, s - x.lineWidth, e);
     x.stroke();
+  }
+  function kernGrund(x, gr) {
+    kernFlaeche(x, gr);
+    kernRand(x, gr);
   }
   /* Die vier Kerzen, in den Massen des 512er Feldes. Der Aufrufer hat
      schon an den Ort geschoben; hier wird nur noch skaliert. */
@@ -1138,10 +1162,16 @@
     kernKerzen(x, gr);
     return c;
   }
-  /* Nur der weiche Teil — die Kerzen kommen im Anflug als Pfade dazu. */
-  function kernGrundScheibe(gr) {
+  /* NUR DER WEICHE TEIL — ohne Rand.
+
+     Der Rand war frueher mitgebacken. Er kommt jetzt in jedem Bild als
+     Strich dazu, in der Groesse, in der er wirklich steht; gebacken
+     waere er einmal da und einmal als Strich, also doppelt, und der
+     gebackene wuerde als weicher Schatten neben dem scharfen stehen.
+     Die Kerzen kommen ohnehin schon als Pfade dazu. */
+  function kernFlaecheScheibe(gr) {
     var c = tafel(gr, gr);
-    kernGrund(c.getContext("2d"), gr);
+    kernFlaeche(c.getContext("2d"), gr);
     return c;
   }
   window.rcpKosmos = function (huelle, wahl) {
@@ -1386,7 +1416,7 @@
            Sparschaltung legte die Schlange still, und die Ankunft kam
            aus einer 128er Vorlage. Was am Ende den ganzen Schirm
            fuellt, darf nie wegoptimiert werden. */
-        pflichten.push(function () { KERN_GRUND = kernGrundScheibe(GROSS); });
+        pflichten.push(function () { KERN_GRUND = kernFlaecheScheibe(GROSS); });
         spaeter(function () { GLAS_NAH = glasWeich(GROSS); });
       }
       if (pflichten.length) {
@@ -2151,10 +2181,29 @@
              Bild davor sass ein kleines, matschiges Kaestchen. Dieselbe
              Grenze hatte ich bei den Marken schon richtiggestellt und
              hier stehen lassen. */
+          /* UND DER RAND KOMMT IMMER ALS STRICH DAZU.
+
+             Dieselbe Ueberlegung, eine Stufe weiter. Die Vorlage von 512
+             wird am Hoehepunkt auf rund 2070 Geraetepunkte gezogen —
+             vierfach, beim groessten Ding auf dem Schirm, im letzten
+             Augenblick, in dem man sonst nichts ansieht.
+
+             Aber nicht alles daran leidet darunter. Die Flaeche ist ein
+             weicher Verlauf: vierfach hochgezogen sieht sie aus wie
+             vorher, und sie bleibt darum eine Vorlage — ein Blit, so
+             billig wie bisher. Die Haarlinie am Rand leidet sehr wohl,
+             und die wird gezeichnet. Ein Strich je Bild, bei EINEM
+             Gegenstand.
+
+             Der Weg ueber die ganze gezeichnete Flaeche ist gemessen und
+             verworfen: scharf, aber 4,0 auf 5,0 Prozent verpasste Takte,
+             und ohne Schere keinen Deut besser (5,3). Zwei Fuellungen
+             ueber den vollen Schirm kosten das, nicht das Schneiden. */
           if (kg * DPR > FERNGR && KERN_GRUND) {
             g.drawImage(KERN_GRUND, kx - kg / 2, ky - kg / 2, kg, kg);
             g.save();
             g.translate(kx - kg / 2, ky - kg / 2);
+            kernRand(g, kg);
             kernKerzen(g, kg);
             g.restore();
           } else {
@@ -2515,4 +2564,12 @@
       abbrechen: function () { laeuft = false; aufraeumen(); }
     };
   };
+  /* WIE LANGE EIN FLUG DAUERN SOLL — heraussagen, nicht abschreiben.
+
+     Der Ladebildschirm muss das wissen: kommt diese Datei spaet, hat er
+     weniger Zeit uebrig, als ein voller Flug braucht, und kuerzt ihn.
+     Die Zahl dafuer stand einen Augenblick lang als 4400 in index.html —
+     also zweimal, an zwei Stellen, die auseinanderlaufen koennen. Sie
+     gehoert hierher, wo sie gilt. */
+  window.rcpKosmos.flugzeit = FLUGZEIT;
 })();
