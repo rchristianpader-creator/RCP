@@ -1489,7 +1489,27 @@
                  auf 256 zu stauchen wirft welche weg. Hoechstens das
                  Doppelte der Vorlage, gedeckelt bei der Nahgroesse. */
               var eig = Math.max(b.naturalWidth || 0, b.naturalHeight || 0) || 128;
-              k.zeichen = zeichenAusBild(b, klemm(eig * 2, 128, GROSS));
+              /* IMMER IN VOLLER GROESSE BACKEN, auch wenn die Quelle
+                 klein ist.
+
+                 Hier stand "hoechstens das Doppelte der Vorlage" — mit
+                 dem guten Grund, dass Hochrechnen keine Schaerfe
+                 erfindet. Das stimmt, verfehlt aber, worum es geht:
+                 liefert der Dienst ein Logo mit 128 Punkten, wurde das
+                 Gesicht mit 256 gebacken und danach in JEDEM Bild auf
+                 bis zu 800 Geraetepunkte gezogen — dreifach, mit dem
+                 schnellen Filter, und der taugt dafuer nicht.
+
+                 Gebacken wird jetzt einmal auf 512, mit dem guten
+                 Filter des Browsers. Schaerfe entsteht dabei keine,
+                 aber das Hochrechnen geschieht EINMAL und gut statt
+                 sechzigmal je Sekunde und schlecht. Wie gross die
+                 Quellen wirklich sind, steht ab jetzt in der Bilanz —
+                 auf dem Prueftisch sind es 512, auf dem Telefon weiss
+                 ich es nicht, und genau das war die Luecke. */
+              if (eig < kleinstesLogo) kleinstesLogo = eig;
+              if (eig > groesstesLogo) groesstesLogo = eig;
+              k.zeichen = zeichenAusBild(b, GROSS);
               if (k.fern) { try { k.fern.width = 0; k.fern.height = 0; } catch (e) {} }
               k.fern = fernScheibe(GLAS_FERN, k.zeichen, FERNGR);
               /* UND EINE MITTLERE STUFE.
@@ -1558,7 +1578,9 @@
     }
     tempoSetzen();
     var sparsam = false, messAb = 0, fenster = [];
-    var dichteFenster = [], dichteAb = 0, dichteStufen = 0;
+    var dichteFenster = [], dichteAb = 0;
+    var engFolge = 0, gutFolge = 0, teiler = 1;
+    var kleinstesLogo = 9999, groesstesLogo = 0;
     /* STOCKT ES? — die eine Frage, die beide Regler stellen.
 
        Nicht "sind die Bilder langsamer als X", sondern "verpasst dieses
@@ -1781,7 +1803,7 @@
          gesammelt, immer wieder. Bei sechsfacher Bremse ging die Leiter
          darum kein einziges Mal herunter: der Regler war ausgerechnet
          dort blind, wo er gebraucht wurde. */
-      if (t > 900 && t < 5200 && dichteStufen < 2 && DPR > geraeteDichte / 4) {
+      if (t > 900 && t < 5200) {
         if (!dichteAb) dichteAb = t;
         dichteFenster.push(dtRoh);
         if (t - dichteAb >= 500 && dichteFenster.length >= 6) {
@@ -1792,14 +1814,60 @@
              gehandelt wurde wie im Fehlerfall, und die Pruefreihe blieb
              gruen. Ein Protokoll, das nicht von der Entscheidung selbst
              stammt, bezeugt nichts. */
-          var eng = stockt(dichteFenster, 0.25);
+          var eng = stockt(dichteFenster, 0.35);
           if (leiter.length < 40) leiter.push([Math.round(t), DPR,
             dichteFenster.length, Math.round(Math.min.apply(null, dichteFenster)),
             Math.round(dichteFenster.reduce(function (a, b) { return a + b; }, 0) / dichteFenster.length),
             eng ? 1 : 0]);
-          if (eng) {
-            dichteStufen++;
-            dichteDeckel = glatteStufe(DPR * 0.99);
+          /* ZWEI SCHLECHTE FENSTER HINTEREINANDER, nicht eines.
+
+             Die Leiter urteilte nach einem einzigen Fenster von einer
+             halben Sekunde — und ausgerechnet in dieser Zeit baut die
+             Liste ihre Karten auf. Gemessen liegen die langen Aufgaben
+             des Hauptfadens bei 437, 622, 783, 953 und 1073
+             Millisekunden, also mitten im ersten Fenster. Ein Regler,
+             der dort urteilt, misst den SEITENAUFBAU und nimmt dem
+             ganzen Rest des Fluges die Aufloesung weg. Dass er dabei
+             etwas Richtiges gemessen hat, macht das Urteil nicht
+             richtig: die Last war voruebergehend, die Folge nicht.
+
+             Genau denselben Fehler hatte die alte Sparschaltung, nur
+             frueher. Jetzt braucht es ZWEI schlechte Fenster in Folge —
+             eine Sekunde durchgehender Ueberlastung —, und die Schwelle
+             steigt von einem Viertel auf ein gutes Drittel verpasster
+             Takte.
+
+             UND ES GEHT WIEDER HINAUF. Erholt sich das Geraet (zwei gute
+             Fenster in Folge), wird die Dichte zurueckgeholt. Ein
+             Neuanlegen kostet ein Bild; den ganzen Anflug in halber
+             Aufloesung zu malen kostet die Schaerfe, um die es geht. */
+          if (eng) { engFolge++; gutFolge = 0; } else { gutFolge++; engFolge = 0; }
+          /* DER TEILER WIRD GEFUEHRT, nicht die Dichte gerechnet.
+
+             Ein erster Versuch holte die Dichte mit "DPR mal 2,02"
+             zurueck und landete bei 2,02 — einem krummen Wert, den der
+             Kompositor nicht glatt hochzieht. Die Dichte ist immer die
+             Geraetedichte GETEILT durch eine ganze Zahl; also wird diese
+             Zahl gefuehrt und sonst nichts.
+
+             UND ES GEHT NICHT WIEDER HINAUF. Das war der Plan — erholt
+             sich das Geraet, soll die Aufloesung zurueckkommen — und er
+             ist an der Messung gescheitert: mit Rueckkehr pendelte die
+             Leiter bei vierfacher Bremse 3 -> 1,5 -> 3 -> 1,5, also drei
+             Neuanlagen der Leinwand waehrend eines Fluges. Selbst mit
+             der Bedingung "hoechstens einmal zurueck" blieben es drei
+             Wechsel. Ein Pendel ist schlimmer als jede der beiden
+             Stufen, und ein Wechsel ist immer ein verlorenes Bild.
+
+             Es bleibt bei: einmal hinunter, dann Ruhe. Die Schaerfe
+             wird nicht dadurch gerettet, dass man die Dichte
+             zurueckholt, sondern dadurch, dass man sie gar nicht erst
+             vorschnell weggibt — und genau das leistet die
+             Zurueckhaltung oben. */
+          if (engFolge >= 2 && teiler < 3) {
+            engFolge = 0; gutFolge = 0;
+            teiler++;
+            dichteDeckel = Math.max(1, geraeteDichte / teiler);
             messen(true);
           }
           dichteFenster.length = 0; dichteAb = t;
@@ -2368,6 +2436,8 @@
           anteil: Math.round(verpasst / dts.length * 1000) / 10,
           malMitte: mz.length ? Math.round(mz[Math.floor(mz.length / 2)] * 100) / 100 : null,
           stufen: leiter.length ? leiter[leiter.length - 1][1] : null,
+          logoKlein: kleinstesLogo === 9999 ? null : kleinstesLogo,
+          logoGross: groesstesLogo || null,
           dauer: spur[spur.length - 1][0]
         };
         window.rcpKosmosBilanz = bilanz;
