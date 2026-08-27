@@ -43,7 +43,24 @@
      Geschwindigkeit folgt aus Strecke durch Zeit und bleibt dann fest.
      Der Nachlauf ist die Strecke NACH der Ankunft, in der der Blitz
      deckt, waehrend die Seite den Deckel abzieht. */
-  var FLUGZEIT = 6200;
+  /* VIER KOMMA VIER SEKUNDEN, nicht sechs komma zwei.
+
+     Der Ladebildschirm dauerte mit Abgang 6,7 Sekunden — zu lang, um
+     ihn jeden Morgen zu sehen. Nur die Uhr zu kuerzen waere aber der
+     falsche Weg gewesen: die Geschwindigkeit folgt aus Strecke durch
+     Zeit, und dieselbe Strecke in weniger Zeit heisst schlicht
+     schneller. Bei 4,4 Sekunden auf der alten Strecke waere die Kamera
+     44 Prozent flotter unterwegs — hektisch, nicht angenehm.
+
+     Gekuerzt wird darum die STRECKE, und zwar dort, wo nichts
+     passiert: die Anfahrt (TOR) von 1500 auf 800. In dieser Zeit sind
+     die Marken Punkte im Nebel; das Sehenswerte — die nahen
+     Vorbeifluege und die Ankunft — liegt am Ende. Dazu der letzte
+     Abstand zum Zeichen etwas knapper.
+
+     So bleibt die Geschwindigkeit bei rund einem Viertel mehr statt
+     der Haelfte, und der Schirm ist ein Drittel kuerzer da. */
+  var FLUGZEIT = 4400;
   /* ZWEI AUFLOESUNGEN JE MARKE.
 
      Die Scheiben wurden bei 96 Pixeln gebacken und im nahen Vorbeiflug
@@ -1388,7 +1405,7 @@
        die Gasse beginnt bei TOR und schreitet mit SCHRITT in die Tiefe,
        der Kern wartet ZIEL_ABSTAND hinter der letzten Marke. HELIX ist
        der Radius der Gasse um die Flugachse. */
-    var TOR = 1500, SCHRITT = 430, HELIX = 250, ZIEL_ABSTAND = 950;
+    var TOR = 800, SCHRITT = 430, HELIX = 250, ZIEL_ABSTAND = 820;
 
     /* Die Sterne: echte Orte im Raum, keine Striche auf einer Scheibe.
        Jeder hat Ort, Topf (Farbtemperatur), Grundhelligkeit und sein
