@@ -222,7 +222,13 @@
       ".kosmosliquid,.kosmosglas{position:absolute;inset:0;pointer-events:none;overflow:hidden}",
       ".kosmosliquid{z-index:0;background:#0a0d0c}",
       ".kosmosleinwand{position:absolute;inset:0;z-index:1;display:block;width:100%;height:100%}",
-      ".kosmosglas{z-index:2}",
+      /* DIE RANDABDUNKLUNG SITZT AUF DEM BEHAELTER, nicht auf einem
+         eigenen Kind. Sie ist statisch und deckt den ganzen Schirm; als
+         eigenes Element war sie eine Ebene mehr, die der Kompositor in
+         jedem Bild mitzusammensetzen hatte. Auf dem Behaelter, den es
+         ohnehin gibt, kostet sie nichts extra. */
+      ".kosmosglas{z-index:2;background:radial-gradient(120% 90% at 50% 46%,",
+      "rgba(0,0,0,0) 30%,rgba(0,0,0,.3) 62%,rgba(2,4,4,.82) 100%)}",
       ".kosmosfeld{position:absolute;top:50%;left:50%;width:150%;aspect-ratio:1;",
       "margin:-75% 0 0 -75%;border-radius:50%;will-change:transform}",
       ".kosmosfeld.eins{background:radial-gradient(closest-side,",
@@ -304,8 +310,6 @@
       "background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.95) 0%,",
       "rgba(228,244,238,.6) 10%,rgba(178,220,206,.28) 26%,",
       "rgba(110,180,160,.07) 55%,rgba(0,0,0,0) 100%)}",
-      ".kosmosrand{position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 46%,",
-      "rgba(0,0,0,0) 30%,rgba(0,0,0,.3) 62%,rgba(2,4,4,.82) 100%)}",
       /* DAS KORN STEHT STILL.
 
          Es sprang sechsmal je Sekunde um elf Punkt — "animation:
@@ -1165,7 +1169,7 @@
     oben.className = "kosmosglas";
     oben.setAttribute("aria-hidden", "true");
     oben.innerHTML = '<i class="kosmosspinne"></i>' +
-      '<i class="kosmosblitz"></i><i class="kosmoskorn"></i><i class="kosmosrand"></i>';
+      '<i class="kosmosblitz"></i><i class="kosmoskorn"></i>';
     huelle.appendChild(oben);
 
     /* Zwei Deckel uebereinander: die Pixeldichte (hoechstens 2, die
@@ -2050,7 +2054,7 @@
           } else {
             g.drawImage(KERN_FERN, kx - kg / 2, ky - kg / 2, kg, kg);
           }
-          var sg = Math.min(kg * 2.2, GRENZE * 0.85);
+          var sg = Math.min(kg * 1.15, GRENZE * 0.36);
           spinneStand = lichtSetzen(spinneEbene, spinneStand, kx, ky, sg,
             kg < GRENZE * 0.55 ? kd * 0.32 : 0);
         }
