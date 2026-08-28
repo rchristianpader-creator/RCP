@@ -1404,6 +1404,9 @@
        in den ruhigen Bildern der Reise. */
     var arbeiten = [];
     var pflichten = [];
+    /* Ab wann die Schlange ueberhaupt anfaengt — siehe eineArbeit(). */
+    var RUHE_AB = 1500;
+    var arbeitTakt = 0;
     var spaeterBereit = false;
     function spaeter(tun) { arbeiten.push(tun); }
     function eineArbeit() {
@@ -1425,6 +1428,33 @@
         return;
       }
       if (!arbeiten.length || sparsam) return;
+      /* UND NICHT IN DER ANFAHRT.
+
+         Gemessen in Faechern von 250 ms: die ersten anderthalb Sekunden
+         verlieren Bilder, die Mitte des Fluges (2 bis 4 Sekunden) kein
+         einziges. In der Anfahrt laedt die Seite noch — Liste, Charts,
+         Kurse —, und die Szene teilt sich das Geraet mit ihr. Danach hat
+         sie es fuer sich.
+
+         Also wartet die Schlange. Gebraucht wird ihr Inhalt ohnehin
+         spaet: die mittlere Stufe einer Marke greift erst, wenn die
+         Marke gross genug ist, und gross wird sie im Anflug. Zehn
+         Stuecke, eins je Bild, sind zweihundert Millisekunden nach dem
+         Start der Schlange abgearbeitet — lange bevor sie zaehlen.
+
+         Die Pflichten stehen ausserhalb: sie laufen oben, vor dieser
+         Zeile, und warten auf nichts. */
+      if (t0 && (performance.now() - t0) < RUHE_AB) return;
+      /* UND EINS ALLE VIER BILDER, nicht eins je Bild.
+
+         Mit "eins je Bild" war die Schlange nach zehn Bildern leer und
+         hinterliess genau dort einen Einbruch — die Arbeit war nicht
+         weniger geworden, nur zusammengedraengt. Ab 1,5 Sekunden bis
+         zur Ankunft liegen rund hundertsiebzig Bilder; zehn Stuecke
+         darin unterzubringen ist reichlich Platz, und ein Stueck je
+         vier Bilder laesst zwischen zwei Anlagen genug Luft, dass die
+         Grafikeinheit nachkommt. */
+      if ((++arbeitTakt % 4) !== 0) return;
       var a = arbeiten.shift();
       try { a(); } catch (e) {}
     }
@@ -1518,18 +1548,38 @@
         /* Das ZEICHEN, nicht die fertige Scheibe: das Glas kommt beim
            Malen darunter. Fetch.ai bringt ihre eigene volle Scheibe mit
            (Indigo statt Glas) — sie ist der eine Sonderfall. */
-        /* Die kleine Fassung sofort — sie ist billig und wird als
-           erstes gebraucht. Die grosse steht in der Schlange: sechzehn
-           Zeichen bei 256 Pixeln in EINEM Bild waren die letzten
-           Ausreisser von sechzig Millisekunden. */
+        /* DER RUECKFALL WIRD ERST GEBAUT, WENN ER GEBRAUCHT WIRD.
+
+           Hier stand er unbedingt: fuer JEDE Marke wurde sofort das
+           Kuerzel gezeichnet (96) und daraus die ferne Scheibe (128).
+           Fuer eine Marke, die ein Logo erwartet, ist beides umsonst —
+           sie ist bis zur Ankunft des Logos unsichtbar, und dann wird
+           die ferne Scheibe aus dem Logo neu gebaut und die alte
+           weggeworfen. Bei dreizehn Marken waren das rund zwanzig
+           Leinwaende, die nie jemand gesehen hat.
+
+           Das klingt nach Kleinkram und ist es nicht: gemessen kostet
+           die ganze Backschlange nur vierzig Millisekunden Rechenzeit,
+           verliert aber zwanzig Bilder. Der Preis steckt im ANLEGEN der
+           Flaechen, nicht im Zeichnen darauf — und den senkt man nur,
+           indem man weniger anlegt.
+
+           Gebraucht wird der Rueckfall in zwei Faellen, und dann wird er
+           gebaut: die Marke erwartet gar kein Logo, oder das Logo kommt
+           nicht (Fehler oder Frist). */
+        var willLogo = !!(p.logo || (sym && !ohneLogo(sym)));
         (function (k, sy) {
           if (sy === "FET-USD") {
             k.fern = fetScheibe(FERNGR, wahl.farben);
             spaeter(function () { k.eigen = fetScheibe(GROSS, wahl.farben); });
-          } else {
-            k.klein = sinnBild(sy, 96) || textScheibe(96, zeichenFuer(sy) || "?");
-            k.fern = fernScheibe(GLAS_FERN, k.klein, FERNGR);
-            k.mittel = null;
+            return;
+          }
+          k.mittel = null;
+          k.rueckfall = function () {
+            if (k.zeichen || k.fern) return;
+            var kl = sinnBild(sy, 96) || textScheibe(96, zeichenFuer(sy) || "?");
+            k.fern = fernScheibe(GLAS_FERN, kl, FERNGR);
+            try { kl.width = 0; kl.height = 0; } catch (e3) {}
             spaeter(function () {
               if (!k.zeichen) {
                 /* Auch die gezeichneten Zeichen kommen als Gesicht —
@@ -1540,11 +1590,11 @@
                 k.zeichen = roh2 && scheibenGesicht(roh2, ZEICHENGR, false);
               }
             });
-          }
+          };
+          if (!willLogo) k.rueckfall();
         })(e, sym);
-        e.bereit = true;
-        if (p.logo || (sym && !ohneLogo(sym))) {
-          e.bereit = false;
+        e.bereit = !willLogo;
+        if (willLogo) {
           e.frist = jetzt + 1400;
           window.rcpKosmosLogos = window.rcpKosmosLogos || { angefragt: 0, geladen: 0 };
           window.rcpKosmosLogos.angefragt++;
@@ -1603,7 +1653,10 @@
               k.bereit = true;
               window.rcpKosmosLogos.geladen++;
             };
-            b.onerror = function () { k.bereit = true; };
+            b.onerror = function () {
+              if (k.rueckfall) k.rueckfall();
+              k.bereit = true;
+            };
             b.src = quelle;
           })(e, p.logo || "/.netlify/functions/logo?sym=" + encodeURIComponent(sym));
         }
@@ -2112,7 +2165,13 @@
            oder die Frist faellt. kp.auf ist der Moment des Auftritts:
            ab ihm blendet die Scheibe weich ein, und ab ihm wird ihr
            Bild nie mehr getauscht. */
-        if (!kp.bereit && t > kp.frist) kp.bereit = true;
+        if (!kp.bereit && t > kp.frist) {
+          /* Die Frist ist gefallen und das Logo ist nicht gekommen —
+             jetzt braucht die Marke ihr Kuerzel, und erst jetzt wird es
+             gebaut. */
+          if (kp.rueckfall) kp.rueckfall();
+          kp.bereit = true;
+        }
         if (!kp.bereit) continue;
         if (kp.auf == null) kp.auf = t;
         kp.kz = kz;
