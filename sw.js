@@ -5,7 +5,7 @@
    - everything else (TradingView, /.netlify/functions/*): straight to network, never cached
    Bump CACHE on every deploy so old shells are dropped. */
 
-const CACHE = "aktien-liste-v192";
+const CACHE = "aktien-liste-v193";
 
 /* Ohne Sitzung liefert das Tor statt der Seite eine Weiterleitung zur
    Anmeldung — deshalb wird das Dokument hier nicht vorgeladen, sondern
@@ -14,24 +14,16 @@ const CACHE = "aktien-liste-v192";
    Ladebildschirm, also soll er nicht erst geholt werden muessen, wenn es
    losgeht.
 
-   kosmos.js seit v190. Bis dahin stand sie ausdruecklich NICHT hier, mit
-   gutem Grund: sie gehoerte der Verwaltung, und hundertzwanzig Kilobyte
-   je Stand fuer eine Datei vorzuhalten, die fast niemand abruft, waere
-   verkehrt herum gewesen. Der Grund ist entfallen — der Auftakt gehoert
-   jetzt allen und laeuft bei JEDEM Start. Damit ist sie kein Sonderfall
-   mehr, sondern liegt so selbstverstaendlich bereit wie das Aussehen.
-
    Kein Kommentar zwischen den Zeilen: die Pruefreihe liest diese Liste als
    JSON aus der Datei, und daran waere sie eben zerbrochen. */
 const PRECACHE = [
-  "/stil.css?v=192",
-  "/kosmos.js?v=192",
+  "/stil.css?v=193",
   "/manifest.webmanifest",
-  "/icon-180.png?v=192",
-  "/icon-192.png?v=192",
-  "/icon-512.png?v=192",
-  "/kerzen.svg?v=192",
-  "/kerzen-blass.svg?v=192"
+  "/icon-180.png?v=193",
+  "/icon-192.png?v=193",
+  "/icon-512.png?v=193",
+  "/kerzen.svg?v=193",
+  "/kerzen-blass.svg?v=193"
 ];
 
 /* css dazu: seit v137 liegt das Aussehen in stil.css. Sie traegt ?v=NN,
@@ -91,10 +83,10 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
   /* Die EINE Ausnahme vom Functions-Verbot: die Logos. Sie aendern sich
-     praktisch nie, die Liste holt sie bei jedem Besuch fuer ihre Karten,
-     und der Kosmos-Auftakt braucht sie SOFORT — eine Marke soll dort
-     nie auf ihr Bild warten. Zwischenspeicher zuerst, einmal je Stand
-     (der Vorrat wird mit jedem CACHE-Wechsel geleert). */
+     praktisch nie, und die Liste holt sie bei jedem Besuch fuer ihre
+     Karten — eine Karte soll nie auf ihr Bild warten. Zwischenspeicher
+     zuerst, einmal je Stand (der Vorrat wird mit jedem CACHE-Wechsel
+     geleert). */
   if (url.pathname === "/.netlify/functions/logo") {
     event.respondWith(
       caches.match(req).then((hit) => {

@@ -1113,35 +1113,6 @@
   }
   .logo-marke svg { width: 60%; height: 60%; color: #fff; }
 
-  /* DER KOSMISCHE AUFTAKT DER VERWALTUNG.
-
-     Sieht die Liste, dass ihre Besucherin die Verwaltung ist (der Vermerk
-     faellt beim Kontoabruf), traegt der Ladebildschirm diese Klasse: die
-     Glasscheibe und die laute Lage verschwinden, an ihrer Stelle zeichnet
-     kosmos.js das Uhrwerk aller Marken. Der Grundton steht hier, damit
-     der Schirm schon dunkel ist, bevor die Datei ueberhaupt da ist. */
-  /* AN DER WURZEL, nicht am Auftakt. Die Klasse wird im Kopf des
-     Dokuments gesetzt, vor dem Stylesheet und vor jedem Anstrich — den
-     Auftakt selbst gibt es zu diesem Zeitpunkt noch gar nicht. Wer die
-     Regel an .auftakt.kosmisch bindet, bekommt sie erst, wenn der
-     Kasten die Klasse traegt, und das ist zu spaet: der gewoehnliche
-     Ladebildschirm blitzt dann auf. Beide Schreibweisen stehen hier,
-     damit auch der spaeter gesetzte Kasten greift. */
-  .kosmisch .auftakt,
-  .auftakt.kosmisch { background: #0a0d0c; }
-  .kosmisch .auftakt .auftakt-liquid,
-  .kosmisch .auftakt .auftakt-mitte,
-  .kosmisch .auftakt > .lichtfeld,
-  .auftakt.kosmisch .auftakt-liquid,
-  .auftakt.kosmisch .auftakt-mitte { display: none; }
-  .auftakt.kosmisch .kosmosleinwand {
-    position: absolute;
-    inset: 0;
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
-
   /* EINMAL VORSTELLEN — die Marke der neuen Position fliegt nach dem
      Ladebildschirm ueber die Liste. Sie faengt nichts ab: wer dabei tippt,
      trifft die Liste.
@@ -3427,11 +3398,11 @@
      zu tun. Gemeldet als "der Lichtstrahl-Uebergang nicht mehr von oben
      nach unten, sondern das runde Licht aus der Animation".
 
-     Jetzt geht das Licht dort auf, wo die Reise geendet hat: ein Ring aus
-     der Mitte, der nach aussen laeuft und dabei verglueht — dieselbe
-     Bewegung und dieselbe Farbe wie die Flut im Auftakt (kosmos.js,
-     .kosmosflut). Ein Uebergang, der die Szene davor fortsetzt statt sie
-     abzuloesen.
+     Jetzt geht das Licht dort auf, wo der Auftakt steht: ein Ring aus der
+     Mitte, der nach aussen laeuft und dabei verglueht. Er ist zur Zeit
+     des Kosmos entstanden und hat dessen Flut fortgesetzt; der Flug ist
+     entfernt, der Ring bleibt — er passt zur Glasscheibe genauso, denn
+     auch die sitzt in der Mitte.
 
      Die Karten fahren weiter von unten herein; das ist ihre eigene
      Bewegung und bleibt. */
@@ -3601,7 +3572,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=192");
+    background-image: url("/kerzen.svg?v=193");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -3615,7 +3586,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=192");
+    background-image: url("/kerzen-blass.svg?v=193");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
