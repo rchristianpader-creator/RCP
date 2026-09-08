@@ -4236,7 +4236,7 @@
 /* Ein gemeinsames Fenster fuer die Symbole, wie beim Terminkasten.
    Nur die ausgewaehlte Karte nimmt Platz ein; Charts bleiben im DOM. */
 .symbol-fenster {
-  margin-top: 12px;
+  margin-top: 28px;
   overflow-x: clip;
 }
 .symbol-fenster > .karten { margin-top: 0; }
