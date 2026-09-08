@@ -3688,46 +3688,8 @@
       rgba(var(--bg-rgb), 0) 100%);
   }
 
-  /* Der Lesefortschritt am oberen Bildrand.
-
-     Er lag zuletzt im Kasten der Kuerzel und war nur zu sehen, solange der
-     Kasten klebte. Ohne Kasten faehrt die Reihe mit, und ein Strich, der
-     nach zwei Fingerbreit aus dem Bild wandert, misst nichts mehr.
-
-     Also dorthin, wo er hingehoert: fest an die Oberkante des Schirms, ueber
-     allem, zwei Pixel hoch. Bei Scrollstellung null ist er auf Null
-     zusammengezogen und damit unsichtbar — er braucht kein Ein- und
-     Ausblenden mehr. */
-  nav .nav-fortschritt {
-    position: fixed;
-    left: 0;
-    right: 0;
-    top: 0;
-    height: 2px;
-    background: var(--fg);
-    transform: scaleX(0);
-    transform-origin: 0 50%;
-    z-index: 60;
-    will-change: transform;
-    pointer-events: none;
-  }
-  @supports (animation-timeline: scroll()) {
-    @media (prefers-reduced-motion: no-preference) {
-      /* Wie weit man in der Seite ist — ebenfalls ohne Zuhoerer */
-      nav .nav-fortschritt {
-        animation: fortschritt linear both;
-        animation-timeline: scroll(root block);
-      }
-      @keyframes fortschritt {
-        from { transform: scaleX(0); }
-        to   { transform: scaleX(1); }
-      }
-    }
-  }
-
   @media (prefers-reduced-motion: reduce) {
     header .kopf-lauf { transform: none; }
-    nav .nav-fortschritt { display: none; }
   }
 
   /* SCROLLEN

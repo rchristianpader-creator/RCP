@@ -33,7 +33,7 @@
      zuerst und geht einmal je Stand ueber die Leitung, waehrend dieses
      Dokument bei jedem Start neu geholt wird. Weit vorn im Kopf, damit kein
      Skript darunter auf Masse zugreift, die es noch nicht gibt. -->
-<link rel="stylesheet" href="/stil.css?v=215">
+<link rel="stylesheet" href="/stil.css?v=216">
 <style>
 /* Ein Netz unter der Teilung.
 
@@ -103,9 +103,9 @@
 })();
 </script>
 
-<link rel="stylesheet" href="/black-glass.css?v=215">
-<script src="/touch-contact.js?v=215" defer></script>
-<script src="/black-glass.js?v=215" defer></script>
+<link rel="stylesheet" href="/black-glass.css?v=216">
+<script src="/touch-contact.js?v=216" defer></script>
+<script src="/black-glass.js?v=216" defer></script>
 </head>
 <body>
 <!-- Deckt die Statuszone ab; ohne sie null hoch. Siehe .statusdecke. -->
@@ -235,7 +235,6 @@
 </div>
 
 <nav>
-  <i class="nav-fortschritt" id="navFortschritt" aria-hidden="true"></i>
   <button class="sort-chip" id="sortBtn" type="button" aria-pressed="false"
           aria-label="Nach Nähe zur Einkaufszone sortieren"
           title="Nach Nähe zur Einkaufszone sortieren"><span class="zeichen">⇅</span></button>
@@ -289,7 +288,7 @@
   </div>
   <div class="karten" id="karten"></div>
 </section>
-<script src="/symbole.js?v=215"></script>
+<script src="/symbole.js?v=216"></script>
 
 
 
@@ -2953,12 +2952,7 @@ if ("serviceWorker" in navigator) {
     laufen(karten);
   }
 
-  /* Was dem Finger folgt: der Kopf bleibt beim Wegscrollen etwas zurueck,
-     und die Linie unter der Leiste zeigt, wie weit man in der Liste ist.
-
-     Ein Zuhoerer, gerechnet wird erst im naechsten Einzelbild, geschrieben
-     werden nur zwei Variablen. Die Masse stehen fest, bis sich das Fenster
-     aendert — getBoundingClientRect bei jedem Bild waere hier der teure Weg. */
+  /* Kopf-Parallaxe: pro Bild wird nur der Kopfversatz aktualisiert. */
   function laufen(karten) {
     if (ruhig) return;
 
@@ -2978,19 +2972,10 @@ if ("serviceWorker" in navigator) {
     var wurzel = document.documentElement;
 
     var kopfHoehe = 0;
-    var anfang = 0;
-    var ende = 1;
 
     function messen() {
       var h = document.querySelector("header");
       kopfHoehe = h ? h.offsetHeight : 0;
-      var erste = karten[0];
-      var letzte = karten[karten.length - 1];
-      if (!erste || !letzte) return;
-      anfang = erste.getBoundingClientRect().top + window.pageYOffset - window.innerHeight * 0.6;
-      ende = letzte.getBoundingClientRect().top + window.pageYOffset +
-             letzte.offsetHeight - window.innerHeight * 0.6;
-      if (ende <= anfang) ende = anfang + 1;
     }
 
     var wartet = false;
@@ -3003,10 +2988,6 @@ if ("serviceWorker" in navigator) {
         var mit = y < kopfHoehe ? y : kopfHoehe;
         wurzel.style.setProperty("--rcp-oben", mit + "px");
       }
-
-      var teil = (y - anfang) / (ende - anfang);
-      teil = teil < 0 ? 0 : teil > 1 ? 1 : teil;
-      wurzel.style.setProperty("--rcp-lauf", teil.toFixed(4));
     }
 
     function anstossen() {
