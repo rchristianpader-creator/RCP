@@ -1,4 +1,4 @@
-# Liquid feedback QA — v209, 2026-09-08
+# Liquid feedback QA — v210, 2026-09-08
 
 Baseline: production v204, commit 05d8e3502a07bf8ffe4a4eecd5667b2273121a37.
 Release scope: code corrections verified by automated regression tests. Actual iPhone input delivery, visual quality and smoothness remain unverified; this is not complete device acceptance.
@@ -22,7 +22,7 @@ The earlier regression fixes are included: stale contacts cannot restart unrelat
 
 ## Automated result
 
-**47/47 tests pass:** 37 input/simulation tests and 10 asset/cache checks. `git diff --check` passes. All four app pages and the service worker use v209 for the liquid assets.
+**49/49 tests pass:** 39 input/simulation tests and 10 asset/cache checks. `git diff --check` passes. All four app pages and the service worker use v210 for the liquid assets.
 
 Coverage includes subpixel reversals, multiple fingers, pointer cancellation during touch, 100 rapid taps, click deduplication, passive listeners, continuous momentum, idle expiration, blur/background cleanup, reduced motion/transparency, unavailable canvas, unchanged viewport, high-refresh scheduling, wave settling, sparse swipes and cancelled/released endpoints. Asset checks cover page references, precache existence, root JavaScript/classic inline syntax, and service-worker navigation/authentication cache rules.
 
@@ -77,3 +77,15 @@ Touch pointer samples are now queued until the next rendering turn. If a touchst
 Eight added tests cover pointer-only taps/swipes, re-touch during momentum at new coordinates, native/pointer deduplication, pending-input cleanup, two independent pointer-only fingers, cancellation, late native ownership, and click-before-frame ordering. The last ordering test failed on the first candidate and passed after correction. Entire suite: 47 tests pass.
 
 Limits: arbitration adds at most one available rendering turn before pointer-only samples are forwarded. If the browser delivers neither input stream or suspends rendering, this code cannot recover physical coordinates or render during that suspension. No actual Safari/iPhone event trace or end-to-end device run has been obtained. No guarantee of every physical touch is claimed.
+
+## v210 — retain water, reduce rendering work, tighten highlights
+
+The user superseded the removal request with a request to keep the animation and make it smoother and sharper. The temporary removal was never published; v210 retains the water solver and input routing.
+
+Two added regression tests first failed and now pass: the render loop no longer hit-tests or changes the CSS background of the cards beneath the water, and changes to viewport height preserve the wave state at existing coordinates. The latter addresses a concrete reset path relevant to vertical scrolling when browser controls resize the viewport, without claiming that this is the only device-level cause.
+
+The static black palette, glass gradients, borders, shadows, typography and controls remain. Backdrop blur on scrolling card surfaces is disabled to remove a repeated compositing cost; the login/dialog glass treatment is retained. The separate per-frame radial card highlight is removed. Water remains on its pointer-transparent canvas.
+
+Boundary damping is precomputed on resize rather than recalculated for every cell on every simulation step. Shading reuses squared slope values, replaces the highlight exponent with multiplications, narrows the specular lobe and reduces broad height-based haze. These changes reduce selected operations and are intended to produce clearer light edges. No real iPhone frame-rate benchmark or visual acceptance has been performed, and this report does not label the animation fully smooth or every vertical touch recognized.
+
+The complete 49-test suite passes. Input semantics from v209 are retained, including no fabricated impulses at released/stale finger positions. The removed feature request did not result in a deployment.

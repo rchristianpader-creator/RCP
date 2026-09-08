@@ -6,20 +6,33 @@
   var contacts=new Map(), impulses=[];
 
   var canvas,ctx,buffer,bctx,pixels,cols,rows,cell,width,height;
-  var elevation,velocity,nextElevation,nextVelocity;
+  var elevation,velocity,nextElevation,nextVelocity,edgeDamping;
   var frame=0,previousTime=0,accumulator=0;
-  var surface=null,point=null,pixelRatio=0;
+  var pixelRatio=0;
   function allowed() { return !reduced.matches && !opaque.matches && !document.hidden; }
   function resize() {
     if(!canvas) return;
     var ratio=Math.min(devicePixelRatio||1,1.5);
     if(width===innerWidth && height===innerHeight && pixelRatio===ratio) return;
+    var oldElevation=elevation,oldVelocity=velocity,oldCols=cols,oldCell=cell;
     width=innerWidth; height=innerHeight; pixelRatio=ratio;
     cell=Math.max(5,Math.ceil(width/180));
     cols=Math.ceil(width/cell)+2; rows=Math.ceil(height/cell)+2;
     var size=cols*rows;
     elevation=new Float32Array(size); velocity=new Float32Array(size);
     nextElevation=new Float32Array(size); nextVelocity=new Float32Array(size);
+    // Browser bars can resize the viewport during vertical scrolling. Preserve
+    // visible water when only its height changes instead of resetting the field.
+    if(oldElevation && oldCols===cols && oldCell===cell) {
+      var retained=Math.min(oldElevation.length,size)-cols;
+      elevation.set(oldElevation.subarray(0,retained));
+      velocity.set(oldVelocity.subarray(0,retained));
+    }
+    edgeDamping=new Float32Array(size);
+    for(var y=1;y<rows-1;y++) for(var x=1;x<cols-1;x++) {
+      var edge=Math.min(x,y,cols-1-x,rows-1-y);
+      edgeDamping[y*cols+x]=edge<5 ? .76+edge*.045 : 1;
+    }
     canvas.width=Math.round(width*ratio); canvas.height=Math.round(height*ratio);
     ctx.setTransform(ratio,0,0,ratio,0,0);
     buffer.width=cols; buffer.height=rows; pixels=bctx.createImageData(cols,rows);
@@ -34,34 +47,13 @@
     if(!ctx || !bctx) { canvas=null; return false; }
     document.body.appendChild(canvas); resize(); return true;
   }
-  function clearReflection() {
-    if(surface) {
-      surface.classList.remove('black-glass-touch');
-      surface.style.removeProperty('--touch-x'); surface.style.removeProperty('--touch-y');
-    }
-    surface=null; point=null;
-  }
-  function reflect() {
-    if(!point) return;
-    var target=document.elementFromPoint(point.x,point.y);
-    var next=target && target.closest('.card, .kasten, .auftakt-mitte, .jetzt, header');
-    if(surface!==next) {
-      var pending=point; clearReflection(); point=pending; surface=next;
-      if(surface) surface.classList.add('black-glass-touch');
-    }
-    if(surface) {
-      var r=surface.getBoundingClientRect();
-      surface.style.setProperty('--touch-x',(point.x-r.left)+'px');
-      surface.style.setProperty('--touch-y',(point.y-r.top)+'px');
-    }
-  }
   function wake() {
     if(canvas && !frame && allowed()) { previousTime=performance.now(); accumulator=16.7; frame=requestAnimationFrame(draw); }
   }
   function begin(id,x,y) {
     if(!allowed() || !prepare()) return;
     var now=performance.now();
-    contacts.set(id,{x:x,y:y,time:now,born:now}); point={x:x,y:y};
+    contacts.set(id,{x:x,y:y,time:now,born:now});
     impulses.push({x:x,y:y,power:.55}); wake();
   }
   function move(id,x,y) {
@@ -73,18 +65,15 @@
     // Integrating along its path avoids separated circles during fast movement.
     var steps=Math.max(1,Math.min(48,Math.ceil(distance/5)));
     for(var i=1;i<=steps;i++) impulses.push({x:old.x+(x-old.x)*i/steps,y:old.y+(y-old.y)*i/steps,power:Math.min(.18,.025+distance/steps*.025)});
-    contacts.set(id,{x:x,y:y,time:now,born:old.born}); point={x:x,y:y}; wake();
+    contacts.set(id,{x:x,y:y,time:now,born:old.born}); wake();
   }
   function end(id) {
     if(!contacts.has(id)) return;
     contacts.delete(id);
-    if(!contacts.size) {
-      clearReflection();
-    }
     wake();
   }
   function reset() {
-    cancelAnimationFrame(frame); frame=0; contacts.clear(); impulses=[]; clearReflection();
+    cancelAnimationFrame(frame); frame=0; contacts.clear(); impulses=[];
     if(elevation) { elevation.fill(0); velocity.fill(0); nextElevation.fill(0); nextVelocity.fill(0); }
     if(ctx) ctx.clearRect(0,0,width,height);
   }
@@ -108,8 +97,7 @@
       var lapV=velocity[i-1]+velocity[i+1]+velocity[i-cols]+velocity[i+cols]-4*v;
       // Viscosity spreads momentum while damping fast oscillations.
       var nv=(v+.16*lapH+.12*lapV)*.972;
-      var edge=Math.min(x,y,cols-1-x,rows-1-y);
-      if(edge<5) nv*=.76+edge*.045;
+      nv*=edgeDamping[i];
       nextVelocity[i]=nv;
       nextElevation[i]=Math.max(-3,Math.min(3,(h+nv)*.998));
     }
@@ -125,14 +113,18 @@
       var localEnergy=Math.max(Math.abs(h),Math.abs(velocity[i])*3);
       energy=Math.max(energy,localEnergy);
       if(localEnergy<.0004 && Math.abs(sx)+Math.abs(sy)<.0004) { data[i*4+3]=0; continue; }
-      var slope=Math.hypot(sx,sy),length=Math.sqrt(1+sx*sx+sy*sy);
+      var slopeSquared=sx*sx+sy*sy;
+      var slope=Math.sqrt(slopeSquared),length=Math.sqrt(1+slopeSquared);
       var light=(-.42*sx-.58*sy+.69)/length;
       // Normals from the shared surface produce moving silver highlights and shadows.
-      var specular=Math.pow(Math.max(0,(-.25*sx-.35*sy+.90)/length),24);
+      // Narrower highlights without an exponentiation per active pixel.
+      var highlight=Math.max(0,(-.25*sx-.35*sy+.90)/length);
+      var h2=highlight*highlight,h4=h2*h2,h8=h4*h4,h16=h8*h8;
+      var specular=h16*h16;
       var ridge=Math.min(1,slope*2.5);
-      var bright=Math.max(0,light-.69)*1.5+specular*ridge*.6;
+      var bright=Math.max(0,light-.69)*1.5+specular*ridge*1.05;
       var dark=Math.max(0,.69-light)*.85;
-      var shadeAlpha=Math.min(.44,Math.max(bright,dark)+Math.min(.055,Math.abs(h)*.035));
+      var shadeAlpha=Math.min(.44,Math.max(bright,dark)+Math.min(.018,Math.abs(h)*.012));
       var p=i*4;
       if(bright>=dark) { data[p]=235;data[p+1]=245;data[p+2]=241; }
       else { data[p]=2;data[p+1]=6;data[p+2]=5; }
@@ -154,7 +146,6 @@
     // On high-refresh displays retain the previous canvas until the next
     // simulation step. Avoid a second full-grid shading pass for unchanged water.
     if(!iterations) { frame=requestAnimationFrame(draw); return; }
-    reflect();
     var energy=shade();
     if(contacts.size || energy>.004) frame=requestAnimationFrame(draw);
     else { ctx.clearRect(0,0,width,height); elevation.fill(0); velocity.fill(0); }
