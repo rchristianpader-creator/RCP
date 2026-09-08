@@ -28,6 +28,8 @@ const OFFEN = [
      wird der ganze Speicher nicht angelegt. Eine Datei, ohne die die Seite
      nackt dasteht, darf nicht am Tuersteher haengen. */
   "/stil.css",
+  "/black-glass.css",
+  "/black-glass.js",
   "/.netlify/functions/konto",
   "/.netlify/functions/on-publish",
   "/manifest.webmanifest",

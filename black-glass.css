@@ -1,0 +1,71 @@
+/* Black glass: light belongs on the edge; the canvas stays black. */
+:root {
+  color-scheme: dark;
+  --bg: #050606;
+  --bg-rgb: 5, 6, 6;
+  --card: #0b0d0d;
+  --fg: #f2f5f4;
+  --muted: #a0aaa6;
+  --r-karte: 22px;
+  --glas-fenster: linear-gradient(155deg, rgba(255,255,255,.035), rgba(255,255,255,.008) 45%, rgba(0,0,0,.24));
+  --glas-kante-glanz: inset 0 1px 0 rgba(255,255,255,.3), inset 1px 0 0 rgba(255,255,255,.07), inset 0 -1px 0 rgba(0,0,0,.8);
+  --hebung: 0 16px 40px -24px rgba(0,0,0,.95);
+}
+html, body { background-color: #050606; }
+.card, .kasten, .auftakt-mitte, .jetzt {
+  border-color: rgba(255,255,255,.14);
+  box-shadow: var(--glas-kante-glanz), var(--hebung);
+  background: var(--glas-fenster);
+}
+.kasten, .auftakt-mitte {
+  background-color: rgba(5,6,6,.88);
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
+  backdrop-filter: blur(16px) saturate(120%);
+}
+.card-head .logo, .kopf-marke {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.35), inset 0 -1px 0 rgba(0,0,0,.8), 0 8px 18px -10px #000;
+}
+/* A separate background layer never distorts prices or chart lettering. */
+.black-glass-touch {
+  background-image: radial-gradient(180px circle at var(--touch-x,50%) var(--touch-y,50%), rgba(225,240,235,.10), transparent 75%), var(--glas-fenster);
+  border-color: rgba(255,255,255,.26);
+}
+button, a.sort-chip, nav a {
+  transition: scale 420ms cubic-bezier(.18,.85,.24,1.3), box-shadow 260ms ease, border-color 260ms ease;
+}
+button:active:not(:disabled), a.sort-chip:active, nav a:active { scale: .955; }
+button:focus-visible, a:focus-visible {
+  outline: 2px solid #d5e9e0;
+  outline-offset: 4px;
+}
+.black-glass-ripple {
+  position: fixed;
+  width: 72px;
+  height: 72px;
+  margin: -36px;
+  border-radius: 50%;
+  border: 1px solid rgba(230,245,240,.5);
+  background: radial-gradient(circle, transparent 44%, rgba(235,250,242,.08) 66%, transparent 72%);
+  box-shadow: inset 0 0 12px rgba(255,255,255,.07), 0 0 12px rgba(255,255,255,.035);
+  pointer-events: none;
+  z-index: 10000;
+  animation: blackGlassRipple 650ms cubic-bezier(.15,.65,.2,1) forwards;
+}
+@keyframes blackGlassRipple {
+  from { transform: scale(.28); opacity: .85; }
+  to { transform: scale(2.1); opacity: 0; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .card, .kasten, .auftakt-mitte, .jetzt, .black-glass-touch { background: #0b0d0d; }
+  .kasten, .auftakt-mitte { backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .black-glass-ripple { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .black-glass-ripple { display: none; }
+  button, a.sort-chip, nav a { transition: none; }
+  button:active:not(:disabled), a.sort-chip:active, nav a:active { scale: none; }
+}
+@media (forced-colors: active) {
+  .black-glass-ripple { display: none; }
+  .black-glass-touch { background-image: none; }
+}
