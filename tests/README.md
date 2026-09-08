@@ -1,4 +1,4 @@
-# Liquid feedback QA — v207, 2026-09-08
+# Liquid feedback QA — v208, 2026-09-08
 
 Baseline: production v204, commit 05d8e3502a07bf8ffe4a4eecd5667b2273121a37.
 Release scope: code corrections verified by automated regression tests. Actual iPhone input delivery, visual quality and smoothness remain unverified; this is not complete device acceptance.
@@ -22,7 +22,7 @@ The earlier regression fixes are included: stale contacts cannot restart unrelat
 
 ## Automated result
 
-**36/36 tests pass:** 26 input/simulation tests and 10 asset/cache checks. `git diff --check` passes. All four app pages and the service worker use v207 for the liquid assets.
+**39/39 tests pass:** 29 input/simulation tests and 10 asset/cache checks. `git diff --check` passes. All four app pages and the service worker use v208 for the liquid assets.
 
 Coverage includes subpixel reversals, multiple fingers, pointer cancellation during touch, 100 rapid taps, click deduplication, passive listeners, continuous momentum, idle expiration, blur/background cleanup, reduced motion/transparency, unavailable canvas, unchanged viewport, high-refresh scheduling, wave settling, sparse swipes and cancelled/released endpoints. Asset checks cover page references, precache existence, root JavaScript/classic inline syntax, and service-worker navigation/authentication cache rules.
 
@@ -32,7 +32,7 @@ The harness executes actual source scripts with deterministic DOM, canvas, timer
 
 The supervised local preview could not start because the sites-previewd mailbox is unavailable. No browser visual acceptance or authenticated end-to-end run was possible.
 
-If Safari does not deliver a physical contact sample, JavaScript has no measured coordinate for it. Native scrolling remains enabled. Momentum still uses the last known contact location; this must not be described as recognition of every finger movement. The recording does not independently show the finger's actual location.
+If Safari does not deliver a physical contact sample, JavaScript has no measured coordinate for it. Native scrolling remains enabled. From v208, momentum alone cannot create new impulses at released or stale contact coordinates. The recording does not independently show the finger's actual location.
 
 Scroll cleanup is conservative: after 180 ms of scroll idle and at least 120 ms without delivered contact samples, outstanding touch contacts are released. A finger held still after scrolling also relaxes until another delivered movement arrives. Actual viewport dimension changes still rebuild the wave field. Scrolling backdrop filters and the full-viewport CPU canvas require device profiling; their real frame rate has not been measured.
 
@@ -57,3 +57,13 @@ The input router now samples scrollY during animation frames for the current ges
 Three regression tests cover delayed scroll delivery across the cleanup deadline, scrolling observed via animation frames without a scroll event, and deduplication/blur cleanup. The first two failed on v206 before this change. The complete suite now passes 36 tests.
 
 Limit: if WebKit suspends both animation callbacks and scroll-position updates visible to JavaScript, this cannot render new simulated frames during that suspension. Real iPhone frame timing remains unmeasured; the report does not claim that the recording's entire cause is proven or that every physical gesture is delivered.
+
+## v208 — current contact coordinates only
+
+Two further tests reproduced the user's stale-position report: when a new touch snapshot replaced an old contact lacking touchend, cleanup overwrote the new position with the old one; momentum also continued injecting at released coordinates. Both now pass, along with a third test covering stale contacts without touchend.
+
+Contact records now retain their own ID and sample time. Releasing an old contact cannot replace the position of a different current contact. Scroll impulses use active contact records directly, not the cached click-deduplication position. If the latest sample for a contact is older than 120 ms when scroll movement is observed, that contact is released and generates no scroll impulse. Each concurrent current contact retains its own coordinates.
+
+This intentionally supersedes the earlier behavior of injecting new waves throughout momentum after release. Existing waves still decay through the solver, but scroll distance alone cannot locate a new finger. If native touch samples are absent, new localized effects stop instead of appearing at an invented or old location. This is a correctness tradeoff, not a guarantee that iOS delivers every touch. The live iPhone location behavior remains unverified.
+
+Tests for scroll-position sampling now retain current touch samples; the old test requiring released-finger momentum impulses was replaced with an explicit prohibition on those impulses. Complete suite: 39 passing tests.

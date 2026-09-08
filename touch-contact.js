@@ -14,22 +14,25 @@
     if(!lastTouch) previousScrollY=scrollY;
     if(active.has(id)) finish(id);
     clearTimeout(scrollTimer);
-    active.set(id,{x:x,y:y});
-    lastTouch={x:x,y:y,time:performance.now()};
+    active.set(id,{x:x,y:y,time:performance.now()});
+    lastTouch={id:id,x:x,y:y,time:performance.now()};
     emit('start',id,x,y);
     watchScroll();
   }
   function move(id,x,y) {
     var contact=active.get(id);
     if(!contact) { start(id,x,y); return; }
-    contact.x=x; contact.y=y;
-    lastTouch={x:x,y:y,time:performance.now()};
+    contact.x=x; contact.y=y; contact.time=performance.now();
+    lastTouch={id:id,x:x,y:y,time:performance.now()};
     emit('move',id,x,y);
   }
   function finish(id) {
     var contact=active.get(id); if(!contact) return;
     active.delete(id);
-    lastTouch={x:contact.x,y:contact.y,time:performance.now()};
+    if(lastTouch && lastTouch.id===id) {
+      var remaining=Array.from(active.entries()).pop();
+      lastTouch=remaining ? {id:remaining[0],x:remaining[1].x,y:remaining[1].y,time:remaining[1].time} : {id:id,x:contact.x,y:contact.y,time:performance.now()};
+    }
     emit('end',id,contact.x,contact.y);
     if(!active.size) { clearTimeout(scrollTimer); scrollTimer=setTimeout(settleScroll,180); }
   }
@@ -64,7 +67,14 @@
     var delta=scrollY-previousScrollY; previousScrollY=scrollY;
     if(!delta || !lastTouch || document.hidden) return;
     clearTimeout(scrollTimer);
-    window.dispatchEvent(new CustomEvent('rcp:liquid-scroll',{detail:{x:lastTouch.x,y:lastTouch.y,delta:delta}}));
+    // Scroll distance cannot tell us where a new finger is. Never inject
+    // fresh waves at a released or no-longer-updated contact position.
+    var now=performance.now();
+    Array.from(active.entries()).forEach(function(entry) {
+      var id=entry[0],contact=entry[1];
+      if(now-contact.time>120) { finish(id); return; }
+      window.dispatchEvent(new CustomEvent('rcp:liquid-scroll',{detail:{x:contact.x,y:contact.y,delta:delta}}));
+    });
     // Only the wave solver receives momentum; no extra stationary circle.
     scrollTimer=setTimeout(settleScroll,180);
   }
