@@ -13,7 +13,7 @@
   function resize() {
     if(!canvas) return;
     width=innerWidth; height=innerHeight;
-    cell=Math.max(4,Math.ceil(width/220));
+    cell=Math.max(5,Math.ceil(width/180));
     cols=Math.ceil(width/cell)+2; rows=Math.ceil(height/cell)+2;
     var size=cols*rows,ratio=Math.min(devicePixelRatio||1,1.5);
     elevation=new Float32Array(size); velocity=new Float32Array(size);

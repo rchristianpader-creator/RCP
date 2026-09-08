@@ -31,6 +31,7 @@ const OFFEN = [
   "/black-glass.css",
   "/black-glass.js",
   "/touch-contact.js",
+  "/liquid-scroll.js",
   "/.netlify/functions/konto",
   "/.netlify/functions/on-publish",
   "/manifest.webmanifest",
