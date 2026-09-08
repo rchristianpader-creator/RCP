@@ -3246,29 +3246,3 @@ angemeldet, also gibt es nichts, wohin die Meldung gehen könnte. Ein kurzes
 * `status.js`, `alerts.js` und `on-publish.js` lesen die veröffentlichte
   `index.html`. Sie unterschreiben sich dafür selbst eine kurzlebige Kennung
   (`dienstKopf()` in `sitzung.js`), sonst würde das Tor sie aussperren.
-
-
-## Gemeinsames Liquid Glass (v194)
-
-`liquid-glass.css` enthält die gemeinsamen Farben, Radien, Glasmaterialien und
-Interaktionszustände. Alle fünf HTML-Seiten laden diese Datei nach ihrem
-Seitenlayout. Die bisherigen Kopien der Designvariablen sind entfernt.
-Scrollende Karten kommen weiter ohne `backdrop-filter` aus; feste Leseblätter
-und die Anmeldung erhalten Frost. Reduzierte Bewegung und Transparenz werden
-über Systemeinstellungen berücksichtigt.
-
-Der Startbildschirm zeigt drei abgeschlossene Ladevorgänge: Watchlist, erster
-Chart und Kurse. Ein Chart-Platzhalter gilt nicht mehr als fertiger Chart.
-`aria-busy` kennzeichnet den tatsächlichen Abruf; Fehler beenden die Animation
-und zeigen eine Auskunft. Der Start wartet mindestens 600 ms (bei reduzierter
-Bewegung 0 ms) und höchstens 4,5 Sekunden. Beim Timeout bleibt der Fortschritt
-auf dem tatsächlichen Stand; ausstehende Daten laden in den Karten weiter.
-
-Die neue CSS-Datei ist am Anmeldetor öffentlich und im Service-Worker-Cache
-v194 enthalten, damit Anmeldung und Offline-Start dieselben Styles erhalten.
-
-Die Ladelogik lässt sich ohne weitere Abhängigkeiten prüfen:
-
-```sh
-node --test tests/loader.test.cjs
-```
