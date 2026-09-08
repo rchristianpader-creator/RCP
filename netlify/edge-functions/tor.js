@@ -30,6 +30,7 @@ const OFFEN = [
   "/stil.css",
   "/black-glass.css",
   "/black-glass.js",
+  "/touch-contact.js",
   "/.netlify/functions/konto",
   "/.netlify/functions/on-publish",
   "/manifest.webmanifest",

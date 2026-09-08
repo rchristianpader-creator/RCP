@@ -4,7 +4,6 @@
   var reduced=matchMedia('(prefers-reduced-motion: reduce)');
   var opaque=matchMedia('(prefers-reduced-transparency: reduce)');
   var contacts=new Map(), impulses=[];
-  var touchIds=new Map(), pointerIds=new Map();
   var lastContact=null,lastScrollY=scrollY,lastScrollAt=0;
   var canvas,ctx,buffer,bctx,pixels,cols,rows,cell,width,height;
   var elevation,velocity,nextElevation,nextVelocity;
@@ -86,7 +85,7 @@
     wake();
   }
   function reset() {
-    cancelAnimationFrame(frame); frame=0; contacts.clear(); touchIds.clear(); pointerIds.clear(); lastContact=null; impulses=[]; clearReflection();
+    cancelAnimationFrame(frame); frame=0; contacts.clear(); lastContact=null; impulses=[]; clearReflection();
     if(elevation) { elevation.fill(0); velocity.fill(0); nextElevation.fill(0); nextVelocity.fill(0); }
     if(ctx) ctx.clearRect(0,0,width,height);
   }
@@ -158,55 +157,13 @@
     if(contacts.size || energy>.004) frame=requestAnimationFrame(draw);
     else { ctx.clearRect(0,0,width,height); elevation.fill(0); velocity.fill(0); }
   }
-  var options={passive:true,capture:true};
-  function link(map,key,x,y) {
-    var id=map.get(key);
-    if(id && contacts.has(id)) return id;
-    var best=null,dist=3,now=performance.now();
-    // Touch and Pointer events describe the same physical contact on iOS.
-    // Join their streams without emitting the initial impulse twice.
-    contacts.forEach(function(p,candidate) {
-      if(Array.from(map.values()).indexOf(candidate)!==-1 || now-p.born>120) return;
-      var d=Math.hypot(x-p.x,y-p.y);
-      if(d<dist) { best=candidate; dist=d; }
-    });
-    id=best || key;
-    if(!best) begin(id,x,y);
-    map.set(key,id); return id;
-  }
-  document.addEventListener('touchstart',function(e) {
-    Array.from(e.changedTouches).forEach(function(t) { link(touchIds,'t'+t.identifier,t.clientX,t.clientY); });
-  },options);
-  document.addEventListener('touchmove',function(e) {
-    Array.from(e.changedTouches).forEach(function(t) {
-      var key='t'+t.identifier;
-      var id=touchIds.get(key) || link(touchIds,key,t.clientX,t.clientY);
-      move(id,t.clientX,t.clientY);
-    });
-  },options);
-  ['touchend','touchcancel'].forEach(function(name) {
-    document.addEventListener(name,function(e) {
-      Array.from(e.changedTouches).forEach(function(t) {
-        var key='t'+t.identifier; end(touchIds.get(key)); touchIds.delete(key);
-      });
-    },options);
-  });
-  document.addEventListener('pointerdown',function(e) {
-    if(e.button===0) link(pointerIds,'p'+e.pointerId,e.clientX,e.clientY);
-  },options);
-  document.addEventListener('pointermove',function(e) {
-    var id=pointerIds.get('p'+e.pointerId); if(!id) return;
-    var samples=e.getCoalescedEvents ? e.getCoalescedEvents() : [];
-    if(!samples.length) samples=[e];
-    samples.forEach(function(s) { move(id,s.clientX,s.clientY); });
-  },options);
-  ['pointerup','pointercancel'].forEach(function(name) {
-    document.addEventListener(name,function(e) {
-      var key='p'+e.pointerId,id=pointerIds.get(key);
-      // Native scrolling cancels Pointer events, but Touch events may continue.
-      if(name!=='pointercancel' || Array.from(touchIds.values()).indexOf(id)===-1) end(id);
-      pointerIds.delete(key);
-    },options);
+  window.addEventListener('rcp:liquid-contact',function(e) {
+    var input=e.detail;
+    if(input.phase==='start') begin(input.id,input.x,input.y);
+    else if(input.phase==='move') {
+      if(!contacts.has(input.id)) begin(input.id,input.x,input.y);
+      else move(input.id,input.x,input.y);
+    } else end(input.id);
   });
   window.addEventListener('scroll',function() {
     var now=performance.now(),delta=scrollY-lastScrollY; lastScrollY=scrollY;
