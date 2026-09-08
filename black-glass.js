@@ -4,6 +4,8 @@
   var reduced=matchMedia('(prefers-reduced-motion: reduce)');
   var opaque=matchMedia('(prefers-reduced-transparency: reduce)');
   var contacts=new Map(), impulses=[];
+  var touchIds=new Map(), pointerIds=new Map();
+  var lastContact=null,lastScrollY=scrollY,lastScrollAt=0;
   var canvas,ctx,buffer,bctx,pixels,cols,rows,cell,width,height;
   var elevation,velocity,nextElevation,nextVelocity;
   var frame=0,previousTime=0,accumulator=0;
@@ -57,21 +59,34 @@
   }
   function begin(id,x,y) {
     if(!allowed() || !prepare()) return;
-    contacts.set(id,{x:x,y:y}); point={x:x,y:y};
+    var now=performance.now();
+    contacts.set(id,{x:x,y:y,time:now,born:now}); point={x:x,y:y};
+    lastContact={x:x,y:y,time:now,released:0,scrolling:false};
     impulses.push({x:x,y:y,power:.55}); wake();
   }
   function move(id,x,y) {
     var old=contacts.get(id); if(!old) return;
+    var now=performance.now();
+    if(lastContact) { lastContact.x=x; lastContact.y=y; lastContact.time=now; }
+    if(x===old.x && y===old.y) { old.time=now; return; }
     var distance=Math.hypot(x-old.x,y-old.y);
     // No distance/time threshold. Every delivered sample changes the contact.
     // Integrating along its path avoids separated circles during fast movement.
     var steps=Math.max(1,Math.min(48,Math.ceil(distance/5)));
     for(var i=1;i<=steps;i++) impulses.push({x:old.x+(x-old.x)*i/steps,y:old.y+(y-old.y)*i/steps,power:Math.min(.18,.025+distance/steps*.025)});
-    contacts.set(id,{x:x,y:y}); point={x:x,y:y}; wake();
+    contacts.set(id,{x:x,y:y,time:now,born:old.born}); point={x:x,y:y}; wake();
   }
-  function end(id) { contacts.delete(id); if(!contacts.size) clearReflection(); wake(); }
+  function end(id) {
+    if(!contacts.has(id)) return;
+    contacts.delete(id);
+    if(!contacts.size) {
+      if(lastContact) lastContact.released=performance.now();
+      clearReflection();
+    }
+    wake();
+  }
   function reset() {
-    cancelAnimationFrame(frame); frame=0; contacts.clear(); impulses=[]; clearReflection();
+    cancelAnimationFrame(frame); frame=0; contacts.clear(); touchIds.clear(); pointerIds.clear(); lastContact=null; impulses=[]; clearReflection();
     if(elevation) { elevation.fill(0); velocity.fill(0); nextElevation.fill(0); nextVelocity.fill(0); }
     if(ctx) ctx.clearRect(0,0,width,height);
   }
@@ -109,6 +124,9 @@
       var i=y*cols+x,h=elevation[i];
       var sx=(elevation[i-1]-elevation[i+1])*2.4;
       var sy=(elevation[i-cols]-elevation[i+cols])*2.4;
+      var localEnergy=Math.max(Math.abs(h),Math.abs(velocity[i])*3);
+      energy=Math.max(energy,localEnergy);
+      if(localEnergy<.0004 && Math.abs(sx)+Math.abs(sy)<.0004) { data[i*4+3]=0; continue; }
       var slope=Math.hypot(sx,sy),length=Math.sqrt(1+sx*sx+sy*sy);
       var light=(-.42*sx-.58*sy+.69)/length;
       // Normals from the shared surface produce moving silver highlights and shadows.
@@ -121,7 +139,7 @@
       if(bright>=dark) { data[p]=235;data[p+1]=245;data[p+2]=241; }
       else { data[p]=2;data[p+1]=6;data[p+2]=5; }
       data[p+3]=Math.round(shadeAlpha*255);
-      energy=Math.max(energy,Math.abs(h),Math.abs(velocity[i])*3);
+
     }
     bctx.putImageData(pixels,0,0);
     ctx.clearRect(0,0,width,height);
@@ -141,29 +159,72 @@
     else { ctx.clearRect(0,0,width,height); elevation.fill(0); velocity.fill(0); }
   }
   var options={passive:true,capture:true};
+  function link(map,key,x,y) {
+    var id=map.get(key);
+    if(id && contacts.has(id)) return id;
+    var best=null,dist=3,now=performance.now();
+    // Touch and Pointer events describe the same physical contact on iOS.
+    // Join their streams without emitting the initial impulse twice.
+    contacts.forEach(function(p,candidate) {
+      if(Array.from(map.values()).indexOf(candidate)!==-1 || now-p.born>120) return;
+      var d=Math.hypot(x-p.x,y-p.y);
+      if(d<dist) { best=candidate; dist=d; }
+    });
+    id=best || key;
+    if(!best) begin(id,x,y);
+    map.set(key,id); return id;
+  }
   document.addEventListener('touchstart',function(e) {
-    Array.from(e.changedTouches).forEach(function(t) { begin('t'+t.identifier,t.clientX,t.clientY); });
+    Array.from(e.changedTouches).forEach(function(t) { link(touchIds,'t'+t.identifier,t.clientX,t.clientY); });
   },options);
   document.addEventListener('touchmove',function(e) {
-    Array.from(e.changedTouches).forEach(function(t) { move('t'+t.identifier,t.clientX,t.clientY); });
+    Array.from(e.changedTouches).forEach(function(t) {
+      var key='t'+t.identifier;
+      var id=touchIds.get(key) || link(touchIds,key,t.clientX,t.clientY);
+      move(id,t.clientX,t.clientY);
+    });
   },options);
   ['touchend','touchcancel'].forEach(function(name) {
     document.addEventListener(name,function(e) {
-      Array.from(e.changedTouches).forEach(function(t) { end('t'+t.identifier); });
+      Array.from(e.changedTouches).forEach(function(t) {
+        var key='t'+t.identifier; end(touchIds.get(key)); touchIds.delete(key);
+      });
     },options);
   });
   document.addEventListener('pointerdown',function(e) {
-    if(e.pointerType!=='touch' && e.button===0) begin('p'+e.pointerId,e.clientX,e.clientY);
+    if(e.button===0) link(pointerIds,'p'+e.pointerId,e.clientX,e.clientY);
   },options);
   document.addEventListener('pointermove',function(e) {
-    if(e.pointerType==='touch') return;
+    var id=pointerIds.get('p'+e.pointerId); if(!id) return;
     var samples=e.getCoalescedEvents ? e.getCoalescedEvents() : [];
     if(!samples.length) samples=[e];
-    samples.forEach(function(s) { move('p'+e.pointerId,s.clientX,s.clientY); });
+    samples.forEach(function(s) { move(id,s.clientX,s.clientY); });
   },options);
   ['pointerup','pointercancel'].forEach(function(name) {
-    document.addEventListener(name,function(e) { end('p'+e.pointerId); },options);
+    document.addEventListener(name,function(e) {
+      var key='p'+e.pointerId,id=pointerIds.get(key);
+      // Native scrolling cancels Pointer events, but Touch events may continue.
+      if(name!=='pointercancel' || Array.from(touchIds.values()).indexOf(id)===-1) end(id);
+      pointerIds.delete(key);
+    },options);
   });
+  window.addEventListener('scroll',function() {
+    var now=performance.now(),delta=scrollY-lastScrollY; lastScrollY=scrollY;
+    if(!lastContact || !allowed() || !canvas || !delta) return;
+    if(contacts.size) lastContact.scrolling=true;
+    var released=lastContact.released;
+    var follow=contacts.size || (released && lastContact.scrolling && now-released<1100 && now-lastScrollAt<160);
+    lastScrollAt=now;
+    if(!follow) return;
+    // Feed the momentum of this same swipe at its actual last contact point.
+    // Never start a new effect at an arbitrary card or symbol.
+    var freshMove=contacts.size && now-lastContact.time<24;
+    if(!freshMove) {
+      var fade=contacts.size ? 1 : Math.pow(1-(now-released)/1100,2);
+      impulses.push({x:lastContact.x,y:lastContact.y,power:Math.min(.16,Math.abs(delta)*.007)*fade});
+    }
+    wake();
+  },{passive:true});
   window.addEventListener('blur',reset);
   window.addEventListener('resize',function() { resize(); wake(); },{passive:true});
   document.addEventListener('visibilitychange',function() { if(document.hidden) reset(); });
