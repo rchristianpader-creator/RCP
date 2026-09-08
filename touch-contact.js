@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var active=new Map(), serial=0,lastTouch=null;
-  var scrollMark=null,scrollTimer=0,scrollRemoval=0,previousScrollY=scrollY,lastScrollAt=-Infinity;
+  var scrollTimer=0,previousScrollY=scrollY,lastScrollAt=-Infinity;
   var options={passive:true,capture:true};
   function emit(phase,id,x,y) {
     window.dispatchEvent(new CustomEvent('rcp:liquid-contact',{detail:{phase:phase,id:id,x:x,y:y}}));
@@ -40,9 +40,18 @@
     emit('end',id,contact.x,contact.y);
   }
   function clearScrollFeedback() {
-    clearTimeout(scrollTimer); clearTimeout(scrollRemoval);
-    if(scrollMark) scrollMark.remove();
-    scrollMark=null; lastScrollAt=-Infinity;
+    clearTimeout(scrollTimer); lastScrollAt=-Infinity;
+  }
+  function settleScroll() {
+    // Native scroll can take over without delivering touchend. Do not keep
+    // pressing the liquid forever on behalf of a finger we can no longer track.
+    if(lastTouch && performance.now()-lastTouch.time<120) {
+      scrollTimer=setTimeout(settleScroll,120); return;
+    }
+    Array.from(active.keys()).forEach(function(id) {
+      if(id.charAt(0)==='t') finish(id);
+    });
+    clearScrollFeedback(); lastTouch=null;
   }
   window.addEventListener('scroll',function() {
     var delta=scrollY-previousScrollY; previousScrollY=scrollY;
@@ -52,23 +61,10 @@
     // a stale touch for later keyboard, wheel, or programmatic scrolling.
     if(!active.size && now-lastTouch.time>250 && now-lastScrollAt>180) return;
     lastScrollAt=now;
-    clearTimeout(scrollTimer); clearTimeout(scrollRemoval);
-    if(!scrollMark) {
-      scrollMark=document.createElement('span');
-      scrollMark.className='liquid-contact liquid-scroll-feedback';
-      scrollMark.setAttribute('aria-hidden','true');
-      var core=document.createElement('span'); core.className='liquid-contact-core';
-      scrollMark.appendChild(core); document.body.appendChild(scrollMark);
-    }
-    scrollMark.classList.remove('released');
-    scrollMark.style.transform='translate3d('+lastTouch.x+'px,'+lastTouch.y+'px,0)';
+    clearTimeout(scrollTimer);
     window.dispatchEvent(new CustomEvent('rcp:liquid-scroll',{detail:{x:lastTouch.x,y:lastTouch.y,delta:delta}}));
-    // Scroll duration, not a deadline after touchend, controls this feedback.
-    scrollTimer=setTimeout(function() {
-      if(!scrollMark) return;
-      scrollMark.classList.add('released');
-      scrollRemoval=setTimeout(clearScrollFeedback,650);
-    },180);
+    // Only the wave solver receives momentum; no extra stationary circle.
+    scrollTimer=setTimeout(settleScroll,180);
   },{passive:true});
   function syncTouches(e) {
     var live=new Set();

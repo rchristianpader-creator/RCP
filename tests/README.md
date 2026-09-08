@@ -13,7 +13,7 @@ Before fixes: 13 of 16 liquid tests passed. Three failures were reproduced:
 - A resize event with unchanged dimensions erased the wave field.
 - A simulated 120 Hz display shaded the full field 120 times per second despite a roughly 60 Hz simulation.
 
-After fixes: **26 of 26 tests pass**, including 16 liquid tests and 10 asset/cache checks. `git diff --check` passes.
+After fixes: **29 of 29 tests pass**, including 19 liquid tests and 10 asset/cache checks. `git diff --check` passes.
 
 The harness executes the actual production scripts with deterministic DOM, canvas, timer and animation-frame substitutes. Coverage includes subpixel reversals, concurrent fingers, pointer cancellation during touch, 100 rapid taps, click deduplication, passive input listeners, continuous momentum, idle expiration, blur/background cleanup, accessibility preferences, unavailable canvas, unchanged viewport, high-refresh render scheduling and wave settling. Asset checks cover four app pages, precache existence, root JavaScript and classic inline script syntax, and service-worker navigation/authentication cache rules.
 
@@ -39,3 +39,11 @@ Use Safari and the installed PWA on the affected iPhone. Record iOS version, dev
 - Upgrade an existing v204 PWA to v205, reload, go offline/online and verify the loaded asset versions and absence of authentication-page caching.
 
 Do not describe this candidate as fully tested or the iPhone scroll defect as resolved until those checks have passed.
+
+## Follow-up: circle remaining after scroll
+
+Three additional regression tests first failed on the previous candidate, then passed after this change. A missing touchend left the contact registered indefinitely. Scroll feedback also created a second decorative circle at the last known location.
+
+The second circle and its looping CSS animation are removed. After scroll becomes idle for 180 ms and there have been no delivered contact samples for at least 120 ms, outstanding touch contacts are released. Subsequent delivered touchmove events re-establish feedback. The wave field can decay instead of receiving permanent held pressure.
+
+This is a conservative cleanup heuristic, not detection of physical finger release: a finger held still after scrolling also relaxes until another movement arrives. Momentum impulses still use the last delivered coordinates; they do not establish a new finger position. Native events that Safari does not deliver cannot be reconstructed by these tests or by the visual effect. Actual iPhone scroll behavior remains unverified. No production release.
