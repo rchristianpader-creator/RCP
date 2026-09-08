@@ -2,17 +2,22 @@
 (function () {
   'use strict';
   var active=new Map(), serial=0,lastTouch=null;
-  var scrollTimer=0,previousScrollY=scrollY,lastScrollAt=-Infinity;
+  var scrollTimer=0,scrollFrame=0,previousScrollY=scrollY;
+  var reduced=matchMedia('(prefers-reduced-motion: reduce)');
+  var opaque=matchMedia('(prefers-reduced-transparency: reduce)');
   var options={passive:true,capture:true};
   function emit(phase,id,x,y) {
     window.dispatchEvent(new CustomEvent('rcp:liquid-contact',{detail:{phase:phase,id:id,x:x,y:y}}));
   }
   function start(id,x,y) {
     if(document.hidden) return;
+    if(!lastTouch) previousScrollY=scrollY;
     if(active.has(id)) finish(id);
+    clearTimeout(scrollTimer);
     active.set(id,{x:x,y:y});
     lastTouch={x:x,y:y,time:performance.now()};
     emit('start',id,x,y);
+    watchScroll();
   }
   function move(id,x,y) {
     var contact=active.get(id);
@@ -26,11 +31,25 @@
     active.delete(id);
     lastTouch={x:contact.x,y:contact.y,time:performance.now()};
     emit('end',id,contact.x,contact.y);
+    if(!active.size) { clearTimeout(scrollTimer); scrollTimer=setTimeout(settleScroll,180); }
   }
   function clearScrollFeedback() {
-    clearTimeout(scrollTimer); lastScrollAt=-Infinity;
+    clearTimeout(scrollTimer); cancelAnimationFrame(scrollFrame); scrollFrame=0;
+  }
+  function watchScroll() {
+    if(scrollFrame || !lastTouch || document.hidden || reduced.matches || opaque.matches) return;
+    scrollFrame=requestAnimationFrame(function() {
+      scrollFrame=0;
+      observeScroll();
+      watchScroll();
+    });
   }
   function settleScroll() {
+    // The compositor may have moved the viewport before JS receives scroll.
+    // Check actual position before declaring the gesture finished.
+    if(lastTouch && scrollY!==previousScrollY && !document.hidden) {
+      observeScroll(); return;
+    }
     // Native scroll can take over without delivering touchend. Do not keep
     // pressing the liquid forever on behalf of a finger we can no longer track.
     if(lastTouch && performance.now()-lastTouch.time<120) {
@@ -41,19 +60,15 @@
     });
     clearScrollFeedback(); lastTouch=null;
   }
-  window.addEventListener('scroll',function() {
+  function observeScroll() {
     var delta=scrollY-previousScrollY; previousScrollY=scrollY;
     if(!delta || !lastTouch || document.hidden) return;
-    var now=performance.now();
-    // Keep a continuous native momentum gesture alive, but never resurrect
-    // a stale touch for later keyboard, wheel, or programmatic scrolling.
-    if(!active.size && now-lastTouch.time>250 && now-lastScrollAt>180) return;
-    lastScrollAt=now;
     clearTimeout(scrollTimer);
     window.dispatchEvent(new CustomEvent('rcp:liquid-scroll',{detail:{x:lastTouch.x,y:lastTouch.y,delta:delta}}));
     // Only the wave solver receives momentum; no extra stationary circle.
     scrollTimer=setTimeout(settleScroll,180);
-  },{passive:true});
+  }
+  window.addEventListener('scroll',observeScroll,{passive:true});
   function syncTouches(e) {
     // Ended/cancelled fingers are absent from touches. Consume their final
     // coordinates before removing them, including swipes with no touchmove.

@@ -1,4 +1,4 @@
-# Liquid feedback QA — v206, 2026-09-08
+# Liquid feedback QA — v207, 2026-09-08
 
 Baseline: production v204, commit 05d8e3502a07bf8ffe4a4eecd5667b2273121a37.
 Release scope: code corrections verified by automated regression tests. Actual iPhone input delivery, visual quality and smoothness remain unverified; this is not complete device acceptance.
@@ -22,7 +22,7 @@ The earlier regression fixes are included: stale contacts cannot restart unrelat
 
 ## Automated result
 
-**33/33 tests pass:** 23 input/simulation tests and 10 asset/cache checks. `git diff --check` passes. All four app pages and the service worker use v206 for the liquid assets.
+**36/36 tests pass:** 26 input/simulation tests and 10 asset/cache checks. `git diff --check` passes. All four app pages and the service worker use v207 for the liquid assets.
 
 Coverage includes subpixel reversals, multiple fingers, pointer cancellation during touch, 100 rapid taps, click deduplication, passive listeners, continuous momentum, idle expiration, blur/background cleanup, reduced motion/transparency, unavailable canvas, unchanged viewport, high-refresh scheduling, wave settling, sparse swipes and cancelled/released endpoints. Asset checks cover page references, precache existence, root JavaScript/classic inline syntax, and service-worker navigation/authentication cache rules.
 
@@ -47,3 +47,13 @@ Required manual checks in Safari and the installed PWA:
 
 Reference for final Touch coordinates: https://www.w3.org/community/reports/touchevents/CG-FINAL-touch-events-20240704/
 Reference for coalesced pointer samples: https://www.w3.org/TR/pointerevents3/
+
+## v207 — delayed scroll delivery
+
+The 14:51 recording shows waves during parts of the scroll and absent reactions during others. It does not establish the scheduling of native events. We separately reproduced an application bug: the idle timeout discarded the gesture even when scrollY had already changed and the scroll event had not yet been delivered.
+
+The input router now samples scrollY during animation frames for the current gesture and checks it before idle cleanup. A detected change extends the gesture and injects its scroll delta into the water field. Native scroll events and frame sampling share one last-position value, so the same delta is not counted twice. Sampling ends on idle, blur or hiding, and respects reduced motion/transparency. It never calls preventDefault or changes the page scroll position.
+
+Three regression tests cover delayed scroll delivery across the cleanup deadline, scrolling observed via animation frames without a scroll event, and deduplication/blur cleanup. The first two failed on v206 before this change. The complete suite now passes 36 tests.
+
+Limit: if WebKit suspends both animation callbacks and scroll-position updates visible to JavaScript, this cannot render new simulated frames during that suspension. Real iPhone frame timing remains unmeasured; the report does not claim that the recording's entire cause is proven or that every physical gesture is delivered.
