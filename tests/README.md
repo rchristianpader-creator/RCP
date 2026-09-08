@@ -1,4 +1,19 @@
-# UI QA — v212, 2026-09-08
+# UI QA — v213, 2026-09-08
+
+## v213 — only symbols snap; native calendar-style touch handling
+
+Start-page and footer snap targets are removed. Only the symbol window snaps.
+Symbol swipes now use the same native touchstart/touchmove/touchend path as the
+economic calendar, with an 8 px direction threshold, full finger displacement,
+preventDefault only for horizontal movement and a 45 px switching threshold.
+The previous drag had been damped to 35% and capped at 70 px. Touch pointer
+cancellation cannot discard a native touch gesture; duplicate pointer delivery
+cannot advance twice. Short/vertical/cancelled/multitouch gestures do not switch.
+Mouse and pen still use PointerEvents. No visible arrows were added.
+
+Three new native-touch regression tests failed before the correction and pass
+after it. All 27 asset/controller tests pass. These are simulated event tests;
+real iPhone visual/touch acceptance behind the site login is still unverified.
 
 ## v212 — centered snap and swipe navigation
 

@@ -21,7 +21,10 @@
   }
 
   function zuruecksetzen() {
-    if (geste && geste.karte) geste.karte.style.transform = "";
+    if (geste && geste.karte) {
+      geste.karte.style.transition = "";
+      geste.karte.style.transform = "";
+    }
     geste = null;
   }
 
@@ -88,37 +91,80 @@
     blaettern(e.key === "ArrowLeft" ? -1 : 1);
   });
 
-  // PointerEvents decken Finger, Stift und Maus ab. Vertikales Ziehen
-  // uebernimmt der Browser; ein Abbruch darf keine Aktie weiterschalten.
-  karten.addEventListener("pointerdown", function (e) {
-    if (!e.isPrimary) { zuruecksetzen(); return; }
-    if (e.button !== 0 || !aktiv || liste().length < 2 ||
-        e.target.closest("button, input, select, textarea, [contenteditable='true']")) return;
-    geste = { id: e.pointerId, x: e.clientX, y: e.clientY, quer: false, karte: aktiv };
-  });
-  window.addEventListener("pointermove", function (e) {
-    if (!geste || geste.id !== e.pointerId) return;
-    var dx = e.clientX - geste.x, dy = e.clientY - geste.y;
+  // Derselbe Touch-Weg wie beim Wirtschaftskalender: ab acht Pixeln die
+  // Richtung festlegen, dem Finger ungebremst folgen, ab 45 Pixeln wechseln.
+  // Native TouchEvents bleiben von begleitenden Pointer-Abbruechen getrennt.
+  function anfangen(p, ziel, native) {
+    zuruecksetzen();
+    if (!aktiv || liste().length < 2 ||
+        ziel.closest("button, input, select, textarea, [contenteditable='true']")) return;
+    if (aktiv.getAnimations) aktiv.getAnimations().forEach(function (a) { a.cancel(); });
+    geste = { id: native ? p.identifier : p.pointerId, native: native,
+      x: p.clientX, y: p.clientY, quer: false, karte: aktiv };
+  }
+  function bewegen(p, e) {
+    var dx = p.clientX - geste.x, dy = p.clientY - geste.y;
     if (!geste.quer) {
       if (Math.max(Math.abs(dx), Math.abs(dy)) < 8) return;
       if (Math.abs(dy) >= Math.abs(dx)) { zuruecksetzen(); return; }
       geste.quer = true;
-      karten.setPointerCapture(e.pointerId);
     }
-    if (!ruhig.matches) geste.karte.style.transform = "translateX(" + Math.max(-70, Math.min(70, dx * 0.35)) + "px)";
-  }, { passive: true });
-  window.addEventListener("pointerup", function (e) {
-    if (!geste || geste.id !== e.pointerId) return;
-    var dx = e.clientX - geste.x, dy = e.clientY - geste.y;
+    if (e && e.cancelable) e.preventDefault();
+    if (!ruhig.matches) {
+      geste.karte.style.transition = "none";
+      geste.karte.style.transform = "translateX(" + dx + "px)";
+    }
+  }
+  function loslassen(p) {
+    var dx = p.clientX - geste.x, dy = p.clientY - geste.y;
     var quer = geste.quer || (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy));
     zuruecksetzen();
     if (quer) {
       sperreBis = Date.now() + 400;
       if (Math.abs(dx) > 45) blaettern(dx < 0 ? 1 : -1);
     }
+  }
+  fenster.addEventListener("touchstart", function (e) {
+    if (e.touches.length !== 1) { zuruecksetzen(); return; }
+    anfangen(e.touches[0], e.target, true);
   }, { passive: true });
-  window.addEventListener("pointercancel", zuruecksetzen, { passive: true });
-  karten.addEventListener("lostpointercapture", zuruecksetzen);
+  fenster.addEventListener("touchmove", function (e) {
+    if (!geste || !geste.native) return;
+    if (e.touches.length !== 1 || e.touches[0].identifier !== geste.id) {
+      zuruecksetzen(); return;
+    }
+    bewegen(e.touches[0], e);
+  }, { passive: false });
+  fenster.addEventListener("touchend", function (e) {
+    if (!geste || !geste.native) return;
+    for (var i = 0; i < e.changedTouches.length; i++) {
+      if (e.changedTouches[i].identifier === geste.id) {
+        loslassen(e.changedTouches[i]); return;
+      }
+    }
+  }, { passive: true });
+  fenster.addEventListener("touchcancel", zuruecksetzen, { passive: true });
+
+  // Maus und Stift behalten denselben Weg; Touch laeuft oben wie im Kalender.
+  karten.addEventListener("pointerdown", function (e) {
+    if (e.pointerType === "touch" || (geste && geste.native)) return;
+    if (!e.isPrimary) { zuruecksetzen(); return; }
+    if (e.button !== 0) return;
+    anfangen(e, e.target, false);
+  });
+  window.addEventListener("pointermove", function (e) {
+    if (!geste || geste.native || geste.id !== e.pointerId) return;
+    var warQuer = geste.quer;
+    bewegen(e);
+    if (geste && geste.quer && !warQuer) karten.setPointerCapture(e.pointerId);
+  }, { passive: true });
+  window.addEventListener("pointerup", function (e) {
+    if (!geste || geste.native || geste.id !== e.pointerId) return;
+    loslassen(e);
+  }, { passive: true });
+  function pointerAbbruch() { if (geste && !geste.native) zuruecksetzen(); }
+  window.addEventListener("pointercancel", pointerAbbruch, { passive: true });
+  karten.addEventListener("lostpointercapture", pointerAbbruch);
   window.addEventListener("blur", zuruecksetzen);
   document.addEventListener("visibilitychange", function () { if (document.hidden) zuruecksetzen(); });
   // Ein Wisch ueber einer Schlagzeile oeffnet keinen Link beim Loslassen.

@@ -4296,13 +4296,14 @@ html.symbole-einrasten {
   scroll-padding-block: calc(var(--luft) / 2);
 }
 .symbol-fenster.bereit {
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
   scroll-snap-align: center;
   scroll-snap-stop: always;
   margin-bottom: var(--luft);
 }
-/* Startseite und Fuss bleiben eigene erreichbare Ziele. */
-.symbole-einrasten .erste-seite { scroll-snap-align: start; }
-.symbole-einrasten footer { scroll-snap-align: end; }
+/* Nur das Symbolfenster rastet ein. Startseite und Fuss scrollen frei. */
 .symbol-steuerung {
   display: flex;
   align-items: center;

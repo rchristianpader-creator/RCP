@@ -162,3 +162,45 @@ test('direct selection centers the complete window for different viewport height
     assert.equal(h.elements.symbolFenster.classList.contains('bereit'), true);
   }
 });
+
+test('calendar-style native touch drag follows the full finger distance and commits on release', () => {
+  const h = harness(), box = h.elements.symbolFenster;
+  const touch = (x,y) => ({identifier:7,clientX:x,clientY:y});
+  box.fire('touchstart',{touches:[touch(280,300)]});
+  const move = box.fire('touchmove',{touches:[touch(130,302)],cancelable:true});
+  assert.equal(h.cards[0].style.transform,'translateX(-150px)');
+  assert.equal(move.defaultPrevented,true);
+  box.fire('touchmove',{touches:[touch(180,302)],cancelable:true});
+  assert.equal(h.cards[0].style.transform,'translateX(-100px)');
+  box.fire('touchend',{touches:[],changedTouches:[touch(160,302)]});
+  assert.deepEqual(h.current(),['stock1']);
+});
+test('native vertical, short, cancelled and multitouch gestures do not switch symbols', () => {
+  for(const kind of ['vertical','short','cancel','multi']) {
+    const h=harness(),box=h.elements.symbolFenster;
+    const t=(x,y)=>({identifier:7,clientX:x,clientY:y});
+    box.fire('touchstart',{touches:[t(200,200)]});
+    const end=kind==='vertical'?t(202,300):kind==='short'?t(180,200):t(100,200);
+    const move=box.fire('touchmove',{touches:kind==='multi'?[end,{identifier:8,clientX:50,clientY:200}]:[end],cancelable:true});
+    if(kind==='vertical') assert.equal(move.defaultPrevented,undefined);
+    box.fire(kind==='cancel'?'touchcancel':'touchend',{touches:[],changedTouches:[end]});
+    assert.deepEqual(h.current(),['stock0']);
+  }
+});
+test('touch pointer cancellation and duplicate pointerup cannot discard or double a native swipe', () => {
+  const h=harness(),box=h.elements.symbolFenster;
+  const t=x=>({identifier:7,clientX:x,clientY:200});
+  h.elements.karten.fire('pointerdown',{pointerType:'touch',clientX:200,clientY:200});
+  box.fire('touchstart',{touches:[t(200)]});
+  box.fire('touchmove',{touches:[t(100)],cancelable:true});
+  h.win.fire('pointercancel',{pointerType:'touch'});
+  box.fire('touchend',{touches:[],changedTouches:[t(100)]});
+  h.win.fire('pointerup',{pointerType:'touch',clientX:100,clientY:200});
+  assert.deepEqual(h.current(),['stock1']);
+});
+test('native sparse swipe uses the final touchend coordinates', () => {
+  const h=harness(),box=h.elements.symbolFenster;
+  box.fire('touchstart',{touches:[{identifier:1,clientX:200,clientY:200}]});
+  box.fire('touchend',{touches:[],changedTouches:[{identifier:1,clientX:80,clientY:200}]});
+  assert.deepEqual(h.current(),['stock1']);
+});
