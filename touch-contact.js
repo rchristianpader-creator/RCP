@@ -1,4 +1,4 @@
-/* Low-latency contact feedback, independent of the fluid solver. */
+/* Passive input routing for the shared liquid surface. No decorative overlays. */
 (function () {
   'use strict';
   var active=new Map(), serial=0,lastTouch=null;
@@ -10,13 +10,7 @@
   function start(id,x,y) {
     if(document.hidden) return;
     if(active.has(id)) finish(id);
-    var mark=document.createElement('span');
-    mark.className='liquid-contact'; mark.setAttribute('aria-hidden','true');
-    var core=document.createElement('span'); core.className='liquid-contact-core'; mark.appendChild(core);
-    mark.style.transform='translate3d('+x+'px,'+y+'px,0)';
-    document.body.appendChild(mark);
-    active.set(id,{node:mark,x:x,y:y,born:performance.now()});
-    // Visual feedback is installed before invoking any simulation handler.
+    active.set(id,{x:x,y:y});
     lastTouch={x:x,y:y,time:performance.now()};
     emit('start',id,x,y);
   }
@@ -24,7 +18,6 @@
     var contact=active.get(id);
     if(!contact) { start(id,x,y); return; }
     contact.x=x; contact.y=y;
-    contact.node.style.transform='translate3d('+x+'px,'+y+'px,0)';
     lastTouch={x:x,y:y,time:performance.now()};
     emit('move',id,x,y);
   }
@@ -32,11 +25,6 @@
     var contact=active.get(id); if(!contact) return;
     active.delete(id);
     lastTouch={x:contact.x,y:contact.y,time:performance.now()};
-    var wait=Math.max(0,140-(performance.now()-contact.born));
-    setTimeout(function() {
-      contact.node.classList.add('released');
-      setTimeout(function() { contact.node.remove(); },650);
-    },wait);
     emit('end',id,contact.x,contact.y);
   }
   function clearScrollFeedback() {
@@ -67,6 +55,14 @@
     scrollTimer=setTimeout(settleScroll,180);
   },{passive:true});
   function syncTouches(e) {
+    // Ended/cancelled fingers are absent from touches. Consume their final
+    // coordinates before removing them, including swipes with no touchmove.
+    if(e.type==='touchend' || e.type==='touchcancel') {
+      Array.from(e.changedTouches || []).forEach(function(t) {
+        var id='t'+t.identifier;
+        if(active.has(id)) move(id,t.clientX,t.clientY);
+      });
+    }
     var live=new Set();
     Array.from(e.touches).forEach(function(t) {
       var id='t'+t.identifier; live.add(id);
@@ -87,10 +83,16 @@
   window.addEventListener('pointermove',function(e) {
     var id='p'+e.pointerId;
     if(e.pointerType==='touch' || !active.has(id)) return;
+    if(e.getCoalescedEvents) e.getCoalescedEvents().forEach(function(p) { move(id,p.clientX,p.clientY); });
     move(id,e.clientX,e.clientY);
   },options);
   ['pointerup','pointercancel'].forEach(function(name) {
-    window.addEventListener(name,function(e) { if(e.pointerType!=='touch') finish('p'+e.pointerId); },options);
+    window.addEventListener(name,function(e) {
+      var id='p'+e.pointerId;
+      if(e.pointerType==='touch' || !active.has(id)) return;
+      if(Number.isFinite(e.clientX) && Number.isFinite(e.clientY)) move(id,e.clientX,e.clientY);
+      finish(id);
+    },options);
   });
   // Cover trusted click-only activations without doubling the usual touch click.
   window.addEventListener('click',function(e) {
