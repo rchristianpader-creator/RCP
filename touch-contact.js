@@ -2,6 +2,7 @@
 (function () {
   'use strict';
   var active=new Map(), serial=0,lastTouch=null;
+  var scrollMark=null,scrollTimer=0,scrollRemoval=0,previousScrollY=scrollY;
   var options={passive:true,capture:true};
   function emit(phase,id,x,y) {
     window.dispatchEvent(new CustomEvent('rcp:liquid-contact',{detail:{phase:phase,id:id,x:x,y:y}}));
@@ -38,6 +39,32 @@
     },wait);
     emit('end',id,contact.x,contact.y);
   }
+  function clearScrollFeedback() {
+    clearTimeout(scrollTimer); clearTimeout(scrollRemoval);
+    if(scrollMark) scrollMark.remove();
+    scrollMark=null;
+  }
+  window.addEventListener('scroll',function() {
+    var delta=scrollY-previousScrollY; previousScrollY=scrollY;
+    if(!delta || !lastTouch || document.hidden) return;
+    clearTimeout(scrollTimer); clearTimeout(scrollRemoval);
+    if(!scrollMark) {
+      scrollMark=document.createElement('span');
+      scrollMark.className='liquid-contact liquid-scroll-feedback';
+      scrollMark.setAttribute('aria-hidden','true');
+      var core=document.createElement('span'); core.className='liquid-contact-core';
+      scrollMark.appendChild(core); document.body.appendChild(scrollMark);
+    }
+    scrollMark.classList.remove('released');
+    scrollMark.style.transform='translate3d('+lastTouch.x+'px,'+lastTouch.y+'px,0)';
+    window.dispatchEvent(new CustomEvent('rcp:liquid-scroll',{detail:{x:lastTouch.x,y:lastTouch.y,delta:delta}}));
+    // Scroll duration, not a deadline after touchend, controls this feedback.
+    scrollTimer=setTimeout(function() {
+      if(!scrollMark) return;
+      scrollMark.classList.add('released');
+      scrollRemoval=setTimeout(clearScrollFeedback,650);
+    },180);
+  },{passive:true});
   function syncTouches(e) {
     var live=new Set();
     Array.from(e.touches).forEach(function(t) {
@@ -74,8 +101,8 @@
     if(lastTouch && performance.now()-lastTouch.time<800 && Math.hypot(x-lastTouch.x,y-lastTouch.y)<24) return;
     var id='c'+(++serial); start(id,x,y); finish(id);
   },options);
-  window.addEventListener('blur',function() { Array.from(active.keys()).forEach(finish); });
+  window.addEventListener('blur',function() { Array.from(active.keys()).forEach(finish); clearScrollFeedback(); lastTouch=null; });
   document.addEventListener('visibilitychange',function() {
-    if(document.hidden) Array.from(active.keys()).forEach(finish);
+    if(document.hidden) { Array.from(active.keys()).forEach(finish); clearScrollFeedback(); lastTouch=null; }
   });
 })();

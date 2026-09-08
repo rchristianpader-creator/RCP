@@ -130,3 +130,15 @@ header h1 { line-height: 1.2; }
   .liquid-contact-core { background: none; border: 2px solid currentColor; color: #eef6f2; width: 44px; height: 44px; left: -22px; top: -22px; }
 }
 
+
+/* A compositor animation stays visible throughout native scroll momentum. */
+.liquid-scroll-feedback:not(.released) .liquid-contact-core {
+  animation: liquidScrollFlow 1100ms ease-in-out infinite alternate;
+}
+@keyframes liquidScrollFlow {
+  from { transform: scale(.92,1.12) rotate(-12deg); opacity: .65; }
+  to { transform: scale(1.16,.96) rotate(12deg); opacity: .95; }
+}
+@media (prefers-reduced-motion: reduce), (prefers-reduced-transparency: reduce), (forced-colors: active) {
+  .liquid-scroll-feedback { display: none; }
+}

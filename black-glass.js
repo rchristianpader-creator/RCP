@@ -165,23 +165,12 @@
       else move(input.id,input.x,input.y);
     } else end(input.id);
   });
-  window.addEventListener('scroll',function() {
-    var now=performance.now(),delta=scrollY-lastScrollY; lastScrollY=scrollY;
-    if(!lastContact || !allowed() || !canvas || !delta) return;
-    if(contacts.size) lastContact.scrolling=true;
-    var released=lastContact.released;
-    var follow=contacts.size || (released && lastContact.scrolling && now-released<1100 && now-lastScrollAt<160);
-    lastScrollAt=now;
-    if(!follow) return;
-    // Feed the momentum of this same swipe at its actual last contact point.
-    // Never start a new effect at an arbitrary card or symbol.
-    var freshMove=contacts.size && now-lastContact.time<24;
-    if(!freshMove) {
-      var fade=contacts.size ? 1 : Math.pow(1-(now-released)/1100,2);
-      impulses.push({x:lastContact.x,y:lastContact.y,power:Math.min(.16,Math.abs(delta)*.007)*fade});
-    }
+  window.addEventListener('rcp:liquid-scroll',function(e) {
+    if(!allowed() || !prepare()) return;
+    var input=e.detail;
+    impulses.push({x:input.x,y:input.y,power:Math.min(.16,.02+Math.abs(input.delta)*.006)});
     wake();
-  },{passive:true});
+  });
   window.addEventListener('blur',reset);
   window.addEventListener('resize',function() { resize(); wake(); },{passive:true});
   document.addEventListener('visibilitychange',function() { if(document.hidden) reset(); });
