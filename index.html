@@ -33,7 +33,7 @@
      zuerst und geht einmal je Stand ueber die Leitung, waehrend dieses
      Dokument bei jedem Start neu geholt wird. Weit vorn im Kopf, damit kein
      Skript darunter auf Masse zugreift, die es noch nicht gibt. -->
-<link rel="stylesheet" href="/stil.css?v=213">
+<link rel="stylesheet" href="/stil.css?v=214">
 <style>
 /* Ein Netz unter der Teilung.
 
@@ -103,9 +103,9 @@
 })();
 </script>
 
-<link rel="stylesheet" href="/black-glass.css?v=213">
-<script src="/touch-contact.js?v=213" defer></script>
-<script src="/black-glass.js?v=213" defer></script>
+<link rel="stylesheet" href="/black-glass.css?v=214">
+<script src="/touch-contact.js?v=214" defer></script>
+<script src="/black-glass.js?v=214" defer></script>
 </head>
 <body>
 <!-- Deckt die Statuszone ab; ohne sie null hoch. Siehe .statusdecke. -->
@@ -289,7 +289,7 @@
   </div>
   <div class="karten" id="karten"></div>
 </section>
-<script src="/symbole.js?v=213"></script>
+<script src="/symbole.js?v=214"></script>
 
 
 
@@ -2906,6 +2906,7 @@ if ("serviceWorker" in navigator) {
       var sortBtn = document.getElementById("sortBtn");
       if (sortBtn) {
         sortBtn.addEventListener("click", function () {
+          if (stapel.classList.contains("seitlich")) return;
           auftritt.disconnect();
           alles.forEach(function (k) { k.classList.add("sichtbar"); });
           // Lang genug, dass der letzte Teil (0,48 s Vorlauf, 1,05 s Lauf)
@@ -4924,7 +4925,7 @@ if ("serviceWorker" in navigator) {
     return (r.width > 0 && r.height > 0) ? el : null;
   }
   function wahl(s) {
-    return da(document.querySelector(s.replace(".karten > .card", ".karten > .card:not([hidden])")));
+    return da(document.querySelector(s.replace(".karten > .card", ".karten > .card:not([inert])")));
   }
 
   var SCHRITTE = [

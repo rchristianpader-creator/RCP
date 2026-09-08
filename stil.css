@@ -4291,19 +4291,9 @@
   overflow-x: clip;
 }
 .symbol-fenster > .karten { margin-top: 0; }
-html.symbole-einrasten {
-  scroll-snap-type: y proximity;
-  scroll-padding-block: calc(var(--luft) / 2);
-}
-.symbol-fenster.bereit {
-  touch-action: pan-y;
-  user-select: none;
-  -webkit-user-select: none;
-  scroll-snap-align: center;
-  scroll-snap-stop: always;
-  margin-bottom: var(--luft);
-}
-/* Nur das Symbolfenster rastet ein. Startseite und Fuss scrollen frei. */
+/* Kein vertikales Scroll-Snap: die Seite behaelt ihren nativen Schwung.
+   symbole.js zentriert erst nach dem Ausrollen nahe am Symbolfenster. */
+.symbol-fenster.bereit { margin-bottom: var(--luft); }
 .symbol-steuerung {
   display: flex;
   align-items: center;
@@ -4318,23 +4308,64 @@ html.symbole-einrasten {
 }
 .symbol-steuerung[hidden],
 .karten.seitlich > .card[hidden] { display: none !important; }
-.karten.seitlich { touch-action: pan-y pinch-zoom; }
+.karten.seitlich {
+  position: relative;
+  flex-direction: row;
+  gap: calc(var(--rand) * 2);
+  width: min(808px, 100%);
+  margin-left: auto;
+  margin-right: auto;
+  padding-inline: var(--rand);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.karten.seitlich::-webkit-scrollbar { display: none; }
 .karten.seitlich > .card {
   --kartenhoehe: calc(100dvh - var(--luft) - 28px);
-  margin-bottom: 0;
-  content-visibility: visible;
-  contain-intrinsic-size: none;
-  animation: none !important;
+  flex: 0 0 100%;
+  min-width: 0;
+  width: auto;
+  margin: 0;
+  scroll-snap-align: center;
+  content-visibility: auto;
+  contain-intrinsic-size: auto var(--kartenhoehe);
+  view-timeline-axis: inline;
 }
-/* Senkrechte Ein-/Ausfahrten passen nicht zum seitlichen Kartenwechsel. */
-.karten.seitlich > .card > *,
-.karten.seitlich > .card > .card-head > .row,
-.karten.seitlich > .card > .card-head > .info {
-  animation: none !important;
-  transform: none !important;
-  opacity: 1 !important;
+/* Dieselben gestaffelten Teile und Zeitfenster wie vorher, jetzt seitlich.
+   Nur die Bewegungsrichtung wird ersetzt; Deckkraft, Staffelung und Kante
+   bleiben erhalten. Keine pauschalen animation:none/opacity:1-Overrides. */
+@keyframes teilSeitlich {
+  from { opacity: 0; transform: translate3d(180px, 0, 0); }
+  55% { opacity: 1; }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
 }
-.karten.seitlich > .card > .card-head::after { animation: none !important; }
+@keyframes teilKleinSeitlich {
+  from { opacity: 0; transform: translate3d(26px, 0, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .karten.seitlich > .card > .card-head,
+    .karten.seitlich > .card > .ziel-bar,
+    .karten.seitlich > .card > .chart,
+    .karten.seitlich > .card > .news-block,
+    .karten.seitlich > .card > .actions { animation-name: teilSeitlich; }
+    .karten.seitlich > .card > .card-head > .row,
+    .karten.seitlich > .card > .card-head > .info { animation-name: teilKleinSeitlich; }
+  }
+  @supports not (animation-timeline: view()) {
+    .karten.seitlich.animiert > .card.sichtbar > .card-head,
+    .karten.seitlich.animiert > .card.sichtbar > .ziel-bar,
+    .karten.seitlich.animiert > .card.sichtbar > .chart,
+    .karten.seitlich.animiert > .card.sichtbar > .news-block,
+    .karten.seitlich.animiert > .card.sichtbar > .actions { animation-name: teilSeitlich; }
+    .karten.seitlich.animiert > .card.sichtbar > .card-head > .row,
+    .karten.seitlich.animiert > .card.sichtbar > .card-head > .info { animation-name: teilKleinSeitlich; }
+  }
+}
 .nur-web .symbol-fenster { display: none; }
 @media (min-width: 720px) {
   .symbol-steuerung { width: min(780px, 100% - 28px); margin-left: auto; margin-right: auto; }

@@ -1,4 +1,31 @@
-# UI QA — v213, 2026-09-08
+# UI QA — v214, 2026-09-08
+
+## v214 — native momentum, settled centering, restored animation
+
+The previous implementation intercepted horizontal touchmove, transformed one
+card and replaced it on release. It also enabled root vertical scroll snapping
+and suppressed the original card-part animations. Those mechanisms are removed.
+Cards now occupy a native horizontal overflow container with CSS snap alignment;
+all card DOM and loaded charts remain mounted. Offscreen cards are inert and
+aria-hidden. Selection updates once per rendering turn from cached snap offsets.
+No touchmove listener or per-event gesture transform remains in symbole.js.
+
+Vertical scrolling has no CSS snap target or forced stop. After native scrollend
+(or a 180 ms idle fallback), a mostly visible symbol window can smoothly center.
+It never centers under a held finger or during ongoing scroll events, and it
+latches after arrival so the next scroll can leave freely. Height-only viewport
+changes do not reset horizontal momentum. Direct navigation uses the same center.
+
+The original card-part timing, stagger, opacity and header-edge animation remain.
+The two translation keyframes now move sideways; supported browsers drive them
+from the inline view timeline, others retain the existing visibility observer.
+Sorting no longer disconnects that observer for the horizontal layout.
+
+All 23 asset/controller tests pass. The controller tests model native scroll
+positions and events; they do not simulate a browser's physics or measure frame
+rate. Live login-page asset versions can confirm deployment, but the app is
+protected by login. The cloud browser rejected local/data preview URLs by policy.
+No physical iPhone smoothness claim or visual acceptance is made.
 
 ## v213 — only symbols snap; native calendar-style touch handling
 
