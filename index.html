@@ -33,7 +33,7 @@
      zuerst und geht einmal je Stand ueber die Leitung, waehrend dieses
      Dokument bei jedem Start neu geholt wird. Weit vorn im Kopf, damit kein
      Skript darunter auf Masse zugreift, die es noch nicht gibt. -->
-<link rel="stylesheet" href="/stil.css?v=193">
+<link rel="stylesheet" href="/stil.css?v=194">
 <style>
 /* Ein Netz unter der Teilung.
 
@@ -103,8 +103,9 @@
 })();
 </script>
 
+<link rel="stylesheet" href="/liquid-glass.css?v=194">
 </head>
-<body>
+<body class="rcp-app">
 <!-- Deckt die Statuszone ab; ohne sie null hoch. Siehe .statusdecke. -->
 <div id="stilfehlt" role="status">Das Aussehen (stil.css) konnte nicht geladen werden — bitte neu laden.</div>
 <div class="statusdecke" aria-hidden="true"></div>
@@ -125,12 +126,14 @@
     <i class="auftakt-zug"></i>
   </div>
   <div class="auftakt-mitte">
+    <div class="glas-emblem" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M16 14v34M32 22v32M48 8v36"/><rect x="11" y="22" width="10" height="17" rx="3" fill="currentColor"/><rect x="27" y="32" width="10" height="13" rx="3"/><rect x="43" y="16" width="10" height="18" rx="3"/></svg></div>
     <i class="kantenlicht" aria-hidden="true"><i></i></i>
     <div class="label">Geschützt</div>
     <h1>Aktien-Liste</h1>
     <p class="wer" id="auftaktWer">&nbsp;</p>
-    <div class="balken"><i id="auftaktBalken"></i></div>
+    <div class="balken" role="progressbar" aria-label="App wird vorbereitet" aria-valuemin="0" aria-valuemax="3" aria-valuenow="0" id="auftaktFortschritt"><i id="auftaktBalken"></i></div>
     <p class="tun" id="auftaktTun">Liste wird geladen</p>
+    <div class="ladeschritte" aria-hidden="true"><span data-ladeschritt="liste">Watchlist</span><span data-ladeschritt="chart">Charts</span><span data-ladeschritt="kurse">Kurse</span></div>
   </div>
 </div>
 
@@ -280,7 +283,7 @@
 
 </div>
 
-<div class="karten" id="karten"></div>
+<div class="karten" id="karten"><div class="ladeplatz" role="status">Watchlist wird geladen …</div></div>
 
 
 
@@ -1001,6 +1004,8 @@
   function zeichnen(kasten, daten) {
     var punkte = daten.punkte || [];
     if (punkte.length < 2) return false;
+    kasten.setAttribute("aria-busy", "false");
+    kasten.removeAttribute("data-fehler");
 
     var spanne = kasten.getAttribute("data-spanne") || "1T";
     var kurse = punkte.map(function (x) { return x[1]; });
@@ -1140,6 +1145,8 @@
     if (!kaesten.length) return;
 
     function platzhalter(k) {
+      k.setAttribute("aria-busy", "true");
+      k.removeAttribute("data-fehler");
       if (k.querySelector(".chart-warte")) return;
       k.textContent = "";
       var w = el("div", "chart-warte");
@@ -1164,8 +1171,10 @@
        ?pruef=1. */
     function ohneZahlen(k, spanne) {
       platzhalter(k);
+      k.setAttribute("aria-busy", "false");
+      k.setAttribute("data-fehler", "true");
       var w = k.querySelector(".chart-warte .wort");
-      if (w) w.textContent = "Kein Kurs";
+      if (w) w.textContent = "Kursdaten derzeit nicht verfügbar";
     }
 
     function einsetzen(k) {
@@ -1487,6 +1496,7 @@
   }
 
   function scheitern() {
+    stapel.textContent = "";
     var hinweis = el("div", "karten-fehler",
       "Die Liste konnte nicht geladen werden. Bitte die Seite neu laden.");
     stapel.appendChild(hinweis);
@@ -3010,17 +3020,7 @@ if ("serviceWorker" in navigator) {
 </script>
 
 <script>
-/* Der Auftakt steuert sich selbst.
-
-   Er verschwindet, wenn drei Dinge erledigt sind: die Liste steht, der
-   oberste Chart hat gezeichnet, und die Kurse sind da. Dazwischen sagt er,
-   woran gerade gearbeitet wird — die Zeit vergeht ohnehin, sie soll nur
-   nicht wie Stillstand aussehen.
-
-   Zwei Grenzen: mindestens 900 ms, damit es nicht zuckt, wenn alles schon im
-   Zwischenspeicher liegt. Und hoechstens 3 Sekunden, damit ein haengender
-   Dienst niemanden aufhaelt — der Auftakt geht dann trotzdem weg. Was bis
-   dahin nicht geladen ist, laedt eben sichtbar weiter. */
+/* Start: echter Fortschritt, kurze Mindestdauer, begrenztes Warten. */
 (function () {
   var kasten = document.getElementById("auftakt");
   if (!kasten) return;
@@ -3031,37 +3031,13 @@ if ("serviceWorker" in navigator) {
   var begonnen = Date.now();
   var fertig = false;
 
-  /* Vier Sekunden, so gewollt — und das ist jetzt eine eigene
-     Entscheidung, keine Folge mehr.
-
-     Ursprunglich standen hier 900 ms: gerade genug, damit es nicht zuckt,
-     wenn alles schon im Zwischenspeicher liegt. Auf vier Sekunden ging es
-     hoch, WEIL der Ladebildschirm ein Auftritt wurde — ein Flug, der
-     seine Zeit brauchte. Der Flug ist entfernt; die vier Sekunden bleiben
-     trotzdem, so bestellt. Der Auftakt aus Glas hat seinen eigenen
-     Auftritt: die Scheibe faehrt herein, das Kantenlicht wandert, der
-     Balken laeuft mit.
-
-     Wer sie nicht will, aendert genau diese Zahl: 900 macht daraus wieder
-     ein blosses Ueberbruecken, 0 laesst den Deckel abgehen, sobald
-     geladen ist.
-
-     Die obere Grenze muss ueber den vier Sekunden liegen, sonst schneidet
-     sie den Auftritt ab, und unter dem Notausgang oben (7 s). */
-  var MINDESTENS = 4000;
-  var HOECHSTENS = 5200;
-
-  /* HIER STAND DER KOSMOS.
-
-     Derselbe Ladebildschirm wurde zur Buehne fuer kosmos.js: ein Flug
-     durch eine Gasse aus allen Marken der Liste, am Ende die Ankunft im
-     App-Zeichen. Auf Wunsch entfernt ("Lade Animation bitte entfernen").
-
-     Was bleibt, ist der Auftakt, den es vorher schon gab: die Glasscheibe
-     mit dem Zeichen, der Balken, die drei Schritte, der Einzug. Er hat
-     den Flug nie gebraucht — die Szene war Anstrich auf diesem Geruest,
-     kein zweiter Ablauf. Deshalb faellt sie ersatzlos weg, und hier steht
-     nichts an ihrer Stelle. */
+  var ruhig = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var MINDESTENS = ruhig ? 0 : 600;
+  var HOECHSTENS = 4500;
+  var wache = null;
+  var frist;
+  var fehler = false;
+  var fortschritt = document.getElementById("auftaktFortschritt");
 
   // Was der Auftakt abwartet, in der Reihenfolge, in der es eintrifft
   var schritte = [
@@ -3070,56 +3046,37 @@ if ("serviceWorker" in navigator) {
     { name: "kurse", wort: "Kurse werden geholt", da: false }
   ];
 
-  /* Der Balken zeigt den kleineren von zwei Werten: was geladen ist und wie
-     viel von den vier Sekunden herum ist. Nur nach Schritten waere er nach
-     zwei Sekunden voll und stuende dann still — ein Haenger, kein Auftritt.
-     Nur nach der Zeit waere er eine Luege. So ist er voll, wenn geladen ist
-     UND die Zeit herum ist: genau wenn der Deckel abgeht. */
   function anteil() {
     var geladen = schritte.filter(function (s) { return s.da; }).length / schritte.length;
-    var zeit = Math.min(1, (Date.now() - begonnen) / MINDESTENS);
-    return Math.min(geladen, zeit);
+    return geladen;
   }
 
   function zeichnen() {
+    if (deckelWeg) return;
+    if (fortschritt) fortschritt.setAttribute("aria-valuenow", schritte.filter(function (s) { return s.da; }).length);
+    schritte.forEach(function (s) {
+      var label = kasten.querySelector("[data-ladeschritt=" + s.name + "]");
+      if (label) label.classList.toggle("erledigt", s.da);
+    });
     if (balken) balken.style.transform = "scaleX(" + anteil().toFixed(3) + ")";
     var offen = schritte.filter(function (s) { return !s.da; })[0];
-    if (tun && offen) tun.textContent = offen.wort;
+    if (tun && offen && !fertig) tun.textContent = offen.wort;
     if (!offen) schluss();
   }
 
-  /* Alle 120 ms nachziehen: der Balken traegt einen Uebergang von 0,68 s,
-     33 Schritte ueber vier Sekunden reichen also voellig. Ein Takt je Bild
-     waere hier Verschwendung — daneben wird die Liste gebaut. */
   var takt = setInterval(zeichnen, 120);
 
   function erledigt(name) {
     var s = schritte.filter(function (x) { return x.name === name; })[0];
-    if (!s || s.da) return;
+    if (!s || s.da || deckelWeg) return;
     s.da = true;
     zeichnen();
   }
 
-  /* Der Einzug. Wird genau in dem Bild ausgeloest, in dem der Deckel zu
-     gehen beginnt — beides zusammen ist eine Bewegung, nacheinander waeren
-     es zwei.
-
-     Die Nummer je Block steht als --n am Element und nicht als nth-child im
-     Stylesheet: die Zahl der Karten steht erst zur Laufzeit fest, und
-     Bloecke koennen ausgeblendet sein (der Wirtschaftskasten ist es oft).
-     Gezaehlt wird deshalb, was wirklich zu sehen ist — sonst haette die
-     dritte Karte die Verzoegerung der fuenften und der Zug bekaeme Luecken.
-
-     Aufgeraeumt wird hinterher: die Klasse bleibt nur, solange die Bewegung
-     laeuft. Sonst faengt jede spaeter gebaute Karte noch einmal von vorn an
-     hereinzufahren. */
   function einzug() {
     var app = document.getElementById("app");
-    if (!app) return;
-    /* Genau die, die das Stylesheet auch bewegt. Zuerst stand hier "alle
-       Kinder von #app" — darin sind aber der Kartenbehaelter und der Fuss,
-       die nicht mitfahren. Sie haetten Nummern verbraucht, und der Zug
-       haette an ihrer Stelle Luecken gehabt. */
+    if (!app || ruhig) return;
+
     var WELCHE = ".erste-seite > header, .erste-seite > nav, .erste-seite > .news-banner," +
                  ".erste-seite > .wirtschaft-block, .erste-seite > .setup-strip, .erste-seite > .fg-box";
     var sichtbar = function (e) {
@@ -3131,35 +3088,22 @@ if ("serviceWorker" in navigator) {
 
     document.body.classList.add("einzug");
 
-    var licht = document.createElement("i");
-    licht.className = "einzug-licht";
-    licht.setAttribute("aria-hidden", "true");
-    document.body.appendChild(licht);
-
     var dauer = 780 + alle.length * 55 + 200;
     setTimeout(function () {
       document.body.classList.remove("einzug");
       alle.forEach(function (e) { e.style.removeProperty("--n"); });
-      if (licht.parentNode) licht.parentNode.removeChild(licht);
+
     }, Math.min(dauer, 3000));
   }
 
   function schluss() {
     if (fertig) return;
     fertig = true;
-    if (tun) tun.textContent = "Fertig";
-    /* Den Balken hier NICHT auf voll setzen. Er waere sonst schon voll,
-       waehrend die Scheibe noch ihren Auftritt hat — der Takt oben schiebt
-       ihn stattdessen bis zum letzten Bild weiter. */
-    var warten = Math.max(0, MINDESTENS - (Date.now() - begonnen));
-    /* HIER STAND EINE WEICHE. Solange der Kosmos den Ladebildschirm
-       bespielte, durfte die Uhr den Deckel nicht selbst abnehmen: sonst
-       waere der Flug mitten in der Ankunft gekappt worden. Sie bestellte
-       nur den Abflug, die Szene meldete sich, und eine Notbremse von neun
-       Sekunden deckte den Fall, dass sie still stirbt.
+    var vollstaendig = schritte.every(function (s) { return s.da; });
+    if (tun) tun.textContent = !vollstaendig ? "Die Daten laden im Hintergrund weiter" : (fehler ? "Liste geöffnet · Daten teilweise nicht verfügbar" : "Deine Watchlist ist bereit");
 
-       Ohne Flug gibt es nichts abzuwarten: der Deckel geht zur Uhrzeit,
-       wie vor dem Kosmos. */
+    var warten = Math.max(0, MINDESTENS - (Date.now() - begonnen));
+
     setTimeout(deckelAb, warten);
   }
 
@@ -3168,47 +3112,51 @@ if ("serviceWorker" in navigator) {
     if (deckelWeg) return;
     deckelWeg = true;
     clearInterval(takt);
-    if (balken) balken.style.transform = "scaleX(1)";
+    clearTimeout(frist);
+    if (wache) wache.disconnect();
     einzug();
     kasten.classList.add("weg");
     setTimeout(function () {
-      /* Die Kerzen ueberleben den Auftakt: der Schirm mit dem, was
-         dazugekommen ist, laesst sie hinter sich weiterlaufen. Verschoben,
-         nicht kopiert — das Bild ist gross, einmal genuegt. Er ist dabei
-         noch zugeklappt, und in Zugeklapptem bewegt sich nichts. */
+
       var kerzen = kasten.querySelector(".kerzen");
       var ziel = document.getElementById("neuheitKerzen");
       if (kerzen && ziel && !ziel.firstChild) ziel.appendChild(kerzen);
       if (kasten.parentNode) kasten.parentNode.removeChild(kasten);
-      /* 380 statt 600 ms: so lange dauert das Ausblenden jetzt (0,34 s)
-         plus ein Wimpernschlag. Blieb der Deckel laenger stehen, als er
-         zu sehen war, hing eine unsichtbare Ebene ueber der Seite. */
+
     }, 460);
   }
 
   // Notausgang: haengt irgendetwas, geht der Auftakt trotzdem
-  setTimeout(schluss, HOECHSTENS);
+  frist = setTimeout(schluss, HOECHSTENS);
 
   // 1. Die Liste steht
-  document.addEventListener("rcp:karten", function () {
+  function kartenBereit() {
+    if (deckelWeg) return;
+    if (!window.rcpPositionen) fehler = true;
     erledigt("liste");
 
     // 2. Der oberste Chart hat gezeichnet
     var erster = document.querySelector(".karten > .card .chart");
     if (!erster) { erledigt("chart"); return; }
-    if (erster.classList.contains("chart-da")) { erledigt("chart"); return; }
-    var wache = new MutationObserver(function () {
-      if (erster.classList.contains("chart-da")) {
-        wache.disconnect();
-        erledigt("chart");
-      }
+    function chartBereit() {
+      if (erster.getAttribute("aria-busy") !== "false") return false;
+      if (erster.hasAttribute("data-fehler")) fehler = true;
+      erledigt("chart");
+      return true;
+    }
+    if (chartBereit()) return;
+    if (wache) wache.disconnect();
+    wache = new MutationObserver(function () {
+      if (chartBereit()) wache.disconnect();
     });
-    wache.observe(erster, { attributes: true, attributeFilter: ["class"] });
-  });
+    wache.observe(erster, { attributes: true, attributeFilter: ["aria-busy"] });
+  }
+  document.addEventListener("rcp:karten", kartenBereit);
+  if (window.rcpPositionen) kartenBereit();
 
   // 3. Die Kurse sind da (dasselbe Ergebnis, das die Aktiv-Anzeige benutzt)
   document.addEventListener("rcp:status", function () { erledigt("kurse"); });
-  document.addEventListener("rcp:status-fehler", function () { erledigt("kurse"); });
+  document.addEventListener("rcp:status-fehler", function () { fehler = true; erledigt("kurse"); });
 
   // Wer da ist, sobald das Konto geantwortet hat
   document.addEventListener("rcp:konto", function (e) {
