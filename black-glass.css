@@ -130,7 +130,3 @@ header h1 { line-height: 1.2; }
   .liquid-contact-core { background: none; border: 2px solid currentColor; color: #eef6f2; width: 44px; height: 44px; left: -22px; top: -22px; }
 }
 
-/* Keep pinch zoom and horizontal controls native; own only vertical list gestures. */
-html.liquid-touch-scroll .erste-seite,
-html.liquid-touch-scroll .karten { touch-action: pan-x pinch-zoom; }
-html.liquid-scroll-moving { scroll-behavior: auto !important; }
