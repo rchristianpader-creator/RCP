@@ -350,23 +350,10 @@
      steht der Inhalt mittig. Sonst haette man das Loch im Kasten statt
      darunter. */
   .erste-seite {
-    /* Hier stehen zwei Forderungen, die ich einmal verwechselt hatte:
-
-         - der letzte Kasten soll UEBER dem Home-Indikator enden, damit
-           seine Rundung zu sehen ist;
-         - die erste Karte soll erst UNTER der Falte beginnen, also ab
-           100svh.
-
-       Der erste Anlauf zog den sicheren Rand von der Hoehe ab. Damit war
-       zwar der Kasten frei, aber die Huelle selbst wurde kuerzer — und die
-       Karte rutschte um denselben Streifen nach oben ins Bild.
-
-       Der Streifen gehoert deshalb in den Innenabstand, nicht in die
-       Hoehe: die Huelle bleibt volle 100svh hoch, die Bloecke fuellen
-       100svh minus Streifen. Beide Forderungen zugleich. Im Browser und auf
-       Geraeten ohne Indikator ist env() 0, dann aendert sich nichts. */
+    /* Der Uebergang zum Symbolfenster hat einen festen Abstand. Keine
+       zusaetzliche Luecke fuer Browserleisten oder den Home-Indikator. */
     min-height: 100svh;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-bottom: 0;
     display: flex;
     flex-direction: column;
   }
@@ -4287,7 +4274,7 @@
 /* Ein gemeinsames Fenster fuer die Symbole, wie beim Terminkasten.
    Nur die ausgewaehlte Karte nimmt Platz ein; Charts bleiben im DOM. */
 .symbol-fenster {
-  margin-top: calc(var(--luft) / 2 + (100lvh - 100svh));
+  margin-top: 12px;
   overflow-x: clip;
 }
 .symbol-fenster > .karten { margin-top: 0; }
@@ -4334,6 +4321,7 @@
   contain-intrinsic-size: auto var(--kartenhoehe);
   view-timeline-axis: inline;
 }
+.karten.seitlich > .card.symbol-vorlauf { content-visibility: visible; }
 /* Dieselben gestaffelten Teile und Zeitfenster wie vorher, jetzt seitlich.
    Nur die Bewegungsrichtung wird ersetzt; Deckkraft, Staffelung und Kante
    bleiben erhalten. Keine pauschalen animation:none/opacity:1-Overrides. */

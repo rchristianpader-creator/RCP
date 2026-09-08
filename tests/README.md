@@ -1,4 +1,23 @@
-# UI QA — v214, 2026-09-08
+# UI QA — v215, 2026-09-08
+
+## v215 — close the gap and avoid interrupting horizontal momentum
+
+The first-page bottom safe-area padding and the extra large/small viewport
+height difference before the symbols are removed. The transition now has a
+fixed 12 px margin before the counter, independent of browser chrome height.
+
+A new regression test reproduced an instant scroll reset when a live status
+update emitted rcp:sortiert without changing the order. The controller now
+leaves native momentum untouched in that case. Selection updates no longer
+rewrite role, labels, tabindex and hidden state across all cards during swipes.
+The current and adjacent cards are prepared for rendering. Chart preloading
+observes the horizontal container with one viewport of left/right preload, so
+adjacent chart requests start before those cards enter the viewport.
+
+All 24 asset/controller tests pass. Original side animation rules, native
+scrolling and settled-only vertical centering remain. The supplied screenshot
+shows the excessive spacing; there is no real-device frame-rate measurement.
+The changes address specific code paths, not a guarantee of iPhone smoothness.
 
 ## v214 — native momentum, settled centering, restored animation
 

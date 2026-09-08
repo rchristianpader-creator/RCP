@@ -33,7 +33,7 @@
      zuerst und geht einmal je Stand ueber die Leitung, waehrend dieses
      Dokument bei jedem Start neu geholt wird. Weit vorn im Kopf, damit kein
      Skript darunter auf Masse zugreift, die es noch nicht gibt. -->
-<link rel="stylesheet" href="/stil.css?v=214">
+<link rel="stylesheet" href="/stil.css?v=215">
 <style>
 /* Ein Netz unter der Teilung.
 
@@ -103,9 +103,9 @@
 })();
 </script>
 
-<link rel="stylesheet" href="/black-glass.css?v=214">
-<script src="/touch-contact.js?v=214" defer></script>
-<script src="/black-glass.js?v=214" defer></script>
+<link rel="stylesheet" href="/black-glass.css?v=215">
+<script src="/touch-contact.js?v=215" defer></script>
+<script src="/black-glass.js?v=215" defer></script>
 </head>
 <body>
 <!-- Deckt die Statuszone ab; ohne sie null hoch. Siehe .statusdecke. -->
@@ -289,7 +289,7 @@
   </div>
   <div class="karten" id="karten"></div>
 </section>
-<script src="/symbole.js?v=214"></script>
+<script src="/symbole.js?v=215"></script>
 
 
 
@@ -1269,7 +1269,9 @@
       eintraege.forEach(function (e) {
         if (e.isIntersecting) einsetzen(zuKarte.get(e.target));
       });
-    }, { rootMargin: "250% 0px" });
+    // Eine Kartenbreite Vorlauf links und rechts: der naechste Chart wird
+    // vor dem Wischen geladen, nicht erst beim Hereinschieben.
+    }, { root: stapel, rootMargin: "0px 100%" });
 
     var weit = new IntersectionObserver(function (eintraege) {
       eintraege.forEach(function (e) {

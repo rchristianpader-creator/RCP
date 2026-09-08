@@ -17,24 +17,30 @@
   }
   function messen() {
     breite = karten.clientWidth;
-    plaetze = liste().map(function (el) {
+    var alle = liste();
+    plaetze = alle.map(function (el, i) {
+      el.setAttribute("role", "group");
+      el.setAttribute("aria-roledescription", "Folie");
+      el.setAttribute("aria-label", (i + 1) + " von " + alle.length);
+      el.tabIndex = -1;
       return { el: el, x: Math.max(0, el.offsetLeft - (karten.clientWidth - el.offsetWidth) / 2) };
     });
   }
   function markieren(karte) {
     if (!karte) return;
-    var alle = liste(), index = alle.indexOf(karte);
+    var alle = plaetze.map(function (p) { return p.el; }), index = alle.indexOf(karte);
     if (index < 0) return;
     var fokusWechsel = aktiv && aktiv !== karte && aktiv.contains(document.activeElement);
+    if (aktiv && aktiv !== karte) {
+      aktiv.inert = true;
+      aktiv.setAttribute("aria-hidden", "true");
+    }
     aktiv = karte;
+    aktiv.inert = false;
+    aktiv.setAttribute("aria-hidden", "false");
     alle.forEach(function (el, i) {
-      el.hidden = false;
-      el.inert = el !== aktiv;
-      el.setAttribute("aria-hidden", el === aktiv ? "false" : "true");
-      el.setAttribute("role", "group");
-      el.setAttribute("aria-roledescription", "Folie");
-      el.setAttribute("aria-label", (i + 1) + " von " + alle.length);
-      el.tabIndex = -1;
+      // Nachbarn sind bereits gerendert, bevor der naechste Wisch beginnt.
+      el.classList.toggle("symbol-vorlauf", Math.abs(i - index) <= 1);
     });
     steuerung.hidden = false;
     zaehler.textContent = (karte.getAttribute("data-kuerzel") || karte.id) + " · " + (index + 1) + " von " + alle.length;
@@ -127,6 +133,9 @@
   });
   function neuMessen() {
     if (!aktiv) return;
+    var alle = liste();
+    if (karten.clientWidth === breite && alle.length === plaetze.length &&
+        alle.every(function (el, i) { return el === plaetze[i].el; })) return;
     messen(); zeigen(aktiv, false, true);
   }
   document.addEventListener("rcp:sortiert", neuMessen);
@@ -137,7 +146,9 @@
     var alle = liste();
     if (!alle.length) { aktiv = null; steuerung.hidden = true; return; }
     karten.classList.add("seitlich"); fenster.classList.add("bereit");
-    alle.forEach(function (el) { el.hidden = false; });
+    alle.forEach(function (el) {
+      el.hidden = false; el.inert = true; el.setAttribute("aria-hidden", "true");
+    });
     messen();
     var ziel = location.hash && document.getElementById(location.hash.slice(1));
     zeigen(alle.indexOf(ziel) >= 0 ? ziel : alle[0], false, true);

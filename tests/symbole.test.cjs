@@ -130,3 +130,9 @@ test('landing naturally at the center does not make the next small scroll snap b
  const h=harness();h.vertical(786);h.idle();assert.equal(h.win.lastScroll,undefined);
  h.vertical(850);h.idle();assert.equal(h.win.lastScroll,undefined);
 });
+test('unchanged live sorting updates do not reset an in-progress horizontal scroll',()=>{
+ const h=harness();const calls=h.elements.karten.scrollCalls;
+ h.elements.karten.scrollLeft=150;h.doc.fire('rcp:sortiert');
+ assert.equal(h.elements.karten.scrollLeft,150);
+ assert.equal(h.elements.karten.scrollCalls,calls);
+});
