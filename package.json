@@ -6,5 +6,8 @@
   "dependencies": {
     "@netlify/blobs": "^8.1.0",
     "web-push": "^3.6.7"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.cjs"
   }
 }
