@@ -4,8 +4,6 @@
   var fenster = document.getElementById("symbolFenster");
   var karten = document.getElementById("karten");
   var steuerung = document.getElementById("symbolSteuerung");
-  var vorher = document.getElementById("symbolVorher");
-  var weiter = document.getElementById("symbolWeiter");
   var zaehler = document.getElementById("symbolZaehler");
   if (!fenster || !karten || !steuerung) return;
 
@@ -35,6 +33,8 @@
     var fokusWechsel = aktiv && aktiv !== karte && aktiv.contains(document.activeElement);
     aktiv = karte;
     karten.classList.add("seitlich");
+    fenster.classList.add("bereit");
+    document.documentElement.classList.add("symbole-einrasten");
     alle.forEach(function (el, i) {
       el.hidden = el !== aktiv;
       el.setAttribute("role", "group");
@@ -43,7 +43,6 @@
       el.tabIndex = -1;
     });
     steuerung.hidden = false;
-    vorher.disabled = weiter.disabled = alle.length < 2;
     var kuerzel = karte.getAttribute("data-kuerzel") || karte.id;
     zaehler.textContent = kuerzel + " · " + (index + 1) + " von " + alle.length;
     document.querySelectorAll("nav a[href^='#']").forEach(function (a) {
@@ -54,9 +53,9 @@
     });
     if (fokusWechsel) karte.focus({ preventScroll: true });
     if (scrollen) {
-      var luft = parseFloat(getComputedStyle(karte).marginBottom) || 28;
+      var rand = Math.max(0, (window.innerHeight - fenster.offsetHeight) / 2);
       window.scrollTo({
-        top: Math.max(0, fenster.getBoundingClientRect().top + window.scrollY - luft / 2),
+        top: Math.max(0, fenster.getBoundingClientRect().top + window.scrollY - rand),
         behavior: ruhig.matches ? "auto" : "smooth"
       });
     }
@@ -80,8 +79,6 @@
     var karte = typeof ziel === "string" ? document.getElementById(ziel.replace(/^#/, "")) : ziel;
     return zeigen(karte, scrollen !== false);
   };
-  vorher.addEventListener("click", function () { blaettern(-1); });
-  weiter.addEventListener("click", function () { blaettern(1); });
 
   fenster.addEventListener("keydown", function (e) {
     if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey ||

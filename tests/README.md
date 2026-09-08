@@ -1,4 +1,16 @@
-# UI QA — v211, 2026-09-08
+# UI QA — v212, 2026-09-08
+
+## v212 — centered snap and swipe navigation
+
+Visible previous/next arrows are removed. The symbol counter remains; horizontal
+swipes change the stock. The whole symbol window (counter and card) snaps to the
+vertical center when approached by scrolling. A direct symbol selection uses the
+same measured center. Header and footer remain separate reachable snap targets.
+
+The 23 asset/controller tests pass, including a new check for centering across
+three viewport heights. The unchanged water-animation tests passed previously.
+The live site requires a login, so visual acceptance behind that login remains
+open. This release was explicitly requested for immediate publication.
 
 ## v211 — symbols in a sideways carousel
 
