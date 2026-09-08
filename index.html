@@ -33,7 +33,7 @@
      zuerst und geht einmal je Stand ueber die Leitung, waehrend dieses
      Dokument bei jedem Start neu geholt wird. Weit vorn im Kopf, damit kein
      Skript darunter auf Masse zugreift, die es noch nicht gibt. -->
-<link rel="stylesheet" href="/stil.css?v=193">
+<link rel="stylesheet" href="/stil.css?v=211">
 <style>
 /* Ein Netz unter der Teilung.
 
@@ -103,9 +103,9 @@
 })();
 </script>
 
-<link rel="stylesheet" href="/black-glass.css?v=210">
-<script src="/touch-contact.js?v=210" defer></script>
-<script src="/black-glass.js?v=210" defer></script>
+<link rel="stylesheet" href="/black-glass.css?v=211">
+<script src="/touch-contact.js?v=211" defer></script>
+<script src="/black-glass.js?v=211" defer></script>
 </head>
 <body>
 <!-- Deckt die Statuszone ab; ohne sie null hoch. Siehe .statusdecke. -->
@@ -283,7 +283,15 @@
 
 </div>
 
-<div class="karten" id="karten"></div>
+<section class="symbol-fenster" id="symbolFenster" aria-label="Symbole" aria-roledescription="Karussell">
+  <div class="symbol-steuerung" id="symbolSteuerung" hidden>
+    <button id="symbolVorher" type="button" aria-label="Vorheriges Symbol" aria-controls="karten">‹</button>
+    <span id="symbolZaehler" role="status" aria-live="polite" aria-atomic="true"></span>
+    <button id="symbolWeiter" type="button" aria-label="Nächstes Symbol" aria-controls="karten">›</button>
+  </div>
+  <div class="karten" id="karten"></div>
+</section>
+<script src="/symbole.js?v=211"></script>
 
 
 
@@ -936,7 +944,10 @@
     // Steht ein Anker in der Adresse, jetzt erst kann er angesprungen werden
     if (location.hash && location.hash.length > 1) {
       var ziel = document.getElementById(location.hash.slice(1));
-      if (ziel) setTimeout(function () { ziel.scrollIntoView(); }, 60);
+      if (ziel) setTimeout(function () {
+        if (window.rcpSymbolZeigen) window.rcpSymbolZeigen(ziel);
+        else ziel.scrollIntoView();
+      }, 60);
     }
   }
 
@@ -1264,7 +1275,8 @@
 
     var weit = new IntersectionObserver(function (eintraege) {
       eintraege.forEach(function (e) {
-        if (!e.isIntersecting) raus(zuKarte.get(e.target));
+        // Seitlich ausgeblendete Karten behalten ihren bereits geladenen Chart.
+        if (!e.isIntersecting && !stapel.classList.contains("seitlich")) raus(zuKarte.get(e.target));
       });
     }, { rootMargin: "1000% 0px" });
 
@@ -1556,11 +1568,13 @@
   function binden() {
   document.querySelectorAll("nav a[href^='#']").forEach(function (a) {
     a.addEventListener("click", function (e) {
+      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       var id = a.getAttribute("href");
       if (!id || id === "#") return;
       var el = document.querySelector(id);
       if (!el) return;
       e.preventDefault();
+      if (window.rcpSymbolZeigen && window.rcpSymbolZeigen(el)) return;
       var top = layoutOben(el) - sprungAbstand();
       window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
       // Ziel kurz einrahmen, der Ring verklingt von selbst
@@ -2505,6 +2519,7 @@ if ("serviceWorker" in navigator) {
     karten().forEach(function (el) {
       el.style.order = rang ? (rang[el.id] || 90) : "";
     });
+    document.dispatchEvent(new CustomEvent("rcp:sortiert"));
   }
   function ordnenNav(rang) {
     navLinks().forEach(function (el) {
@@ -2579,7 +2594,7 @@ if ("serviceWorker" in navigator) {
     btn.setAttribute("aria-pressed", aktiv ? "true" : "false");
     // Das Zeichen bleibt stehen; erklaert wird der Zustand fuer Vorlesen und Tooltip
     var text = aktiv
-      ? (positionen ? "Sortiert: nächste Zone oben" : "Sortiert, sobald die Kurse da sind")
+      ? (positionen ? "Sortiert: nächste Zone zuerst" : "Sortiert, sobald die Kurse da sind")
       : "Nach Nähe zur Einkaufszone sortieren";
     btn.setAttribute("aria-label", text);
     btn.setAttribute("title", text);
@@ -2914,6 +2929,7 @@ if ("serviceWorker" in navigator) {
 
     var hier = "";
     function markieren(id) {
+      if (stapel.classList.contains("seitlich")) return;
       if (id === hier) return;
       hier = id;
       Object.keys(chips).forEach(function (k) {
@@ -4845,6 +4861,10 @@ if ("serviceWorker" in navigator) {
     if (url.hash && url.hash.length > 1) {
       var ziel = document.getElementById(url.hash.slice(1));
       if (!ziel) return false;
+      if (window.rcpSymbolZeigen && window.rcpSymbolZeigen(ziel)) {
+        history.replaceState(null, "", url.hash);
+        return true;
+      }
       if (location.hash !== url.hash) location.hash = url.hash;
       else ziel.scrollIntoView({ behavior: "smooth", block: "start" });
       return true;
@@ -4905,16 +4925,18 @@ if ("serviceWorker" in navigator) {
     var r = el.getBoundingClientRect();
     return (r.width > 0 && r.height > 0) ? el : null;
   }
-  function wahl(s) { return da(document.querySelector(s)); }
+  function wahl(s) {
+    return da(document.querySelector(s.replace(".karten > .card", ".karten > .card:not([hidden])")));
+  }
 
   var SCHRITTE = [
     { wo: function () { return wahl("nav"); },
       titel: "Die Leiste",
-      text: "Jedes Kürzel springt zu seiner Karte. Beim Scrollen wandert die Markierung mit — du siehst immer, wo du gerade bist." },
+      text: "Jedes Kürzel öffnet seine Karte. Im Symbolfenster wechselst du mit einem Wisch nach links oder rechts. Die Markierung zeigt das gewählte Symbol." },
 
     { wo: function () { return da(document.getElementById("sortBtn")); },
       titel: "Nach Nähe sortieren",
-      text: "Ein Tipp, und die Liste steht nach Abstand zur Einkaufszone. Was am nächsten dran ist, kommt nach oben." },
+      text: "Ein Tipp, und die Symbole stehen nach Abstand zur Einkaufszone. Was am nächsten dran ist, kommt zuerst." },
 
     { wo: function () { return da(document.getElementById("wirtschaftBlock")); },
       titel: "Wirtschaftstermine",

@@ -4293,3 +4293,59 @@
 /* Der Hinweis aus index.html gilt nur, solange DIESE Datei fehlt. Steht
    sie, verschwindet er — das ist der ganze Mechanismus. */
 #stilfehlt { display: none; }
+
+/* Ein gemeinsames Fenster fuer die Symbole, wie beim Terminkasten.
+   Nur die ausgewaehlte Karte nimmt Platz ein; Charts bleiben im DOM. */
+.symbol-fenster {
+  margin-top: calc(var(--luft) / 2 + (100lvh - 100svh));
+  overflow-x: clip;
+}
+.symbol-fenster > .karten { margin-top: 0; }
+.symbol-steuerung {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 44px;
+  margin: 0 var(--rand) 4px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.symbol-steuerung[hidden],
+.karten.seitlich > .card[hidden] { display: none !important; }
+.symbol-steuerung button {
+  flex: 0 0 44px;
+  height: 44px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-chip);
+  background: var(--glas-fenster);
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.symbol-steuerung button:disabled { opacity: 0.3; cursor: default; }
+.karten.seitlich { touch-action: pan-y pinch-zoom; }
+.karten.seitlich > .card {
+  --kartenhoehe: calc(100dvh - var(--luft) - 48px);
+  content-visibility: visible;
+  contain-intrinsic-size: none;
+  animation: none !important;
+}
+/* Senkrechte Ein-/Ausfahrten passen nicht zum seitlichen Kartenwechsel. */
+.karten.seitlich > .card > *,
+.karten.seitlich > .card > .card-head > .row,
+.karten.seitlich > .card > .card-head > .info {
+  animation: none !important;
+  transform: none !important;
+  opacity: 1 !important;
+}
+.karten.seitlich > .card > .card-head::after { animation: none !important; }
+.nur-web .symbol-fenster { display: none; }
+@media (min-width: 720px) {
+  .symbol-steuerung { width: min(780px, 100% - 28px); margin-left: auto; margin-right: auto; }
+}

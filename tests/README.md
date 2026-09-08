@@ -1,4 +1,23 @@
-# Liquid feedback QA — v210, 2026-09-08
+# UI QA — v211, 2026-09-08
+
+## v211 — symbols in a sideways carousel
+
+The stock cards now share one window. Left/right gestures, arrow buttons and
+keyboard arrows change the active symbol. Symbol links, initial URL fragments,
+hash changes and service-worker navigation select the matching card. Sorting
+preserves the selected symbol and changes the order used by the carousel.
+Hidden cards retain their DOM and loaded charts; they occupy no vertical space
+and are excluded from focus navigation. Reduced motion disables slide effects.
+
+The 49 existing regression tests pass. Twelve additional controller tests pass,
+covering navigation, sorting, fragment links, empty/single lists, focus, reduced
+motion, sparse swipes, vertical/short/cancelled gestures and trailing clicks.
+These use a simulated DOM/event harness, not a real browser. The cloud browser
+blocked the local preview (`ERR_BLOCKED_BY_CLIENT`), and local Playwright browser
+binaries were unavailable. Mobile/desktop visual QA and physical iPhone touch
+acceptance remain unverified.
+
+## Previous water-animation checks
 
 Baseline: production v204, commit 05d8e3502a07bf8ffe4a4eecd5667b2273121a37.
 Release scope: code corrections verified by automated regression tests. Actual iPhone input delivery, visual quality and smoothness remain unverified; this is not complete device acceptance.
