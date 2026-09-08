@@ -4,18 +4,20 @@
   var reduced=matchMedia('(prefers-reduced-motion: reduce)');
   var opaque=matchMedia('(prefers-reduced-transparency: reduce)');
   var contacts=new Map(), impulses=[];
-  var lastContact=null,lastScrollY=scrollY,lastScrollAt=0;
+
   var canvas,ctx,buffer,bctx,pixels,cols,rows,cell,width,height;
   var elevation,velocity,nextElevation,nextVelocity;
   var frame=0,previousTime=0,accumulator=0;
-  var surface=null,point=null;
+  var surface=null,point=null,pixelRatio=0;
   function allowed() { return !reduced.matches && !opaque.matches && !document.hidden; }
   function resize() {
     if(!canvas) return;
-    width=innerWidth; height=innerHeight;
+    var ratio=Math.min(devicePixelRatio||1,1.5);
+    if(width===innerWidth && height===innerHeight && pixelRatio===ratio) return;
+    width=innerWidth; height=innerHeight; pixelRatio=ratio;
     cell=Math.max(5,Math.ceil(width/180));
     cols=Math.ceil(width/cell)+2; rows=Math.ceil(height/cell)+2;
-    var size=cols*rows,ratio=Math.min(devicePixelRatio||1,1.5);
+    var size=cols*rows;
     elevation=new Float32Array(size); velocity=new Float32Array(size);
     nextElevation=new Float32Array(size); nextVelocity=new Float32Array(size);
     canvas.width=Math.round(width*ratio); canvas.height=Math.round(height*ratio);
@@ -60,13 +62,11 @@
     if(!allowed() || !prepare()) return;
     var now=performance.now();
     contacts.set(id,{x:x,y:y,time:now,born:now}); point={x:x,y:y};
-    lastContact={x:x,y:y,time:now,released:0,scrolling:false};
     impulses.push({x:x,y:y,power:.55}); wake();
   }
   function move(id,x,y) {
     var old=contacts.get(id); if(!old) return;
     var now=performance.now();
-    if(lastContact) { lastContact.x=x; lastContact.y=y; lastContact.time=now; }
     if(x===old.x && y===old.y) { old.time=now; return; }
     var distance=Math.hypot(x-old.x,y-old.y);
     // No distance/time threshold. Every delivered sample changes the contact.
@@ -79,13 +79,12 @@
     if(!contacts.has(id)) return;
     contacts.delete(id);
     if(!contacts.size) {
-      if(lastContact) lastContact.released=performance.now();
       clearReflection();
     }
     wake();
   }
   function reset() {
-    cancelAnimationFrame(frame); frame=0; contacts.clear(); lastContact=null; impulses=[]; clearReflection();
+    cancelAnimationFrame(frame); frame=0; contacts.clear(); impulses=[]; clearReflection();
     if(elevation) { elevation.fill(0); velocity.fill(0); nextElevation.fill(0); nextVelocity.fill(0); }
     if(ctx) ctx.clearRect(0,0,width,height);
   }
@@ -152,6 +151,9 @@
     impulses.forEach(function(p) { disturb(p.x,p.y,p.power,false); }); impulses=[];
     var iterations=0;
     while(accumulator>=16.7 && iterations<3) { step(); accumulator-=16.7; iterations++; }
+    // On high-refresh displays retain the previous canvas until the next
+    // simulation step. Avoid a second full-grid shading pass for unchanged water.
+    if(!iterations) { frame=requestAnimationFrame(draw); return; }
     reflect();
     var energy=shade();
     if(contacts.size || energy>.004) frame=requestAnimationFrame(draw);

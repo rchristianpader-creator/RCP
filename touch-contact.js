@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var active=new Map(), serial=0,lastTouch=null;
-  var scrollMark=null,scrollTimer=0,scrollRemoval=0,previousScrollY=scrollY;
+  var scrollMark=null,scrollTimer=0,scrollRemoval=0,previousScrollY=scrollY,lastScrollAt=-Infinity;
   var options={passive:true,capture:true};
   function emit(phase,id,x,y) {
     window.dispatchEvent(new CustomEvent('rcp:liquid-contact',{detail:{phase:phase,id:id,x:x,y:y}}));
@@ -42,11 +42,16 @@
   function clearScrollFeedback() {
     clearTimeout(scrollTimer); clearTimeout(scrollRemoval);
     if(scrollMark) scrollMark.remove();
-    scrollMark=null;
+    scrollMark=null; lastScrollAt=-Infinity;
   }
   window.addEventListener('scroll',function() {
     var delta=scrollY-previousScrollY; previousScrollY=scrollY;
     if(!delta || !lastTouch || document.hidden) return;
+    var now=performance.now();
+    // Keep a continuous native momentum gesture alive, but never resurrect
+    // a stale touch for later keyboard, wheel, or programmatic scrolling.
+    if(!active.size && now-lastTouch.time>250 && now-lastScrollAt>180) return;
+    lastScrollAt=now;
     clearTimeout(scrollTimer); clearTimeout(scrollRemoval);
     if(!scrollMark) {
       scrollMark=document.createElement('span');
