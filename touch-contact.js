@@ -2,6 +2,7 @@
 (function () {
   'use strict';
   var active=new Map(), serial=0,lastTouch=null;
+  var touchPointers=new Map(),pointerFrame=0;
   var scrollTimer=0,scrollFrame=0,previousScrollY=scrollY;
   var reduced=matchMedia('(prefers-reduced-motion: reduce)');
   var opaque=matchMedia('(prefers-reduced-transparency: reduce)');
@@ -59,7 +60,7 @@
       scrollTimer=setTimeout(settleScroll,120); return;
     }
     Array.from(active.keys()).forEach(function(id) {
-      if(id.charAt(0)==='t') finish(id);
+      if(id.charAt(0)==='t' || id.charAt(0)==='q') finish(id);
     });
     clearScrollFeedback(); lastTouch=null;
   }
@@ -79,7 +80,60 @@
     scrollTimer=setTimeout(settleScroll,180);
   }
   window.addEventListener('scroll',observeScroll,{passive:true});
+  function flushTouchPointers() {
+    pointerFrame=0;
+    touchPointers.forEach(function(record,id) {
+      if(!record.native) {
+        record.samples.forEach(function(sample) {
+          var key='q'+id;
+          if(sample.phase==='start') start(key,sample.x,sample.y);
+          else if(sample.phase==='move') move(key,sample.x,sample.y);
+          else finish(key);
+        });
+      }
+      record.samples=[];
+      if(record.ended) touchPointers.delete(id);
+    });
+  }
+  function queueTouchPointer(e,phase) {
+    if(document.hidden) return;
+    var record=touchPointers.get(e.pointerId);
+    if(phase==='start') {
+      if(record) finish('q'+e.pointerId);
+      record={native:false,ended:false,samples:[]};
+      touchPointers.set(e.pointerId,record);
+    }
+    if(!record) return;
+    if(!record.native) {
+      if(phase==='move' && e.getCoalescedEvents) {
+        e.getCoalescedEvents().forEach(function(p) {
+          record.samples.push({phase:'move',x:p.clientX,y:p.clientY});
+        });
+      }
+      if(phase==='end' && Number.isFinite(e.clientX) && Number.isFinite(e.clientY)) {
+        record.samples.push({phase:'move',x:e.clientX,y:e.clientY});
+      }
+      record.samples.push({phase:phase,x:e.clientX,y:e.clientY});
+    }
+    if(phase==='end') record.ended=true;
+    // Wait one rendering turn for the corresponding TouchEvent snapshot.
+    // Unclaimed PointerEvents remain usable; duplicate streams never add
+    // two held contacts. No coordinate-distance matching or cooldown window.
+    if(!pointerFrame) pointerFrame=requestAnimationFrame(flushTouchPointers);
+  }
+  function claimTouchPointers() {
+    touchPointers.forEach(function(record,id) {
+      finish('q'+id);
+      record.native=true;
+      record.samples=[];
+    });
+  }
+  function clearTouchPointers() {
+    cancelAnimationFrame(pointerFrame); pointerFrame=0;
+    touchPointers.clear();
+  }
   function syncTouches(e) {
+    if(e.type==='touchstart' || e.type==='touchmove') claimTouchPointers();
     // Ended/cancelled fingers are absent from touches. Consume their final
     // coordinates before removing them, including swipes with no touchmove.
     if(e.type==='touchend' || e.type==='touchcancel') {
@@ -97,24 +151,28 @@
       if(id.charAt(0)==='t' && !live.has(id)) finish(id);
     });
   }
-  // Touch identifiers are authoritative: no heuristic matching with Pointer IDs.
+  // Touch snapshots take ownership when present; pointer-only gestures survive.
   window.addEventListener('touchstart',syncTouches,options);
   window.addEventListener('touchmove',syncTouches,options);
   window.addEventListener('touchend',syncTouches,options);
   window.addEventListener('touchcancel',syncTouches,options);
   window.addEventListener('pointerdown',function(e) {
-    if(e.pointerType!=='touch' && e.button===0) start('p'+e.pointerId,e.clientX,e.clientY);
+    if(e.button!==0) return;
+    if(e.pointerType==='touch') queueTouchPointer(e,'start');
+    else start('p'+e.pointerId,e.clientX,e.clientY);
   },options);
   window.addEventListener('pointermove',function(e) {
+    if(e.pointerType==='touch') { queueTouchPointer(e,'move'); return; }
     var id='p'+e.pointerId;
-    if(e.pointerType==='touch' || !active.has(id)) return;
+    if(!active.has(id)) return;
     if(e.getCoalescedEvents) e.getCoalescedEvents().forEach(function(p) { move(id,p.clientX,p.clientY); });
     move(id,e.clientX,e.clientY);
   },options);
   ['pointerup','pointercancel'].forEach(function(name) {
     window.addEventListener(name,function(e) {
+      if(e.pointerType==='touch') { queueTouchPointer(e,'end'); return; }
       var id='p'+e.pointerId;
-      if(e.pointerType==='touch' || !active.has(id)) return;
+      if(!active.has(id)) return;
       if(Number.isFinite(e.clientX) && Number.isFinite(e.clientY)) move(id,e.clientX,e.clientY);
       finish(id);
     },options);
@@ -122,6 +180,7 @@
   // Cover trusted click-only activations without doubling the usual touch click.
   window.addEventListener('click',function(e) {
     if(!e.isTrusted) return;
+    if(pointerFrame) { cancelAnimationFrame(pointerFrame); flushTouchPointers(); }
     var x=e.clientX,y=e.clientY;
     if(e.detail===0 && e.target.getBoundingClientRect) {
       var rect=e.target.getBoundingClientRect(); x=rect.left+rect.width/2; y=rect.top+rect.height/2;
@@ -129,8 +188,8 @@
     if(lastTouch && performance.now()-lastTouch.time<800 && Math.hypot(x-lastTouch.x,y-lastTouch.y)<24) return;
     var id='c'+(++serial); start(id,x,y); finish(id);
   },options);
-  window.addEventListener('blur',function() { Array.from(active.keys()).forEach(finish); clearScrollFeedback(); lastTouch=null; });
+  window.addEventListener('blur',function() { Array.from(active.keys()).forEach(finish); clearTouchPointers(); clearScrollFeedback(); lastTouch=null; });
   document.addEventListener('visibilitychange',function() {
-    if(document.hidden) { Array.from(active.keys()).forEach(finish); clearScrollFeedback(); lastTouch=null; }
+    if(document.hidden) { Array.from(active.keys()).forEach(finish); clearTouchPointers(); clearScrollFeedback(); lastTouch=null; }
   });
 })();

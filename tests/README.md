@@ -1,4 +1,4 @@
-# Liquid feedback QA — v208, 2026-09-08
+# Liquid feedback QA — v209, 2026-09-08
 
 Baseline: production v204, commit 05d8e3502a07bf8ffe4a4eecd5667b2273121a37.
 Release scope: code corrections verified by automated regression tests. Actual iPhone input delivery, visual quality and smoothness remain unverified; this is not complete device acceptance.
@@ -22,7 +22,7 @@ The earlier regression fixes are included: stale contacts cannot restart unrelat
 
 ## Automated result
 
-**39/39 tests pass:** 29 input/simulation tests and 10 asset/cache checks. `git diff --check` passes. All four app pages and the service worker use v208 for the liquid assets.
+**47/47 tests pass:** 37 input/simulation tests and 10 asset/cache checks. `git diff --check` passes. All four app pages and the service worker use v209 for the liquid assets.
 
 Coverage includes subpixel reversals, multiple fingers, pointer cancellation during touch, 100 rapid taps, click deduplication, passive listeners, continuous momentum, idle expiration, blur/background cleanup, reduced motion/transparency, unavailable canvas, unchanged viewport, high-refresh scheduling, wave settling, sparse swipes and cancelled/released endpoints. Asset checks cover page references, precache existence, root JavaScript/classic inline syntax, and service-worker navigation/authentication cache rules.
 
@@ -67,3 +67,13 @@ Contact records now retain their own ID and sample time. Releasing an old contac
 This intentionally supersedes the earlier behavior of injecting new waves throughout momentum after release. Existing waves still decay through the solver, but scroll distance alone cannot locate a new finger. If native touch samples are absent, new localized effects stop instead of appearing at an invented or old location. This is a correctness tradeoff, not a guarantee that iOS delivers every touch. The live iPhone location behavior remains unverified.
 
 Tests for scroll-position sampling now retain current touch samples; the old test requiring released-finger momentum impulses was replaced with an explicit prohibition on those impulses. Complete suite: 39 passing tests.
+
+## v209 — do not discard touch PointerEvents
+
+The old router discarded every pointer event with pointerType=touch. Three new tests reproduced complete input loss when a touchscreen gesture was delivered only through PointerEvents: a tap, a sparse swipe and a new tap during momentum. This is a verified code-path defect, not evidence that the affected iPhone uses that delivery sequence in every reported failure.
+
+Touch pointer samples are now queued until the next rendering turn. If a touchstart/touchmove snapshot arrives, it takes ownership and suppresses the pending duplicate pointer stream. Otherwise the queued pointer coordinates, coalesced samples and final position reach the existing solver. A late native snapshot releases an already-active fallback before activating its native contacts. Pointer IDs and Touch identifiers remain separate; there is no proximity matching or post-touch cooldown blocking new gestures. A trusted click flushes pending samples first so a fast pointer tap is not counted twice. Blur and hiding cancel pending callbacks.
+
+Eight added tests cover pointer-only taps/swipes, re-touch during momentum at new coordinates, native/pointer deduplication, pending-input cleanup, two independent pointer-only fingers, cancellation, late native ownership, and click-before-frame ordering. The last ordering test failed on the first candidate and passed after correction. Entire suite: 47 tests pass.
+
+Limits: arbitration adds at most one available rendering turn before pointer-only samples are forwarded. If the browser delivers neither input stream or suspends rendering, this code cannot recover physical coordinates or render during that suspension. No actual Safari/iPhone event trace or end-to-end device run has been obtained. No guarantee of every physical touch is claimed.
