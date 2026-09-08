@@ -10,71 +10,7 @@
 <link rel="apple-touch-icon" href="/icon-180.png?v=193">
 <title>Positionen · Aktien-Liste</title>
 <style>
-  :root {
-    /* Dieselben Marken wie in der Liste — Wort fuer Wort. Die Verwaltung
-       war als einzige Seite noch hell: weisse Kaesten auf Grauweiss,
-       waehrend die Liste, die Anmeldung und der Ladebildschirm dunkles Glas
-       auf wanderndem Licht zeigen. Wer aus der Liste hierher kam, kam in
-       eine andere App.
-
-       Umgestellt sind nur diese Marken und ein paar Flaechen darunter. Der
-       Rest der Seite hat schon immer ueber --fg, --muted, --line und
-       --card gearbeitet und zieht deshalb von selbst mit. */
-    color-scheme: dark;
-    --bg: #0a0d0c;
-    --bg-rgb: 10, 13, 12;
-    --fg: #f2f5f4;
-    --fg-rgb: 242, 245, 244;
-    --auf-fg: #0a0d0c;
-    --muted: #9aa5a2;
-    --line: rgba(255, 255, 255, 0.16);
-    --soft: rgba(255, 255, 255, 0.06);
-    --card: #131816;
-    --hair: rgba(255, 255, 255, 0.12);
-    --r-karte: 16px;
-    --r-feld: 12px;
-    --r-chip: 11px;
-    --r-marke: 6px;
-    /* Die Farbe der gezeichneten Fetch.ai-Marke — dieselben drei Werte auf
-       jeder Seite, stil-test haelt sie zusammen. Gebraucht werden sie hier
-       nicht unmittelbar; sie stehen da, damit es EINE Antwort auf die
-       Frage gibt, welche Farbe die Marke hat. */
-    --marke-hell: #3c2fa8;
-    --marke-mitte: #241b78;
-    --marke-tief: #141051;
-    /* Der Grund: dieselben vier Farbfelder wie drueben, darueber die drei
-       wandernden Lichtfelder. Ohne ihn waere das Glas darauf nur graue
-       Fuellung — es braucht etwas, das hindurchscheint. */
-    --grund-kuehl: rgba(38, 74, 96, 0.05);
-    --grund-warm: rgba(112, 82, 52, 0.04);
-    --grund-flieder: rgba(64, 44, 78, 0.045);
-    --grund-tuerkis: rgba(28, 88, 78, 0.05);
-    --grund-flaeche:
-      radial-gradient(120% 90% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.55) 100%),
-      radial-gradient(78% 58% at 10% 4%, var(--grund-kuehl) 0%, transparent 68%),
-      radial-gradient(66% 52% at 92% 14%, var(--grund-warm) 0%, transparent 68%),
-      radial-gradient(84% 62% at 74% 96%, var(--grund-flieder) 0%, transparent 70%),
-      radial-gradient(64% 48% at 8% 88%, var(--grund-tuerkis) 0%, transparent 70%),
-      var(--bg);
-    /* Glas. Die Kaesten hier scrollen mit, deshalb kein Frost — ein
-       mitscrollender backdrop-filter wird bei jedem Bild neu gefiltert und
-       hat drueben schon einmal das Scrollen traege gemacht. Was ein Fenster
-       ausmacht, ist ohnehin die Kante, nicht die Fuellung. */
-    --glas-fenster: transparent;
-    --glas-kante-glanz:
-      inset 0 1px 0 rgba(255, 255, 255, 0.36),
-      inset 0 2px 1px -1px rgba(255, 255, 255, 0.12),
-      inset 1px 0 0 rgba(255, 255, 255, 0.08),
-      inset -1px 0 0 rgba(255, 255, 255, 0.05),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.34);
-    --hebung:
-      0 1px 2px rgba(0, 0, 0, 0.4),
-      0 10px 24px -12px rgba(0, 0, 0, 0.6);
-    --glas: rgba(255, 255, 255, 0.1);
-    --gut: #3ecf8e;
-    --schlecht: #ff6b6b;
-    --ease: cubic-bezier(0.22, 1, 0.36, 1);
-  }
+  /* Gemeinsame Designwerte stehen in liquid-glass.css. */
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -482,8 +418,9 @@
     * { transition-duration: 0.01ms !important; }
   }
 </style>
+<link rel="stylesheet" href="/liquid-glass.css?v=194">
 </head>
-<body>
+<body class="rcp-editor">
 
 <div class="grundkurve" aria-hidden="true">
   <i class="lichtfeld eins"></i><i class="lichtfeld zwei"></i><i class="lichtfeld drei"></i>
@@ -518,7 +455,7 @@
 </header>
 
 <main>
-  <div id="liste"></div>
+  <div id="liste"><div class="ladeplatz" role="status">Positionen werden geladen …</div></div>
   <button type="button" class="neuKnopf" id="neuKnopf">Position hinzufügen</button>
 </main>
 
@@ -564,6 +501,12 @@
   function sagen(text, art) {
     stand.textContent = text;
     stand.className = "stand" + (art ? " " + art : "");
+    var platz = liste.querySelector(".ladeplatz");
+    if (platz && art === "schlecht") {
+      platz.className = "ladefehler";
+      platz.textContent = text + " Bitte die Seite erneut öffnen.";
+      untertitel.textContent = "Positionen konnten nicht geladen werden";
+    }
   }
 
   function verglichen() {

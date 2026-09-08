@@ -34,68 +34,7 @@
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Geschützt, Zugang auf Anfrage">
 <meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=193">
 <style>
-  :root {
-    /* Dunkel, wie die Liste. Umgestellt sind nur diese Marken. */
-    color-scheme: dark;
-    --bg: #0a0d0c;
-    --bg-rgb: 10, 13, 12;
-    --fg: #f2f5f4;
-    --fg-rgb: 242, 245, 244;
-    --auf-fg: #0a0d0c;
-    --muted: #9aa5a2;
-    --line: rgba(255, 255, 255, 0.16);
-    --soft: rgba(255, 255, 255, 0.06);
-    --card: #131816;
-    --hair: rgba(255, 255, 255, 0.12);
-    /* Dieselben Marken wie in der Liste — die Seiten sollen sich nicht
-       unterscheiden, nur weil sie ein eigenes Regelwerk haben. */
-    --r-karte: 16px;
-    --r-feld: 12px;
-    --r-chip: 11px;
-    --r-marke: 6px;
-    /* Die Farbe der gezeichneten Fetch.ai-Marke — dieselben drei Werte auf
-       jeder Seite, stil-test haelt sie zusammen. Gebraucht werden sie hier
-       nicht unmittelbar; sie stehen da, damit es EINE Antwort auf die
-       Frage gibt, welche Farbe die Marke hat. */
-    --marke-hell: #3c2fa8;
-    --marke-mitte: #241b78;
-    --marke-tief: #141051;
-    /* Dieselben vier Farbfelder wie in der Liste — hier liegen sie unter den
-       laufenden Kerzen, und der Kasten liegt ueber beidem. */
-    --grund-kuehl: rgba(38, 74, 96, 0.05);
-    --grund-warm: rgba(112, 82, 52, 0.04);
-    --grund-flieder: rgba(64, 44, 78, 0.045);
-    --grund-tuerkis: rgba(28, 88, 78, 0.05);
-    /* Glas — dieselbe Machart wie in der Liste. Hier liegt der Kasten ueber
-       den laufenden Kerzen, also genau der Fall, fuer den es gedacht ist. */
-    --glas-frost: saturate(190%) blur(12px);
-    --glas-fuellung: rgba(255, 255, 255, 0.1);
-    /* Woelbung und Farbstich wie in der Liste: ein weicher dunkler Ring
-       knapp innerhalb des Randes gibt der Scheibe Dicke, die helle Linie
-       oben zieht ins Kuehle, die dunkle unten ins Warme. */
-    --glas-kante:
-      inset 0 1px 0 rgba(255, 255, 255, 0.28),
-      inset 0 2px 1px -1px rgba(255, 255, 255, 0.1),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.3);
-    --glas-schimmer: linear-gradient(148deg,
-      rgba(255, 255, 255, 0.22) 0%,
-      rgba(255, 255, 255, 0.12) 24%,
-      rgba(255, 255, 255, 0.04) 50%,
-      rgba(255, 255, 255, 0) 72%);
-    /* Schimmer und Fuellung als zwei Hintergrundebenen — eine Ebene
-       weniger als das fruehere ::before, und dieselbe Schreibweise wie
-       drueben in der Liste. */
-    --glas-grund:
-      var(--glas-schimmer),
-      linear-gradient(var(--glas-fuellung), var(--glas-fuellung));
-    --hebung:
-      0 1px 2px rgba(0, 0, 0, 0.4),
-      0 10px 24px -12px rgba(0, 0, 0, 0.6);
-    --glas: rgba(255, 255, 255, 0.1);
-    --gut: #3ecf8e;
-    --schlecht: #ff6b6b;
-    --ease: cubic-bezier(0.22, 1, 0.36, 1);
-  }
+  /* Gemeinsame Designwerte stehen in liquid-glass.css. */
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -384,13 +323,15 @@
     * { transition-duration: 0.01ms !important; }
   }
 </style>
+<link rel="stylesheet" href="/liquid-glass.css?v=194">
 </head>
-<body>
+<body class="rcp-login">
 
 <div class="kerzen" aria-hidden="true"><div class="kerzen-band hinten"></div><div class="kerzen-band vorn"></div></div>
 
 <div class="kasten" id="kasten">
   <div class="marke">
+    <div class="glas-emblem" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M16 14v34M32 22v32M48 8v36"/><rect x="11" y="22" width="10" height="17" rx="3" fill="currentColor"/><rect x="27" y="32" width="10" height="13" rx="3"/><rect x="43" y="16" width="10" height="18" rx="3"/></svg></div>
     <div class="label">Geschützt</div>
     <h1>Aktien-Liste</h1>
     <p class="sub" id="untertitel">Anmelden mit E-Mail und Passwort</p>
@@ -516,6 +457,7 @@
     }
 
     senden.disabled = true;
+    senden.setAttribute("aria-busy", "true");
     var vorher = senden.textContent;
     senden.textContent = modus === "registrieren" ? "Wird gesendet …" : "Prüfe …";
 
@@ -528,6 +470,7 @@
       .then(function (r) { return r.json().catch(function () { return {}; }); })
       .then(function (a) {
         senden.disabled = false;
+        senden.removeAttribute("aria-busy");
         senden.textContent = vorher;
 
         if (!a || a.ok !== true) {
@@ -546,6 +489,7 @@
       })
       .catch(function () {
         senden.disabled = false;
+        senden.removeAttribute("aria-busy");
         senden.textContent = vorher;
         sagen("Keine Verbindung. Noch einmal versuchen.", false);
       });
