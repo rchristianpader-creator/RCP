@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="dark">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#0a0d0c">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=194">
-<link rel="apple-touch-icon" href="/icon-180.png?v=194">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=218">
+<link rel="apple-touch-icon" href="/icon-180.png?v=218">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -33,7 +33,7 @@
      zuerst und geht einmal je Stand ueber die Leitung, waehrend dieses
      Dokument bei jedem Start neu geholt wird. Weit vorn im Kopf, damit kein
      Skript darunter auf Masse zugreift, die es noch nicht gibt. -->
-<link rel="stylesheet" href="/stil.css?v=194">
+<link rel="stylesheet" href="/stil.css?v=218">
 <style>
 /* Ein Netz unter der Teilung.
 
@@ -62,14 +62,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=194">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=218">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=194">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=218">
 
 <script>
 /* Im Browser oder als App?
@@ -103,6 +103,9 @@
 })();
 </script>
 
+<link rel="stylesheet" href="/black-glass.css?v=218">
+<script src="/touch-contact.js?v=218" defer></script>
+<script src="/black-glass.js?v=218" defer></script>
 </head>
 <body>
 <!-- Deckt die Statuszone ab; ohne sie null hoch. Siehe .statusdecke. -->
@@ -223,7 +226,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=194" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=218" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -232,7 +235,6 @@
 </div>
 
 <nav>
-  <i class="nav-fortschritt" id="navFortschritt" aria-hidden="true"></i>
   <button class="sort-chip" id="sortBtn" type="button" aria-pressed="false"
           aria-label="Nach Nähe zur Einkaufszone sortieren"
           title="Nach Nähe zur Einkaufszone sortieren"><span class="zeichen">⇅</span></button>
@@ -280,7 +282,13 @@
 
 </div>
 
-<div class="karten" id="karten"></div>
+<section class="symbol-fenster" id="symbolFenster" aria-label="Symbole" aria-roledescription="Karussell">
+  <div class="symbol-steuerung" id="symbolSteuerung" hidden>
+    <span id="symbolZaehler" role="status" aria-live="polite" aria-atomic="true"></span>
+  </div>
+  <div class="karten" id="karten"></div>
+</section>
+<script src="/symbole.js?v=218"></script>
 
 
 
@@ -350,7 +358,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=194" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=218" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -398,7 +406,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=194" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=218" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -417,7 +425,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=194" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=218" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -534,7 +542,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=194" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=218" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -933,7 +941,10 @@
     // Steht ein Anker in der Adresse, jetzt erst kann er angesprungen werden
     if (location.hash && location.hash.length > 1) {
       var ziel = document.getElementById(location.hash.slice(1));
-      if (ziel) setTimeout(function () { ziel.scrollIntoView(); }, 60);
+      if (ziel) setTimeout(function () {
+        if (window.rcpSymbolZeigen) window.rcpSymbolZeigen(ziel);
+        else ziel.scrollIntoView();
+      }, 60);
     }
   }
 
@@ -1257,11 +1268,14 @@
       eintraege.forEach(function (e) {
         if (e.isIntersecting) einsetzen(zuKarte.get(e.target));
       });
-    }, { rootMargin: "250% 0px" });
+    // Eine Kartenbreite Vorlauf links und rechts: der naechste Chart wird
+    // vor dem Wischen geladen, nicht erst beim Hereinschieben.
+    }, { root: stapel, rootMargin: "0px 100%" });
 
     var weit = new IntersectionObserver(function (eintraege) {
       eintraege.forEach(function (e) {
-        if (!e.isIntersecting) raus(zuKarte.get(e.target));
+        // Seitlich ausgeblendete Karten behalten ihren bereits geladenen Chart.
+        if (!e.isIntersecting && !stapel.classList.contains("seitlich")) raus(zuKarte.get(e.target));
       });
     }, { rootMargin: "1000% 0px" });
 
@@ -1384,7 +1398,7 @@
     var geladen = !!window.rcpStern, gescheitert = false;
     if (!geladen) {
       var datei = document.createElement("script");
-      datei.src = "/stern.js?v=194";
+      datei.src = "/stern.js?v=218";
       datei.onload = function () { geladen = true; };
       datei.onerror = function () { gescheitert = true; };
       document.head.appendChild(datei);
@@ -1553,11 +1567,13 @@
   function binden() {
   document.querySelectorAll("nav a[href^='#']").forEach(function (a) {
     a.addEventListener("click", function (e) {
+      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       var id = a.getAttribute("href");
       if (!id || id === "#") return;
       var el = document.querySelector(id);
       if (!el) return;
       e.preventDefault();
+      if (window.rcpSymbolZeigen && window.rcpSymbolZeigen(el)) return;
       var top = layoutOben(el) - sprungAbstand();
       window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
       // Ziel kurz einrahmen, der Ring verklingt von selbst
@@ -2502,6 +2518,7 @@ if ("serviceWorker" in navigator) {
     karten().forEach(function (el) {
       el.style.order = rang ? (rang[el.id] || 90) : "";
     });
+    document.dispatchEvent(new CustomEvent("rcp:sortiert"));
   }
   function ordnenNav(rang) {
     navLinks().forEach(function (el) {
@@ -2576,7 +2593,7 @@ if ("serviceWorker" in navigator) {
     btn.setAttribute("aria-pressed", aktiv ? "true" : "false");
     // Das Zeichen bleibt stehen; erklaert wird der Zustand fuer Vorlesen und Tooltip
     var text = aktiv
-      ? (positionen ? "Sortiert: nächste Zone oben" : "Sortiert, sobald die Kurse da sind")
+      ? (positionen ? "Sortiert: nächste Zone zuerst" : "Sortiert, sobald die Kurse da sind")
       : "Nach Nähe zur Einkaufszone sortieren";
     btn.setAttribute("aria-label", text);
     btn.setAttribute("title", text);
@@ -2890,6 +2907,7 @@ if ("serviceWorker" in navigator) {
       var sortBtn = document.getElementById("sortBtn");
       if (sortBtn) {
         sortBtn.addEventListener("click", function () {
+          if (stapel.classList.contains("seitlich")) return;
           auftritt.disconnect();
           alles.forEach(function (k) { k.classList.add("sichtbar"); });
           // Lang genug, dass der letzte Teil (0,48 s Vorlauf, 1,05 s Lauf)
@@ -2911,6 +2929,7 @@ if ("serviceWorker" in navigator) {
 
     var hier = "";
     function markieren(id) {
+      if (stapel.classList.contains("seitlich")) return;
       if (id === hier) return;
       hier = id;
       Object.keys(chips).forEach(function (k) {
@@ -2933,12 +2952,7 @@ if ("serviceWorker" in navigator) {
     laufen(karten);
   }
 
-  /* Was dem Finger folgt: der Kopf bleibt beim Wegscrollen etwas zurueck,
-     und die Linie unter der Leiste zeigt, wie weit man in der Liste ist.
-
-     Ein Zuhoerer, gerechnet wird erst im naechsten Einzelbild, geschrieben
-     werden nur zwei Variablen. Die Masse stehen fest, bis sich das Fenster
-     aendert — getBoundingClientRect bei jedem Bild waere hier der teure Weg. */
+  /* Kopf-Parallaxe: pro Bild wird nur der Kopfversatz aktualisiert. */
   function laufen(karten) {
     if (ruhig) return;
 
@@ -2958,19 +2972,10 @@ if ("serviceWorker" in navigator) {
     var wurzel = document.documentElement;
 
     var kopfHoehe = 0;
-    var anfang = 0;
-    var ende = 1;
 
     function messen() {
       var h = document.querySelector("header");
       kopfHoehe = h ? h.offsetHeight : 0;
-      var erste = karten[0];
-      var letzte = karten[karten.length - 1];
-      if (!erste || !letzte) return;
-      anfang = erste.getBoundingClientRect().top + window.pageYOffset - window.innerHeight * 0.6;
-      ende = letzte.getBoundingClientRect().top + window.pageYOffset +
-             letzte.offsetHeight - window.innerHeight * 0.6;
-      if (ende <= anfang) ende = anfang + 1;
     }
 
     var wartet = false;
@@ -2983,10 +2988,6 @@ if ("serviceWorker" in navigator) {
         var mit = y < kopfHoehe ? y : kopfHoehe;
         wurzel.style.setProperty("--rcp-oben", mit + "px");
       }
-
-      var teil = (y - anfang) / (ende - anfang);
-      teil = teil < 0 ? 0 : teil > 1 ? 1 : teil;
-      wurzel.style.setProperty("--rcp-lauf", teil.toFixed(4));
     }
 
     function anstossen() {
@@ -3382,7 +3383,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=194";
+      i.src = "/icon-512.png?v=218";
     });
     return symbolBild;
   }
@@ -4885,6 +4886,10 @@ if ("serviceWorker" in navigator) {
     if (url.hash && url.hash.length > 1) {
       var ziel = document.getElementById(url.hash.slice(1));
       if (!ziel) return false;
+      if (window.rcpSymbolZeigen && window.rcpSymbolZeigen(ziel)) {
+        history.replaceState(null, "", url.hash);
+        return true;
+      }
       if (location.hash !== url.hash) location.hash = url.hash;
       else ziel.scrollIntoView({ behavior: "smooth", block: "start" });
       return true;
@@ -4945,16 +4950,18 @@ if ("serviceWorker" in navigator) {
     var r = el.getBoundingClientRect();
     return (r.width > 0 && r.height > 0) ? el : null;
   }
-  function wahl(s) { return da(document.querySelector(s)); }
+  function wahl(s) {
+    return da(document.querySelector(s.replace(".karten > .card", ".karten > .card:not([inert])")));
+  }
 
   var SCHRITTE = [
     { wo: function () { return wahl("nav"); },
       titel: "Die Leiste",
-      text: "Jedes Kürzel springt zu seiner Karte. Beim Scrollen wandert die Markierung mit — du siehst immer, wo du gerade bist." },
+      text: "Jedes Kürzel öffnet seine Karte. Im Symbolfenster wechselst du mit einem Wisch nach links oder rechts. Die Markierung zeigt das gewählte Symbol." },
 
     { wo: function () { return da(document.getElementById("sortBtn")); },
       titel: "Nach Nähe sortieren",
-      text: "Ein Tipp, und die Liste steht nach Abstand zur Einkaufszone. Was am nächsten dran ist, kommt nach oben." },
+      text: "Ein Tipp, und die Symbole stehen nach Abstand zur Einkaufszone. Was am nächsten dran ist, kommt zuerst." },
 
     { wo: function () { return da(document.getElementById("wirtschaftBlock")); },
       titel: "Wirtschaftstermine",

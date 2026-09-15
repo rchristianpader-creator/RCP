@@ -350,23 +350,10 @@
      steht der Inhalt mittig. Sonst haette man das Loch im Kasten statt
      darunter. */
   .erste-seite {
-    /* Hier stehen zwei Forderungen, die ich einmal verwechselt hatte:
-
-         - der letzte Kasten soll UEBER dem Home-Indikator enden, damit
-           seine Rundung zu sehen ist;
-         - die erste Karte soll erst UNTER der Falte beginnen, also ab
-           100svh.
-
-       Der erste Anlauf zog den sicheren Rand von der Hoehe ab. Damit war
-       zwar der Kasten frei, aber die Huelle selbst wurde kuerzer — und die
-       Karte rutschte um denselben Streifen nach oben ins Bild.
-
-       Der Streifen gehoert deshalb in den Innenabstand, nicht in die
-       Hoehe: die Huelle bleibt volle 100svh hoch, die Bloecke fuellen
-       100svh minus Streifen. Beide Forderungen zugleich. Im Browser und auf
-       Geraeten ohne Indikator ist env() 0, dann aendert sich nichts. */
+    /* Der Uebergang zum Symbolfenster hat einen festen Abstand. Keine
+       zusaetzliche Luecke fuer Browserleisten oder den Home-Indikator. */
     min-height: 100svh;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-bottom: 0;
     display: flex;
     flex-direction: column;
   }
@@ -534,18 +521,8 @@
        Hier stand zusaetzlich die Hoehe der klebenden Leiste. Es klebt
        nichts mehr, also wird auch nichts mehr freigehalten. */
     scroll-padding-top: calc(var(--luft) / 2);
-    /* Kein Einrasten.
-
-       Es stand kurz drin: die Karten rasten beim Loslassen auf die Leiste
-       ein, damit keine halb abgeschnitten stehen bleibt. Auf dem Telefon
-       fuehlte sich das genau falsch an — jeder Wisch wurde zur naechsten
-       Karte gezogen, und wer nur ein Stueck weiter wollte, musste dagegen
-       anwischen. "langsam und anstrengend".
-
-       Noetig ist es auch nicht mehr: seit eine Karte plus ihr Abstand
-       zusammen etwa einen Schirm ergeben, steht ohnehin fast immer eine
-       ganze Karte im Bild — nur eben ohne Zwang. Und die Sprungmarken der
-       Kuerzel treffen weiterhin genau, dafuer sorgt scroll-padding-top. */
+    /* Das gemeinsame Symbolfenster rastet gezielt ein, sobald es aufgebaut
+       ist. Die Regel steht bei .symbol-fenster am Ende dieser Datei. */
   }
 
   /* Ziffern mit fester Breite, ueberall wo Zahlen stehen.
@@ -3572,7 +3549,7 @@
        Band den Bildschirm immer noch ganz ab. */
     width: calc(100% + var(--kachel));
     height: 100%;
-    background-image: url("/kerzen.svg?v=194");
+    background-image: url("/kerzen.svg?v=218");
     background-repeat: repeat-x;
     background-size: var(--kachel) 100%;
     will-change: transform;
@@ -3586,7 +3563,7 @@
        Prozessor kostete das im Schnitt 3,0 lange Bilder je Lauf statt 0,3.
        Als zweite Datei sind es dieselben Einzelwerte wie frueher (0,16 ·
        0,17 · 0,26) und nichts zu ueberblenden. */
-    background-image: url("/kerzen-blass.svg?v=194");
+    background-image: url("/kerzen-blass.svg?v=218");
     animation: kerzenLauf 20.25s linear infinite;
   }
   .kerzen-band.vorn {
@@ -3711,46 +3688,8 @@
       rgba(var(--bg-rgb), 0) 100%);
   }
 
-  /* Der Lesefortschritt am oberen Bildrand.
-
-     Er lag zuletzt im Kasten der Kuerzel und war nur zu sehen, solange der
-     Kasten klebte. Ohne Kasten faehrt die Reihe mit, und ein Strich, der
-     nach zwei Fingerbreit aus dem Bild wandert, misst nichts mehr.
-
-     Also dorthin, wo er hingehoert: fest an die Oberkante des Schirms, ueber
-     allem, zwei Pixel hoch. Bei Scrollstellung null ist er auf Null
-     zusammengezogen und damit unsichtbar — er braucht kein Ein- und
-     Ausblenden mehr. */
-  nav .nav-fortschritt {
-    position: fixed;
-    left: 0;
-    right: 0;
-    top: 0;
-    height: 2px;
-    background: var(--fg);
-    transform: scaleX(0);
-    transform-origin: 0 50%;
-    z-index: 60;
-    will-change: transform;
-    pointer-events: none;
-  }
-  @supports (animation-timeline: scroll()) {
-    @media (prefers-reduced-motion: no-preference) {
-      /* Wie weit man in der Seite ist — ebenfalls ohne Zuhoerer */
-      nav .nav-fortschritt {
-        animation: fortschritt linear both;
-        animation-timeline: scroll(root block);
-      }
-      @keyframes fortschritt {
-        from { transform: scaleX(0); }
-        to   { transform: scaleX(1); }
-      }
-    }
-  }
-
   @media (prefers-reduced-motion: reduce) {
     header .kopf-lauf { transform: none; }
-    nav .nav-fortschritt { display: none; }
   }
 
   /* SCROLLEN
@@ -4293,3 +4232,91 @@
 /* Der Hinweis aus index.html gilt nur, solange DIESE Datei fehlt. Steht
    sie, verschwindet er — das ist der ganze Mechanismus. */
 #stilfehlt { display: none; }
+
+/* Ein gemeinsames Fenster fuer die Symbole, wie beim Terminkasten.
+   Nur die ausgewaehlte Karte nimmt Platz ein; Charts bleiben im DOM. */
+.symbol-fenster {
+  margin-top: 28px;
+  overflow-x: clip;
+}
+.symbol-fenster > .karten { margin-top: 0; }
+/* Kein vertikales Scroll-Snap: die Seite behaelt ihren nativen Schwung.
+   symbole.js zentriert erst nach dem Ausrollen nahe am Symbolfenster. */
+.symbol-fenster.bereit { margin-bottom: var(--luft); }
+.symbol-steuerung {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  height: 24px;
+  margin: 0 var(--rand) 4px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.symbol-steuerung[hidden],
+.karten.seitlich > .card[hidden] { display: none !important; }
+.karten.seitlich {
+  position: relative;
+  flex-direction: row;
+  gap: calc(var(--rand) * 2);
+  width: min(808px, 100%);
+  margin-left: auto;
+  margin-right: auto;
+  padding-inline: var(--rand);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.karten.seitlich::-webkit-scrollbar { display: none; }
+.karten.seitlich > .card {
+  --kartenhoehe: calc(100dvh - var(--luft) - 28px);
+  flex: 0 0 100%;
+  min-width: 0;
+  width: auto;
+  margin: 0;
+  scroll-snap-align: center;
+  content-visibility: auto;
+  contain-intrinsic-size: auto var(--kartenhoehe);
+  view-timeline-axis: inline;
+}
+.karten.seitlich > .card.symbol-vorlauf { content-visibility: visible; }
+/* Dieselben gestaffelten Teile und Zeitfenster wie vorher, jetzt seitlich.
+   Nur die Bewegungsrichtung wird ersetzt; Deckkraft, Staffelung und Kante
+   bleiben erhalten. Keine pauschalen animation:none/opacity:1-Overrides. */
+@keyframes teilSeitlich {
+  from { opacity: 0; transform: translate3d(180px, 0, 0); }
+  55% { opacity: 1; }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes teilKleinSeitlich {
+  from { opacity: 0; transform: translate3d(26px, 0, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .karten.seitlich > .card > .card-head,
+    .karten.seitlich > .card > .ziel-bar,
+    .karten.seitlich > .card > .chart,
+    .karten.seitlich > .card > .news-block,
+    .karten.seitlich > .card > .actions { animation-name: teilSeitlich; }
+    .karten.seitlich > .card > .card-head > .row,
+    .karten.seitlich > .card > .card-head > .info { animation-name: teilKleinSeitlich; }
+  }
+  @supports not (animation-timeline: view()) {
+    .karten.seitlich.animiert > .card.sichtbar > .card-head,
+    .karten.seitlich.animiert > .card.sichtbar > .ziel-bar,
+    .karten.seitlich.animiert > .card.sichtbar > .chart,
+    .karten.seitlich.animiert > .card.sichtbar > .news-block,
+    .karten.seitlich.animiert > .card.sichtbar > .actions { animation-name: teilSeitlich; }
+    .karten.seitlich.animiert > .card.sichtbar > .card-head > .row,
+    .karten.seitlich.animiert > .card.sichtbar > .card-head > .info { animation-name: teilKleinSeitlich; }
+  }
+}
+.nur-web .symbol-fenster { display: none; }
+@media (min-width: 720px) {
+  .symbol-steuerung { width: min(780px, 100% - 28px); margin-left: auto; margin-right: auto; }
+}
