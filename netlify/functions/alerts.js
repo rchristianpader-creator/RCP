@@ -2,7 +2,7 @@
    Laeuft von selbst alle 30 Minuten.
 
    Automatisch, ohne Konfiguration:
-   - Zonen und Symbole liest die Function direkt aus der veroeffentlichten index.html
+   - Zonen und Symbole kommen aus der gespeicherten Watchlist (positionen.js)
    - Zonen stehen in der Waehrung ihrer Position (Fib 0,5-0,618 aus den
      Charts). Verglichen wird ohne Umrechnung: der Kurs von Yahoo kommt in
      derselben Waehrung wie die Notierung, und der Ausloeser soll nicht am
@@ -45,7 +45,7 @@ export default async () => {
 
   const watch = await zonen();
   if (!watch.length) {
-    return json({ ok: false, fehler: "keine Zonen in index.html gefunden" }, 500);
+    return json({ ok: false, fehler: "keine Position mit Einkaufszone gefunden" }, 500);
   }
 
   const k = await keys();
@@ -84,14 +84,29 @@ export default async () => {
         text = fmt(price) + " " + cur + " — Zone " + fmt(item.high) + " bis " + fmt(item.low) + " " + cur;
       }
 
+      /* EIN Titel, an EINER Stelle gebaut. Vorher stand derselbe Ausdruck
+         zweimal da, einmal fuer das Buch und einmal fuer den Push — zwei
+         Stellen, die auseinanderlaufen koennen, und beide waren dieselbe
+         Zeile lang falsch.
+
+         titelFuer() laesst keinen leeren Namen durch: kaeme wirklich
+         nichts an, stuende dort "Eine Position in der Zone" und nicht
+         "undefined in der Zone". Eine Meldung ohne Namen ist mager, eine
+         Meldung mit "undefined" ist kaputt. */
+      const titel = titelFuer(item);
+
       await notieren({
-        titel: item.label + " in der Zone",
+        titel: titel,
         text: text,
         url: "/#" + item.anchor,
+        /* Das Kuerzel gehoert mit ins Buch: in der Glocke steht es als
+           Zeichen an der Meldung, und wer es hat, kann den Namen auch
+           nachschlagen, falls er einmal fehlt. */
+        zeichen: [item.badge],
         art: "zone"
       });
       await senden(store, subs, {
-        title: item.label + " in der Zone",
+        title: titel,
         body: text,
         url: "/#" + item.anchor,
         tag: item.badge
@@ -152,9 +167,11 @@ async function senden(store, subs, payload) {
   }
 }
 
-/* --- Zonen aus der eigenen Seite lesen --- */
+/* --- Die Positionen mit Einkaufszone --- */
 
-/* Zonen und Symbole kommen aus der gespeicherten Watchlist. */
+/* Aus der gespeicherten Watchlist, nicht mehr aus der Seite: hier stand
+   "Zonen aus der eigenen Seite lesen", und das war seit dem Umzug auf den
+   Speicher falsch. */
 async function zonen() {
   const liste = await lesen(getStore(LADEN));
   const out = [];
@@ -168,6 +185,25 @@ async function zonen() {
     out.push({
       anchor: p.id,
       badge: (p.badge || p.yahoo).trim(),
+      /* DER NAME FUER DIE MELDUNG — und das ist der Fehler, der hier
+         jahrelang stand.
+
+         Gemeldet als "Symbole Namen werden nicht erkannt": im Buch der
+         Meldungen hiess jeder Zonenalarm "undefined in der Zone". Der
+         Grund ist eine Verschiebung: solange diese Function die
+         veroeffentlichte index.html gelesen hat, holte sie den Namen aus
+         dem <h2> der Karte und legte ihn als "label" ab. Beim Umzug auf
+         den Speicher (lesen() aus positionen.js) ist das Feld
+         verschwunden — die zwei Stellen, die es in den Titel setzen,
+         sind stehengeblieben. undefined + " in der Zone" ist in
+         JavaScript keine Ausnahme, sondern eine Zeichenkette, und
+         deshalb ist es niemandem aufgefallen ausser dem Menschen, der
+         die Meldung liest.
+
+         Dieselbe Vorfahrt wie damals: der ausgeschriebene Name, sonst
+         das Kuerzel, sonst das Yahoo-Symbol. Etwas davon gibt es immer —
+         ohne yahoo kaeme die Position oben gar nicht bis hierher. */
+      label: String(p.name || p.badge || p.yahoo).trim(),
       yahoo: p.yahoo,
       high: z.high,
       low: z.low
@@ -176,20 +212,24 @@ async function zonen() {
   return out;
 }
 
-function firstMatch(text, re) {
-  const m = text.match(re);
-  return m ? m[1] : null;
+/* Der Titel einer Zonenmeldung — die einzige Stelle, die ihn baut.
+
+   Sie ist bewusst misstrauisch: was hier hereinkommt, stammt aus der
+   gespeicherten Watchlist, und dort kann ein Feld fehlen. Ein fehlender
+   Name darf eine Meldung nicht entstellen. */
+function titelFuer(item) {
+  const name = String((item && item.label) || "").trim();
+  return (name || "Eine Position") + " in der Zone";
 }
 
-// "40.557" -> 40557 ; "8,68" -> 8.68
-function num(s) {
-  return parseFloat(
-    String(s || "")
-      .replace(/[^\d.,]/g, "")
-      .replace(/\./g, "")
-      .replace(",", ".")
-  );
-}
+/* HIER STANDEN firstMatch() UND num().
+
+   Beide gehoerten zur Zeit, in der diese Function die veroeffentlichte
+   index.html las und die Zonen mit Ausdruecken aus dem Markup schnitt.
+   Seit sie aus dem Speicher liest, hat sie keinen Aufrufer mehr — und
+   totes Werkzeug in der Werkstatt laesst spaeter jemanden glauben, es
+   werde noch benutzt. Genau so ist der Fehler mit dem Namen entstanden:
+   die eine Haelfte umgezogen, die andere stehengelassen. */
 
 /* --- Kurse --- */
 
