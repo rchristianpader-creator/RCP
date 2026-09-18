@@ -15,13 +15,25 @@
    Sekunden auch. Wer kippt, sieht es sofort; wer anders sitzt, sieht
    nichts.
 
-   DIE ERLAUBNIS.
+   DIE ERLAUBNIS — UND WER DANACH FRAGT.
 
    Ab iOS 13 gibt der Lagesensor nichts heraus, bevor der Mensch es
-   erlaubt, und gefragt werden darf nur aus einer Geste heraus. Gefragt
-   wird deshalb beim ersten Antippen, genau einmal; die Antwort wird
-   behalten. Wer ablehnt, wird nicht wieder gefragt. Auf Android und am
-   Rechner braucht es das nicht, dort laeuft es sofort. */
+   erlaubt, und gefragt werden darf nur aus einer Geste heraus.
+
+   Der erste Anlauf fragte beim ERSTEN ANTIPPEN IRGENDWO und merkte sich
+   ein Nein fuer immer. Beides war falsch. Ein Systemdialog, der
+   aufspringt, weil man auf eine Karte getippt hat, ist ein Ueberfall; und
+   "nie wieder fragen" ohne jeden Schalter heisst, dass eine einmal
+   verneinte Frage nicht mehr zu beantworten ist. Gefragt wurde damit die
+   Frage "wie aktiviere ich das" — zu Recht, denn es ging gar nicht.
+
+   Jetzt fragt niemand von selbst. Wo eine Erlaubnis noetig ist und noch
+   nicht vorliegt, meldet dieses Stueck "moeglich, laeuft aber nicht"; die
+   Seite zeigt daraufhin einen Knopf, und erst dessen Druck fragt. Ein
+   Nein sperrt nichts: der Knopf steht wieder da.
+
+   Auf Android und am Rechner braucht es keine Erlaubnis, dort laeuft es
+   sofort und ohne Knopf. */
 (function () {
   'use strict';
   var reduced = matchMedia('(prefers-reduced-motion: reduce)');
@@ -88,10 +100,16 @@
     senden(x, y);
   }
 
+  function standMelden() {
+    window.dispatchEvent(new CustomEvent('rcp:neigung-stand',
+      { detail: { laeuft: haengt, moeglich: moeglich() } }));
+  }
+
   function anhaengen() {
     if (haengt) return;
     haengt = true;
     window.addEventListener('deviceorientation', lesen, { passive: true });
+    standMelden();
   }
 
   function abhaengen() {
@@ -100,6 +118,7 @@
     window.removeEventListener('deviceorientation', lesen);
     ruheB = null; ruheG = null;
     senden(0, 0);
+    standMelden();
   }
 
   var SCHLUESSEL = 'rcp_neigung';
@@ -110,27 +129,58 @@
     try { return localStorage.getItem(SCHLUESSEL); } catch (e) { return null; }
   }
 
-  function starten() {
+  function moeglich() {
+    return !!window.DeviceOrientationEvent && !reduced.matches && !opaque.matches;
+  }
+  function brauchtErlaubnis() {
     var D = window.DeviceOrientationEvent;
-    if (!D) return;
-    if (reduced.matches || opaque.matches) return;
-    if (typeof D.requestPermission !== 'function') { anhaengen(); return; }
-    /* Hier ist iOS. Abgelehnt bleibt abgelehnt — nicht bei jedem Start
-       wieder fragen. */
-    if (gemerkt() === '0') return;
+    return !!D && typeof D.requestPermission === 'function';
+  }
+
+  /* Fragen — und zwar NUR, wenn jemand danach gefragt hat. Der Ruf muss
+     synchron in der Geste stehen, sonst weist iOS ihn ab; deshalb keine
+     Umwege und kein setTimeout davor. */
+  function fragen() {
+    var D = window.DeviceOrientationEvent;
+    if (!D || !moeglich()) return Promise.resolve(false);
+    if (!brauchtErlaubnis()) { anhaengen(); return Promise.resolve(true); }
+    return D.requestPermission().then(function (antwort) {
+      if (antwort === 'granted') { merken('1'); anhaengen(); return true; }
+      /* Ein Nein wird NICHT gemerkt: der Knopf steht wieder da, und wer
+         es sich anders ueberlegt, kann es sich anders ueberlegen. */
+      standMelden();
+      return false;
+    }).catch(function () { standMelden(); return false; });
+  }
+
+  function starten() {
+    if (!moeglich()) return;
+    if (!brauchtErlaubnis()) { anhaengen(); return; }
+    /* Schon einmal erlaubt: dann darf ohne Dialog wieder gefragt werden.
+       iOS verlangt den Ruf trotzdem aus einer Geste heraus, aber er geht
+       diesmal lautlos durch — es blinkt nichts auf. */
+    if (gemerkt() !== '1') { standMelden(); return; }
     var einmal = function () {
       ['pointerdown', 'touchend', 'click'].forEach(function (n) {
         window.removeEventListener(n, einmal, true);
       });
-      D.requestPermission().then(function (antwort) {
-        if (antwort === 'granted') { merken('1'); anhaengen(); }
-        else merken('0');
-      }).catch(function () {});
+      fragen();
     };
     ['pointerdown', 'touchend', 'click'].forEach(function (n) {
       window.addEventListener(n, einmal, true);
     });
   }
+
+  /* Der Griff fuer die Seite: ob es geht, ob es laeuft, und das Einschalten
+     von Hand. Mehr gibt es hier nicht zu holen — die Neigung selbst
+     verlaesst dieses Stueck nur als rcp:liquid-tilt. */
+  window.rcpNeigung = {
+    moeglich: moeglich,
+    brauchtErlaubnis: brauchtErlaubnis,
+    laeuft: function () { return haengt; },
+    einschalten: fragen,
+    ausschalten: function () { merken('0'); abhaengen(); }
+  };
 
   /* Aus dem Blick heisst aus: ein Sensor, der im Hintergrund weiterliest,
      haelt das Wasser wach und kostet Strom fuer ein Bild, das niemand
