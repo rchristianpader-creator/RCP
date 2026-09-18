@@ -5,8 +5,8 @@
 <meta name="color-scheme" content="dark">
 <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#0a0d0c">
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=221">
-<link rel="apple-touch-icon" href="/icon-180.png?v=221">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=222">
+<link rel="apple-touch-icon" href="/icon-180.png?v=222">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Aktien-Liste">
@@ -33,7 +33,7 @@
      zuerst und geht einmal je Stand ueber die Leitung, waehrend dieses
      Dokument bei jedem Start neu geholt wird. Weit vorn im Kopf, damit kein
      Skript darunter auf Masse zugreift, die es noch nicht gibt. -->
-<link rel="stylesheet" href="/stil.css?v=221">
+<link rel="stylesheet" href="/stil.css?v=222">
 <style>
 /* Ein Netz unter der Teilung.
 
@@ -62,14 +62,14 @@
 <meta property="og:url" content="https://rcp-aktien.netlify.app/">
 <meta property="og:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta property="og:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=221">
+<meta property="og:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=222">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="de_DE">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Aktien-Liste · Ralph Christian Pader">
 <meta name="twitter:description" content="Live-Charts · Technische Analyse · Watchlist">
-<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=221">
+<meta name="twitter:image" content="https://rcp-aktien.netlify.app/og-preview.png?v=222">
 
 <script>
 /* Im Browser oder als App?
@@ -103,13 +103,9 @@
 })();
 </script>
 
-<link rel="stylesheet" href="/black-glass.css?v=221">
-<script src="/touch-contact.js?v=221" defer></script>
-<script src="/black-glass.js?v=221" defer></script>
-<!-- Die Neigung des Geraets, ausschliesslich als Eingabe fuer das Wasser.
-     Sie bewegt nichts an der Seite; was sie liest, geht als ein einziges
-     Ereignis an den Wasserloeser und sonst nirgendwohin. -->
-<script src="/neigung.js?v=221" defer></script>
+<link rel="stylesheet" href="/black-glass.css?v=222">
+<script src="/touch-contact.js?v=222" defer></script>
+<script src="/black-glass.js?v=222" defer></script>
 </head>
 <body>
 <!-- Deckt die Statuszone ab; ohne sie null hoch. Siehe .statusdecke. -->
@@ -206,7 +202,6 @@
       </svg>
       Meldungen
     </button>
-    <button class="install-btn" id="neigungBtn" type="button" hidden>Wasser kippt mit</button>
     <a class="install-btn verwaltung-btn" id="verwaltungBtn" href="/verwaltung.html" hidden>Verwaltung</a>
   </div>
   <div class="konto-zeile" id="kontoZeile" hidden></div>
@@ -231,7 +226,7 @@
 </script>
 
 <div class="web-sperre" id="webSperre">
-  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=221" alt=""></div>
+  <div class="web-mark" aria-hidden="true"><img src="/icon-192.png?v=222" alt=""></div>
   <div class="web-text">
     <b>Diese Liste läuft als App</b>
     <span>Auf dem Home-Bildschirm — mit Live-Charts, News und Analysen, Wirtschaftsterminen und einer Meldung, sobald ein Kurs seine Einkaufszone berührt. Im Browser gibt es das nicht.</span>
@@ -293,7 +288,7 @@
   </div>
   <div class="karten" id="karten"></div>
 </section>
-<script src="/symbole.js?v=221"></script>
+<script src="/symbole.js?v=222"></script>
 
 
 
@@ -363,7 +358,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonEcke"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=221" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
+            <image href="/icon-192.png?v=222" x="152" y="16" width="34" height="34" clip-path="url(#ikonEcke)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -411,7 +406,7 @@
           <svg class="mock" viewBox="0 0 300 66" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
             <rect x="34" y="5" width="232" height="56" rx="7" opacity=".3"/>
             <defs><clipPath id="ikonAndroidDialog"><rect x="48" y="14" width="24" height="24" rx="6"/></clipPath></defs>
-            <image href="/icon-192.png?v=221" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
+            <image href="/icon-192.png?v=222" x="48" y="14" width="24" height="24" clip-path="url(#ikonAndroidDialog)"/>
             <rect x="48" y="14" width="24" height="24" rx="6" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <text x="82" y="24" font-size="9.5" font-weight="700" fill="currentColor" stroke="none">Aktien-Liste</text>
             <text x="82" y="35" font-size="8" fill="currentColor" stroke="none" opacity=".45">rcp-aktien.netlify.app</text>
@@ -430,7 +425,7 @@
             <rect x="60" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <rect x="106" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
             <defs><clipPath id="ikonAndroidStart"><rect x="152" y="16" width="34" height="34" rx="8"/></clipPath></defs>
-            <image href="/icon-192.png?v=221" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
+            <image href="/icon-192.png?v=222" x="152" y="16" width="34" height="34" clip-path="url(#ikonAndroidStart)"/>
             <rect x="152" y="16" width="34" height="34" rx="8" fill="none" stroke="currentColor" stroke-opacity=".2"/>
             <rect class="ring" x="147" y="11" width="44" height="44" rx="11" stroke="currentColor" stroke-width="1.4"/>
             <rect x="198" y="16" width="34" height="34" rx="8" fill="currentColor" opacity=".13"/>
@@ -547,7 +542,7 @@
 </div>
 
 <div class="install-bar" id="installBar" hidden>
-  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=221" alt=""></div>
+  <div class="install-mark" aria-hidden="true"><img src="/icon-192.png?v=222" alt=""></div>
   <div class="install-copy">
     <b>Aktien-Liste als App</b>
     <span>Ohne Adressleiste, mit Icon auf dem Home-Bildschirm</span>
@@ -1403,7 +1398,7 @@
     var geladen = !!window.rcpStern, gescheitert = false;
     if (!geladen) {
       var datei = document.createElement("script");
-      datei.src = "/stern.js?v=221";
+      datei.src = "/stern.js?v=222";
       datei.onload = function () { geladen = true; };
       datei.onerror = function () { gescheitert = true; };
       document.head.appendChild(datei);
@@ -1949,57 +1944,6 @@
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape" && !sheet.hidden) closeSheet();
   });
-})();
-
-/* DER KNOPF FUER DIE NEIGUNG.
-
-   Gefragt: "wie aktiviere ich das". Die Antwort war bis hierher: gar
-   nicht — der Systemdialog sprang beim ersten Antippen irgendwo auf, und
-   ein Nein galt fuer immer, ohne jeden Schalter.
-
-   Der Knopf ist eine Aufforderung, kein Dauergast: er steht nur da, wo
-   die Neigung ueberhaupt geht UND eine Erlaubnis fehlt. Laeuft sie,
-   verschwindet er — dieselbe Regel wie beim Knopf fuer die
-   Benachrichtigungen daneben. Wo es keine Erlaubnis braucht (Android,
-   Rechner), laeuft es ohne ihn, und er kommt gar nicht erst.
-
-   Ausschalten geht ueber die Geraeteeinstellung "Bewegung reduzieren" —
-   die schaltet auch das Wasser selbst ab, und beides gehoert zusammen. */
-(function () {
-  var btn = document.getElementById("neigungBtn");
-  if (!btn) return;
-
-  function richten() {
-    var n = window.rcpNeigung;
-    /* Ohne das Stueck, ohne Sensor, oder wo keine Erlaubnis noetig ist:
-       kein Knopf. Im letzten Fall laeuft es schon. */
-    if (!n || !n.moeglich() || !n.brauchtErlaubnis()) { btn.hidden = true; return; }
-    btn.hidden = n.laeuft();
-  }
-
-  btn.addEventListener("click", function () {
-    var n = window.rcpNeigung;
-    if (!n) return;
-    /* Der Ruf muss synchron in der Geste stehen — kein Umweg davor. */
-    n.einschalten().then(function (ja) {
-      if (!ja) {
-        /* Ein Nein ist kein Fehler, aber es soll nicht aussehen, als sei
-           nichts passiert. Der Knopf bleibt stehen; wer es sich anders
-           ueberlegt, tippt noch einmal. */
-        btn.textContent = "Wasser kippt mit \u2014 nicht erlaubt";
-        setTimeout(function () { btn.textContent = "Wasser kippt mit"; }, 2600);
-      }
-      richten();
-    });
-  });
-
-  window.addEventListener("rcp:neigung-stand", richten);
-  /* neigung.js laedt mit defer und kann spaeter dran sein als dieses
-     Stueck — darum nicht nur auf das Ereignis verlassen. */
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", richten);
-  }
-  richten();
 })();
 
 // Benachrichtigungen: Geraet anmelden und den Schluessel fuer Netlify zeigen
@@ -3439,7 +3383,7 @@ if ("serviceWorker" in navigator) {
       var i = new Image();
       i.onload = function () { fertig(i); };
       i.onerror = function () { fertig(null); };
-      i.src = "/icon-512.png?v=221";
+      i.src = "/icon-512.png?v=222";
     });
     return symbolBild;
   }

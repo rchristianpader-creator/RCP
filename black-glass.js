@@ -9,48 +9,6 @@
   var elevation,velocity,nextElevation,nextVelocity,edgeDamping;
   var frame=0,previousTime=0,accumulator=0;
   var pixelRatio=0;
-  /* DIE NEIGUNG DES GERAETS.
-
-     Sie kommt als rcp:liquid-tilt herein (neigung.js) und wirkt hier als
-     SCHWERKRAFT: die Ruhelage der Flaeche ist dann nicht mehr flach,
-     sondern eine Ebene, die zur tiefen Seite abfaellt. Das Wasser laeuft
-     dorthin, die Wellen laufen weiter darauf, und der Lichtschein
-     verschiebt sich mit — genau das sieht man einer geneigten Schale an.
-
-     Warum eine Zielebene und kein Stroemungsfeld: dieses Modell fuehrt
-     nur eine Hoehe je Zelle, keine Richtung. Eine Zielebene braucht davon
-     nichts und ist unbedingt stabil.
-
-     DIE EBENE WIRD BEGRENZT, und das ist der Unterschied zwischen
-     sichtbar und unsichtbar. Der erste Anlauf nahm eine ungebrochene
-     Ebene: sie hat ueberall DIESELBE Steigung, und dieser Schatten
-     rechnet aus der Steigung — die ganze Flaeche wurde also gleichmaessig
-     heller (gemessen 23 auf 31), ohne irgendwo zu kippen. Eine Neigung,
-     die man nicht als Richtung sieht, ist keine.
-
-     Darum eine steilere Ebene, die vorher anschlaegt: unten sammelt sich
-     das Wasser flach, oben liegt es flach frei, und dazwischen steht ein
-     Band mit Steigung. Dieses Band wandert mit der Neigung, und DAS sieht
-     man.
-
-     Die Feder ist absichtlich unterdaempft: das Wasser schiesst ueber
-     seine Ruhelage hinaus und schwingt ein paar Mal nach — ein Schwappen,
-     kein Umschalten. Mit .0055 war es ueberdaempft und glitt lautlos an
-     seinen Platz. */
-  var kippX=0,kippY=0,kippAktiv=false;
-  var spalteZiel=null,zielMx=0,zielMy=0;
-  var KIPP_HOCH=1.35,KIPP_FEDER=.016,KIPP_STEIL=2.4;
-  function kippKurve(t) { return t<-1?-1:(t>1?1:t); }
-  function kippTafel() {
-    if(!cols) return;
-    if(!spalteZiel || spalteZiel.length!==cols) spalteZiel=new Float32Array(cols);
-    zielMx=(cols-1)/2; zielMy=(rows-1)/2;
-    for(var x=0;x<cols;x++)
-      spalteZiel[x]=kippKurve(kippX*KIPP_STEIL*(x-zielMx)/(zielMx||1))*KIPP_HOCH;
-  }
-  function kippZeile(y) {
-    return kippKurve(kippY*KIPP_STEIL*(y-zielMy)/(zielMy||1))*KIPP_HOCH;
-  }
   function allowed() { return !reduced.matches && !opaque.matches && !document.hidden; }
   function resize() {
     if(!canvas) return;
@@ -78,7 +36,6 @@
     canvas.width=Math.round(width*ratio); canvas.height=Math.round(height*ratio);
     ctx.setTransform(ratio,0,0,ratio,0,0);
     buffer.width=cols; buffer.height=rows; pixels=bctx.createImageData(cols,rows);
-    kippTafel();
     ctx.imageSmoothingEnabled=true;
     ctx.imageSmoothingQuality='high';
   }
@@ -117,7 +74,6 @@
   }
   function reset() {
     cancelAnimationFrame(frame); frame=0; contacts.clear(); impulses=[];
-    kippX=0; kippY=0; kippAktiv=false; kippTafel();
     if(elevation) { elevation.fill(0); velocity.fill(0); nextElevation.fill(0); nextVelocity.fill(0); }
     if(ctx) ctx.clearRect(0,0,width,height);
   }
@@ -135,40 +91,26 @@
   function step() {
     // All fingers contribute to these arrays, so crossing wakes interfere naturally.
     contacts.forEach(function(p) { disturb(p.x,p.y,0,true); });
-    var feder=kippAktiv?KIPP_FEDER:0;
-    for(var y=1;y<rows-1;y++) {
-      /* Die Zielhoehe je Zeile einmal, nicht je Punkt. Ohne Neigung ist
-         sie null und die Feder auch — dann rechnet die Schleife wie
-         vorher, bis auf eine Multiplikation mit Null. */
-      var zeileZiel=feder?kippZeile(y):0;
-      for(var x=1;x<cols-1;x++) {
-        var i=y*cols+x,h=elevation[i],v=velocity[i];
-        var lapH=elevation[i-1]+elevation[i+1]+elevation[i-cols]+elevation[i+cols]-4*h;
-        var lapV=velocity[i-1]+velocity[i+1]+velocity[i-cols]+velocity[i+cols]-4*v;
-        // Viscosity spreads momentum while damping fast oscillations.
-        var nv=(v+.16*lapH+.12*lapV)*.972;
-        nv+=(zeileZiel+spalteZiel[x]-h)*feder;
-        nv*=edgeDamping[i];
-        nextVelocity[i]=nv;
-        nextElevation[i]=Math.max(-3,Math.min(3,(h+nv)*.998));
-      }
+    for(var y=1;y<rows-1;y++) for(var x=1;x<cols-1;x++) {
+      var i=y*cols+x,h=elevation[i],v=velocity[i];
+      var lapH=elevation[i-1]+elevation[i+1]+elevation[i-cols]+elevation[i+cols]-4*h;
+      var lapV=velocity[i-1]+velocity[i+1]+velocity[i-cols]+velocity[i+cols]-4*v;
+      // Viscosity spreads momentum while damping fast oscillations.
+      var nv=(v+.16*lapH+.12*lapV)*.972;
+      nv*=edgeDamping[i];
+      nextVelocity[i]=nv;
+      nextElevation[i]=Math.max(-3,Math.min(3,(h+nv)*.998));
     }
     var swap=elevation; elevation=nextElevation; nextElevation=swap;
     swap=velocity; velocity=nextVelocity; nextVelocity=swap;
   }
   function shade() {
     var data=pixels.data,energy=0;
-    for(var y=1;y<rows-1;y++) {
-      /* Ruhe heisst "liegt auf der Zielebene", nicht "ist null". Mit der
-         alten Messung galt geneigtes Wasser dauerhaft als aufgeregt, die
-         Schleife haette nie aufgehoert zu laufen. */
-      var zeileZiel=kippAktiv?kippZeile(y):0;
-      for(var x=1;x<cols-1;x++) {
+    for(var y=1;y<rows-1;y++) for(var x=1;x<cols-1;x++) {
       var i=y*cols+x,h=elevation[i];
       var sx=(elevation[i-1]-elevation[i+1])*2.4;
       var sy=(elevation[i-cols]-elevation[i+cols])*2.4;
-      var ruhe=kippAktiv?(zeileZiel+spalteZiel[x]):0;
-      var localEnergy=Math.max(Math.abs(h-ruhe),Math.abs(velocity[i])*3);
+      var localEnergy=Math.max(Math.abs(h),Math.abs(velocity[i])*3);
       energy=Math.max(energy,localEnergy);
       if(localEnergy<.0004 && Math.abs(sx)+Math.abs(sy)<.0004) { data[i*4+3]=0; continue; }
       var slopeSquared=sx*sx+sy*sy;
@@ -188,7 +130,6 @@
       else { data[p]=2;data[p+1]=6;data[p+2]=5; }
       data[p+3]=Math.round(shadeAlpha*255);
 
-      }
     }
     bctx.putImageData(pixels,0,0);
     ctx.clearRect(0,0,width,height);
@@ -207,10 +148,6 @@
     if(!iterations) { frame=requestAnimationFrame(draw); return; }
     var energy=shade();
     if(contacts.size || energy>.004) frame=requestAnimationFrame(draw);
-    /* Geneigt und zur Ruhe gekommen: das Bild bleibt stehen, die Schleife
-       nicht. Sechzig Bilder je Sekunde fuer ein unveraendertes Bild waeren
-       nur Strom. Aendert sich die Neigung, weckt kippSetzen() wieder. */
-    else if(kippAktiv) { /* stehenlassen */ }
     else { ctx.clearRect(0,0,width,height); elevation.fill(0); velocity.fill(0); }
   }
   window.addEventListener('rcp:liquid-contact',function(e) {
@@ -226,22 +163,6 @@
     var input=e.detail;
     impulses.push({x:input.x,y:input.y,power:Math.min(.16,.02+Math.abs(input.delta)*.006)});
     wake();
-  });
-  /* DIE NEIGUNG KOMMT HEREIN — und sonst nichts von ihr.
-
-     Sie darf die Flaeche erst anlegen, wenn wirklich gekippt wird: sonst
-     baute ein einziger Sensorwert beim Start eine Leinwand ueber den
-     ganzen Schirm, die niemand braucht. */
-  function kippSetzen(x,y) {
-    var aktiv=Math.abs(x)>.001||Math.abs(y)>.001;
-    if(!aktiv && !kippAktiv) return;
-    if(aktiv && (!allowed() || !prepare())) return;
-    kippX=x; kippY=y; kippAktiv=aktiv; kippTafel(); wake();
-  }
-  window.addEventListener('rcp:liquid-tilt',function(e) {
-    var input=e.detail; if(!input) return;
-    var x=+input.x,y=+input.y;
-    kippSetzen(isFinite(x)?x:0,isFinite(y)?y:0);
   });
   window.addEventListener('blur',reset);
   window.addEventListener('resize',function() { resize(); wake(); },{passive:true});
