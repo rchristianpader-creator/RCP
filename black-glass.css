@@ -36,36 +36,21 @@ button:focus-visible, a:focus-visible {
   outline: 2px solid #d5e9e0;
   outline-offset: 4px;
 }
-/* Water highlights are drawn over the glass, never in the hit-testing layer. */
-.black-glass-water {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 10000;
-}
 .card-head .logo {
   border-color: rgba(255,255,255,.46);
   box-shadow: inset 0 2px 2px rgba(255,255,255,.34), inset 0 -2px 2px rgba(0,0,0,.7), 0 5px 16px rgba(0,0,0,.6);
 }
-/* Scrolling cards keep the glass gradients and edges without repainting
-   a blurred backdrop underneath the animated water canvas. */
+/* Without backdrop blur the cards need an opaque ground of their own. */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .card, .kasten, .auftakt-mitte, .jetzt { background-color: #0c0e0e; }
 }
 @media (prefers-reduced-transparency: reduce) {
   .card, .kasten, .auftakt-mitte, .jetzt { background: #0b0d0d; }
   .card, .kasten, .auftakt-mitte, .jetzt { backdrop-filter: none; -webkit-backdrop-filter: none; }
-  .black-glass-water { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .black-glass-water { display: none; }
   button, a.sort-chip, nav a { transition: none; }
   button:active:not(:disabled), a.sort-chip:active, nav a:active { scale: none; }
-}
-@media (forced-colors: active) {
-  .black-glass-water { display: none; }
 }
 
 

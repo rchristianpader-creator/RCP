@@ -1,4 +1,4 @@
-/* Native seitliche Bewegung; senkrechtes Zentrieren erst nach dem Ausrollen. */
+/* Native seitliche Bewegung; senkrecht scrollt der Browser ganz allein. */
 (function () {
   "use strict";
   var fenster = document.getElementById("symbolFenster");
@@ -8,7 +8,6 @@
   if (!fenster || !karten || !steuerung) return;
   var aktiv = null, plaetze = [], auswahlFrame = 0, breite = 0;
   var ruhig = window.matchMedia("(prefers-reduced-motion: reduce)");
-  var zentrierUhr = 0, finger = 0, gehalten = false, eingerastet = false, mitteY = 0;
 
   function liste() {
     return Array.from(karten.children).filter(function (el) {
@@ -53,9 +52,7 @@
   }
   function zentrieren() {
     var rand = Math.max(0, (window.innerHeight - fenster.offsetHeight) / 2);
-    eingerastet = true;
-    mitteY = Math.max(0, fenster.getBoundingClientRect().top + window.scrollY - rand);
-    window.scrollTo({ top: mitteY,
+    window.scrollTo({ top: Math.max(0, fenster.getBoundingClientRect().top + window.scrollY - rand),
       behavior: ruhig.matches ? "instant" : "smooth" });
   }
   function zeigen(ziel, scrollen, sofort) {
@@ -87,44 +84,8 @@
     if (alle.length) zeigen(alle[(n + alle.length) % alle.length], false);
   });
 
-  // Kein vertikales CSS-Snap und kein Abfangen von touchmove. Der Browser
-  // darf frei scrollen und ausrollen. Erst im Stillstand nahe der Leseposition
-  // folgt ein kurzer smooth-scroll zur Mitte. Danach kann man frei weiter.
-  function ruhePruefen(e) {
-    if (e && e.target !== window && e.target !== document) return;
-    window.clearTimeout(zentrierUhr);
-    if (!aktiv || finger || gehalten || document.hidden) return;
-    var r = fenster.getBoundingClientRect(), h = window.innerHeight;
-    var delta = (r.top + r.bottom - h) / 2;
-    if (Math.abs(delta) > h * 0.5) eingerastet = false;
-    if (Math.abs(delta) < 2) { eingerastet = true; mitteY = window.scrollY; return; }
-    if (eingerastet || Math.abs(delta) > h * 0.28) return;
-    if (r.top > h * 0.35 || r.bottom < h * 0.65) return;
-    zentrieren();
-  }
-  function spaeter() {
-    window.clearTimeout(zentrierUhr);
-    // scrollend kennt auch das Ende des nativen Schwungs. Aeltere Browser
-    // bekommen den Stillstands-Timer, der bei jedem Scrollereignis neu beginnt.
-    if (!("onscrollend" in window)) zentrierUhr = window.setTimeout(ruhePruefen, 180);
-  }
-  window.addEventListener("scroll", function () {
-    if (eingerastet && Math.abs(window.scrollY - mitteY) > window.innerHeight * 0.5) eingerastet = false;
-    spaeter();
-  }, { passive: true });
-  window.addEventListener("scrollend", ruhePruefen, { passive: true });
-  window.addEventListener("touchstart", function (e) { finger = e.touches.length; window.clearTimeout(zentrierUhr); }, { passive: true });
-  function fingerLos(e) { finger = e.touches.length; if (!finger) spaeter(); }
-  window.addEventListener("touchend", fingerLos, { passive: true });
-  window.addEventListener("touchcancel", fingerLos, { passive: true });
-  window.addEventListener("pointerdown", function () { gehalten = true; window.clearTimeout(zentrierUhr); }, { passive: true });
-  function zeigerLos() { gehalten = false; spaeter(); }
-  window.addEventListener("pointerup", zeigerLos, { passive: true });
-  window.addEventListener("pointercancel", zeigerLos, { passive: true });
-  window.addEventListener("blur", function () { finger = 0; gehalten = false; window.clearTimeout(zentrierUhr); });
-  document.addEventListener("visibilitychange", function () {
-    if (document.hidden) { finger = 0; gehalten = false; window.clearTimeout(zentrierUhr); }
-  });
+  // Kein Einrasten und kein Nachziehen: senkrecht bleibt das Scrollen beim
+  // Browser. Zur Mitte geht es nur, wenn ein Symbol direkt gewaehlt wird.
   window.addEventListener("hashchange", function () { if (location.hash) zeigen(location.hash); });
   document.addEventListener("click", function (e) {
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;

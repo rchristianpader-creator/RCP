@@ -82,24 +82,11 @@ test('sorting preserves the selected DOM and recalculates native snap positions'
  assert.deepEqual(h.current(),['stock0']);assert.equal(h.elements.karten.lastScroll.left,780);
  assert.equal(h.cards[0].children[0],chart);h.horizontal(0);assert.deepEqual(h.current(),['stock1']);
 });
-test('no centering while the finger is down or scroll momentum continues',()=>{
- const h=harness();h.win.fire('touchstart',{touches:[{}]});
- h.vertical(650);h.idle();assert.equal(h.win.lastScroll,undefined);
- h.win.fire('touchend',{touches:[]});h.vertical(700);
- assert.equal(h.win.lastScroll,undefined);h.vertical(720);assert.equal(h.win.lastScroll,undefined);
- h.idle();assert.equal(h.win.lastScroll.top,786);assert.equal(h.win.lastScroll.behavior,'smooth');
-});
-test('native scrollend waits for the browser; a horizontal scrollend does not center the page',()=>{
- const h=harness({scrollend:true});h.vertical(700);h.idle();assert.equal(h.win.lastScroll,undefined);
- h.win.fire('scrollend',{target:h.elements.karten});assert.equal(h.win.lastScroll,undefined);
- h.win.fire('scrollend');assert.equal(h.win.lastScroll.top,786);
-});
-test('start page and footer stay free; leaving the centered window does not pull back',()=>{
- const h=harness();h.vertical(100);h.idle();assert.equal(h.win.lastScroll,undefined);
- h.vertical(1400);h.idle();assert.equal(h.win.lastScroll,undefined);
- h.vertical(700);h.idle();assert.equal(h.win.scrollCalls,1);
- h.vertical(850);h.idle();assert.equal(h.win.scrollCalls,1);
- h.vertical(1350);h.idle();h.vertical(700);h.idle();assert.equal(h.win.scrollCalls,2);
+test('vertical scrolling is never pulled to the symbol window',()=>{
+ const h=harness({scrollend:true});
+ for(const y of [100,650,700,720,786,850,1400]){h.vertical(y);h.idle();h.win.fire('scrollend');}
+ h.win.fire('touchstart',{touches:[{}]});h.vertical(700);h.win.fire('touchend',{touches:[]});h.idle();h.win.fire('scrollend');
+ assert.equal(h.win.lastScroll,undefined);
 });
 test('browser-toolbar height changes do not interrupt horizontal momentum',()=>{
  const h=harness();const calls=h.elements.karten.scrollCalls;
@@ -125,10 +112,6 @@ test('direct centering adapts to viewport height without fixed offsets',()=>{
   const h=harness();h.win.innerHeight=height;h.elements.symbolFenster.offsetHeight=height-28;
   h.win.rcpSymbolZeigen('stock2');assert.equal(h.win.lastScroll.top,786);
  }
-});
-test('landing naturally at the center does not make the next small scroll snap back',()=>{
- const h=harness();h.vertical(786);h.idle();assert.equal(h.win.lastScroll,undefined);
- h.vertical(850);h.idle();assert.equal(h.win.lastScroll,undefined);
 });
 test('unchanged live sorting updates do not reset an in-progress horizontal scroll',()=>{
  const h=harness();const calls=h.elements.karten.scrollCalls;
